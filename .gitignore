@@ -15,3 +15,58 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+
+logs
+project/project
+project/target
+target
+tmp
+.history
+dist
+data
+
+# Eclipse stuff
+/.classpath
+/.project
+/.settings
+
+# netbeans
+/nbproject
+
+#Idea
+*.iml
+*.ipr
+*.iws
+/.idea
+/.idea_modules
+
+
+# we use sbt!
+/build.xml
+/pom.xml
+
+# maven
+/target
+/src/target
+
+# vim
+.*.sw[a-p]
+
+# various other potential build files
+/build
+/bin
+/dist
+/manifest.mf
+
+# Mac filesystem dust
+/.DS_Store
+
+# Log files
+/*.log
+
+# Backup files
+*.*~
+
+# temp folders
+/data
+/tmp
