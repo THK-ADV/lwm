@@ -1,11 +1,18 @@
 package util
 
+import com.typesafe.config.ConfigFactory
 import com.unboundid.ldap.sdk._
 import com.unboundid.util.ssl.{SSLUtil, TrustAllTrustManager}
 import org.slf4j.LoggerFactory
 
+import play.api.Play.current
+
+import scala.concurrent.{ExecutionContext, Promise, Future}
+
 
 object LDAPAuthentication  {
+  import ExecutionContext.Implicits.global
+  import scala.async.Async.{async, await}
 
   private val log = LoggerFactory.getLogger(getClass.getName)
 
@@ -15,15 +22,16 @@ object LDAPAuthentication  {
   connectionOptions.setAutoReconnect(true)
   connectionOptions.setUseSynchronousMode(true)
 
-  def authenticate(user: String, password: String) = {
-    val DN = "ou=people,ou=unix,dc=gm,dc=fh-koeln, dc=de" //play.Configuration.root().getString("lwm.bindDN")
-    val bindHost = "advldapp.gm.fh-koeln.de" //play.Configuration.root().getString("lwm.bindHost")
-    val bindPort = 6360 //play.Configuration.root().getString("lwm.bindPort")
+  def authenticate(user: String, password: String):Either[String, Boolean] = {
+    val config = ConfigFactory.load("application")
+    val DN = config.getString("lwm.bindDN")
+    val bindHost = config.getString("lwm.bindHost")
+    val bindPort = config.getInt("lwm.bindPort")
 
     val bindDN = s"uid=$user, $DN"
     val bindRequest = new SimpleBindRequest(bindDN, password)
 
-    bind(bindHost, bindPort, "", "", ssl = true){connection =>
+    bind[Boolean](bindHost, bindPort, "", "", ssl = true){connection =>
       try{
         val bindResult = connection.bind(bindRequest)
         if(bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("Invalid credentials")
