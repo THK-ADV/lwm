@@ -5,23 +5,27 @@ import com.unboundid.ldap.sdk._
 import com.unboundid.util.ssl.{SSLUtil, TrustAllTrustManager}
 import org.slf4j.LoggerFactory
 
-import play.api.Play.current
-
 import scala.concurrent.{ExecutionContext, Promise, Future}
 
-
+/**
+ * The [[LDAPAuthentication]] object enables the user to communicate with an LDAP service.
+ */
 object LDAPAuthentication  {
-  import ExecutionContext.Implicits.global
-  import scala.async.Async.{async, await}
 
   private val log = LoggerFactory.getLogger(getClass.getName)
 
-  private val trustManager = new TrustAllTrustManager()
+  private val trustManager = new TrustAllTrustManager() // Yes, it is actually a bad idea to trust every server but for now it's okay as we only use it with exactly one server.
   private val sslUtil = new SSLUtil(trustManager)
   private val connectionOptions = new LDAPConnectionOptions()
   connectionOptions.setAutoReconnect(true)
   connectionOptions.setUseSynchronousMode(true)
 
+  /**
+   * Tries to authenticate a user with the the LDAP service.
+   * @param user the user
+   * @param password the password for this user
+   * @return either a boolean if the connection was successful or a String with the error message
+   */
   def authenticate(user: String, password: String):Either[String, Boolean] = {
     val config = ConfigFactory.load("application")
     val DN = config.getString("lwm.bindDN")
@@ -31,7 +35,7 @@ object LDAPAuthentication  {
     val bindDN = s"uid=$user, $DN"
     val bindRequest = new SimpleBindRequest(bindDN, password)
 
-    bind[Boolean](bindHost, bindPort, "", "", ssl = true){connection =>
+    bind[Boolean](bindHost, bindPort, DN, "", ssl = true){connection =>
       try{
         val bindResult = connection.bind(bindRequest)
         if(bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("Invalid credentials")
