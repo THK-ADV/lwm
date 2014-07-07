@@ -1,6 +1,6 @@
 package controllers
 
-import play.api.mvc._
+import play.api.mvc.{Action, Controller}
 
 
 case class Session(id: String)
@@ -16,14 +16,26 @@ object SessionManagement extends Controller{
 
   private var sessions: Set[Session] = Set.empty
 
-  def signIn(user: String, password: String) = Action{
+  /*
+  * {
+  *   user: "bla",
+  *   passwd: "hallo123"
+  * }
+   */
+  def signIn() = Action(parse.json){ request =>
+    val user = (request.body \ "user").as[String]
+    val password = (request.body \ "password").as[String]
+
     authenticate(user, password) match{
       case Left(message) =>
         Unauthorized(message)
       case Right(b) =>
         val session = getSession(user)
         sessions += session
-        Ok(session.id)
+        Ok("").withSession(
+          "connected" -> "user",
+          "session" -> session.id
+        )
     }
   }
 
