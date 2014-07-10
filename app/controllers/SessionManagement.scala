@@ -1,6 +1,9 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Right, Left}
 
 
 case class Session(id: String)
@@ -12,29 +15,34 @@ case class Session(id: String)
 object SessionManagement extends Controller {
 
   import util.LDAPAuthentication._
+  import scala.concurrent.duration._
 
   private var sessions: Set[Session] = Set.empty
 
-  /*
+ /*
   * {
   *   user: "bla",
   *   password: "hallo123"
   * }
-   */
-  def login() = Action(parse.json) { request =>
+  */
+  def login() = Action.async(parse.json) { request =>
     val user = (request.body \ "user").as[String]
     val password = (request.body \ "password").as[String]
+    val timeoutFuture = play.api.libs.concurrent.Promise.timeout("Oops", 4.second)
 
-    authenticate(user, password) match {
-      case Left(message) =>
+    val authFuture = authenticate(user, password)
+
+    Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
+      case Left(message: String) =>
         Unauthorized(message)
-      case Right(b) =>
+      case Right(b: Boolean) =>
         val session = createSessionID(user)
         sessions += session
         Ok("").withSession(
           "connected" -> "user",
           "session" -> session.id
         )
+      case t: String => InternalServerError(t)
     }
   }
 

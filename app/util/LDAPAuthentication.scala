@@ -5,7 +5,8 @@ import com.unboundid.ldap.sdk._
 import com.unboundid.util.ssl.{SSLUtil, TrustAllTrustManager}
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.{ExecutionContext, Promise, Future}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * The [[LDAPAuthentication]] object enables the user to communicate with an LDAP service.
@@ -26,7 +27,7 @@ object LDAPAuthentication  {
    * @param password the password for this user
    * @return either a boolean if the connection was successful or a String with the error message
    */
-  def authenticate(user: String, password: String):Either[String, Boolean] = {
+  def authenticate(user: String, password: String):Future[Either[String, Boolean]] = {
     val config = ConfigFactory.load("application")
     val DN = config.getString("lwm.bindDN")
     val bindHost = config.getString("lwm.bindHost")
@@ -35,14 +36,16 @@ object LDAPAuthentication  {
     val bindDN = s"uid=$user, $DN"
     val bindRequest = new SimpleBindRequest(bindDN, password)
 
-    bind[Boolean](bindHost, bindPort, DN, "", ssl = true){connection =>
-      try{
-        val bindResult = connection.bind(bindRequest)
-        if(bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("Invalid credentials")
-      }catch{
-        case e: LDAPException => Left(e.getMessage)
-      } finally {
-        connection.close()
+    Future{
+      bind[Boolean](bindHost, bindPort, DN, "", ssl = true){connection =>
+        try{
+          val bindResult = connection.bind(bindRequest)
+          if(bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("Invalid credentials")
+        }catch{
+          case e: LDAPException => Left(e.getMessage)
+        } finally {
+          connection.close()
+        }
       }
     }
   }
