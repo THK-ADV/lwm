@@ -1,5 +1,7 @@
 package controllers
 
+import org.apache.commons.codec.digest.DigestUtils
+import play.api.libs.concurrent.Promise
 import play.api.mvc.{Action, Controller}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -28,7 +30,7 @@ object SessionManagement extends Controller {
   def login() = Action.async(parse.json) { request =>
     val user = (request.body \ "user").as[String]
     val password = (request.body \ "password").as[String]
-    val timeoutFuture = play.api.libs.concurrent.Promise.timeout("Oops", 4.second)
+    val timeoutFuture = Promise.timeout("Oops", 4.second)
 
     val authFuture = authenticate(user, password)
 
@@ -63,7 +65,7 @@ object SessionManagement extends Controller {
   }
 
   private def createSessionID(user: String): Session = {
-    val sessionID = s"${user.hashCode}::${System.nanoTime()}"
+    val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
     Session(sessionID)
   }
 
