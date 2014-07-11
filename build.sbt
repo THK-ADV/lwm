@@ -15,3 +15,5 @@ libraryDependencies ++= Seq(
 
 
 libraryDependencies += "com.unboundid" % "unboundid-ldapsdk" % "2.3.6" withSources() withJavadoc()
+
+libraryDependencies += "org.apache.directory.studio" % "org.apache.commons.codec" % "1.8" withSources() withJavadoc()
