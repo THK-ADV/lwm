@@ -46,7 +46,7 @@ object SessionManagement extends Controller {
       case Right(b: Boolean) =>
         val session = createSessionID(user)
         sessions += session
-        Ok("").withSession(
+        Ok("Login successful").withSession(
           Security.username -> "user",
           "session" -> session.id
         )
