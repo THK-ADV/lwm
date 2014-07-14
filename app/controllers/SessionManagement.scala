@@ -2,6 +2,7 @@ package controllers
 
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.codec.digest.DigestUtils
+import org.joda.time.DateTime
 import play.api.libs.concurrent.Promise
 import play.api.mvc.{Action, Controller, Security}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,7 +10,7 @@ import scala.concurrent.Future
 import scala.util.{Right, Left}
 
 
-case class Session(id: String)
+case class Session(id: String, expirationDate: DateTime)
 
 
 /**
@@ -21,6 +22,7 @@ object SessionManagement extends Controller {
   import scala.concurrent.duration._
 
   private var sessions: Set[Session] = Set.empty
+  private val config = play.Configuration.root()
 
  /*
   * {
@@ -33,7 +35,7 @@ object SessionManagement extends Controller {
     val password = (request.body \ "password").as[String]
     val timeoutFuture = Promise.timeout("Oops", 15.second)
 
-   val config = play.Configuration.root()
+
    val DN = config.getString("lwm.bindDN")
    val bindHost = config.getString("lwm.bindHost")
    val bindPort = config.getInt("lwm.bindPort")
@@ -48,7 +50,8 @@ object SessionManagement extends Controller {
         sessions += session
         Ok("Login successful").withSession(
           Security.username -> "user",
-          "session" -> session.id
+          "session" -> session.id,
+          "expires" -> session.expirationDate.toString
         )
       case t: String => InternalServerError(t)
     }
@@ -72,7 +75,10 @@ object SessionManagement extends Controller {
 
   private def createSessionID(user: String): Session = {
     val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
-    Session(sessionID)
+    val lifetime = config.getInt("lwm.sessions.lifetime", 8)
+    val expirationDate =  DateTime.now().plusHours(lifetime)
+
+    Session(sessionID, expirationDate)
   }
 
 
