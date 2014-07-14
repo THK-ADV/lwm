@@ -15,7 +15,7 @@ object LDAPAuthentication  {
 
   private val log = LoggerFactory.getLogger(getClass.getName)
 
-  private val trustManager = new TrustAllTrustManager() // Yes, it is actually a bad idea to trust every server but for now it's okay as we only use it with exactly one server.
+  private val trustManager = new TrustAllTrustManager() // Yes, it is actually a bad idea to trust every server but for now it's okay as we only use it with exactly one server in a private network.
   private val sslUtil = new SSLUtil(trustManager)
   private val connectionOptions = new LDAPConnectionOptions()
   connectionOptions.setAutoReconnect(true)
@@ -27,17 +27,12 @@ object LDAPAuthentication  {
    * @param password the password for this user
    * @return either a boolean if the connection was successful or a String with the error message
    */
-  def authenticate(user: String, password: String):Future[Either[String, Boolean]] = {
-    val config = ConfigFactory.load("application")
-    val DN = config.getString("lwm.bindDN")
-    val bindHost = config.getString("lwm.bindHost")
-    val bindPort = config.getInt("lwm.bindPort")
-
-    val bindDN = s"uid=$user, $DN"
+  def authenticate(user: String, password: String, bindHost: String, bindPort: Int, dn: String):Future[Either[String, Boolean]] = {
+    val bindDN = s"uid=$user, $dn"
     val bindRequest = new SimpleBindRequest(bindDN, password)
 
     Future{
-      bind[Boolean](bindHost, bindPort, DN, "", ssl = true){connection =>
+      bind[Boolean](bindHost, bindPort, dn, "", ssl = true){connection =>
         try{
           val bindResult = connection.bind(bindRequest)
           if(bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("Invalid credentials")

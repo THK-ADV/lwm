@@ -1,8 +1,9 @@
 package controllers
 
+import com.typesafe.config.ConfigFactory
 import org.apache.commons.codec.digest.DigestUtils
 import play.api.libs.concurrent.Promise
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, Controller, Security}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Right, Left}
@@ -32,7 +33,12 @@ object SessionManagement extends Controller {
     val password = (request.body \ "password").as[String]
     val timeoutFuture = Promise.timeout("Oops", 4.second)
 
-    val authFuture = authenticate(user, password)
+   val config = play.Configuration.root()
+   val DN = config.getString("lwm.bindDN")
+   val bindHost = config.getString("lwm.bindHost")
+   val bindPort = config.getInt("lwm.bindPort")
+
+    val authFuture = authenticate(user, password, bindHost, bindPort, DN)
 
     Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
       case Left(message: String) =>
@@ -41,7 +47,7 @@ object SessionManagement extends Controller {
         val session = createSessionID(user)
         sessions += session
         Ok("").withSession(
-          "connected" -> "user",
+          Security.username -> "user",
           "session" -> session.id
         )
       case t: String => InternalServerError(t)
@@ -55,12 +61,12 @@ object SessionManagement extends Controller {
       case Some(sid) =>
         if (sessions.exists(_.id == sid)) {
           sessions -= sessions.find(_.id == sid).get
-          Ok(views.html.index("Index")).withNewSession
+          NoContent.withNewSession
         } else {
-          Ok(views.html.index("Index")).withNewSession
+          NoContent.withNewSession
         }
       case None =>
-        Ok(views.html.index("Index")).withNewSession
+        NoContent.withNewSession
     }
   }
 
