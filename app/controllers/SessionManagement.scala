@@ -1,9 +1,7 @@
 package controllers
 
 import akka.actor.{Props, Actor}
-import akka.actor.Actor.Receive
 import akka.util.Timeout
-import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.DateTime
 import play.Configuration
@@ -45,7 +43,6 @@ object SessionManagement extends Controller {
     val timeoutFuture = Promise.timeout("Oops", 15.second)
     val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(user, password)).mapTo[Either[String, SessionHandler.Session]]
 
-
     Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
       case Left(message: String) =>
         Unauthorized(message)
@@ -75,7 +72,9 @@ object SessionHandler {
 
   case class LogoutRequest(sessionID: String)
 
-  case class Session(id: String, expirationDate: DateTime)
+  case class SessionRequest(user: String)
+
+  case class Session(id: String, expirationDate: DateTime, user: String)
 
   def props(config: Configuration) = Props(new SessionHandler(config))
 }
@@ -94,16 +93,20 @@ class SessionHandler(config: Configuration) extends Actor {
     case AuthenticationRequest(user, password) =>
       val authFuture = authenticate(user, password, bindHost, bindPort, DN)
       val requester = sender()
-      authFuture.map{
-        case l @ Left(error) =>
+      authFuture.map {
+        case l@Left(error) =>
           requester ! l
         case Right(success) =>
-          val session =  createSessionID(user)
+          val session = createSessionID(user)
           sessions += session
           requester ! Right(session)
       }
     case LogoutRequest(sessionID) =>
       sessions.find(_.id == sessionID).map(sessions -= _)
+    case SessionRequest(user) =>
+      sessions.find(_.user == user) map { session =>
+        sender() ! session
+      }
   }
 
   private def createSessionID(user: String): Session = {
@@ -111,6 +114,32 @@ class SessionHandler(config: Configuration) extends Actor {
     val lifetime = config.getInt("lwm.sessions.lifetime", 8)
     val expirationDate = DateTime.now().plusHours(lifetime)
 
-    Session(sessionID, expirationDate)
+    Session(sessionID, expirationDate, user)
   }
+}
+
+
+object Permissions {
+
+
+  sealed trait Permission
+
+  trait UserCreation extends Permission
+
+  trait ScheduleRead extends Permission
+
+  trait ScheduleCreation extends Permission
+
+  trait ScheduleModification extends Permission
+
+  trait PermissionModification extends Permission
+
+  class DefaultPermissions extends Permission with ScheduleRead
+
+  class AdminPermissions extends DefaultPermissions
+  with UserCreation
+  with ScheduleCreation
+  with PermissionModification
+  with ScheduleModification
+
 }
