@@ -2,6 +2,7 @@ package controllers
 
 import akka.actor.{Actor, Props}
 import akka.util.Timeout
+import controllers.Permissions.Role
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.DateTime
 import play.api.Configuration
@@ -69,7 +70,7 @@ object SessionHandler {
 
   case class SessionRequest(user: String)
 
-  case class Session(id: String, expirationDate: DateTime, user: String, groups: List[String])
+  case class Session(id: String, expirationDate: DateTime, user: String, groups: List[String], role: Role)
 
   def props(config: Configuration) = Props(new SessionHandler(config))
 }
@@ -110,6 +111,11 @@ class SessionHandler(config: Configuration) extends Actor {
       }
   }
 
+  private def getRoles(user: String, group: List[String]): Role = {
+    // TODO Get additional role information from user details
+    if (group.contains("labor")) Permissions.AdminRole else Permissions.DefaultRole
+  }
+
   private def createSessionID(user: String): Future[Session] = {
     val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
     val lifetime = config.getInt("lwm.sessions.lifetime").getOrElse(8)
@@ -117,8 +123,12 @@ class SessionHandler(config: Configuration) extends Actor {
     val groups = groupMembership(user, bindHost, bindPort, GDN)
 
     groups map {
-      case Left(error) => Session(sessionID, expirationDate, user, Nil)
-      case Right(gs) => Session(sessionID, expirationDate, user, gs.toList)
+      case Left(error) =>
+        val role = getRoles(user, Nil)
+        Session(sessionID, expirationDate, user, Nil, role)
+      case Right(gs) =>
+        val role = getRoles(user, gs.toList)
+        Session(sessionID, expirationDate, user, gs.toList, role)
     }
   }
 }
@@ -126,27 +136,39 @@ class SessionHandler(config: Configuration) extends Actor {
 
 object Permissions {
 
-
   sealed trait Permission
 
-  trait UserCreation extends Permission
+  object UserCreation extends Permission
 
-  trait UserInfoRead extends Permission
+  object UserDeletion extends Permission
 
-  trait ScheduleRead extends Permission
+  object UserModification extends Permission
 
-  trait ScheduleCreation extends Permission
 
-  trait ScheduleModification extends Permission
+  object UserInfoRead extends Permission
 
-  trait PermissionModification extends Permission
+  object ScheduleRead extends Permission
 
-  class DefaultPermissions extends Permission with ScheduleRead with UserInfoRead
+  object ScheduleCreation extends Permission
 
-  class AdminPermissions extends DefaultPermissions
-  with UserCreation
-  with ScheduleCreation
-  with PermissionModification
-  with ScheduleModification
+  object ScheduleModification extends Permission
+
+  object RoleModification extends Permission
+
+  case class Role(permissions: Set[Permission]) {
+    def +=(permission: Permission) = if (permissions.contains(Permissions.RoleModification)) Role(permissions + permission) else this
+
+    def -=(permission: Permission) = if (permissions.contains(Permissions.RoleModification)) Role(permissions - permission) else this
+
+    def contains(permission: Permission) = permissions.contains(permission)
+  }
+
+  val DefaultRole = Role(Set(ScheduleRead, UserInfoRead))
+
+  val AdminRole = Role(Set(
+    UserCreation, UserDeletion, UserModification,
+    UserInfoRead,
+    ScheduleRead, ScheduleCreation, ScheduleModification,
+    RoleModification))
 
 }
