@@ -1,17 +1,15 @@
 package controllers
 
-import akka.actor.{Props, Actor}
+import akka.actor.{Actor, Props}
 import akka.util.Timeout
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.DateTime
-import play.Configuration
-import play.api.libs.concurrent.{Akka, Promise}
-import play.api.mvc.{Action, Controller, Security}
-import util.LDAPAuthentication._
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.Configuration
+import play.api.libs.concurrent.Promise
+import play.api.mvc.{Security, Action, Controller}
+import play.libs.Akka
+
 import scala.concurrent.Future
-import scala.util.{Right, Left}
-import play.api.Play.current
 
 
 /**
@@ -22,12 +20,11 @@ object SessionManagement extends Controller {
   import scala.concurrent.duration._
   import akka.pattern.ask
   import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.Play.current
 
 
-  private val config = play.Configuration.root()
   private implicit val timeout = Timeout(15.seconds)
-
-  private val sessionsHandler = Akka.system.actorOf(SessionHandler.props(config), "sessions")
+  private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
   /*
    * {
@@ -61,8 +58,6 @@ object SessionManagement extends Controller {
 
     NoContent.withNewSession
   }
-
-
 }
 
 
@@ -74,32 +69,38 @@ object SessionHandler {
 
   case class SessionRequest(user: String)
 
-  case class Session(id: String, expirationDate: DateTime, user: String)
+  case class Session(id: String, expirationDate: DateTime, user: String, groups: List[String])
 
   def props(config: Configuration) = Props(new SessionHandler(config))
 }
 
 class SessionHandler(config: Configuration) extends Actor {
 
+  import util.LDAPAuthentication._
   import SessionHandler._
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   private var sessions: Set[Session] = Set.empty
 
-  val DN = config.getString("lwm.bindDN")
-  val bindHost = config.getString("lwm.bindHost")
-  val bindPort = config.getInt("lwm.bindPort")
+  val DN = config.getString("lwm.bindDN").get
+  val GDN = config.getString("lwm.groupDN").get
+  val bindHost = config.getString("lwm.bindHost").get
+  val bindPort = config.getInt("lwm.bindPort").get
 
   def receive: Receive = {
     case AuthenticationRequest(user, password) =>
       val authFuture = authenticate(user, password, bindHost, bindPort, DN)
+
       val requester = sender()
       authFuture.map {
         case l@Left(error) =>
           requester ! l
         case Right(success) =>
-          val session = createSessionID(user)
-          sessions += session
-          requester ! Right(session)
+          val sessionFuture = createSessionID(user)
+          sessionFuture map { session =>
+            sessions += session
+            requester ! Right(session)
+          }
       }
     case LogoutRequest(sessionID) =>
       sessions.find(_.id == sessionID).map(sessions -= _)
@@ -109,12 +110,16 @@ class SessionHandler(config: Configuration) extends Actor {
       }
   }
 
-  private def createSessionID(user: String): Session = {
+  private def createSessionID(user: String): Future[Session] = {
     val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
-    val lifetime = config.getInt("lwm.sessions.lifetime", 8)
+    val lifetime = config.getInt("lwm.sessions.lifetime").getOrElse(8)
     val expirationDate = DateTime.now().plusHours(lifetime)
+    val groups = groupMembership(user, bindHost, bindPort, GDN)
 
-    Session(sessionID, expirationDate, user)
+    groups map {
+      case Left(error) => Session(sessionID, expirationDate, user, Nil)
+      case Right(gs) => Session(sessionID, expirationDate, user, gs.toList)
+    }
   }
 }
 
@@ -126,6 +131,8 @@ object Permissions {
 
   trait UserCreation extends Permission
 
+  trait UserInfoRead extends Permission
+
   trait ScheduleRead extends Permission
 
   trait ScheduleCreation extends Permission
@@ -134,7 +141,7 @@ object Permissions {
 
   trait PermissionModification extends Permission
 
-  class DefaultPermissions extends Permission with ScheduleRead
+  class DefaultPermissions extends Permission with ScheduleRead with UserInfoRead
 
   class AdminPermissions extends DefaultPermissions
   with UserCreation
