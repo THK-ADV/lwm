@@ -69,6 +69,8 @@ object LDAPAuthentication {
     }
   }
 
+  def nameInfo(user: String, bindHost: String, bindPort: Int, dn: String): Future[Either[String, String]] = ???
+
   /**
    * Establishes a connection with the LDAP Server and runs an arbitrary function.
    * @param host the host of the LDAP server
