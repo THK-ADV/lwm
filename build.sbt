@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   ws
 )
 
+TwirlKeys.templateImports += "utils.semantic._"
 
 libraryDependencies += "com.unboundid" % "unboundid-ldapsdk" % "2.3.6" withSources() withJavadoc()
 
