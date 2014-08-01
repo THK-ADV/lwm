@@ -1,5 +1,4 @@
 @(studentForm: Form[Student])
-@import utils.semantic.Individual
 @import utils.semantic.Vocabulary
 
 @helper.form(action = routes.StudentsManagement.studentPost) {
@@ -25,6 +24,6 @@
         Vocabulary.LWM.WebScienceMaster.value -> "Web Science (Master's program)"
     ).toSeq)
     <div class="form-actions">
-        <button type="submit">Create Student</button>
+        <button type="submit">Submit</button>
     </div>
 }

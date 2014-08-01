@@ -3,12 +3,12 @@ package controllers
 import akka.actor.{Actor, Props}
 import akka.util.Timeout
 import controllers.Permissions.Role
-import models.{LoginForms, Student, LoginData}
+import models.{Students, UserForms}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.DateTime
 import play.api.Configuration
 import play.api.libs.concurrent.Promise
-import play.api.mvc.{Security, Action, Controller}
+import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
 
 import scala.concurrent.Future
@@ -18,10 +18,10 @@ import scala.concurrent.Future
  */
 object SessionManagement extends Controller {
 
-  import scala.concurrent.duration._
   import akka.pattern.ask
-  import scala.concurrent.ExecutionContext.Implicits.global
-  import play.api.Play.current
+
+import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.duration._
 
 
   private implicit val timeout = Timeout(15.seconds)
@@ -29,7 +29,7 @@ object SessionManagement extends Controller {
 
   def login() = Action.async { implicit request =>
 
-    val loginData = LoginForms.studentForm.bindFromRequest.fold(
+    val loginData = UserForms.loginForm.bindFromRequest.fold(
       formWithErrors => {
         None
       },
@@ -38,7 +38,7 @@ object SessionManagement extends Controller {
       }
     )
 
-    loginData match{
+    loginData match {
       case None => Future.successful(Unauthorized)
       case Some(login) =>
         val timeoutFuture = Promise.timeout("Oops", 15.second)
@@ -48,21 +48,42 @@ object SessionManagement extends Controller {
           case Left(message: String) =>
             Unauthorized(message)
           case Right(session: SessionHandler.Session) =>
-           session.role match {
-             case Permissions.AdminRole =>
-               Redirect(routes.StudentsManagement.index()).withSession(
-               Security.username -> login.user,
-               "session" -> session.id,
-               "expires" -> session.expirationDate.toString
-             )
-             case _ =>  Redirect(routes.Application.index()).withNewSession
-           }
+            val firstTime = firstTimeCheck(session.user)
+            println(firstTime)
+            session.role match {
+              case Permissions.AdminRole =>
+                if (firstTime) {
+                  Redirect(routes.FirstTimeSetupController.setupUser()).withSession(
+                    Security.username -> login.user,
+                    "session" -> session.id,
+                    "expires" -> session.expirationDate.toString
+                  )
+                } else {
+                  Redirect(routes.StudentsManagement.index()).withSession(
+                    Security.username -> login.user,
+                    "session" -> session.id,
+                    "expires" -> session.expirationDate.toString
+                  )
+                }
+              case _ =>
+                if (firstTime) {
+                  Redirect(routes.FirstTimeSetupController.setupStudent()).withSession(
+                    Security.username -> login.user,
+                    "session" -> session.id,
+                    "expires" -> session.expirationDate.toString
+                  )
+                } else {
+                  Redirect(routes.Application.index()).withNewSession
+                }
+            }
           case t: String => InternalServerError(t)
         }
     }
 
 
   }
+
+  def firstTimeCheck(user: String): Boolean = !Students.exists(user)
 
   def logout() = Action { request =>
     request.session.get("session").map(sessionsHandler ! SessionHandler.LogoutRequest(_))
@@ -81,14 +102,22 @@ object SessionHandler {
 
   case class Session(id: String, expirationDate: DateTime, user: String, groups: List[String], role: Role)
 
+  case class SessionValidationRequest(id: String)
+
+  trait ValidationResponse
+  case object Valid extends ValidationResponse
+
+  case object Invalid extends ValidationResponse
+
   def props(config: Configuration) = Props(new SessionHandler(config))
 }
 
 class SessionHandler(config: Configuration) extends Actor {
 
+  import controllers.SessionHandler._
   import utils.LDAPAuthentication._
-  import SessionHandler._
-  import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
   private var sessions: Set[Session] = Set.empty
 
@@ -118,6 +147,13 @@ class SessionHandler(config: Configuration) extends Actor {
       sessions.find(_.id == id) map { session =>
         sender() ! session
       }
+    case SessionValidationRequest(id) =>
+      val valid = sessions.exists(_.id == id)
+      if(valid){
+        sender() ! Valid
+      }else{
+        sender() ! Invalid
+    }
   }
 
   private def getRoles(user: String, group: List[String]): Role = {

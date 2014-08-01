@@ -1,7 +1,7 @@
 package models
 
-import org.joda.time.DateTime
 import utils.semantic._
+
 import scala.concurrent.Future
 
 
@@ -13,13 +13,12 @@ case class Student(
                     phone: String, degree: String)
 
 
-
-
 object Students {
 
   import utils.Global._
-  import Vocabulary._
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import utils.semantic.Vocabulary._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
   def create(student: Student): Future[Individual] = Future {
@@ -43,5 +42,5 @@ object Students {
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Student))).map(student => Individual(student.s))
   }
 
-
+  def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.systemId} ${Literal(uid).toQueryString}}")
 }

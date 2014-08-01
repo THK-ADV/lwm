@@ -1,13 +1,10 @@
 package controllers
 
-import akka.actor.Actor.Receive
-import akka.actor.{Props, ActorRef, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
-import models.{Student, Students}
-import play.api.Play.current
-import play.api.data.Forms._
-import play.api.data._
-import play.api.mvc.{Action, Controller, WebSocket}
+import controllers.SessionHandler.{Invalid, Valid}
+import models.{Students, UserForms}
+import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
 
 import scala.concurrent.Future
@@ -23,38 +20,42 @@ class StudentWebSocketActor(out: ActorRef) extends Actor {
 
 object StudentsManagement extends Controller {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import akka.pattern.ask
+
+import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
 
   private implicit val timeout = Timeout(5.seconds)
   private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
-  val studentForm = Form(
-    mapping(
-      "id" -> text,
-      "firstname" -> text,
-      "lastname" -> text,
-      "registrationNumber" -> text,
-      "email" -> email,
-      "phone" -> text,
-      "degree" -> text
-    )(Student.apply)(Student.unapply)
-  )
 
-  def index() = Action.async {
-    for (all <- Students.all()) yield {
-      Ok(views.html.students(all.toList, studentForm))
+  def index() = Action.async { request =>
+    request.session.get("session") match {
+      case None => Future.successful(Redirect(routes.Application.index()).withNewSession)
+      case Some(id) =>
+        val responseFut = (sessionsHandler ? SessionHandler.SessionValidationRequest(id)).mapTo[SessionHandler.ValidationResponse]
+        for {
+          response <- responseFut
+          students <- Students.all()
+        } yield {
+          response match {
+            case Valid => Ok(views.html.students(students.toList, UserForms.studentForm))
+            case Invalid => Redirect(routes.Application.index()).withNewSession
+          }
+        }
     }
+
+
   }
 
 
-
-  def socket = WebSocket.acceptWithActor[String, String] { request => out =>
-    StudentWebSocketActor.props(out)
-  }
+  // TODO Websocket Actor
+  //  def socket = WebSocket.acceptWithActor[String, String] { request => out =>
+  //    StudentWebSocketActor.props(out)
+  //  }
 
   def studentPost = Action.async { implicit request =>
-    studentForm.bindFromRequest.fold(
+    UserForms.studentForm.bindFromRequest.fold(
       formWithErrors => {
         for (all <- Students.all()) yield {
           BadRequest(views.html.students(all.toList, formWithErrors))
@@ -62,10 +63,34 @@ object StudentsManagement extends Controller {
 
       },
       student => {
-        for (all <- Students.all()) yield {
-          Students.create(student)
-          Redirect(routes.StudentsManagement.index())
+        request.session.get("session") match {
+          case None => Future.successful(Redirect(routes.Application.index()).withNewSession)
+          case Some(id) =>
+            val responseFut = (sessionsHandler ? SessionHandler.SessionRequest(id)).mapTo[SessionHandler.Session]
+            for {
+              response <- responseFut
+            } yield {
+              if (response.user.equalsIgnoreCase(request.session.get(Security.username).get)) {
+                request.session.get("setup") match {
+                  case Some("1") =>
+                    Students.create(student)
+                    Redirect(routes.StudentDashboardController.dashboard())
+                  case Some("0") =>
+                    Redirect(routes.StudentDashboardController.dashboard())
+                  case _ =>
+                    Redirect(routes.StudentDashboardController.dashboard())
+                }
+              } else {
+                if (response.role.contains(Permissions.UserModification)) {
+                  Students.create(student)
+                  Redirect(routes.StudentsManagement.index())
+                } else {
+                  Redirect(routes.Application.index()).withNewSession
+                }
+              }
+            }
         }
+
       }
     )
   }

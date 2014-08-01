@@ -3,13 +3,20 @@
 # ~~~~
 
 # Home page
-GET           /                                   controllers.Application.index
-POST          /sessions                           controllers.SessionManagement.login
-DELETE        /sessions                           controllers.SessionManagement.logout
+GET           /                                            controllers.Application.index
+POST          /api/sessions                                controllers.SessionManagement.login
+DELETE        /api/sessions                                controllers.SessionManagement.logout
+POST          /api/administration/students                 controllers.StudentsManagement.studentPost()
 
-GET           /administration/students            controllers.StudentsManagement.index()
-POST          /api/administration/students        controllers.StudentsManagement.studentPost()
+GET           /administration/dashboard                    controllers.AdministrationDashboardController.dashboard()
+GET           /administration/students                     controllers.StudentsManagement.index()
+
+
+GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()
+GET           /administration/firstTimeSetupUser           controllers.FirstTimeSetupController.setupUser()
+
+GET           /student/dashboard                           controllers.StudentDashboardController.dashboard()
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET           /assets/*file                       controllers.Assets.at(path="/public", file)
+GET           /assets/*file                                controllers.Assets.at(path="/public", file)

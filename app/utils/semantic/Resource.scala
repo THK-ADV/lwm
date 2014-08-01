@@ -69,7 +69,7 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
 
   lazy val props: Map[Property, RDFNode] = {
     val statements = properties
-    statements.map(s => s.p -> s.o).toMap
+    statements.map(s => s.p -> s.o).toMap.withDefaultValue(Literal(""))
   }
 
   /**
