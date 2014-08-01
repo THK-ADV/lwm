@@ -1,4 +1,4 @@
-package util
+package utils
 
 import akka.util.Timeout
 import controllers.{UserInfoManagement, SessionHandler}
@@ -7,7 +7,7 @@ import org.apache.jena.fuseki.FusekiCmd
 import play.api._
 import play.api.libs.concurrent.Akka
 import play.api.Play.current
-import util.semantic.{Vocabulary, SPARQLExecution, Namespace, NamedGraph}
+import utils.semantic.{Vocabulary, SPARQLExecution, Namespace, NamedGraph}
 
 object Global extends GlobalSettings {
 
@@ -23,19 +23,9 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
 
-    new Thread(new Runnable {
-      override def run(): Unit = {
-        System.setProperty("log4j.configuration", "log4j.properties")
-        new FusekiCmd("--update", "--desc=assemblerA.ttl", "--port=3030", "/lwm").mainRun()
-      }
-    }).start()
-
 
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
-
-    val student = Student("giacinto", List("Robert"), List("Giacinto"), "11053711", List("robert.giacinto@gmail.com"), "017624178020", List(Vocabulary.LWM.MediaInformaticsMaster))
-    Students.create(student)
 
     Logger.info("Application has started")
   }
