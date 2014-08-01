@@ -15,7 +15,7 @@ object UserInfoManagement{
 
 class UserInfoManagement(config: Configuration) extends Actor{
   import UserInfoManagement._
-  import util.LDAPAuthentication._
+  import utils.LDAPAuthentication._
   import scala.concurrent.ExecutionContext.Implicits.global
 
   val DN = config.getString("lwm.bindDN").get

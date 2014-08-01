@@ -3,6 +3,7 @@ package controllers
 import akka.actor.{Actor, Props}
 import akka.util.Timeout
 import controllers.Permissions.Role
+import models.{LoginForms, Student, LoginData}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.DateTime
 import play.api.Configuration
@@ -11,7 +12,6 @@ import play.api.mvc.{Security, Action, Controller}
 import play.libs.Akka
 
 import scala.concurrent.Future
-
 
 /**
  * Session Management.
@@ -27,37 +27,46 @@ object SessionManagement extends Controller {
   private implicit val timeout = Timeout(15.seconds)
   private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
-  /*
-   * {
-   *   user: "bla",
-   *   password: "hallo123"
-   * }
-   */
-  def login() = Action.async(parse.json) { request =>
+  def login() = Action.async { implicit request =>
 
-    val user = (request.body \ "user").as[String]
-    val password = (request.body \ "password").as[String]
+    val loginData = LoginForms.studentForm.bindFromRequest.fold(
+      formWithErrors => {
+        None
+      },
+      login => {
+        Some(login)
+      }
+    )
 
-    val timeoutFuture = Promise.timeout("Oops", 15.second)
-    val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(user, password)).mapTo[Either[String, SessionHandler.Session]]
+    loginData match{
+      case None => Future.successful(Unauthorized)
+      case Some(login) =>
+        val timeoutFuture = Promise.timeout("Oops", 15.second)
+        val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user, login.password)).mapTo[Either[String, SessionHandler.Session]]
 
-    Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
-      case Left(message: String) =>
-        Unauthorized(message)
-      case Right(session: SessionHandler.Session) =>
-        Ok("Login successful").withSession(
-          Security.username -> "user",
-          "session" -> session.id,
-          "expires" -> session.expirationDate.toString
-        )
-      case t: String => InternalServerError(t)
+        Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
+          case Left(message: String) =>
+            Unauthorized(message)
+          case Right(session: SessionHandler.Session) =>
+           session.role match {
+             case Permissions.AdminRole =>
+               Redirect(routes.StudentsManagement.index()).withSession(
+               Security.username -> login.user,
+               "session" -> session.id,
+               "expires" -> session.expirationDate.toString
+             )
+             case _ =>  Redirect(routes.Application.index()).withNewSession
+           }
+          case t: String => InternalServerError(t)
+        }
     }
+
+
   }
 
   def logout() = Action { request =>
     request.session.get("session").map(sessionsHandler ! SessionHandler.LogoutRequest(_))
-
-    NoContent.withNewSession
+    Redirect(routes.Application.index()).withNewSession
   }
 }
 
@@ -68,7 +77,7 @@ object SessionHandler {
 
   case class LogoutRequest(sessionID: String)
 
-  case class SessionRequest(user: String)
+  case class SessionRequest(id: String)
 
   case class Session(id: String, expirationDate: DateTime, user: String, groups: List[String], role: Role)
 
@@ -77,7 +86,7 @@ object SessionHandler {
 
 class SessionHandler(config: Configuration) extends Actor {
 
-  import util.LDAPAuthentication._
+  import utils.LDAPAuthentication._
   import SessionHandler._
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -105,8 +114,8 @@ class SessionHandler(config: Configuration) extends Actor {
       }
     case LogoutRequest(sessionID) =>
       sessions.find(_.id == sessionID).map(sessions -= _)
-    case SessionRequest(user) =>
-      sessions.find(_.user == user) map { session =>
+    case SessionRequest(id) =>
+      sessions.find(_.id == id) map { session =>
         sender() ! session
       }
   }
