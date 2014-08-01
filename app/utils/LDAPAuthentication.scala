@@ -1,4 +1,4 @@
-package util
+package utils
 
 import com.typesafe.config.ConfigFactory
 import com.unboundid.ldap.sdk._
