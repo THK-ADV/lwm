@@ -1,0 +1,30 @@
+@(studentForm: Form[Student])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
+
+@helper.form(action = routes.StudentsManagement.studentPost) {
+    @helper.inputText(studentForm("id"))
+    @helper.inputText(studentForm("registrationNumber"))
+    @helper.inputText(studentForm("firstname"))
+    @helper.inputText(studentForm("lastname"))
+    @helper.inputText(studentForm("email"))
+    @helper.inputText(studentForm("phone"))
+    @helper.select(studentForm("degree"), Map(
+        Vocabulary.LWM.AutomationITMaster.value -> "Automation & IT (Master's program)",
+        Vocabulary.LWM.BusinessAdministrationAndEngineeringBachelor.value -> "Business Administration and Engineering (Bachelor's program)",
+        Vocabulary.LWM.BusinessInformationSystemsBachelor.value -> "Business Information Systems (Bachelor's program)",
+        Vocabulary.LWM.BusinessInformationSystemsBachelorJoint.value -> "Business Information Systems (Bachelor's program / Joint Degree Program)",
+        Vocabulary.LWM.BusinessInformationSystemsMasterJoint.value -> "Business Information Systems (Joint Master's program)",
+        Vocabulary.LWM.ComputerEngineeringBachelor.value -> "Computer Engineering (Bachelor's program)",
+        Vocabulary.LWM.ComputerScienceBachelor.value -> "Computer Science (Bachelor's program)",
+        Vocabulary.LWM.ComputerScienceMaster.value -> "Computer Science (Master's program)",
+        Vocabulary.LWM.ElectricalEngineeringBachelor.value -> "Electrical Engineering (Bachelor's program)",
+        Vocabulary.LWM.GeneralMechanicalEngineeringBachelor.value -> "General Mechanical Engineering (Bachelor's program)",
+        Vocabulary.LWM.MediaInformaticsBachelor.value -> "Media Informatics (Bachelor's program)",
+        Vocabulary.LWM.MediaInformaticsMaster.value -> "Media Informatics (Master's program)",
+        Vocabulary.LWM.WebScienceMaster.value -> "Web Science (Master's program)"
+    ).toSeq)
+    <div class="form-actions">
+        <button type="submit">Create Student</button>
+    </div>
+}

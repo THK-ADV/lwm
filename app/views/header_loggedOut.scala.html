@@ -1,0 +1,11 @@
+@(loginForm: Form[LoginData])
+
+<header>
+    @helper.form(action = routes.SessionManagement.login()){
+        @helper.inputText(loginForm("user"))
+        @helper.inputPassword(loginForm("password"))
+        <div class="form-actions">
+            <button type="submit">Login</button>
+        </div>
+    }
+</header>

@@ -1,16 +1,24 @@
-@(loginForm: Form[LoginData])
+@(students: List[Individual], form: Form[Student])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
 
 <!DOCTYPE html>
 
 <html>
     <head>
-        <title>LWM</title>
+        <title>Studentenverwaltung</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
     </head>
     <body>
-        @header_loggedOut(loginForm)
+        @header_loggedIn()
+        <div id = "studentsList">
+           @studentList(students)
+        </div>
+        <div id="studentsForm">
+            @studentForm(form)
+        </div>
         @footer()
     </body>
 </html>

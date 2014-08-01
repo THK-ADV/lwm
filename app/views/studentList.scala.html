@@ -1,0 +1,16 @@
+@(students: List[Individual])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
+
+<ul>
+@for(student <- students) {
+    <li>
+        <div>
+            <span class="studentlist_adv">@student.props(Vocabulary.LWM.systemId)</span>
+            <span class="studentlist_lastname">@student.props(Vocabulary.FOAF.lastName)</span>
+            <span class="studentlist_firstname">@student.props(Vocabulary.FOAF.firstName)</span>
+            <span class="studentlist_degree">@student.props(Vocabulary.LWM.hasEnrollment)</span>
+        </div>
+    </li>
+}
+</ul>
