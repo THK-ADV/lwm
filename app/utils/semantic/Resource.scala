@@ -1,4 +1,4 @@
-package util.semantic
+package utils.semantic
 
 import java.net.{URLDecoder, URLEncoder}
 import com.hp.hpl.jena.rdf.model.AnonId
@@ -9,6 +9,8 @@ object ResourceUtils{
 }
 
 trait RDFNode {
+  val value: String
+  def toQueryString: String
   def asResource(): Option[Resource]
 
   def asLiteral(): Option[Literal]
@@ -26,6 +28,8 @@ case class Resource(value: String) extends RDFNode {
   override def asResource(): Option[Resource] = Some(this)
 
   override def asLiteral(): Option[Literal] = None
+
+  override def toQueryString: String = toString
 }
 
 case class Property(value: String) extends RDFNode {
@@ -34,17 +38,21 @@ case class Property(value: String) extends RDFNode {
   override def asResource(): Option[Resource] = Some(Resource(value))
 
   override def asLiteral(): Option[Literal] = None
+
+  override def toQueryString: String = toString
 }
 
 case class Literal(value: String, encoded: Boolean = false) extends RDFNode {
   val encodedString = if (encoded) value else URLEncoder.encode(value, "UTF-8")
   val decodedString = if (encoded) URLDecoder.decode(value, "UTF-8") else value
 
-  override def toString = if (value == null) s"""""""" else s""""$encodedString""""
+  override def toString = decodedString
 
   override def asResource(): Option[Resource] = None
 
   override def asLiteral(): Option[Literal] = Some(this)
+
+  override def toQueryString: String = if (value == null) s"""""""" else s""""$encodedString""""
 }
 
 case class NamedGraph(uri: String) {
@@ -52,10 +60,17 @@ case class NamedGraph(uri: String) {
 }
 
 case class Statement(s: Resource, p: Property, o: RDFNode) {
-  override def toString: String = s"$s $p $o"
+  override def toString: String = s"$s $p ${o.toQueryString}"
 }
 
 case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution) {
+
+  lazy val statements = properties
+
+  lazy val props: Map[Property, RDFNode] = {
+    val statements = properties
+    statements.map(s => s.p -> s.o).toMap
+  }
 
   /**
    * Lists all properties of this individual.
@@ -68,6 +83,7 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
 
     t.toList
   }
+
 
   /**
    * Adds a new statement to the named graph.

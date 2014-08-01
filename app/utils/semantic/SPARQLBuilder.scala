@@ -1,4 +1,4 @@
-package util.semantic
+package utils.semantic
 
 object SPARQLBuilder {
 
@@ -32,13 +32,13 @@ object SPARQLBuilder {
     s"SELECT ?s (${rdf.typ} as ?p) ($uri as ?o) FROM NAMED $graph WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s ${rdf.typ} $uri}"
 
   def listIndividualsWithClass(uri: Resource) =
-    s"SELECT ?s (${rdf.typ} as ?p) ($uri as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual};?s ${rdf.typ} $uri}"
+    s"SELECT ?s (${rdf.typ} as ?p) ($uri as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s ${rdf.typ} $uri}"
 
   def listIndividualsWithProperty(p: Property, value: Literal, graph: NamedGraph) =
-    s"SELECT ?s ($p as ?p) ($value as ?o) FROM NAMED $graph WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p $value}"
+    s"SELECT ?s ($p as ?p) ($value as ?o) FROM NAMED $graph WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p ${value.toQueryString}}"
 
   def listIndividualsWithProperty(p: Property, value: Literal) =
-    s"""SELECT ?s ($p as ?p) ($value as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p $value}"""
+    s"""SELECT ?s ($p as ?p) ($value as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p ${value.toQueryString}"""
 
   def listIndividualsWithResource(p: Property, value: Resource, graph: NamedGraph) =
     s"SELECT ?s ($p as ?p) ($value as ?o) FROM NAMED $graph WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p $value}"

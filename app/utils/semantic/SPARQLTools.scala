@@ -1,4 +1,4 @@
-package util.semantic
+package utils.semantic
 
 import java.net.URLDecoder
 

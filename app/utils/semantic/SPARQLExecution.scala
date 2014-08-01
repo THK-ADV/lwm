@@ -1,4 +1,4 @@
-package util.semantic
+package utils.semantic
 
 import java.net.URLEncoder
 
@@ -28,13 +28,12 @@ object SPARQLExecution {
 class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeout: Timeout) {
 
   def executeUpdate(update: String): Boolean = {
-    println(update)
     val updateEncoded = URLEncoder.encode(update, "UTF-8")
     Http.postData(updateHost, s"update=$updateEncoded")
       .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
       .header("content-type", "application/x-www-form-urlencoded")
-      .asString
-      .contains("Success")
+      .asString.toLowerCase
+      .contains("success")
   }
 
   def executeQuery(query: String): String = {
