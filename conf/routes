@@ -3,10 +3,13 @@
 # ~~~~
 
 # Home page
-GET           /                    controllers.Application.index
-POST          /sessions            controllers.SessionManagement.login
-DELETE        /sessions            controllers.SessionManagement.logout
+GET           /                                   controllers.Application.index
+POST          /sessions                           controllers.SessionManagement.login
+DELETE        /sessions                           controllers.SessionManagement.logout
+
+GET           /administration/students            controllers.StudentsManagement.index()
+POST          /api/administration/students        controllers.StudentsManagement.studentPost()
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET           /assets/*file        controllers.Assets.at(path="/public", file)
+GET           /assets/*file                       controllers.Assets.at(path="/public", file)
