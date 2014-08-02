@@ -54,7 +54,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
                     "expires" -> session.expirationDate.toString
                   )
                 } else {
-                  Redirect(routes.StudentsManagement.index()).withSession(
+                  Redirect(routes.AdministrationDashboardController.dashboard()).withSession(
                     Security.username -> login.user,
                     "session" -> session.id,
                     "expires" -> session.expirationDate.toString

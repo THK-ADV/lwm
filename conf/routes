@@ -4,9 +4,11 @@
 
 # Home page
 GET           /                                            controllers.Application.index
+GET           /login                                       controllers.Application.loginScreen
 POST          /api/sessions                                controllers.SessionManagement.login
 DELETE        /api/sessions                                controllers.SessionManagement.logout
 POST          /api/administration/students                 controllers.StudentsManagement.studentPost()
+POST          /api/administration/users                    controllers.UserManagement.userPost()
 
 GET           /administration/dashboard                    controllers.AdministrationDashboardController.dashboard()
 GET           /administration/students                     controllers.StudentsManagement.index()
@@ -14,6 +16,9 @@ GET           /administration/students                     controllers.StudentsM
 
 GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser           controllers.FirstTimeSetupController.setupUser()
+
+POST          /administration/firstTimeSetupStudent        controllers.StudentsManagement.studentFirstTimeSelf()
+POST          /administration/firstTimeSetupUser           controllers.UserManagement.userFirstTimeSelf()
 
 GET           /student/dashboard                           controllers.StudentDashboardController.dashboard()
 

@@ -4,7 +4,9 @@ import actors.SessionHandler
 import actors.SessionHandler.{Invalid, Valid}
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
-import models.{Students, UserForms}
+import controllers.SessionManagement._
+import controllers.UserManagement._
+import models.{Users, Students, UserForms}
 import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
 import utils.Security.Authentication
@@ -47,7 +49,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
   //    StudentWebSocketActor.props(out)
   //  }
 
-  // TODO first time setup post
+  def studentFirstTimeSelf = hasSession { session =>
+    Action { implicit request =>
+      UserForms.studentForm.bindFromRequest.fold(
+        formWithErrors => {
+          BadRequest(views.html.firstTimeInputStudents(formWithErrors))
+        },
+        student => {
+          Students.create(student)
+          Redirect(routes.StudentDashboardController.dashboard())
+        }
+      )
+    }
+  }
+
 
   def studentPost = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
     Action.async { implicit request =>

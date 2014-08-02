@@ -10,6 +10,16 @@
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
     </head>
     <body>
-        @userForm(form)
+    @helper.form(action = routes.UserManagement.userFirstTimeSelf()) {
+        @helper.inputText(form("id"),'readonly -> "readonly")
+        @helper.inputText(form("firstname"))
+        @helper.inputText(form("lastname"))
+        @helper.inputText(form("email"))
+        @helper.inputText(form("phone"))
+
+        <div class="form-actions">
+            <button type="submit">Submit</button>
+        </div>
+    }
     </body>
 </html>

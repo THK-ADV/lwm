@@ -13,7 +13,8 @@
     <div>
         @import utils.semantic.Vocabulary
 
-        @helper.form(action = routes.StudentsManagement.studentPost) {
+        @helper.form(action = routes.StudentsManagement.studentFirstTimeSelf()) {
+            @helper.inputText(form("id"),'readonly -> "readonly")
             @helper.inputText(form("registrationNumber"))
             @helper.inputText(form("firstname"))
             @helper.inputText(form("lastname"))

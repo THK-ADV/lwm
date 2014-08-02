@@ -24,7 +24,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
     private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
 
-    def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.index).withNewSession
+    def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.index)
 
 
     def hasSession(action: SessionHandler.Session => EssentialAction): EssentialAction = EssentialAction { requestHeader =>
@@ -51,6 +51,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
       maybeIteratee.getOrElse(Done(onUnauthorized(requestHeader), Input.Empty))
     }
+
 
 
     def hasPermissions(permissions: Permission*)(action: SessionHandler.Session => EssentialAction): EssentialAction = hasSession { session =>
