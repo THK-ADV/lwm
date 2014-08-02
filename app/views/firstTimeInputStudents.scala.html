@@ -1,6 +1,43 @@
 @(form: Form[Student])
 
-<div>
-    <h1>First Time Setup: Student</h1>
-    @studentForm(form)
-</div>
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>First Time Setup</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
+    </head>
+    <body>
+    <div>
+        @import utils.semantic.Vocabulary
+
+        @helper.form(action = routes.StudentsManagement.studentPost) {
+            @helper.inputText(form("registrationNumber"))
+            @helper.inputText(form("firstname"))
+            @helper.inputText(form("lastname"))
+            @helper.inputText(form("email"))
+            @helper.inputText(form("phone"))
+            @helper.select(form("degree"), Map(
+                Vocabulary.LWM.AutomationITMaster.value -> "Automation & IT (Master's program)",
+                Vocabulary.LWM.BusinessAdministrationAndEngineeringBachelor.value -> "Business Administration and Engineering (Bachelor's program)",
+                Vocabulary.LWM.BusinessInformationSystemsBachelor.value -> "Business Information Systems (Bachelor's program)",
+                Vocabulary.LWM.BusinessInformationSystemsBachelorJoint.value -> "Business Information Systems (Bachelor's program / Joint Degree Program)",
+                Vocabulary.LWM.BusinessInformationSystemsMasterJoint.value -> "Business Information Systems (Joint Master's program)",
+                Vocabulary.LWM.ComputerEngineeringBachelor.value -> "Computer Engineering (Bachelor's program)",
+                Vocabulary.LWM.ComputerScienceBachelor.value -> "Computer Science (Bachelor's program)",
+                Vocabulary.LWM.ComputerScienceMaster.value -> "Computer Science (Master's program)",
+                Vocabulary.LWM.ElectricalEngineeringBachelor.value -> "Electrical Engineering (Bachelor's program)",
+                Vocabulary.LWM.GeneralMechanicalEngineeringBachelor.value -> "General Mechanical Engineering (Bachelor's program)",
+                Vocabulary.LWM.MediaInformaticsBachelor.value -> "Media Informatics (Bachelor's program)",
+                Vocabulary.LWM.MediaInformaticsMaster.value -> "Media Informatics (Master's program)",
+                Vocabulary.LWM.WebScienceMaster.value -> "Web Science (Master's program)"
+            ).toSeq)
+            <div class="form-actions">
+                <button type="submit">Submit</button>
+            </div>
+        }
+    </div>
+    </body>
+</html>

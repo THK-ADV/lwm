@@ -1,7 +1,8 @@
 package utils
 
+import actors.SessionHandler
 import akka.util.Timeout
-import controllers.{UserInfoManagement, SessionHandler}
+import controllers.UserInfoManagement
 import models.{Students, Student}
 import org.apache.jena.fuseki.FusekiCmd
 import play.api._

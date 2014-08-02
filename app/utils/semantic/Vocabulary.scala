@@ -15,6 +15,7 @@ object Vocabulary {
     val prefix = Prefix("lwm")
 
     val Student = resource("Student")
+    val User = resource("User")
     val Degree = resource("Degree")
     val AutomationITMaster = resource("AutomationITMaster")
     val BusinessAdministrationAndEngineeringBachelor = resource("BusinessAdministrationAndEngineeringBachelor")

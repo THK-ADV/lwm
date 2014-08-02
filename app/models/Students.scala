@@ -13,6 +13,8 @@ case class Student(
                     phone: String, degree: String)
 
 
+
+
 object Students {
 
   import utils.Global._
@@ -44,3 +46,4 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
   def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.systemId} ${Literal(uid).toQueryString}}")
 }
+

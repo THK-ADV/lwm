@@ -1,23 +1,23 @@
 package controllers
 
-import models.UserForms
+import models.{Student, User, UserForms}
 import play.api.mvc.{Action, Controller}
+import utils.Security.Authentication
 
 
-object FirstTimeSetupController extends Controller{
-  def setupStudent() = Action { request =>
-    request.session.get("session") match{
-      case None => Redirect(routes.Application.index())
-      case Some(id) =>
+object FirstTimeSetupController extends Controller with Authentication{
 
-        Ok(views.html.firstTimeInputStudents(UserForms.studentForm)).withSession(request.session + ("setup" -> "1"))
+  def setupStudent() =  hasSession{session =>
+    Action { request =>
+      val filledForm = UserForms.studentForm.fill(Student(session.user, "", "", "","", "", ""))
+      Ok(views.html.firstTimeInputStudents(filledForm)).withSession(request.session + ("setup" -> "1"))
     }
   }
 
-  def setupUser() = Action {request =>
-    request.session.get("session") match{
-      case None => Redirect(routes.Application.index())
-      case Some(id) => Ok(views.html.firstTimeInputUser())
+  def setupUser() = hasSession{session =>
+    Action { request =>
+      val filledForm = UserForms.userForm.fill(User(session.user, "", "", "",""))
+     Ok(views.html.firstTimeInputUser(filledForm)).withSession(request.session + ("setup" -> "1"))
     }
   }
 }

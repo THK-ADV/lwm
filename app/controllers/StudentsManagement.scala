@@ -1,11 +1,13 @@
 package controllers
 
+import actors.SessionHandler
+import actors.SessionHandler.{Invalid, Valid}
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
-import controllers.SessionHandler.{Invalid, Valid}
 import models.{Students, UserForms}
 import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
+import utils.Security.Authentication
 
 import scala.concurrent.Future
 
@@ -18,7 +20,7 @@ class StudentWebSocketActor(out: ActorRef) extends Actor {
 }
 
 
-object StudentsManagement extends Controller {
+object StudentsManagement extends Controller with Authentication {
 
   import akka.pattern.ask
 
@@ -29,23 +31,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
   private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
 
-  def index() = Action.async { request =>
-    request.session.get("session") match {
-      case None => Future.successful(Redirect(routes.Application.index()).withNewSession)
-      case Some(id) =>
-        val responseFut = (sessionsHandler ? SessionHandler.SessionValidationRequest(id)).mapTo[SessionHandler.ValidationResponse]
-        for {
-          response <- responseFut
-          students <- Students.all()
-        } yield {
-          response match {
-            case Valid => Ok(views.html.students(students.toList, UserForms.studentForm))
-            case Invalid => Redirect(routes.Application.index()).withNewSession
-          }
-        }
+  def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+    Action.async { request =>
+      for{
+        students <- Students.all()
+      } yield{
+        Ok(views.html.students(students.toList, UserForms.studentForm))
+      }
     }
-
-
   }
 
 
@@ -54,44 +47,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
   //    StudentWebSocketActor.props(out)
   //  }
 
-  def studentPost = Action.async { implicit request =>
-    UserForms.studentForm.bindFromRequest.fold(
-      formWithErrors => {
-        for (all <- Students.all()) yield {
-          BadRequest(views.html.students(all.toList, formWithErrors))
-        }
+  // TODO first time setup post
 
-      },
-      student => {
-        request.session.get("session") match {
-          case None => Future.successful(Redirect(routes.Application.index()).withNewSession)
-          case Some(id) =>
-            val responseFut = (sessionsHandler ? SessionHandler.SessionRequest(id)).mapTo[SessionHandler.Session]
-            for {
-              response <- responseFut
-            } yield {
-              if (response.user.equalsIgnoreCase(request.session.get(Security.username).get)) {
-                request.session.get("setup") match {
-                  case Some("1") =>
-                    Students.create(student)
-                    Redirect(routes.StudentDashboardController.dashboard())
-                  case Some("0") =>
-                    Redirect(routes.StudentDashboardController.dashboard())
-                  case _ =>
-                    Redirect(routes.StudentDashboardController.dashboard())
-                }
-              } else {
-                if (response.role.contains(Permissions.UserModification)) {
-                  Students.create(student)
-                  Redirect(routes.StudentsManagement.index())
-                } else {
-                  Redirect(routes.Application.index()).withNewSession
-                }
-              }
-            }
+  def studentPost = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+    Action.async { implicit request =>
+      UserForms.studentForm.bindFromRequest.fold(
+        formWithErrors => {
+          for (all <- Students.all()) yield {
+            BadRequest(views.html.students(all.toList, formWithErrors))
+          }
+        },
+        student => {
+          Students.create(student)
+          Future.successful(Redirect(routes.StudentsManagement.index()))
         }
-
-      }
-    )
+      )
+    }
   }
 }

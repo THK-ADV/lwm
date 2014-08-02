@@ -1,0 +1,14 @@
+@(form: Form[User])
+
+
+@helper.form(action = routes.StudentsManagement.studentPost) {
+    @helper.inputText(form("id"))
+    @helper.inputText(form("firstname"))
+    @helper.inputText(form("lastname"))
+    @helper.inputText(form("email"))
+    @helper.inputText(form("phone"))
+
+    <div class="form-actions">
+        <button type="submit">Submit</button>
+    </div>
+}

@@ -1,12 +1,8 @@
 package controllers
 
-import akka.actor.{Actor, Props}
+import actors.SessionHandler
 import akka.util.Timeout
-import controllers.Permissions.Role
 import models.{Students, UserForms}
-import org.apache.commons.codec.digest.DigestUtils
-import org.joda.time.DateTime
-import play.api.Configuration
 import play.api.libs.concurrent.Promise
 import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
@@ -49,7 +45,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
             Unauthorized(message)
           case Right(session: SessionHandler.Session) =>
             val firstTime = firstTimeCheck(session.user)
-            println(firstTime)
             session.role match {
               case Permissions.AdminRole =>
                 if (firstTime) {
@@ -73,7 +68,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
                     "expires" -> session.expirationDate.toString
                   )
                 } else {
-                  Redirect(routes.Application.index()).withNewSession
+                  Redirect(routes.StudentDashboardController.dashboard()).withSession(
+                    Security.username -> login.user,
+                    "session" -> session.id,
+                    "expires" -> session.expirationDate.toString
+                  )
                 }
             }
           case t: String => InternalServerError(t)
@@ -88,93 +87,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
   def logout() = Action { request =>
     request.session.get("session").map(sessionsHandler ! SessionHandler.LogoutRequest(_))
     Redirect(routes.Application.index()).withNewSession
-  }
-}
-
-
-object SessionHandler {
-
-  case class AuthenticationRequest(user: String, password: String)
-
-  case class LogoutRequest(sessionID: String)
-
-  case class SessionRequest(id: String)
-
-  case class Session(id: String, expirationDate: DateTime, user: String, groups: List[String], role: Role)
-
-  case class SessionValidationRequest(id: String)
-
-  trait ValidationResponse
-  case object Valid extends ValidationResponse
-
-  case object Invalid extends ValidationResponse
-
-  def props(config: Configuration) = Props(new SessionHandler(config))
-}
-
-class SessionHandler(config: Configuration) extends Actor {
-
-  import controllers.SessionHandler._
-  import utils.LDAPAuthentication._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-
-  private var sessions: Set[Session] = Set.empty
-
-  val DN = config.getString("lwm.bindDN").get
-  val GDN = config.getString("lwm.groupDN").get
-  val bindHost = config.getString("lwm.bindHost").get
-  val bindPort = config.getInt("lwm.bindPort").get
-
-  def receive: Receive = {
-    case AuthenticationRequest(user, password) =>
-      val authFuture = authenticate(user, password, bindHost, bindPort, DN)
-
-      val requester = sender()
-      authFuture.map {
-        case l@Left(error) =>
-          requester ! l
-        case Right(success) =>
-          val sessionFuture = createSessionID(user)
-          sessionFuture map { session =>
-            sessions += session
-            requester ! Right(session)
-          }
-      }
-    case LogoutRequest(sessionID) =>
-      sessions.find(_.id == sessionID).map(sessions -= _)
-    case SessionRequest(id) =>
-      sessions.find(_.id == id) map { session =>
-        sender() ! session
-      }
-    case SessionValidationRequest(id) =>
-      val valid = sessions.exists(_.id == id)
-      if(valid){
-        sender() ! Valid
-      }else{
-        sender() ! Invalid
-    }
-  }
-
-  private def getRoles(user: String, group: List[String]): Role = {
-    // TODO Get additional role information from user details
-    if (group.contains("labor")) Permissions.AdminRole else Permissions.DefaultRole
-  }
-
-  private def createSessionID(user: String): Future[Session] = {
-    val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
-    val lifetime = config.getInt("lwm.sessions.lifetime").getOrElse(8)
-    val expirationDate = DateTime.now().plusHours(lifetime)
-    val groups = groupMembership(user, bindHost, bindPort, GDN)
-
-    groups map {
-      case Left(error) =>
-        val role = getRoles(user, Nil)
-        Session(sessionID, expirationDate, user, Nil, role)
-      case Right(gs) =>
-        val role = getRoles(user, gs.toList)
-        Session(sessionID, expirationDate, user, gs.toList, role)
-    }
   }
 }
 
