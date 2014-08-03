@@ -38,7 +38,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
       for{
         students <- Students.all()
       } yield{
-        Ok(views.html.students(students.toList, UserForms.studentForm))
+        println(students)
+        Ok(views.html.studentManagement(students.toList, UserForms.studentForm))
       }
     }
   }
@@ -69,7 +70,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors => {
           for (all <- Students.all()) yield {
-            BadRequest(views.html.students(all.toList, formWithErrors))
+            BadRequest(views.html.studentManagement(all.toList, formWithErrors))
           }
         },
         student => {

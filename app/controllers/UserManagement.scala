@@ -36,7 +36,7 @@ object UserManagement extends Controller with Authentication {
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors => {
           for (all <- Users.all()) yield {
-            BadRequest(views.html.users(all.toList, formWithErrors))
+            BadRequest(views.html.userManagement(all.toList, formWithErrors))
           }
         },
         user => {

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Administration Dashboard</title>
@@ -6,10 +7,12 @@
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
     </head>
     <body>
-        @header_loggedIn()
-    <div>Left</div>
-    <div>main content</div>
-    <div>context</div>
+        @header_loggedIn_admin()
+        @navigation_admin()
+        <div>
+            overview content:
+            - upcoming events / meetings
+        </div>
         @footer()
     </body>
 </html>

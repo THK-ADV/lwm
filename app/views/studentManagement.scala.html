@@ -12,7 +12,9 @@
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
     </head>
     <body>
-        @header_loggedIn()
+
+        @header_loggedIn_admin()
+        @navigation_admin()
         <div id = "studentsList">
            @studentList(students)
         </div>

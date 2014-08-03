@@ -7,11 +7,13 @@ GET           /                                            controllers.Applicati
 GET           /login                                       controllers.Application.loginScreen
 POST          /api/sessions                                controllers.SessionManagement.login
 DELETE        /api/sessions                                controllers.SessionManagement.logout
-POST          /api/administration/students                 controllers.StudentsManagement.studentPost()
-POST          /api/administration/users                    controllers.UserManagement.userPost()
+
+POST          /administration/users                        controllers.UserManagement.userPost()
 
 GET           /administration/dashboard                    controllers.AdministrationDashboardController.dashboard()
+
 GET           /administration/students                     controllers.StudentsManagement.index()
+POST          /administration/students                     controllers.StudentsManagement.studentPost()
 
 
 GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()
