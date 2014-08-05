@@ -1,10 +1,13 @@
+import play.PlayImport._
+import play.PlayImport.PlayKeys._
+
 name := """lwm"""
 
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
   jdbc,
@@ -13,7 +16,12 @@ libraryDependencies ++= Seq(
   ws
 )
 
+
+requireJs += "main.js"
+
 TwirlKeys.templateImports += "utils.semantic._"
+
+TwirlKeys.templateImports += "org.joda.time.DateTime"
 
 libraryDependencies += "com.unboundid" % "unboundid-ldapsdk" % "2.3.6" withSources() withJavadoc()
 
