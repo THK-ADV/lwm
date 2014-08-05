@@ -45,7 +45,6 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
   }
 
   def executeBooleanQuery(query: String) = {
-    println(query)
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
 
     Http.postData(queryHost, s"query=$queryEncoded")
