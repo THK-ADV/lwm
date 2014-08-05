@@ -15,6 +15,8 @@ object SessionHandler {
 
   case class AuthenticationRequest(user: String, password: String)
 
+  case class NameRequest(user: String)
+
   case class LogoutRequest(sessionID: String)
 
   case class SessionRequest(id: String)
@@ -48,6 +50,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
     case AuthenticationRequest(user, password) =>
       val authFuture = authenticate(user, password, bindHost, bindPort, DN)
 
+
+
       val requester = sender()
       authFuture.map {
         case l@Left(error) =>
@@ -74,6 +78,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
       }else{
         sender() ! Invalid
     }
+
+    case NameRequest(user) =>
+      val requester = sender()
+
+      val nameFuture = getName(user, bindHost, bindPort, DN)
+
+      nameFuture.map{
+        case Left(e) => println("ERROR")
+        case Right(maybeName) => maybeName map { name =>
+          requester ! (name._1, name._2)
+        }
+      }
   }
 
   private def getRoles(user: String, group: List[String]): Role = {

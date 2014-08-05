@@ -85,8 +85,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
   def firstTimeCheck(user: String): Boolean = !Students.exists(user)
 
   def logout() = Action { request =>
+    import play.api.libs.json._
     request.session.get("session").map(sessionsHandler ! SessionHandler.LogoutRequest(_))
-    Redirect(routes.Application.index()).withNewSession
+    val json = Json.toJson(Map(
+      "url" -> routes.Application.index().url
+    ))
+
+    Ok(json)
   }
 }
 
