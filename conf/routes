@@ -24,6 +24,9 @@ POST          /administration/firstTimeSetupUser           controllers.UserManag
 
 GET           /student/dashboard                           controllers.StudentDashboardController.dashboard()
 
+GET           /impressum                                   controllers.VisitorController.impressum()
+GET           /contact                                     controllers.VisitorController.contact()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                controllers.Assets.at(path="/public", file)
