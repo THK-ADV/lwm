@@ -1,0 +1,35 @@
+@(datesToday: List[Individual], datesTomorrow: List[Individual], today: DateTime)
+@import org.joda.time.DateTime
+@import utils.semantic.Vocabulary
+@import utils.semantic.Individual
+
+<div>
+    <div>
+        <h3>Heute, @today.toString("dd.MM.yyyy")</h3>
+        <div>
+            <ul>
+            @for(individual <- datesToday) {
+                <li>
+                    <div>
+
+                    </div>
+                </li>
+            }
+            </ul>
+        </div>
+    </div>
+    <div>
+        <h3>Morgen, @today.plusDays(1).toString("dd.MM.yyyy")</h3>
+        <div>
+            <ul>
+            @for(individual <- datesTomorrow) {
+                <li>
+                    <div>
+
+                    </div>
+                </li>
+            }
+            </ul>
+        </div>
+    </div>
+</div>

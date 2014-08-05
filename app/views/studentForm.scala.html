@@ -2,7 +2,7 @@
 @import utils.semantic.Vocabulary
 
 @helper.form(action = routes.StudentsManagement.studentPost) {
-    @helper.inputText(studentForm("id"),'readonly -> "readonly", '_label -> "ADV Kennung")
+    @helper.inputText(studentForm("id"),'readonly -> "readonly", '_label -> "GM ID")
     @helper.inputText(studentForm("registrationNumber"), '_label -> "Matrikelnummer")
     @helper.inputText(studentForm("firstname"), '_label -> "Vorname")
     @helper.inputText(studentForm("lastname"), '_label -> "Nachname")

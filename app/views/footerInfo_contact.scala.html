@@ -1,15 +1,20 @@
-@(loginForm: Form[LoginData])
 
 <!DOCTYPE html>
 
 <html>
     <head>
-        <title>LWM</title>
+        <title>Dashboard</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
     </head>
     <body>
-        @header_loggedOut(loginForm)
+        <div>
+            <p>Steinmüllerallee 1 <br>
+            51643 Gummersbach <br>
+            Telefon: 02261 8196-0 <br>
+            Telefax: 02261 8196-6666 <br>
+            E-Mail: info@@gm.fh-koeln.de</p>
+        </div>
         @footer()
     </body>
-</html>
+    </html>
