@@ -16,9 +16,6 @@ libraryDependencies ++= Seq(
   ws
 )
 
-
-requireJs += "main.js"
-
 TwirlKeys.templateImports += "utils.semantic._"
 
 TwirlKeys.templateImports += "org.joda.time.DateTime"
