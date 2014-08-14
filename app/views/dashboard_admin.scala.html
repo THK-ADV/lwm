@@ -1,5 +1,6 @@
-@(datesToday: List[Individual], datesTomorrow: List[Individual], today: DateTime)
+@(datesToday: List[Individual], datesTomorrow: List[Individual], today: DateTime, messages: List[Message])
 @import org.joda.time.DateTime
+@import javax.mail.Message
 @import utils.semantic.Individual
 
 <!DOCTYPE html>
@@ -9,12 +10,21 @@
             @head()
     </head>
     <body>
-        @header_loggedIn_admin()
-        @navigation_admin()
-        <div class="container-fluid">
-            @dashboard_admin_dates(datesToday, datesTomorrow, today)
-            @dashboard_admin_emails()
+        <div class="container" id="everything">
+           <div class="row">
+            @header_loggedIn_admin()
+           </div>
+            <div class="row">
+                <div class="col-md-3">@navigation_admin()</div>
+                <div class="col-md-9">
+                    @dashboard_admin_dates(datesToday, datesTomorrow, today)
+                    @dashboard_admin_emails(messages)
+                </div>
+
+            </div>
+            <div class="row">@footerAdmin()</div>
         </div>
-        @footerAdmin()
     </body>
 </html>
+
+

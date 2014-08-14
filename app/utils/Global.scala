@@ -1,6 +1,6 @@
 package utils
 
-import actors.SessionHandler
+import actors.{EmailHandler, SessionHandler}
 import akka.util.Timeout
 import controllers.UserInfoManagement
 import models.{Students, Student}
@@ -13,6 +13,7 @@ import utils.semantic.{Vocabulary, SPARQLExecution, Namespace, NamedGraph}
 object Global extends GlobalSettings {
 
   import scala.concurrent.duration._
+
 
   private val updateHost = "http://localhost:3030/lwm/update"
   private val queryHost = "http://localhost:3030/lwm/query"
@@ -27,6 +28,9 @@ object Global extends GlobalSettings {
 
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
+    Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
+
+
 
     Logger.info("Application has started")
   }

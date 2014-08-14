@@ -10,8 +10,6 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
-  jdbc,
-  anorm,
   cache,
   ws
 )
@@ -19,6 +17,8 @@ libraryDependencies ++= Seq(
 TwirlKeys.templateImports += "utils.semantic._"
 
 TwirlKeys.templateImports += "org.joda.time.DateTime"
+
+TwirlKeys.templateImports += "javax.mail.Message"
 
 libraryDependencies += "com.unboundid" % "unboundid-ldapsdk" % "2.3.6" withSources() withJavadoc()
 
@@ -35,3 +35,5 @@ libraryDependencies += "org.apache.jena" % "jena-tdb" % "1.0.2" withSources() wi
 libraryDependencies += "org.apache.jena" % "jena-fuseki" % "1.0.2" withSources() withJavadoc()
 
 libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.16" withSources() withJavadoc()
+
+libraryDependencies += "javax.mail" % "mail" % "1.5.0-b01" withSources() withJavadoc()

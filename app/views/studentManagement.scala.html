@@ -11,12 +11,13 @@
     </head>
     <body>
         @header_loggedIn_admin()
-        @navigation_admin()
-        <div class="container-fluid">
+        <div class="container">
             <div id="studentsList">
             @studentList(students)
             </div>
         </div>
+        @navigation_admin()
+
         @footerAdmin()
     </body>
 </html>
