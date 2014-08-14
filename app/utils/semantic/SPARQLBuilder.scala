@@ -38,7 +38,7 @@ object SPARQLBuilder {
     s"SELECT ?s ($p as ?p) ($value as ?o) FROM NAMED $graph WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p ${value.toQueryString}}"
 
   def listIndividualsWithProperty(p: Property, value: Literal) =
-    s"""SELECT ?s ($p as ?p) ($value as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p ${value.toQueryString}"""
+    s"""SELECT ?s ($p as ?p) (${value.toQueryString} as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p ${value.toQueryString}}"""
 
   def listIndividualsWithResource(p: Property, value: Resource, graph: NamedGraph) =
     s"SELECT ?s ($p as ?p) ($value as ?o) FROM NAMED $graph WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p $value}"

@@ -6,6 +6,13 @@ function redirect(url) {
 window.location.href = url.url;
 }
 
+function reload(data) {
+    window.location.reload(true);
+}
+
+function deleteStudent(id) {
+    ajaxRequest("/administration/students", "DELETE", "application/json", {id: id}, reload);
+}
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

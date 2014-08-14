@@ -13,16 +13,13 @@ case class Student(
                     phone: String, degree: String)
 
 
-
-
 object Students {
-
 
 
   import utils.Global._
   import utils.semantic.Vocabulary._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.ExecutionContext.Implicits.global
 
 
   def create(student: Student): Future[Individual] = Future {
@@ -42,8 +39,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
     Individual(resource)
   }
 
-  def delete(uid: String) = {
-
+  def delete(uid: String): Unit = {
+    val maybeUserQuery = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.systemId, Literal(uid))
+    val studentResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeUserQuery)).map(student => student.s)
+    studentResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
 
   def all(): Future[Seq[Individual]] = Future {

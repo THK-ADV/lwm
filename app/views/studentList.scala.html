@@ -21,7 +21,7 @@
                     <td>@student.props(Vocabulary.FOAF.firstName)</td>
                     <td>@student.props(Vocabulary.LWM.hasEnrollment)</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td><a class="glyphicon glyphicon-remove"></a></td>
+                    <td><a href="javascript: deleteStudent('@student.props(Vocabulary.LWM.systemId)')" class="glyphicon glyphicon-remove" ></a></td>
                 </tr>
             }
         </table>

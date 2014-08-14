@@ -38,7 +38,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
       for{
         students <- Students.all()
       } yield{
-        println(students)
         Ok(views.html.studentManagement(students.toList, UserForms.studentForm))
       }
     }
