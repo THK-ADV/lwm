@@ -1,4 +1,4 @@
-@(students: List[Individual], form: Form[Student])
+@(students: List[Individual], studentInput: Form[Student])
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary
 
@@ -10,14 +10,12 @@
         @head()
     </head>
     <body>
-
         @header_loggedIn_admin()
         @navigation_admin()
-        <div id = "studentsList">
-           @studentList(students)
-        </div>
-        <div id="studentsForm">
-            @studentForm(form)
+        <div class="container-fluid">
+            <div id="studentsList">
+            @studentList(students)
+            </div>
         </div>
         @footerAdmin()
     </body>

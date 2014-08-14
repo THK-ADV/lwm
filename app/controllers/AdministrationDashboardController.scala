@@ -9,7 +9,7 @@ object AdministrationDashboardController extends Controller with Authentication{
 
   def dashboard = hasPermissions(Permissions.AdminRole.permissions.toList : _*){session =>
     Action {
-      Ok(views.html.dashboardAdmin(List.empty, List.empty, DateTime.now()))
+      Ok(views.html.dashboard_admin(List.empty, List.empty, DateTime.now()))
     }
   }
 }

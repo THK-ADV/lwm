@@ -17,6 +17,8 @@ case class Student(
 
 object Students {
 
+
+
   import utils.Global._
   import utils.semantic.Vocabulary._
 
@@ -38,6 +40,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
     Individual(resource)
+  }
+
+  def delete(uid: String) = {
+
   }
 
   def all(): Future[Seq[Individual]] = Future {

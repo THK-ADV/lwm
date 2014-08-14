@@ -9,16 +9,19 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
     </head>
     <body>
-    @helper.form(action = routes.UserManagement.userFirstTimeSelf()) {
-        @helper.inputText(form("id"),'readonly -> "readonly")
-        @helper.inputText(form("firstname"))
-        @helper.inputText(form("lastname"))
-        @helper.inputText(form("email"))
-        @helper.inputText(form("phone"))
+        <div class="container-fluid">
+        @helper.form(action = routes.UserManagement.userFirstTimeSelf()) {
+            @helper.inputText(form("id"), 'readonly -> "readonly")
+            @helper.inputText(form("firstname"))
+            @helper.inputText(form("lastname"))
+            @helper.inputText(form("email"))
+            @helper.inputText(form("phone"))
 
-        <div class="form-actions">
-            <button type="submit">Submit</button>
+            <div class="form-actions">
+                <button type="submit">Submit</button>
+            </div>
+        }
         </div>
-    }
+
     </body>
 </html>

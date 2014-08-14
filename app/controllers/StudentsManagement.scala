@@ -80,4 +80,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
       )
     }
   }
+
+  def studentRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+    Action.async(parse.json) { implicit request =>
+      for{
+        students <- Students.all()
+      } yield{
+        val id = (request.body \ "id").as[String]
+        Students.delete(id)
+        Ok(views.html.studentManagement(students.toList, UserForms.studentForm))
+      }
+    }
+  }
 }

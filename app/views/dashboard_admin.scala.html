@@ -11,10 +11,9 @@
     <body>
         @header_loggedIn_admin()
         @navigation_admin()
-        <div>
+        <div class="container-fluid">
             @dashboard_admin_dates(datesToday, datesTomorrow, today)
-            overview content:
-            - upcoming events / meetings
+            @dashboard_admin_emails()
         </div>
         @footerAdmin()
     </body>

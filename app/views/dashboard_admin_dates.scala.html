@@ -3,13 +3,36 @@
 @import utils.semantic.Vocabulary
 @import utils.semantic.Individual
 
-<div>
-    <div>
+<div class="row">
+    <div class="col-md-4">
         <h3>Heute, @today.toString("dd.MM.yyyy")</h3>
-        <div>
-            <ul>
+        <div class="well">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div>
+                        AP1, AI, Gruppe A, 9:15-11:30, 2110, Münster
+                    </div>
+                </li>
+
+                <li class="list-group-item">
+                    <div>
+                        AP1, AI, Gruppe B, 9:15-11:30, 2109, Giacinto
+                    </div>
+                </li>
+
+                <li class="list-group-item">
+                    <div>
+                        AP1, AI, Gruppe C, 11:45-13:30, 2110, Münster
+                    </div>
+                </li>
+
+                <li class="list-group-item">
+                    <div>
+                        AP1, AI, Gruppe D, 11:45-13:30, 2109, Krischer
+                    </div>
+                </li>
             @for(individual <- datesToday) {
-                <li>
+                <li class="list-group-item">
                     <div>
 
                     </div>
@@ -18,12 +41,22 @@
             </ul>
         </div>
     </div>
-    <div>
+    <div class="col-md-4">
         <h3>Morgen, @today.plusDays(1).toString("dd.MM.yyyy")</h3>
-        <div>
-            <ul>
+        <div class="well">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div>
+                        AP1, MI, Gruppe A, 9:15-11:30, 2109, Münster
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div>
+                        AP1, MI, Gruppe B, 9:15-11:30, 2110, Dobrynin
+                    </div>
+                </li>
             @for(individual <- datesTomorrow) {
-                <li>
+                <li class="list-group-item">
                     <div>
 
                     </div>
