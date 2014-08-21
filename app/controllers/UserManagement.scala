@@ -27,7 +27,6 @@ object UserManagement extends Controller with Authentication {
     Action { implicit request =>
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors => {
-          println(s"Errors: $formWithErrors")
           BadRequest(views.html.firstTimeInputUser(formWithErrors))
         },
         user => {

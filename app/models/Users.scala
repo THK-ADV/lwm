@@ -56,7 +56,7 @@ object Users{
     val statements = List(
       Statement(resource, RDF.typ, LWM.User),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.systemId, Literal(user.id)),
+      Statement(resource, LWM.hasGmId, Literal(user.id)),
       Statement(resource, FOAF.firstName, Literal(user.firstname)),
       Statement(resource, FOAF.lastName, Literal(user.lastname)),
       Statement(resource, NCO.phoneNumber, Literal(user.phone)),
@@ -70,5 +70,5 @@ object Users{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.User))).map(user => Individual(user.s))
   }
 
-  def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.systemId} ${Literal(uid).toQueryString}}")
+  def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 }

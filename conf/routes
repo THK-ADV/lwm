@@ -18,6 +18,13 @@ POST          /administration/students                     controllers.StudentsM
 DELETE        /administration/students                     controllers.StudentsManagement.studentRemoval()
 
 GET           /administration/labworks                     controllers.LabworkManagementController.index()
+POST          /administration/labworks                     controllers.LabworkManagementController.labWorkPost()
+
+GET           /administration/degrees                      controllers.DegreeManagementController.index()
+POST          /administration/degrees                      controllers.DegreeManagementController.degreePost()
+
+GET           /administration/courses                      controllers.CourseManagementController.index()
+POST          /administration/courses                      controllers.CourseManagementController.coursePost()
 
 
 GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()

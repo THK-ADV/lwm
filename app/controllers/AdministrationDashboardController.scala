@@ -4,6 +4,7 @@ import javax.mail.Message
 
 import actors.EmailHandler
 import actors.EmailHandler.EmailResponse
+import akka.util.Timeout
 import org.joda.time.DateTime
 import play.api.libs.concurrent.Promise
 import play.api.mvc.{Action, Controller}
@@ -20,6 +21,7 @@ object AdministrationDashboardController extends Controller with Authentication{
   import utils.Global._
 
   private val emailHandler = Akka.system.actorSelection("user/emails")
+  implicit val timeout = Timeout(30.seconds)
 
   def dashboard = hasPermissions(Permissions.AdminRole.permissions.toList : _*){session =>
     Action.async { implicit request =>

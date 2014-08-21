@@ -24,14 +24,9 @@ object Global extends GlobalSettings {
   val lwmNamespace = Namespace("http://lwm.gm.fh-koeln.de/")
 
   override def onStart(app: Application) {
-
-
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
     Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
-
-
-
     Logger.info("Application has started")
   }
 

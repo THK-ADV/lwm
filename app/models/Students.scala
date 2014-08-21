@@ -27,7 +27,7 @@ object Students {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Student),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.systemId, Literal(student.gmId)),
+      Statement(resource, LWM.hasGmId, Literal(student.gmId)),
       Statement(resource, FOAF.firstName, Literal(student.firstname)),
       Statement(resource, FOAF.lastName, Literal(student.lastname)),
       Statement(resource, NCO.phoneNumber, Literal(student.phone)),
@@ -40,7 +40,7 @@ object Students {
   }
 
   def delete(uid: String): Unit = {
-    val maybeUserQuery = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.systemId, Literal(uid))
+    val maybeUserQuery = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.hasGmId, Literal(uid))
     val studentResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeUserQuery)).map(student => student.s)
     studentResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
@@ -49,6 +49,6 @@ object Students {
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Student))).map(student => Individual(student.s))
   }
 
-  def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.systemId} ${Literal(uid).toQueryString}}")
+  def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 }
 

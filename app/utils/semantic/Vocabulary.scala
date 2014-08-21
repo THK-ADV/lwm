@@ -17,6 +17,10 @@ object Vocabulary {
     val Student = resource("Student")
     val User = resource("User")
     val Degree = resource("Degree")
+    val Course = resource("Course")
+    val LabWork = resource("LabWork")
+    val Group = resource("Group")
+
     val AutomationITMaster = resource("AutomationITMaster")
     val BusinessAdministrationAndEngineeringBachelor = resource("BusinessAdministrationAndEngineeringBachelor")
     val BusinessInformationSystemsBachelor = resource("BusinessInformationSystemsBachelor")
@@ -35,11 +39,19 @@ object Vocabulary {
 
 
     val registrationId = property("hasRegistrationId")
-    val systemId = property("hasSystemId")
-    val isSystemIdFor = property("isSystemIdFor")
+    val hasGmId = property("hasGmId")
+    val isGmIdFor = property("isGmIdFor")
     val isRegistrationIdFor = property("isRegistrationIdFor")
 
     val hasEnrollment = property("hasEnrollment")
+
+    val hasId = property("hasId")
+    val hasName = property("hasName")
+    val hasGroup = property("hasGroup")
+    val hasMember = property("hasMember")
+    val memberOf = property("memberOf")
+    val hasDegree = property("hasDegree")
+    val hasSchedule = property("hasSchedule")
 
 
   }
