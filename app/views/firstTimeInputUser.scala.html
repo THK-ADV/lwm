@@ -3,25 +3,21 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>First Time Setup</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    </head>
-    <body>
-        <div class="container-fluid">
-        @helper.form(action = routes.UserManagement.userFirstTimeSelf()) {
-            @helper.inputText(form("id"), 'readonly -> "readonly")
-            @helper.inputText(form("firstname"))
-            @helper.inputText(form("lastname"))
-            @helper.inputText(form("email"))
-            @helper.inputText(form("phone"))
 
-            <div class="form-actions">
-                <button type="submit">Submit</button>
-            </div>
-        }
-        </div>
+    @head("First Time Setup")
+        <body>
+            <div class="container-fluid">
+            @helper.form(action = routes.UserManagement.userFirstTimeSelf()) {
+                @helper.inputText(form("id"), 'readonly -> "readonly")
+                @helper.inputText(form("firstname"))
+                @helper.inputText(form("lastname"))
+                @helper.inputText(form("email"))
+                @helper.inputText(form("phone"))
 
-    </body>
+                <div class="form-actions">
+                    <button type="submit">Submit</button>
+                </div>
+            }
+</div>
+</body>
 </html>

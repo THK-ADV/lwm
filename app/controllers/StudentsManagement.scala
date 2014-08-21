@@ -5,7 +5,6 @@ import actors.SessionHandler.{Invalid, Valid}
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import controllers.SessionManagement._
-import controllers.UserManagement._
 import models.{Users, Students, UserForms}
 import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka

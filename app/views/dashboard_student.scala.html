@@ -1,10 +1,7 @@
 @(openCourses: List[Course], courseApplicationForm: Form[CourseApplication])
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Dashboard</title>
-        @head()
-    </head>
+    @head("Dashboard")
     <body>
         @header_loggedIn_student()
     <div class="container-fluid">

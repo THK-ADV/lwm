@@ -1,22 +1,26 @@
-@(users: List[Individual], form: Form[User])
+@(users: List[Individual])
 @import utils.semantic.Individual
 
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>Studentenverwaltung</title>
-        @head()
-    </head>
+   @head("Nutzerverwaltung")
     <body>
+        <div class="container" id="everything">
+        <div class="row">
         @header_loggedIn_admin()
-        @navigation_admin()
-        <div id = "studentsList">
-            @userList(users)
         </div>
-        <div id="studentsForm">
-            @userForm(form)
+        <div class="row">
+            @navigation_admin()
+            <div class="col-md-8">
+                @userList(users)
+            </div>
         </div>
+
+        <div class="row">
         @footerAdmin()
+        </div>
+            </div>
     </body>
 </html>
+

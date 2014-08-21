@@ -6,7 +6,7 @@ import scala.concurrent.Future
 
 
 case class Student(
-                    id: String,
+                    gmId: String,
                     firstname: String, lastname: String,
                     registrationNumber: String,
                     email: String,
@@ -27,7 +27,7 @@ object Students {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Student),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.systemId, Literal(student.id)),
+      Statement(resource, LWM.systemId, Literal(student.gmId)),
       Statement(resource, FOAF.firstName, Literal(student.firstname)),
       Statement(resource, FOAF.lastName, Literal(student.lastname)),
       Statement(resource, NCO.phoneNumber, Literal(student.phone)),

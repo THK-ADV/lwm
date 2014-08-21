@@ -1,7 +1,8 @@
 package controllers
 
 import akka.util.Timeout
-import models.{UserForms, Users}
+import controllers.LabworkManagementController._
+import models.{Students, UserForms, Users}
 import play.api.mvc.{Action, Controller}
 import play.libs.Akka
 import utils.Security.Authentication
@@ -14,6 +15,12 @@ object UserManagement extends Controller with Authentication {
   import scala.concurrent.duration._
 
   private implicit val timeout = Timeout(5.seconds)
+
+  def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+    Action.async { request =>
+      Future.successful(Ok(views.html.userManagement(Nil)))
+    }
+  }
 
 
   def userFirstTimeSelf = hasSession { session =>
@@ -36,7 +43,7 @@ object UserManagement extends Controller with Authentication {
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors => {
           for (all <- Users.all()) yield {
-            BadRequest(views.html.userManagement(all.toList, formWithErrors))
+            BadRequest(views.html.userManagement(all.toList))
           }
         },
         user => {

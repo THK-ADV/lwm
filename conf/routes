@@ -8,13 +8,16 @@ GET           /login                                       controllers.Applicati
 POST          /api/sessions                                controllers.SessionManagement.login
 DELETE        /api/sessions                                controllers.SessionManagement.logout
 
+GET           /administration/users                        controllers.UserManagement.index()
 POST          /administration/users                        controllers.UserManagement.userPost()
 
 GET           /administration/dashboard                    controllers.AdministrationDashboardController.dashboard()
 
 GET           /administration/students                     controllers.StudentsManagement.index()
 POST          /administration/students                     controllers.StudentsManagement.studentPost()
-DELETE        /administration/students                      controllers.StudentsManagement.studentRemoval()
+DELETE        /administration/students                     controllers.StudentsManagement.studentRemoval()
+
+GET           /administration/labworks                     controllers.LabworkManagementController.index()
 
 
 GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()

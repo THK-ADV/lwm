@@ -5,19 +5,22 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>Studentenverwaltung</title>
-        @head()
-    </head>
+    @head("Studentenverwaltung")
     <body>
+        <div class="container" id="everything">
+        <div class="row">
         @header_loggedIn_admin()
-        <div class="container">
-            <div id="studentsList">
+        </div>
+        <div class="row">
+            @navigation_admin()
+            <div id="studentsList" class="col-md-8">
             @studentList(students)
             </div>
         </div>
-        @navigation_admin()
 
-        @footerAdmin()
+
+        <div class="row">@footerAdmin()</div>
+            </div>
     </body>
 </html>
+

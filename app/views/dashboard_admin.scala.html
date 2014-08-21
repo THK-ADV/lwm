@@ -6,8 +6,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Administration Dashboard</title>
-            @head()
+            @head("Administration Dashboard")
     </head>
     <body>
         <div class="container" id="everything">
@@ -15,12 +14,11 @@
             @header_loggedIn_admin()
            </div>
             <div class="row">
-                <div class="col-md-3">@navigation_admin()</div>
+                @navigation_admin()
                 <div class="col-md-9">
                     @dashboard_admin_dates(datesToday, datesTomorrow, today)
                     @dashboard_admin_emails(messages)
                 </div>
-
             </div>
             <div class="row">@footerAdmin()</div>
         </div>
