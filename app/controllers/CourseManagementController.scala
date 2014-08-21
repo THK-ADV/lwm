@@ -24,17 +24,17 @@ object CourseManagementController extends Controller with Authentication{
 
   def coursePost() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async { implicit request =>
-      DegreeForms.degreeForm.bindFromRequest.fold(
+      CourseForms.courseForm.bindFromRequest.fold(
         formWithErrors => {
           for {
             degrees <- Degrees.all()
           } yield {
-            BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors))
+            BadRequest(views.html.courseManagement(degrees.toList, formWithErrors))
           }
         },
-        degree => {
-          Degrees.create(degree)
-          Future.successful(Redirect(routes.DegreeManagementController.index()))
+        course => {
+          Courses.create(course)
+          Future.successful(Redirect(routes.CourseManagementController.index()))
         }
       )
     }
