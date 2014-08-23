@@ -25,7 +25,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
     def onUnauthorized(request: RequestHeader) = {
-      println("Redirecting to index")
       Results.Redirect(routes.Application.index)
     }
 
