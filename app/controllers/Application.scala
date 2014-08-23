@@ -38,15 +38,13 @@ object Application extends Controller with Authentication{
       case None =>
         Future.successful(Ok(views.html.login(UserForms.loginForm)))
       case Some(id) =>
-        val responseFut = (sessionsHandler ? SessionHandler.SessionValidationRequest(id)).mapTo[SessionHandler.ValidationResponse]
-
         for {
-          response <- responseFut
+          response <- sessionsHandler ? SessionHandler.SessionValidationRequest(id)
         } yield {
           response match {
             case Valid(session) =>
               Redirect(routes.Application.index())
-            case Invalid =>
+            case _ =>
               Ok(views.html.login(UserForms.loginForm))
           }
         }

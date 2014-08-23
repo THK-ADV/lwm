@@ -24,19 +24,24 @@ import scala.concurrent.ExecutionContext.Implicits.global
     private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
 
-    def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.index)
+    def onUnauthorized(request: RequestHeader) = {
+      println("Redirecting to index")
+      Results.Redirect(routes.Application.index)
+    }
+
 
 
     def hasSession(action: SessionHandler.Session => EssentialAction): EssentialAction = EssentialAction { requestHeader =>
       val maybeToken = requestHeader.session.get("session")
       val maybeIteratee = maybeToken map { token =>
-        val responseFut = (sessionsHandler ? SessionHandler.SessionValidationRequest(token)).mapTo[SessionHandler.ValidationResponse]
         val sessionFuture = for {
-          response <- responseFut
+          response <- sessionsHandler ? SessionHandler.SessionValidationRequest(token)
         } yield {
           response match {
-            case Valid(session) => Some(session)
-            case Invalid => None
+            case Valid(session) =>
+              Some(session)
+            case _ =>
+              None
           }
         }
 

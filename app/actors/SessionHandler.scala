@@ -25,10 +25,9 @@ object SessionHandler {
 
   case class SessionValidationRequest(id: String)
 
-  trait ValidationResponse
-  case class Valid(session: Session) extends ValidationResponse
+  case class Valid(session: Session)
 
-  case object Invalid extends ValidationResponse
+  case object Invalid
 
   def props(config: Configuration) = Props(new SessionHandler(config))
 }
