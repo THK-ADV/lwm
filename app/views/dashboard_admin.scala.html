@@ -1,0 +1,26 @@
+@(datesToday: List[Individual], datesTomorrow: List[Individual], today: DateTime, messages: List[Message])
+@import org.joda.time.DateTime
+@import javax.mail.Message
+@import utils.semantic.Individual
+
+<!DOCTYPE html>
+<html>
+    @head("Administration Dashboard")
+    <body>
+        <div class="container" id="everything">
+           <div class="row">
+            @header_loggedIn_admin()
+           </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    @dashboard_admin_dates(datesToday, datesTomorrow, today)
+                    @dashboard_admin_emails(messages)
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>
+
+

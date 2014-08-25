@@ -1,0 +1,26 @@
+@(users: List[Individual])
+@import utils.semantic.Individual
+
+<!DOCTYPE html>
+
+<html>
+   @head("Nutzerverwaltung")
+    <body>
+        <div class="container" id="everything">
+        <div class="row">
+        @header_loggedIn_admin()
+        </div>
+        <div class="row">
+            @navigation_admin()
+            <div class="col-md-8">
+                @userList(users)
+            </div>
+        </div>
+
+        <div class="row">
+        @footerAdmin()
+        </div>
+            </div>
+    </body>
+</html>
+

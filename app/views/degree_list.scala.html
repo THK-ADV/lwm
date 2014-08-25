@@ -1,0 +1,24 @@
+@(degrees: List[Individual])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
+
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">Studiengangsübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>ID</th>
+        </tr>
+        @for(degree <- degrees) {
+            <tr>
+                <td>@degree.props(Vocabulary.LWM.hasName)</td>
+                <td>@degree.props(Vocabulary.LWM.hasId)</td>
+                <td><a class="glyphicon glyphicon-pencil"></a></td>
+            </tr>
+        }
+    </table>
+
+</div>

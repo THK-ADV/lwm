@@ -1,0 +1,24 @@
+@(courses: List[Individual])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
+
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">Veranstaltungsübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>ID</th>
+        </tr>
+        @for(course <- courses) {
+            <tr>
+                <td>@course.props(Vocabulary.LWM.hasName)</td>
+                <td>@course.props(Vocabulary.LWM.hasId)</td>
+                <td><a class="glyphicon glyphicon-pencil"></a></td>
+            </tr>
+        }
+    </table>
+
+</div>

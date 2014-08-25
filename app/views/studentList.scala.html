@@ -1,0 +1,30 @@
+@(students: List[Individual])
+    @import utils.semantic.Individual
+    @import utils.semantic.Vocabulary
+
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Studentenübersicht</div>
+
+        <table class="table">
+            <tr>
+                <th>GM ID</th>
+                <th>Nachname</th>
+                <th>Vorname</th>
+                <th>Studiengang</th>
+            </tr>
+            @for(student <- students) {
+                <tr>
+                    <td>@student.props(Vocabulary.LWM.hasGmId)</td>
+                    <td>@student.props(Vocabulary.FOAF.lastName)</td>
+                    <td>@student.props(Vocabulary.FOAF.firstName)</td>
+                    <td>@student.props(Vocabulary.LWM.hasEnrollment)</td>
+                    <td><a class="glyphicon glyphicon-pencil"></a></td>
+                    <td><a href="javascript: deleteStudent('@student.props(Vocabulary.LWM.hasGmId)')" class="glyphicon glyphicon-remove" ></a></td>
+                </tr>
+            }
+        </table>
+
+    </div>
+

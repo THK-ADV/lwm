@@ -1,0 +1,12 @@
+@(openCourses: List[LabWork], courseApplicationForm: Form[LabWorkApplication])
+<!DOCTYPE html>
+<html>
+    @head("Dashboard")
+    <body>
+        @header_loggedIn_student()
+    <div class="container-fluid">
+        @dashboard_student_classEnrolement()
+    </div>
+        @footer()
+    </body>
+</html>

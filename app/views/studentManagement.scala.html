@@ -1,0 +1,26 @@
+@(students: List[Individual], studentInput: Form[Student])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
+
+<!DOCTYPE html>
+
+<html>
+    @head("Studentenverwaltung")
+    <body>
+        <div class="container" id="everything">
+        <div class="row">
+        @header_loggedIn_admin()
+        </div>
+        <div class="row">
+            @navigation_admin()
+            <div id="studentsList" class="col-md-8">
+            @studentList(students)
+            </div>
+        </div>
+
+
+        <div class="row">@footerAdmin()</div>
+            </div>
+    </body>
+</html>
+

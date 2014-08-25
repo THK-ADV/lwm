@@ -1,0 +1,36 @@
+@(messages: List[Message])
+@import javax.mail.internet.InternetAddress
+@import javax.mail.Message
+
+<div class="row">
+    <div class="panel panel-default col-md-9">
+        <div class="panel-heading">Eingegangene Emails</div>
+
+        <table class="table">
+            <tr>
+                <th>From</th>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Text</th>
+            </tr>
+            @for(message <- messages) {
+                <tr>
+                    <td>@message.getFrom()(0).asInstanceOf[InternetAddress]</td>
+                    <td>@message.getReceivedDate</td>
+                    <td>@message.getSubject</td>
+                    <td>
+                    @{
+                        val cType = message.getContentType
+                        if(cType.equalsIgnoreCase("text/html") || cType.equalsIgnoreCase("text/plain")) {
+                            message.getContent.asInstanceOf[String]
+                        } else {
+                            "multipart"
+                        }
+                    }
+                    </td>
+                </tr>
+            }
+        </table>
+
+    </div>
+</div>

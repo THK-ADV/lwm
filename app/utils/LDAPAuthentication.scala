@@ -1,6 +1,5 @@
-package util
+package utils
 
-import com.typesafe.config.ConfigFactory
 import com.unboundid.ldap.sdk._
 import com.unboundid.util.ssl.{SSLUtil, TrustAllTrustManager}
 import org.slf4j.LoggerFactory
@@ -69,6 +68,30 @@ object LDAPAuthentication {
     }
   }
 
+  def getName(user: String, bindHost: String, bindPort: Int, dn: String): Future[Either[String, Option[(String, String)]]] = Future {
+    bind(bindHost, bindPort, dn, "") {
+      connection =>
+        try {
+          import scala.collection.JavaConverters._
+          val results = connection.search(dn, SearchScope.SUB, s"(uid=$user)", "sn", "givenName").getSearchEntries.asScala
+
+          if (results.size == 1) {
+            val sn = results.head.getAttribute("sn").getValue
+            val givenName = results.head.getAttribute("givenName").getValue
+            Right(Some((givenName, sn)))
+          } else {
+            Right(None)
+          }
+        } catch {
+          case e: LDAPException => Left(e.getMessage)
+        } finally {
+          connection.close()
+        }
+    }
+  }
+
+  def nameInfo(user: String, bindHost: String, bindPort: Int, dn: String): Future[Either[String, String]] = ???
+
   /**
    * Establishes a connection with the LDAP Server and runs an arbitrary function.
    * @param host the host of the LDAP server
@@ -80,8 +103,8 @@ object LDAPAuthentication {
    * @tparam A the return value when the function was successfully executed
    * @return the result of the function f
    */
-  private def bind[A](host: String, port: Int, dn: String, password: String, ssl: Boolean = true)
-                     (f: LDAPConnection => Either[String, A]): Either[String, A] = {
+  def bind[A](host: String, port: Int, dn: String, password: String, ssl: Boolean = true)
+             (f: LDAPConnection => Either[String, A]): Either[String, A] = {
     if (ssl) {
       val sslContext = sslUtil.createSSLContext("SSLv3")
       val connection = new LDAPConnection(sslContext.getSocketFactory)

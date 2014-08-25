@@ -1,0 +1,39 @@
+@(labWorks: List[Individual], degrees: List[Individual], courses: List[Individual], form: Form[LabWork])
+@import utils.semantic.Individual
+<!DOCTYPE html>
+<html>
+    <head>
+    @head("Praktikumsverwaltung")
+    </head>
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+            <div class="col-md-9">
+                    <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
+
+                    </button>
+
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">Neues Praktikum hinzufügen</h4>
+                                </div>
+                                <div class="modal-body">
+                                    @labwork_management_form(degrees, courses, form)
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

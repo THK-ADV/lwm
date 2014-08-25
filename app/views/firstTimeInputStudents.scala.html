@@ -1,0 +1,39 @@
+@(form: Form[Student])
+
+<!DOCTYPE html>
+
+<html>
+    @head("First Time Setup")
+    <body>
+    <div class="container-fluid">
+        @import utils.semantic.Vocabulary
+
+        @helper.form(action = routes.StudentsManagement.studentFirstTimeSelf()) {
+            @helper.inputText(form("id"),'readonly -> "readonly", '_label -> "ADV Kennung")
+            @helper.inputText(form("registrationNumber"), '_label -> "Matrikelnummer")
+            @helper.inputText(form("firstname"), '_label -> "Vorname")
+            @helper.inputText(form("lastname"), '_label -> "Nachname")
+            @helper.inputText(form("email"), '_label -> "Email")
+            @helper.inputText(form("phone"), '_label -> "Telefon")
+            @helper.select(form("degree"), Map(
+                Vocabulary.LWM.AutomationITMaster.value -> "Automation & IT (Master's program)",
+                Vocabulary.LWM.BusinessAdministrationAndEngineeringBachelor.value -> "Business Administration and Engineering (Bachelor's program)",
+                Vocabulary.LWM.BusinessInformationSystemsBachelor.value -> "Business Information Systems (Bachelor's program)",
+                Vocabulary.LWM.BusinessInformationSystemsBachelorJoint.value -> "Business Information Systems (Bachelor's program / Joint Degree Program)",
+                Vocabulary.LWM.BusinessInformationSystemsMasterJoint.value -> "Business Information Systems (Joint Master's program)",
+                Vocabulary.LWM.ComputerEngineeringBachelor.value -> "Computer Engineering (Bachelor's program)",
+                Vocabulary.LWM.ComputerScienceBachelor.value -> "Computer Science (Bachelor's program)",
+                Vocabulary.LWM.ComputerScienceMaster.value -> "Computer Science (Master's program)",
+                Vocabulary.LWM.ElectricalEngineeringBachelor.value -> "Electrical Engineering (Bachelor's program)",
+                Vocabulary.LWM.GeneralMechanicalEngineeringBachelor.value -> "General Mechanical Engineering (Bachelor's program)",
+                Vocabulary.LWM.MediaInformaticsBachelor.value -> "Media Informatics (Bachelor's program)",
+                Vocabulary.LWM.MediaInformaticsMaster.value -> "Media Informatics (Master's program)",
+                Vocabulary.LWM.WebScienceMaster.value -> "Web Science (Master's program)"
+            ).toSeq, '_label -> "Studiengang")
+            <div class="form-actions">
+                <button type="submit">Abschicken</button>
+            </div>
+        }
+    </div>
+    </body>
+</html>
