@@ -1,0 +1,26 @@
+@(time: List[String], labwork: LabWork, entries: List[TimetableEntry])
+
+<div class= "panel panel-default">
+<table class="table table-bordered">
+    <thead>
+        <tr><h4>@labwork.name @labwork.semester</h4></tr>
+    </thead>
+    <tbody>
+        <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>
+                            Saturday</th></tr>
+
+        @for(t <- time) {
+            <tr>
+                <td>@t</td>
+                <td>@tableRow(t, "monday", entries)</td>
+                <td>@tableRow(t, "tuesday", entries)</td>
+                <td>@tableRow(t, "wednesday", entries)</td>
+                <td>@tableRow(t, "thursday", entries)</td>
+                <td>@tableRow(t, "friday", entries)</td>
+                <td>@tableRow(t, "saturday", entries)</td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+</div>

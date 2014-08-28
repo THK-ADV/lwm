@@ -7,6 +7,9 @@ import utils.semantic._
 import scala.concurrent.Future
 
 
+
+
+
 case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
@@ -52,6 +55,7 @@ object LabWorks {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, LWM.hasId, Literal(labWork.id)),
       Statement(resource, LWM.hasName, Literal(labWork.name)),
+
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
       Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
@@ -67,7 +71,6 @@ object LabWorks {
       )
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  groupStatements: _*))
     }
-
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*))
 
     Individual(resource)
@@ -131,6 +134,8 @@ object LabworkGroups{
     groupResources.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
   def all(): Future[Seq[Individual]] = Future{
+
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Group))).map(group => Individual(group.s))
+
   }
 }
