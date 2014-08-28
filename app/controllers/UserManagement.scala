@@ -18,7 +18,7 @@ object UserManagement extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
     Action.async { request =>
-      Future.successful(Ok(views.html.userManagement(Nil)))
+     for(users <- Users.all()) yield Ok(views.html.userManagement(users.toList))
     }
   }
 

@@ -2,9 +2,7 @@
 @import utils.semantic.Individual
 <!DOCTYPE html>
 <html>
-    <head>
     @head("Praktikumsverwaltung")
-    </head>
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -13,6 +11,7 @@
             <div class="row">
                 @navigation_admin()
             <div class="col-md-9">
+                    @labwork_list(labWorks)
                     <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                     </button>

@@ -1,0 +1,34 @@
+@(labworks: List[Individual])
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Individual
+@import utils.semantic.Resource
+@import utils.semantic.Vocabulary
+@import utils.Global._
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">Nutzerübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Veranstaltung</th>
+            <th>Studiengang</th>
+            <th>Gruppenanzahl</th>
+            <th>Aufgabenanzahl</th>
+        </tr>
+        @for(labwork <- labworks) {
+            <tr>
+                <td>@labwork.props(Vocabulary.LWM.hasName).headOption.getOrElse("")</td>
+                <td>@Individual(Resource(labwork.props(Vocabulary.LWM.hasCourse).head.value)).props(LWM.hasName).headOption.getOrElse("")</td>
+                <td>@Individual(Resource(labwork.props(Vocabulary.LWM.hasDegree).head.value)).props(LWM.hasName).headOption.getOrElse("")</td>
+                <td>@labwork.props(Vocabulary.LWM.hasGroup).size</td>
+                <td>@labwork.props(Vocabulary.LWM.hasAssignmentCount).headOption.getOrElse("0")</td>
+                <td><a class="glyphicon glyphicon-pencil"></a></td>
+                <td><a href="javascript: deleteLabwork('@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+            </tr>
+        }
+    </table>
+
+</div>
+

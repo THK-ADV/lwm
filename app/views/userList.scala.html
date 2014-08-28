@@ -2,13 +2,26 @@
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary
 
-<ul>
-@for(user <- users) {
-    <li>
-        <div>
-            <span class="studentlist_adv">@user.props(Vocabulary.LWM.hasGmId)</span>
-            <span class="studentlist_lastname">@user.props(Vocabulary.FOAF.lastName)</span>
-            <span class="studentlist_firstname">@user.props(Vocabulary.FOAF.firstName)</span>
-        </div>
-    </li>}
-</ul>
+
+<div class="panel panel-default">
+    <div class="panel-heading">Nutzerübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>GM ID</th>
+            <th>Nachname</th>
+            <th>Vorname</th>
+        </tr>
+        @for(user <- users) {
+            <tr>
+                <td>@user.props(Vocabulary.LWM.hasGmId).headOption.getOrElse("")</td>
+                <td>@user.props(Vocabulary.FOAF.lastName).headOption.getOrElse("")</td>
+                <td>@user.props(Vocabulary.FOAF.firstName).headOption.getOrElse("")</td>
+                <td><a class="glyphicon glyphicon-pencil"></a></td>
+                <td><a href="javascript: deleteUser('@user.props(Vocabulary.LWM.hasGmId).headOption.getOrElse("")')" class="glyphicon glyphicon-remove" ></a></td>
+            </tr>
+        }
+    </table>
+
+</div>
+
