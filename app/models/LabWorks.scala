@@ -6,7 +6,7 @@ import utils.semantic._
 
 import scala.concurrent.Future
 
-case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, classId: String, semester: String)
+case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
 
@@ -34,7 +34,7 @@ object LabWorkForms{
       "groupCount" -> number(min=1),
       "assignmentCount" -> number(min=1),
       "courseId" -> nonEmptyText,
-      "classId" -> nonEmptyText,
+      "degreeId" -> nonEmptyText,
       "semester" -> nonEmptyText
     )(LabWork.apply)(LabWork.unapply)
   )
@@ -58,7 +58,7 @@ object LabWorks {
       Statement(resource, LWM.hasName, Literal(labWork.name)),
       Statement(resource, LWM.hasName, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasName, Literal(labWork.courseId)),
-      Statement(resource, LWM.hasName, Literal(labWork.classId)),
+      Statement(resource, LWM.hasName, Literal(labWork.degreeId)),
       Statement(resource, LWM.hasName, Literal(labWork.semester))
     )
 
@@ -71,7 +71,6 @@ object LabWorks {
       )
 
     }
-
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
     Individual(resource)
   }
@@ -87,6 +86,6 @@ object LabWorks {
     courseResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
   def all(): Future[Seq[Individual]] = Future{
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Degree))).map(course => Individual(course.s))
+    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork))).map(labwork => Individual(labwork.s))
   }
 }
