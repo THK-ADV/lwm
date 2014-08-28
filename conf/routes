@@ -21,15 +21,15 @@ DELETE        /administration/students                     controllers.StudentsM
 GET           /administration/labworks                     controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                 controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks                     controllers.LabworkManagementController.labWorkPost()
-DELETE          /administration/labworks                     controllers.LabworkManagementController.labworkRemoval()
+DELETE        /administration/labworks                     controllers.LabworkManagementController.labworkRemoval()
 
 GET           /administration/degrees                      controllers.DegreeManagementController.index()
 POST          /administration/degrees                      controllers.DegreeManagementController.degreePost()
-DELETE        /administration/degrees                     controllers.DegreeManagementController.degreeRemoval()
+DELETE        /administration/degrees                      controllers.DegreeManagementController.degreeRemoval()
 
 GET           /administration/courses                      controllers.CourseManagementController.index()
 POST          /administration/courses                      controllers.CourseManagementController.coursePost()
-DELETE        /administration/courses                     controllers.CourseManagementController.courseRemoval()
+DELETE        /administration/courses                      controllers.CourseManagementController.courseRemoval()
 
 GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser           controllers.FirstTimeSetupController.setupUser()
@@ -42,7 +42,7 @@ GET           /student/dashboard                           controllers.StudentDa
 GET           /impressum                                   controllers.VisitorController.impressum()
 GET           /contact                                     controllers.VisitorController.contact()
 
-GET           /timetable                                   controllers.TimeTableController.index()
+GET           /administration/timetable                    controllers.TimeTableController.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                controllers.Assets.at(path="/public", file)
