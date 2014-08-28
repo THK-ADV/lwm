@@ -1,9 +1,10 @@
-@(time: String, day: String, entries: List[TimetableEntry])
+@(time: Time, day: Weekdays.Weekday, entries: List[TimetableSlot])
+@import utils.semantic.Vocabulary.RDFS
 
 
-@for(e <- entries.filter(entry => entry.day == day && entry.time == time)) {
-    <h6>Name: @e.name </h6>
-    <h6>Betreuer: <br> @for(s <- e.supervisors) { @s <br> }</h6>
+@for(e <- entries.filter(entry => entry.day == day && entry.startTime == time)) {
+    <h6>Name: @e.timetable.uri.value </h6>
+    <h6>Betreuer: <br> @for(s <- e.possibleTeachers) { @s <br> }</h6>
     <h6>Raum: @e.room </h6>
     <br>
 }

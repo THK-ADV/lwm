@@ -38,7 +38,9 @@ case class Time(hours: Int, minutes: Int) extends Ordered[Time]{
   override def toString = s"$hours:$minutes"
 }
 
-case class TimetableSlot(day: Weekdays.Weekday, startTime: Time, endTime: Time, possibleTeachers: List[Individual], timetable: Individual)
+/*add back later when individuals can be acquired*/
+//case class TimetableSlot(day: Weekdays.Weekday, startTime: Time, endTime: Time, possibleTeachers: List[Individual], timetable: Individual)
+case class TimetableSlot(day: Weekdays.Weekday, startTime: Time, endTime: Time, possibleTeachers: List[String], room: Room,timetable: Individual)
 
 case class Schedule()
 

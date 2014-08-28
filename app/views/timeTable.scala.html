@@ -1,4 +1,6 @@
-@(time: List[String], labwork: LabWork, entries: List[TimetableEntry])
+@(time: List[Time], labwork: LabWork, entries: List[TimetableSlot])
+
+
 
 <div class= "panel panel-default">
 <table class="table table-bordered">
@@ -12,12 +14,12 @@
         @for(t <- time) {
             <tr>
                 <td>@t</td>
-                <td>@tableRow(t, "monday", entries)</td>
-                <td>@tableRow(t, "tuesday", entries)</td>
-                <td>@tableRow(t, "wednesday", entries)</td>
-                <td>@tableRow(t, "thursday", entries)</td>
-                <td>@tableRow(t, "friday", entries)</td>
-                <td>@tableRow(t, "saturday", entries)</td>
+                <td>@tableRow(t, Weekdays.Monday, entries)</td>
+                <td>@tableRow(t, Weekdays.Tuesday, entries)</td>
+                <td>@tableRow(t, Weekdays.Wednesday, entries)</td>
+                <td>@tableRow(t, Weekdays.Thursday, entries)</td>
+                <td>@tableRow(t, Weekdays.Friday, entries)</td>
+                <td>@tableRow(t, Weekdays.Saturday, entries)</td>
             </tr>
         }
 
