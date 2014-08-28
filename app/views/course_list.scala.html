@@ -14,8 +14,8 @@
         </tr>
         @for(course <- courses) {
             <tr>
-                <td>@course.props(Vocabulary.LWM.hasName)</td>
-                <td>@course.props(Vocabulary.LWM.hasId)</td>
+                <td>@course.props(Vocabulary.LWM.hasName).headOption.getOrElse("")</td>
+                <td>@course.props(Vocabulary.LWM.hasId).headOption.getOrElse("")</td>
                 <td><a class="glyphicon glyphicon-pencil"></a></td>
             </tr>
         }

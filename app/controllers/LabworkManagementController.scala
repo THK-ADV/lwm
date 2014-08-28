@@ -22,6 +22,7 @@ object LabworkManagementController extends Controller with Authentication {
         degrees <- Degrees.all()
         labworks <- LabWorks.all()
       } yield {
+        println(labworks)
         Ok(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
       }
     }
@@ -36,7 +37,7 @@ object LabworkManagementController extends Controller with Authentication {
             courses <- Courses.all()
             degrees <- Degrees.all()
           } yield {
-            BadRequest(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
+            BadRequest(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, formWithErrors))
           }
         },
         labwork => {

@@ -67,9 +67,14 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
 
   lazy val statements = properties
 
-  lazy val props: Map[Property, RDFNode] = {
+  lazy val props: Map[Property, List[RDFNode]] = {
     val statements = properties
-    statements.map(s => s.p -> s.o).toMap.withDefaultValue(Literal(""))
+    val g = statements.map(s ⇒ s.p -> s.o).groupBy(_._1)
+    val l = g.map {
+      e ⇒
+        e._1 -> e._2.map(_._2)
+    }
+    l
   }
 
   /**

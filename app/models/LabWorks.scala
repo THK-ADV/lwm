@@ -17,6 +17,7 @@ case class LabWorkApplication(courseID: String, gmID: String)
  * @param students gmIds of the students
  */
 case class LabWorkGroup(groupID: String, courseID: String, students: List[String])
+// TODO course id should be courseResourceURI
 
 
 object LabWorkForms{
@@ -56,28 +57,29 @@ object LabWorks {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, LWM.hasId, Literal(labWork.id)),
       Statement(resource, LWM.hasName, Literal(labWork.name)),
-      Statement(resource, LWM.hasName, Literal(labWork.assignmentCount.toString)),
-      Statement(resource, LWM.hasName, Literal(labWork.courseId)),
-      Statement(resource, LWM.hasName, Literal(labWork.degreeId)),
-      Statement(resource, LWM.hasName, Literal(labWork.semester))
+      Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
+      Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
+      Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
+      Statement(resource, LWM.hasSemester, Literal(labWork.semester))
     )
-
-    for(i <- 0 until labWork.groupCount){
+    for(i <- 0 until labWork.groupCount) {
       val group = ResourceUtils.createResource(lwmNamespace)
-      val statements = List(
-        Statement(resource, RDF.typ, LWM.Group),
-        Statement(resource, RDF.typ, OWL.NamedIndividual),
-        Statement(resource, RDF.typ, OWL.NamedIndividual)
+      val groupStatements = List(
+        Statement(group, RDF.typ, LWM.Group),
+        Statement(group, RDF.typ, OWL.NamedIndividual),
+        Statement(resource, LWM.hasGroup, group)
       )
-
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  groupStatements: _*))
     }
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
+
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*))
+
     Individual(resource)
   }
 
-  def delete(degree: Degree) = {
-    val maybeDegree = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.hasId, Literal(degree.id))
-    val degreeResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeDegree)).map(course => course.s)
+  def delete(labwork: LabWork) = {
+    val maybeLabwork = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.hasId, Literal(labwork.id))
+    val degreeResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeLabwork)).map(labwork => labwork.s)
     degreeResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
   def delete(id: String) = {

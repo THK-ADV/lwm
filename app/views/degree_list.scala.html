@@ -14,8 +14,8 @@
         </tr>
         @for(degree <- degrees) {
             <tr>
-                <td>@degree.props(Vocabulary.LWM.hasName)</td>
-                <td>@degree.props(Vocabulary.LWM.hasId)</td>
+                <td>@degree.props(Vocabulary.LWM.hasName).headOption.getOrElse("")</td>
+                <td>@degree.props(Vocabulary.LWM.hasId).headOption.getOrElse("")</td>
                 <td><a class="glyphicon glyphicon-pencil"></a></td>
             </tr>
         }
