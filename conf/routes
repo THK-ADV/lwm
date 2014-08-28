@@ -10,6 +10,7 @@ DELETE        /api/sessions                                controllers.SessionMa
 
 GET           /administration/users                        controllers.UserManagement.index()
 POST          /administration/users                        controllers.UserManagement.userPost()
+DELETE        /administration/users                        controllers.UserManagement.userRemoval()
 
 GET           /administration/dashboard                    controllers.AdministrationDashboardController.dashboard()
 
@@ -18,14 +19,17 @@ POST          /administration/students                     controllers.StudentsM
 DELETE        /administration/students                     controllers.StudentsManagement.studentRemoval()
 
 GET           /administration/labworks                     controllers.LabworkManagementController.index()
+GET           /administration/labworks/:id                 controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks                     controllers.LabworkManagementController.labWorkPost()
+DELETE          /administration/labworks                     controllers.LabworkManagementController.labworkRemoval()
 
 GET           /administration/degrees                      controllers.DegreeManagementController.index()
 POST          /administration/degrees                      controllers.DegreeManagementController.degreePost()
+DELETE        /administration/degrees                     controllers.DegreeManagementController.degreeRemoval()
 
 GET           /administration/courses                      controllers.CourseManagementController.index()
 POST          /administration/courses                      controllers.CourseManagementController.coursePost()
-
+DELETE        /administration/courses                     controllers.CourseManagementController.courseRemoval()
 
 GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser           controllers.FirstTimeSetupController.setupUser()

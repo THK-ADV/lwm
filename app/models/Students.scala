@@ -45,6 +45,13 @@ object Students {
     studentResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
 
+  def delete(resource: Resource): Unit = {
+    val individual = Individual(resource)
+    if(individual.props(RDF.typ).contains(LWM.Student)){
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph))
+    }
+  }
+
   def all(): Future[Seq[Individual]] = Future {
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Student))).map(student => Individual(student.s))
   }

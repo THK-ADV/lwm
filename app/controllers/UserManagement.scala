@@ -6,6 +6,7 @@ import models.{Students, UserForms, Users}
 import play.api.mvc.{Action, Controller}
 import play.libs.Akka
 import utils.Security.Authentication
+import utils.semantic.Resource
 
 import scala.concurrent.Future
 
@@ -47,9 +48,23 @@ object UserManagement extends Controller with Authentication {
         },
         user => {
           Users.create(user)
-          Future.successful(Redirect(routes.StudentsManagement.index()))
+          Future.successful(Redirect(routes.UserManagement.index()))
         }
       )
     }
   }
+
+  def userRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+    Action.async(parse.json) { implicit request =>
+      for{
+        users <- Users.all()
+      } yield{
+        val id = (request.body \ "id").as[String]
+        Users.delete(Resource(id))
+        Ok(views.html.userManagement(users.toList))
+      }
+    }
+  }
+
+
 }

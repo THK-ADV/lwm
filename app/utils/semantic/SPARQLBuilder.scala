@@ -69,4 +69,12 @@ object SPARQLBuilder {
 
   def loadGraph(resource: Resource, graph: NamedGraph): String = s"LOAD $resource INTO GRAPH $graph"
 
+  def listIndividualsWithClassAndProperty(cls: Resource, prop: Property, value: RDFNode) =
+    s"""
+       |SELECT ?s (${rdf.typ} as ?p) ($cls as ?o) WHERE {
+       |?s ${rdf.typ} ${owl.NamedIndividual} .
+       |?s ${rdf.typ} $cls .
+       |?s $prop ${value.toQueryString}
+       |}
+       |""".stripMargin
 }

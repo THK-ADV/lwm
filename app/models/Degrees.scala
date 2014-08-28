@@ -38,11 +38,14 @@ object Degrees {
     val degreeResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeDegree)).map(course => course.s)
     degreeResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
   }
-  def delete(id: String) = {
-    val maybeCourse = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.hasId, Literal(id))
-    val courseResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeCourse)).map(course => course.s)
-    courseResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
+
+  def delete(resource: Resource): Unit = {
+    val individual = Individual(resource)
+    if(individual.props(RDF.typ).contains(LWM.Degree)){
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph))
+    }
   }
+
   def all(): Future[Seq[Individual]] = Future{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Degree))).map(course => Individual(course.s))
   }

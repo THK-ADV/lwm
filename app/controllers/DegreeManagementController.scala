@@ -3,6 +3,7 @@ package controllers
 import models._
 import play.api.mvc.{Action, Controller}
 import utils.Security.Authentication
+import utils.semantic.Resource
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -35,6 +36,18 @@ object DegreeManagementController extends Controller with Authentication{
           Future.successful(Redirect(routes.DegreeManagementController.index()))
         }
       )
+    }
+  }
+
+  def degreeRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+    Action.async(parse.json) { implicit request =>
+      for{
+        degrees <- Degrees.all()
+      } yield{
+        val id = (request.body \ "id").as[String]
+        Degrees.delete(Resource(id))
+        Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm))
+      }
     }
   }
 }

@@ -70,5 +70,12 @@ object Users{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.User))).map(user => Individual(user.s))
   }
 
+  def delete(resource: Resource): Unit = {
+    val individual = Individual(resource)
+    if(individual.props(RDF.typ).contains(LWM.User)){
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph))
+    }
+  }
+
   def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 }
