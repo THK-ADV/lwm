@@ -30,6 +30,7 @@ object Students {
       Statement(resource, LWM.hasGmId, Literal(student.gmId)),
       Statement(resource, FOAF.firstName, Literal(student.firstname)),
       Statement(resource, FOAF.lastName, Literal(student.lastname)),
+      Statement(resource, RDFS.label, Literal(s"${student.firstname} ${student.lastname}")),
       Statement(resource, NCO.phoneNumber, Literal(student.phone)),
       Statement(resource, FOAF.mbox, Literal(student.email)),
       Statement(resource, LWM.hasEnrollment, Resource(student.degree)),

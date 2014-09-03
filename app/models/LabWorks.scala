@@ -55,6 +55,7 @@ object LabWorks {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, LWM.hasId, Literal(labWork.id)),
       Statement(resource, LWM.hasName, Literal(labWork.name)),
+      Statement(resource, RDFS.label, Literal(labWork.name)),
 
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
@@ -62,11 +63,13 @@ object LabWorks {
       Statement(resource, LWM.hasSemester, Literal(labWork.semester))
     )
 
-    for(i <- 0 until labWork.groupCount) {
+    for(i <- 'A'.toInt until 'A'.toInt + labWork.groupCount) {
       val group = ResourceUtils.createResource(lwmNamespace)
       val groupStatements = List(
         Statement(group, RDF.typ, LWM.Group),
         Statement(group, RDF.typ, OWL.NamedIndividual),
+        Statement(group, LWM.hasLabWork, resource),
+        Statement(group, LWM.hasId, Literal(s"${i.toChar}")),
         Statement(resource, LWM.hasGroup, group)
       )
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  groupStatements: _*))
@@ -100,10 +103,10 @@ object LabWorks {
 /**
  * An assignment group.
  * @param id id of this group
- * @param courseURI id of this associated course
+ * @param labwork id of this associated labwork
  * @param studentsURIs gmIds of the students
  */
-case class LabWorkGroup(id: String, courseURI: String, studentsURIs: List[String])
+case class LabWorkGroup(id: String, labwork: Resource, studentsURIs: List[String])
 
 object LabworkGroups{
   import utils.Global._
@@ -117,7 +120,9 @@ object LabworkGroups{
       Statement(resource, RDF.typ, LWM.Group),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, LWM.hasId, Literal(group.id)),
-      Statement(resource, LWM.hasCourse, Resource(group.courseURI))
+      Statement(resource, RDFS.label, Literal(s"Gruppe ${group.id}")),
+      Statement(resource, LWM.hasLabWork, group.labwork),
+      Statement(group.labwork, LWM.hasGroup, resource)
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*))
 

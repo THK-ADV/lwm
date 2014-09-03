@@ -20,16 +20,16 @@ object Courses {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(course: Course): Future[Individual] = Future {
-    val resource = ResourceUtils.createResource(lwmNamespace)
+    val courseResource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
-      Statement(resource, RDF.typ, LWM.Course),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasId, Literal(course.id)),
-      Statement(resource, RDFS.label, Literal(course.name)),
-      Statement(resource, LWM.hasName, Literal(course.name))
+      Statement(courseResource, RDF.typ, LWM.Course),
+      Statement(courseResource, RDF.typ, OWL.NamedIndividual),
+      Statement(courseResource, LWM.hasId, Literal(course.id)),
+      Statement(courseResource, RDFS.label, Literal(course.name)),
+      Statement(courseResource, LWM.hasName, Literal(course.name))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
-    Individual(resource)
+    Individual(courseResource)
   }
 
   def delete(course: Course) = {
