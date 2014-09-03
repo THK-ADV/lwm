@@ -72,7 +72,27 @@ object TimeSlots{
 case class Timetable(labwork: Resource)
 
 case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time, room: String, supervisors: List[Resource], timetable: Resource)
+
 case class TimetableEntryFormEntry(day: String, startTime: String, endTime: String, room: String, supervisors: String)
+
+object Timetables{
+  import utils.Global._
+  import utils.semantic.Vocabulary._
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def create(timetable: Timetable) = {
+    val resource = ResourceUtils.createResource(lwmNamespace)
+    val statements = List(
+      Statement(resource, RDF.typ, LWM.Timetable),
+      Statement(resource, RDF.typ, OWL.NamedIndividual),
+      Statement(timetable.labwork, LWM.hasTimetable, resource)
+    )
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
+    Individual(resource)
+  }
+
+}
 
 
 object TimetableEntries{
@@ -81,21 +101,21 @@ object TimetableEntries{
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(timetableSlot: TimetableEntry) = {
-    val resource = ResourceUtils.createResource(lwmNamespace)
+  def create(timetableEntry: TimetableEntry) = {
+    val timetableEntryResource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
-      Statement(resource, RDF.typ, LWM.TimetableEntry),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasStartTime, Literal(timetableSlot.startTime.toString)),
-      Statement(resource, LWM.hasEndTime, Literal(timetableSlot.endTime.toString)),
-      Statement(resource, LWM.hasTimetable, timetableSlot.timetable),
-      Statement(resource, LWM.hasWeekday, timetableSlot.day.uri)
-    )
+      Statement(timetableEntryResource, RDF.typ, LWM.TimetableEntry),
+      Statement(timetableEntryResource, RDF.typ, OWL.NamedIndividual),
+      Statement(timetableEntryResource, LWM.hasStartTime, Literal(timetableEntry.startTime.toString)),
+      Statement(timetableEntryResource, LWM.hasEndTime, Literal(timetableEntry.endTime.toString)),
+      Statement(timetableEntryResource, LWM.hasTimetable, timetableEntry.timetable),
+      Statement(timetableEntry.timetable, LWM.hasEntry, timetableEntryResource),
+      Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri)
+    ) ::: timetableEntry.supervisors.map(supervisor => List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.supervises, timetableEntryResource))).flatten
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
-    Individual(resource)
+    Individual(timetableEntryResource)
   }
 
-  def entriesForTimetable(timetable: Resource) = ???
 
   def all(): Future[Seq[Individual]] = Future{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.TimetableEntry))).map(timetableEntry => Individual(timetableEntry.s))

@@ -52,7 +52,6 @@ object Vocabulary {
     val hasMember = property("hasMember")
     val memberOf = property("memberOf")
     val hasDegree = property("hasDegree")
-    val hasSchedule = property("hasSchedule")
 
     val hasAssignmentCount = property("hasAssignmentCount")
     val hasSemester = property("hasSemester")
@@ -68,10 +67,15 @@ object Vocabulary {
     val Sunday = resource("Sunday")
 
     val TimetableEntry = resource("TimetableEntry")
+    val Timetable = resource("Timetable")
     val hasStartTime = property("hasStartTime")
     val hasEndTime = property("hasEndTime")
     val hasWeekday = property("hasWeekday")
     val hasTimetable = property("hasTimetable")
+    val hasEntry = property("hasEntry")
+    val hasLabWork = property("hasLabWork")
+    val hasSupervisor = property("hasSupervisor")
+    val supervises = property("supervises")
 
   }
 
