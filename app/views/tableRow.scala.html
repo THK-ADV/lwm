@@ -4,7 +4,6 @@
 
 @for(e <- entries.filter(entry => entry.day == day && entry.startTime == time)) {
     <h6>Name: @e.timetable.uri.value </h6>
-    <h6>Betreuer: <br> @for(s <- e.possibleTeachers) { @s <br> }</h6>
-    <h6>Raum: @e.room </h6>
-    <br>
+    <h6>Betreuer: <br> @for(s <- e.possibleTeachers) { @s <br /> }</h6>
+
 }

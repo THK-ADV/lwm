@@ -1,24 +1,25 @@
 @(degrees: List[Individual])
-@import utils.semantic.Individual
-@import utils.semantic.Vocabulary
+    @import utils.semantic.Individual
+    @import utils.semantic.Vocabulary
+    @import utils.semantic.Literal
 
 
+    <div class="panel panel-default">
+        <div class="panel-heading">Studiengangsübersicht</div>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Studiengangsübersicht</div>
-
-    <table class="table">
-        <tr>
-            <th>Name</th>
-            <th>ID</th>
-        </tr>
-        @for(degree <- degrees) {
+        <table class="table">
             <tr>
-                <td>@degree.props(Vocabulary.LWM.hasName).headOption.getOrElse("")</td>
-                <td>@degree.props(Vocabulary.LWM.hasId).headOption.getOrElse("")</td>
-                <td><a class="glyphicon glyphicon-pencil"></a></td>
+                <th>Name</th>
+                <th>ID</th>
             </tr>
-        }
-    </table>
+            @for(degree <- degrees) {
+                <tr>
+                    <td>@degree.props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
+                    <td>@degree.props.getOrElse(Vocabulary.LWM.hasId, List(Literal(""))).head.value</td>
+                    <td><a class="glyphicon glyphicon-pencil"></a></td>
+                    <td><a href="javascript: deleteDegree('@degree.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                </tr>
+            }
+        </table>
 
-</div>
+    </div>

@@ -13,6 +13,24 @@ function reload(data) {
 function deleteStudent(id) {
     ajaxRequest("/administration/students", "DELETE", "application/json", {id: id}, reload);
 }
+
+function deleteUser(id) {
+    ajaxRequest("/administration/users", "DELETE", "application/json", {id: id}, reload);
+}
+
+function deleteCourse(id) {
+    ajaxRequest("/administration/courses", "DELETE", "application/json", {id: id}, reload);
+}
+
+function deleteDegree(id) {
+    ajaxRequest("/administration/degrees", "DELETE", "application/json", {id: id}, reload);
+}
+
+
+function deleteLabwork(id) {
+    ajaxRequest("/administration/labworks", "DELETE", "application/json", {id: id}, reload);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

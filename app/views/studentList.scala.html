@@ -1,5 +1,6 @@
 @(students: List[Individual])
     @import utils.semantic.Individual
+    @import utils.semantic.Literal
     @import utils.semantic.Vocabulary
 
 
@@ -16,12 +17,12 @@
             </tr>
             @for(student <- students) {
                 <tr>
-                    <td>@student.props(Vocabulary.LWM.hasGmId).headOption.getOrElse("")</td>
-                    <td>@student.props(Vocabulary.FOAF.lastName).headOption.getOrElse("")</td>
-                    <td>@student.props(Vocabulary.FOAF.firstName).headOption.getOrElse("")</td>
-                    <td>@student.props(Vocabulary.LWM.hasEnrollment).headOption.getOrElse("")</td>
+                    <td>@student.props.getOrElse(Vocabulary.LWM.hasGmId, List(Literal(""))).head.value</td>
+                    <td>@student.props.getOrElse(Vocabulary.FOAF.lastName, List(Literal(""))).head.value</td>
+                    <td>@student.props.getOrElse(Vocabulary.FOAF.firstName, List(Literal(""))).head.value</td>
+                    <td>@student.props.getOrElse(Vocabulary.LWM.hasEnrollment, List(Literal(""))).head.value</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td><a href="javascript: deleteStudent('@student.props(Vocabulary.LWM.hasGmId).headOption.getOrElse("")')" class="glyphicon glyphicon-remove" ></a></td>
+                    <td><a href="javascript: deleteStudent('@student.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
                 </tr>
             }
         </table>

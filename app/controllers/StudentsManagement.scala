@@ -9,6 +9,7 @@ import models.{Users, Students, UserForms}
 import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
 import utils.Security.Authentication
+import utils.semantic.Resource
 
 import scala.concurrent.Future
 
@@ -85,7 +86,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
         students <- Students.all()
       } yield{
         val id = (request.body \ "id").as[String]
-        Students.delete(id)
+        Students.delete(Resource(id))
         Ok(views.html.studentManagement(students.toList, UserForms.studentForm))
       }
     }

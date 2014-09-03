@@ -15,10 +15,8 @@ object TimeTableController extends Controller with Authentication {
       Ok(views.html.timeTableManagement(
         List(Time(7, 30), Time(8, 0), Time(8, 30), Time(9, 0), Time(9, 30)),
         LabWork("AP1", "Algorithmen und Programmierung", 5, 8, "AP1", "Medieninformatik", "WS14/15"),
-        List(TimetableSlot(Weekdays.Monday, Time(7, 30), Time(9, 0), List("Robert Giacinto"), Room(Resource("2103")),Individual(Resource("AP1"))),
-          TimetableSlot(Weekdays.Tuesday, Time(8, 0), Time(9, 0), List("Robert Giacinto"),Room(Resource("2105")),Individual(Resource("AP1"))),
-        TimetableSlot(Weekdays.Monday, Time(7, 30), Time(9, 0), List("Manuel Krischer"), Room(Resource("2104")),Individual(Resource("BS"))),
-        TimetableSlot(Weekdays.Friday, Time(7, 30), Time(9, 0), List("Guido Muenster"), Room(Resource("2103")),Individual(Resource("AP1"))))))
-    }
-  }
-}
+        List(TimetableSlot(Weekdays.Monday, Time(7, 30), Time(9, 0), List("Robert Giacinto"), Room(Resource("2103")), Individual(Resource("AP1"))),
+          TimetableSlot(Weekdays.Tuesday, Time(8, 0), Time(9, 0), List("Robert Giacinto"), Room(Resource("2105")), Individual(Resource("AP1"))),
+          TimetableSlot(Weekdays.Monday, Time(7, 30), Time(9, 0), List("Manuel Krischer"), Room(Resource("2104")), Individual(Resource("BS"))),
+          TimetableSlot(Weekdays.Friday, Time(7, 30), Time(9, 0), List("Guido Muenster"), Room(Resource("2103")), Individual(Resource("AP1"))))))
+    }}}

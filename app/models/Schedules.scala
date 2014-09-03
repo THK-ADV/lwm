@@ -42,12 +42,6 @@ case class Time(hours: Int, minutes: Int) extends Ordered[Time]{
 //case class TimetableSlot(day: Weekdays.Weekday, startTime: Time, endTime: Time, possibleTeachers: List[Individual], timetable: Individual)
 case class TimetableSlot(day: Weekdays.Weekday, startTime: Time, endTime: Time, possibleTeachers: List[String], room: Room,timetable: Individual)
 
-case class Schedule()
-
-
-object Schedules {
-
-}
 
 object TimetableSlots{
   import utils.Global._
