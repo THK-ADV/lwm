@@ -28,6 +28,7 @@ object Courses {
       Statement(courseResource, RDFS.label, Literal(course.name)),
       Statement(courseResource, LWM.hasName, Literal(course.name))
     )
+
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
     Individual(courseResource)
   }
@@ -45,6 +46,12 @@ object Courses {
   }
   def all() = Future{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Course))).map(course => Individual(course.s))
+  }
+
+  def exists(course: Course): Boolean = {
+    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${Literal(course.id).toQueryString}}")
+    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${Literal(course.name).toQueryString}}")
+    a || b
   }
 }
 

@@ -49,6 +49,13 @@ object Degrees {
   def all(): Future[Seq[Individual]] = Future{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Degree))).map(course => Individual(course.s))
   }
+
+  def exists(degree: Degree): Boolean = {
+    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${Literal(degree.id).toQueryString}}")
+    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${Literal(degree.name).toQueryString}}")
+    val c = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.RDFS.label} ${Literal(degree.name).toQueryString}}")
+    a || b || c
+  }
 }
 
 object DegreeForms{
