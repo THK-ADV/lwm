@@ -1,15 +1,15 @@
-@(time: List[Time], labwork: LabWork, entries: List[TimetableSlot])
+@(startTimes: List[Time], labwork: LabWork, entries: List[TimetableEntry]) <!--TODO Weekday -> List[Entry]-->
 
 <div class= "panel panel-default">
 <table class="table table-bordered">
     <thead>
-        <tr><h4>@labwork.name @labwork.semester</h4></tr>
+        <tr>@labwork.name @labwork.semester</tr>
     </thead>
     <tbody>
         <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>
                             Saturday</th></tr>
 
-        @for(t <- time) {
+        @for(t <- startTimes.sorted) {
             <tr>
                 <td>@t</td>
                 <td>@tableRow(t, Weekdays.Monday, entries)</td>

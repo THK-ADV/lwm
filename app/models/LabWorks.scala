@@ -84,6 +84,7 @@ object LabWorks {
     }
   }
 
+  def get(resource: Resource): Future[Option[LabWork]] = ???
 
   def all(): Future[Seq[Individual]] = Future{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork))).map(labwork => Individual(labwork.s))
