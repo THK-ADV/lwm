@@ -15,9 +15,9 @@ object TimetableController extends Controller with Authentication {
         List(Time(7, 30), Time(8, 0), Time(8, 30), Time(9, 0), Time(9, 30)),
         LabWork("AP1", "Algorithmen und Programmierung", 5, 8, "AP1", "Medieninformatik", "WS14/15"),
         List(
-          TimetableEntry(Weekdays.Monday, Time(7, 30), Time(9, 30), "2110", List(Individual(Resource(""))), Resource("")),
-          TimetableEntry(Weekdays.Tuesday, Time(8, 30), Time(10, 30), "2110", List(Individual(Resource(""))), Resource("")),
-          TimetableEntry(Weekdays.Thursday, Time(7, 30), Time(9, 30), "2110", List(Individual(Resource(""))), Resource(""))
+          TimetableEntry(Weekdays.Monday, Time(7, 30), Time(9, 30), "2110", List(Resource("")), Resource("")),
+          TimetableEntry(Weekdays.Tuesday, Time(8, 30), Time(10, 30), "2110", List(Resource("")), Resource("")),
+          TimetableEntry(Weekdays.Thursday, Time(7, 30), Time(9, 30), "2110", List(Resource("")), Resource(""))
         )
       ))
     }
