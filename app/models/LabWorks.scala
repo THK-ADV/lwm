@@ -50,13 +50,14 @@ object LabWorks {
 
   def create(labWork: LabWork): Future[Individual] = Future {
     val resource = ResourceUtils.createResource(lwmNamespace)
+    val timetable = Timetables.create(Timetable(resource))
     val statements = List(
       Statement(resource, RDF.typ, LWM.LabWork),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, LWM.hasId, Literal(labWork.id)),
       Statement(resource, LWM.hasName, Literal(labWork.name)),
       Statement(resource, RDFS.label, Literal(labWork.name)),
-
+      Statement(resource, LWM.hasTimetable, timetable.uri),
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
       Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
@@ -74,6 +75,8 @@ object LabWorks {
       )
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  groupStatements: _*))
     }
+
+
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*))
 
     Individual(resource)
