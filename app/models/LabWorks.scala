@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 
 
-
+// TODO semester, degree, course shouldnt be a string
 case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
@@ -89,6 +89,7 @@ object LabWorks {
     }
   }
 
+  def get(resource: Resource): Future[Option[LabWork]] = ???
 
   def all(): Future[Seq[Individual]] = Future{
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork))).map(labwork => Individual(labwork.s))

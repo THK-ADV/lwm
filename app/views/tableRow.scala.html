@@ -1,9 +1,8 @@
-@(time: String, day: String, entries: List[TimetableEntry])
+@(startTime: Time, day: Weekdays.Weekday, entries: List[TimetableEntry])
 
 
-@for(e <- entries.filter(entry => entry.day == day && entry.time == time)) {
-    <h6>Name: @e.name </h6>
-    <h6>Betreuer: <br> @for(s <- e.supervisors) { @s <br> }</h6>
+@for(e <- entries.filter(entry => entry.day == day && entry.startTime == startTime)) {
+    <h6>Betreuer: <br /> @for(s <- e.supervisors) { @s <br /> }</h6>
     <h6>Raum: @e.room </h6>
-    <br>
+    <br />
 }

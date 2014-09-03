@@ -67,7 +67,7 @@ object Vocabulary {
     val Saturday = resource("Saturday")
     val Sunday = resource("Sunday")
 
-    val TimetableSlot = resource("TimetableSlot")
+    val TimetableEntry = resource("TimetableEntry")
     val hasStartTime = property("hasStartTime")
     val hasEndTime = property("hasEndTime")
     val hasWeekday = property("hasWeekday")

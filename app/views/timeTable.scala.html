@@ -1,23 +1,23 @@
-@(time: List[String], labwork: LabWork, entries: List[TimetableEntry])
+@(startTimes: List[Time], labwork: LabWork, entries: List[TimetableEntry]) //TODO Weekday -> List[Entry]
 
 <div class= "panel panel-default">
 <table class="table table-bordered">
     <thead>
-        <tr><h4>@labwork.name @labwork.semester</h4></tr>
+        <tr>@labwork.name @labwork.semester</tr>
     </thead>
     <tbody>
         <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>
                             Saturday</th></tr>
 
-        @for(t <- time) {
+        @for(t <- startTimes.sorted) {
             <tr>
                 <td>@t</td>
-                <td>@tableRow(t, "monday", entries)</td>
-                <td>@tableRow(t, "tuesday", entries)</td>
-                <td>@tableRow(t, "wednesday", entries)</td>
-                <td>@tableRow(t, "thursday", entries)</td>
-                <td>@tableRow(t, "friday", entries)</td>
-                <td>@tableRow(t, "saturday", entries)</td>
+                <td>@tableRow(t, Weekdays.Monday, entries)</td>
+                <td>@tableRow(t, Weekdays.Tuesday, entries)</td>
+                <td>@tableRow(t, Weekdays.Wednesday, entries)</td>
+                <td>@tableRow(t, Weekdays.Thursday, entries)</td>
+                <td>@tableRow(t, Weekdays.Friday, entries)</td>
+                <td>@tableRow(t, Weekdays.Saturday, entries)</td>
             </tr>
         }
 
