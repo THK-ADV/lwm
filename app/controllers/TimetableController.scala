@@ -15,11 +15,11 @@ object TimetableController extends Controller with Authentication {
 
   import utils.Global._
 
-  def index(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
+  def index(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async { request =>
      for(supervisors <- Users.all())
      yield {
-        val labWorkI = Individual(Resource(id))
+        val labWorkI = Individual(Resource(labworkid))
         val timetable = Individual((for (i <- labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
         val entries = timetable.props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get)
        Ok(views.html.timeTableManagement(
