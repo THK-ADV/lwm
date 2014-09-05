@@ -43,7 +43,7 @@ object LabWorks {
   import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
+//TODO: ADD hasRoom
   def create(labWork: LabWork): Future[Individual] = Future {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val timetable = Timetables.create(Timetable(resource))

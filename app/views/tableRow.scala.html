@@ -1,9 +1,20 @@
-@(startTime: Time, day: Weekdays.Weekday, entries: List[TimetableEntry])
+@(startTime: Time, dayId: String, labwork: Individual, entries: List[Resource])
+@import utils.semantic.Vocabulary.FOAF
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Individual
+
+@import utils.semantic.Resource
+@import utils.Global._
+
 @import utils.semantic.Vocabulary.RDFS
+<!-- REMOVE ROBERT FROM GETORELSE -->
+@for(r <- entries; i = Individual(r); st = i.props.getOrElse(LWM.hasStartTime, List.empty[Time])) {
+    @if(st.nonEmpty && (st.head.toString == startTime.toString) && (i.props(LWM.hasWeekday).head.value == dayId)) {
+        <h6>Betreuer: <br /> @for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
+            @(Individual(s).props.getOrElse(FOAF.firstName, List("Robert")).head.toString)
+        }</h6>
+        <h6>Raum: ..to be added </h6>
+        <br />
 
-
-@for(e <- entries.filter(entry => entry.day == day && entry.startTime == startTime)) {
-    <h6>Betreuer: <br /> @for(s <- e.supervisors) { @s.value <br /> }</h6>
-    <h6>Raum: @e.room </h6>
-    <br />
+  }
 }

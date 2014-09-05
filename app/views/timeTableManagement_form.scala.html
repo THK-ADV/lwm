@@ -1,16 +1,16 @@
-@(weekdays: List[Weekdays.Weekday], supervisors: List[Individual], rooms: List[Room], time: List[(Int, Time)], entry: Form[TimetableEntryFormEntry])
+@(labWorkId: Individual, weekdays: List[Weekdays.Weekday], supervisors: List[Individual], rooms: List[Room], time: List[Time], entry: Form[TimetableEntryFormEntry])
 @import utils.semantic.Vocabulary
 @import utils.semantic.{Individual, Resource}
 
 @import utils.semantic.Vocabulary._
-@import utils.semantic.Individual
 
-@helper.form(action = routes.LabworkManagementController.labWorkPost()) {
-    @helper.select(entry("day"), for(weekday <- weekdays) yield weekday.uri.toString -> weekday.label, '_label -> "Tag:")
+@helper.form(action = routes.TimetableController.timeTableEntryPost()) {
+    @helper.select(entry("day"), for(weekday <- weekdays) yield weekday.label -> weekday.label, '_label -> "Tag:")
     @helper.select(entry("room"), for (room <- rooms) yield room.number.toString -> room.number.value, '_label -> "Raum:")
-    @helper.select(entry("start"), for(st <- time) yield st._1.toString -> st._2.toString, '_label -> "Startzeit:")
-    @helper.select(entry("end"), for(et <- time) yield et._1.toString -> et._2.toString, '_label -> "Endzeit:")
-    @helper.select(entry("supervisors"), for {supervisor <- supervisors; labelList <- supervisor.props.get(Vocabulary.FOAF.firstName); label = labelList.headOption.getOrElse("")} yield supervisor.uri.value -> label.toString, '_label -> "Betreuer:")
+    @helper.select(entry("start"), for(st <- time) yield st.toString -> st.toString, '_label -> "Startzeit:")
+    @helper.select(entry("end"), for(et <- time) yield et.toString -> et.toString, '_label -> "Endzeit:")
+    @helper.select(entry("supervisors"), for {supervisor <- supervisors; labelList <- supervisor.props.get(Vocabulary.FOAF.firstName); label = labelList.headOption.getOrElse("")} yield label.toString -> label.toString, '_label -> "Betreuer:")
+    @helper.select(entry("ttId"), Seq(labWorkId.props(LWM.hasTimetable).head.asResource().get.value -> labWorkId.props(LWM.hasTimetable).head.asResource().get.value), '_label -> "Resource: ")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
         <button type="submit" class="btn btn-primary">Hinzufügen</button>

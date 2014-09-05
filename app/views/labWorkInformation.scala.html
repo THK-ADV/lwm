@@ -1,6 +1,8 @@
-@import org.joda.time.DateTime
-@import javax.mail.Message
+@(labwork: Individual, groups: List[Resource], assignments: List[Assignment])
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Resource
 @import utils.semantic.Individual
+@import utils.Global._
 
 <!DOCTYPE html>
 <html>
@@ -13,7 +15,35 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    
+                    <div class="row">
+                        <h4>Course: @labwork.props.getOrElse(LWM.hasName, List("")).head @labwork.props.getOrElse(LWM.hasSemester, List("")).head</h4>
+                    </div>
+                    <div class="row">
+                    <h4>Groups: </h4>
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr><th>Group</th><th>Count</th></tr>
+                            @for(r <- groups) {
+
+                                <tr><td>@(Individual(r).props.getOrElse(LWM.hasId, List("")).head)</td><td>@(Individual(r).props.getOrElse(LWM.hasMember, List.empty[Resource]).size)</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <h4>Number of assignments: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</h4>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr><th>Id</th><th>Assignment</th></tr>
+                                @for(a <- assignments) {
+                                    <tr><td>@a.id</td><td>@a.name</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <a href="@routes.TimetableController.index(labwork.uri.value)" class="btn btn-primary" role="button">Timetable</a>
+                    </div>
                 </div>
             </div>
             <div class="row">@footerAdmin()</div>

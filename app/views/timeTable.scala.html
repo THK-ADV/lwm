@@ -1,23 +1,28 @@
-@(startTimes: List[Time], labwork: LabWork, entries: List[TimetableEntry]) <!--TODO Weekday -> List[Entry]-->
+@(timeslots: List[Time], labwork: Individual, entries: List[Resource])
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Individual
+<!--TODO Weekday -> List[Entry]-->
+
+@import utils.semantic.Resource
 
 <div class= "panel panel-default">
 <table class="table table-bordered">
     <thead>
-        <tr>@labwork.name @labwork.semester</tr>
+        <tr>@labwork.props(LWM.hasName).head.value @labwork.props(LWM.hasSemester).head.value</tr>
     </thead>
     <tbody>
         <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>
                             Saturday</th></tr>
 
-        @for(t <- startTimes.sorted) {
+        @for(t <- timeslots.sorted) {
             <tr>
                 <td>@t</td>
-                <td>@tableRow(t, Weekdays.Monday, entries)</td>
-                <td>@tableRow(t, Weekdays.Tuesday, entries)</td>
-                <td>@tableRow(t, Weekdays.Wednesday, entries)</td>
-                <td>@tableRow(t, Weekdays.Thursday, entries)</td>
-                <td>@tableRow(t, Weekdays.Friday, entries)</td>
-                <td>@tableRow(t, Weekdays.Saturday, entries)</td>
+                <td>@tableRow(t, Weekdays.Monday.uri.value, labwork, entries)</td>
+                <td>@tableRow(t, Weekdays.Tuesday.uri.value,labwork, entries)</td>
+                <td>@tableRow(t, Weekdays.Wednesday.uri.value,labwork, entries)</td>
+                <td>@tableRow(t, Weekdays.Thursday.uri.value,labwork, entries)</td>
+                <td>@tableRow(t, Weekdays.Friday.uri.value, labwork,entries)</td>
+                <td>@tableRow(t, Weekdays.Saturday.uri.value, labwork,entries)</td>
             </tr>
         }
 
