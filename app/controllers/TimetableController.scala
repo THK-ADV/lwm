@@ -22,58 +22,55 @@ object TimetableController extends Controller with Authentication {
         val labWorkI = Individual(Resource(id))
         val timetable = Individual((for (i <- labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
         val entries = timetable.props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get)
-
        Ok(views.html.timeTableManagement(
-          TimeSlots.slotTimeMap.values.toList.sorted,
-          labWorkI, entries, supervisors.toList, TimeTableForm.timetableForm))
+         labWorkI,
+         supervisors.toList,
+         TimeSlots.slotTimeMap.values.toList.sorted,
+         entries,
+         TimeTableForm.timetableForm))
       }
     }
   }
 
-  //REDIRECTS TO LABWORK PAGE. => CANNOT REFLECT LABWORK THROUGH TIMETABLE
-  def timeTableEntryPost() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  def timeTableEntryPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session =>
       Action.async {
         implicit request =>
           TimeTableForm.timetableForm.bindFromRequest.fold(
             formWithErrors => {
-              for{e <- convert(formWithErrors.get)
+              for{e <- convert(labworkid, formWithErrors.get)
                   supervisors <- Users.all()
               } yield {
                 BadRequest(views.html.timeTableManagement(
-                TimeSlots.slotTimeMap.values.toList,
-                Individual(Individual(e.timetable).props(LWM.hasLabWork).head.asResource().get),
-                Individual(e.timetable).props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get),
-                supervisors.toList,formWithErrors))
+                  Individual(Resource(labworkid)),
+                  supervisors.toList,
+                  TimeSlots.slotTimeMap.values.toList.sorted,
+                  Individual(e.timetable).props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get),
+                  formWithErrors))
               }
             },
             entry => {
-              for{e <- convert(entry)
+              for{e <- convert(labworkid, entry)
                   supervisors <- Users.all()
               }  yield {
                 TimetableEntries.create(e)
-                /*Ok(views.html.timeTableManagement(
-                  TimeSlots.slotTimeMap.values.toList,
-                  Individual(Individual(e.timetable).props(LWM.hasLabWork).head.asResource().get),
+                Ok(views.html.timeTableManagement(
+                  Individual(Resource(labworkid)),
+                  supervisors.toList,
+                  TimeSlots.slotTimeMap.values.toList.sorted,
                   Individual(e.timetable).props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get),
-                  supervisors.toList,TimeTableForm.timetableForm))*/
-              }
-              for {
-                labworks <- LabWorks.all()
-                courses <- Courses.all()
-                degrees <- Degrees.all()
-              } yield {
-                Ok(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
+                  TimeTableForm.timetableForm))
               }
             }
           )
       }
   }
 
-      def convert(entry: TimetableEntryFormEntry): Future[TimetableEntry] = {
+      def convert(id: String, entry: TimetableEntryFormEntry): Future[TimetableEntry] = {
         for (s <- Users.all())
         yield {
           val supervisors = s.filter(i => i.props(FOAF.firstName).head.value == entry.supervisors).map(_.uri).toList
+          val timetableId = Individual(Resource(id)).props.getOrElse(LWM.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
 
           TimetableEntry(
             Weekdays.workWeek.filter(p => p.label == entry.day).head,
@@ -81,7 +78,7 @@ object TimetableController extends Controller with Authentication {
             Time(entry.endTime.split(":")(0).toInt, entry.endTime.split(":")(1).toInt) ,
             entry.room,
             supervisors,
-            Resource(entry.ttId))
+            timetableId)
         }
       }
 

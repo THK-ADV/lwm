@@ -6,14 +6,13 @@
 @import utils.semantic.Resource
 @import utils.Global._
 
-@import utils.semantic.Vocabulary.RDFS
 <!-- REMOVE ROBERT FROM GETORELSE -->
 @for(r <- entries; i = Individual(r); st = i.props.getOrElse(LWM.hasStartTime, List.empty[Time])) {
     @if(st.nonEmpty && (st.head.toString == startTime.toString) && (i.props(LWM.hasWeekday).head.value == dayId)) {
-        <h6>Betreuer: <br /> @for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
+        <h6><b>Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
             @(Individual(s).props.getOrElse(FOAF.firstName, List("Robert")).head.toString)
         }</h6>
-        <h6>Raum: ..to be added </h6>
+        <h6><b>Raum:</b>..to be added</h6>
         <br />
 
   }

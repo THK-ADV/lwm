@@ -73,7 +73,7 @@ case class Timetable(labwork: Resource)
 
 case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time, room: String, supervisors: List[Resource], timetable: Resource)
 
-case class TimetableEntryFormEntry(day: String, startTime: String, endTime: String, room: String, supervisors: String, ttId: String)
+case class TimetableEntryFormEntry(day: String, startTime: String, endTime: String, room: String, supervisors: String)
 
 object Timetables{
   import utils.Global._
@@ -129,7 +129,6 @@ object TimeTableForm {
     "start" -> nonEmptyText,
     "end" -> nonEmptyText,
     "room" -> nonEmptyText,
-    "supervisors" -> nonEmptyText,
-    "ttId" -> nonEmptyText
+    "supervisors" -> nonEmptyText
   )(TimetableEntryFormEntry.apply)(TimetableEntryFormEntry.unapply))
   }

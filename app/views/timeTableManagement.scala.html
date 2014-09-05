@@ -1,4 +1,4 @@
-@(timeslots: List[Time], labwork: Individual, entries: List[Resource], allSupervisors: List[Individual], form: Form[TimetableEntryFormEntry])
+@(labwork: Individual, allSupervisors: List[Individual], timeslots: List[Time], table_entries: List[Resource], form: Form[TimetableEntryFormEntry])
 @import utils.semantic.Resource
 @import utils.semantic.Individual
 
@@ -14,7 +14,7 @@
         <div class="row">
             @navigation_admin()
             <div class="col-md-9">
-                @timeTable(timeslots, labwork, entries)
+                @timeTable(timeslots, labwork, table_entries)
                 <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                 </button>
@@ -31,7 +31,7 @@
                             <h4 class="modal-title" id="myModalLabel">Neue Veranstaltung hinzufügen</h4>
                         </div>
                         <div class="modal-body">
-                            @timeTableManagement_form(labwork, Weekdays.workWeek, allSupervisors, List(Room(Resource("2001"))), timeslots, TimeTableForm.timetableForm)
+                            @timeTableManagement_form(labwork.uri, Weekdays.workWeek, timeslots, List(Room(Resource("2001"))), allSupervisors, TimeTableForm.timetableForm)
                         </div>
 
                     </div>
