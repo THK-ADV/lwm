@@ -6,13 +6,14 @@
 @import utils.semantic.Resource
 
 <div class= "panel panel-default">
-<table class="table table-bordered">
-    <thead>
-        <tr>@labwork.props(LWM.hasName).head.value @labwork.props(LWM.hasSemester).head.value</tr>
-    </thead>
+
+    <div class="panel-heading">
+        <h5>@labwork.props(LWM.hasName).head.value @labwork.props(LWM.hasSemester).head.value</h5>
+    </div>
+    <table class="table table-bordered">
     <tbody>
-        <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>
-                            Saturday</th></tr>
+        <tr><th>Uhrzeit</th><th>Montag</th><th>Dienstag</th><th>Mittwoch</th><th>Donnerstag</th><th>Freitag</th><th>
+                            Samstag</th></tr>
 
         @for(t <- timeslots.sorted) {
             <tr>

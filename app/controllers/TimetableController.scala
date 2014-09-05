@@ -1,13 +1,11 @@
 package controllers
 
 
-import controllers.LabworkManagementController._
-import controllers.StudentsManagement._
 import models._
 import play.api.mvc.{Action, Controller}
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{FOAF, LWM}
-import utils.semantic.{Vocabulary, RDFNode, Individual, Resource}
+import utils.semantic.Vocabulary.{RDFS, LWM}
+import utils.semantic.{Individual, Resource}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -69,7 +67,7 @@ object TimetableController extends Controller with Authentication {
       def convert(id: String, entry: TimetableEntryFormEntry): Future[TimetableEntry] = {
         for (s <- Users.all())
         yield {
-          val supervisors = s.filter(i => i.props(FOAF.firstName).head.value == entry.supervisors).map(_.uri).toList
+          val supervisors = s.filter(i => i.props(RDFS.label).head.value == entry.supervisors).map(_.uri).toList
           val timetableId = Individual(Resource(id)).props.getOrElse(LWM.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
 
           TimetableEntry(
