@@ -7,7 +7,7 @@ import play.api.libs.concurrent.Promise
 import play.api.mvc.{Action, Controller, Security}
 import play.libs.Akka
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 
 /**
  * Session Management.
@@ -37,14 +37,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
     loginData match {
       case None => Future.successful(Unauthorized)
       case Some(login) =>
-        val timeoutFuture = Promise.timeout("Oops", 15.second)
+        val timeoutFuture = Promise.timeout("Oops", 45.second)
         val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user, login.password)).mapTo[Either[String, SessionHandler.Session]]
 
         Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
           case Left(message: String) =>
             Unauthorized(message)
           case Right(session: SessionHandler.Session) =>
-            val firstTime = firstTimeCheck(session.user)
+            val firstTime = Await.result(firstTimeCheck(session.user), atMost = 20.seconds)
             session.role match {
               case Permissions.AdminRole =>
                 if (firstTime) {
@@ -82,7 +82,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
   }
 
-  def firstTimeCheck(user: String): Boolean = !Students.exists(user)
+  def firstTimeCheck(user: String): Future[Boolean] = Students.exists(user).map{b => !b}
 
   def logout() = Action { request =>
     import play.api.libs.json._

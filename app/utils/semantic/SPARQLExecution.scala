@@ -4,30 +4,17 @@ import java.net.URLEncoder
 
 import akka.util.Timeout
 
+import scala.concurrent.Future
 import scalaj.http.{Http, HttpOptions}
 
 object SPARQLExecution {
-  def executeUpdate(host: String, query: String): Boolean = {
-    Http.post(host)
-      .param("update", query)
-      .option(HttpOptions.readTimeout(5000))
-      .asString.contains("Success")
-  }
-
-  def executeSelect(host: String, query: String): String = {
-    Http(host)
-      .param("query", query)
-      .option(HttpOptions.readTimeout(5000))
-      .header("accept", "text/xml")
-      .asString
-  }
-
-  def apply(queryHost: String, updateHost: String)(implicit timeout: Timeout) = new SPARQLExecution(updateHost, queryHost)
+   def apply(queryHost: String, updateHost: String)(implicit timeout: Timeout) = new SPARQLExecution(updateHost, queryHost)
 }
 
 class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeout: Timeout) {
+  import scala.concurrent.ExecutionContext.Implicits.global
 
-  def executeUpdate(update: String): Boolean = {
+  def executeUpdate(update: String): Future[Boolean] = Future{
     val updateEncoded = URLEncoder.encode(update, "UTF-8")
     Http.postData(updateHost, s"update=$updateEncoded")
       .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
@@ -36,7 +23,7 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
       .contains("success")
   }
 
-  def executeQuery(query: String): String = {
+  def executeQuery(query: String): Future[String] = Future {
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
     Http.postData(queryHost, s"query=$queryEncoded")
       .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
@@ -44,7 +31,33 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
       .asString
   }
 
-  def executeBooleanQuery(query: String) = {
+  def executeBooleanQuery(query: String):Future[Boolean] = Future {
+    val queryEncoded = URLEncoder.encode(query, "UTF-8")
+
+    Http.postData(queryHost, s"query=$queryEncoded")
+      .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
+      .header("accept", "text/xml")
+      .asString.toLowerCase.contains("true")
+  }
+
+  def executeUpdateBlocking(update: String): Boolean = {
+    val updateEncoded = URLEncoder.encode(update, "UTF-8")
+    Http.postData(updateHost, s"update=$updateEncoded")
+      .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
+      .header("content-type", "application/x-www-form-urlencoded")
+      .asString.toLowerCase
+      .contains("success")
+  }
+
+  def executeQueryBlocking(query: String):String =  {
+    val queryEncoded = URLEncoder.encode(query, "UTF-8")
+    Http.postData(queryHost, s"query=$queryEncoded")
+      .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
+      .header("accept", "text/xml")
+      .asString
+  }
+
+  def executeBooleanQueryBlocking(query: String):Boolean =  {
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
 
     Http.postData(queryHost, s"query=$queryEncoded")

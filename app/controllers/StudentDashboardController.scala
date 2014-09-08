@@ -4,11 +4,13 @@ import controllers.AdministrationDashboardController._
 import models.{UserForms, Users, LabWorkForms}
 import play.api.mvc.{Action, Controller}
 
+import scala.concurrent.Future
+
 
 object StudentDashboardController extends Controller{
   def dashboard() =  hasPermissions(Permissions.DefaultRole.permissions.toList : _*){session =>
-    Action {
-      Ok(views.html.dashboard_student(Nil, LabWorkForms.labWorkApplicationForm))
+    Action.async {
+      Future.successful(Ok(views.html.dashboard_student(Nil, LabWorkForms.labWorkApplicationForm)))
     }
   }
 }

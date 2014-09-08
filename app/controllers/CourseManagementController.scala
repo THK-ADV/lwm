@@ -34,8 +34,9 @@ object CourseManagementController extends Controller with Authentication{
           }
         },
         course => {
-          Courses.create(course)
-          Future.successful(Redirect(routes.CourseManagementController.index()))
+          Courses.create(course).map{_ =>
+            Redirect(routes.CourseManagementController.index())
+          }
         }
       )
     }
@@ -43,12 +44,11 @@ object CourseManagementController extends Controller with Authentication{
 
   def courseRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
     Action.async(parse.json) { implicit request =>
-      for{
-        courses <- Courses.all()
-      } yield{
-        val id = (request.body \ "id").as[String]
-        Courses.delete(Resource(id))
-        Ok(views.html.courseManagement(courses.toList, CourseForms.courseForm))
+      val id = (request.body \ "id").as[String]
+      Courses.delete(Resource(id)).flatMap { deleted =>
+        Courses.all().map { all =>
+          Ok(views.html.courseManagement(all, CourseForms.courseForm))
+        }
       }
     }
   }

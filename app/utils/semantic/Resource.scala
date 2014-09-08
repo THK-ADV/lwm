@@ -1,11 +1,13 @@
 package utils.semantic
 
 import java.net.{URLDecoder, URLEncoder}
+import java.util.UUID
 import com.hp.hpl.jena.rdf.model.AnonId
 import scala.xml.XML._
 
 object ResourceUtils{
   def createResource(ns: Namespace) = Resource(s"$ns${AnonId.create()}")
+  def createResource(ns: Namespace, id: UUID) = Resource(s"$ns${id.toString}")
 }
 
 trait RDFNode {
@@ -82,7 +84,7 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
    * @return the list of known properties in the union graph
    */
   def properties: List[Statement] = {
-    val response = executionContext.executeQuery(SPARQLBuilder.listIndividualProperties(uri))
+    val response = executionContext.executeQueryBlocking(SPARQLBuilder.listIndividualProperties(uri))
     val xml = loadString(response)
     val t = SPARQLTools.statementsFromXML(xml)
 
@@ -97,11 +99,11 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
    * @return true, if the update of the named graph was successful
    */
   def add(p: Property, o: RDFNode)(implicit graph: NamedGraph): Boolean = {
-    executionContext.executeUpdate(SPARQLBuilder.insertStatements(graph, Statement(uri, p, o)))
+    executionContext.executeUpdateBlocking(SPARQLBuilder.insertStatements(graph, Statement(uri, p, o)))
   }
 
   def remove(property: Property, value: RDFNode)(implicit graph: NamedGraph): Boolean = {
-    executionContext.executeUpdate(SPARQLBuilder.removeStatements(graph, Statement(uri, property, value)))
+    executionContext.executeUpdateBlocking(SPARQLBuilder.removeStatements(graph, Statement(uri, property, value)))
   }
 
   def update(property: Property, oldValue: RDFNode, newValue: RDFNode)(implicit graph: NamedGraph): Boolean = {
@@ -116,11 +118,11 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
    * @return true, if the statement exists
    */
   def exists(p: Property, o: RDFNode): Boolean = {
-    executionContext.executeQuery(SPARQLBuilder.exists(Statement(uri, p, o))).contains("true")
+    executionContext.executeQueryBlocking(SPARQLBuilder.exists(Statement(uri, p, o))).contains("true")
   }
 
   def ontClasses: List[Resource] = {
-    val response = executionContext.executeQuery(SPARQLBuilder.listIndividualProperties(uri, Vocabulary.RDF.typ))
+    val response = executionContext.executeQueryBlocking(SPARQLBuilder.listIndividualProperties(uri, Vocabulary.RDF.typ))
     val xml = loadString(response)
 
     val statements = SPARQLTools.statementsFromXML(xml)

@@ -1,11 +1,10 @@
-@(labwork: Individual, allSupervisors: List[Individual], timeslots: List[Time], table_entries: List[Resource], form: Form[TimetableEntryFormEntry])
-@import utils.semantic.Resource
+@(rooms: List[Individual], form: Form[RoomFormModel])
 @import utils.semantic.Individual
 
 <!DOCTYPE html>
 
 <html>
-    @head("Stundenplanverwaltung")
+    @head("Veranstaltungsverwaltung")
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -14,7 +13,9 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @timeTable(timeslots, labwork, table_entries)
+                    @room_list(rooms)
+
+
                     <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                     </button>
@@ -25,18 +26,18 @@
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
                                         Close</span></button>
-                                    <h4 class="modal-title" id="myModalLabel">Neue Veranstaltung hinzufügen</h4>
+                                    <h4 class="modal-title" id="myModalLabel">Neuen Raum erstellen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @timeTableManagement_form(labwork.uri, Weekdays.workWeek, timeslots, List(Room("2100", "Terminal Raum 1")), allSupervisors, TimeTableForm.timetableForm)
+                                @room_form(form)
                                 </div>
 
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
+
 
             <div class="row">@footerAdmin()</div>
         </div>

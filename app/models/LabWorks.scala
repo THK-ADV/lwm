@@ -4,7 +4,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import utils.semantic._
 
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 
 case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
 
@@ -43,8 +43,8 @@ object LabWorks {
   import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
-//TODO: ADD hasRoom
-  def create(labWork: LabWork): Future[Individual] = Future {
+
+  def create(labWork: LabWork): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val timetable = Timetables.create(Timetable(resource))
     val statements = List(
@@ -73,28 +73,37 @@ object LabWorks {
     }
 
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*))
-
-    Individual(resource)
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*)).map{r =>
+      Individual(resource)
+    }    
   }
 
-  def delete(labwork: LabWork) = {
-    val maybeLabwork = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.hasId, Literal(labwork.id))
-    val degreeResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeLabwork)).map(labwork => labwork.s)
-    degreeResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
+  def delete(labwork: LabWork): Future[LabWork] = {
+    val maybeLabwork = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.LabWork, Vocabulary.LWM.hasId, Literal(labwork.id))
+    val resultFuture = sparqlExecutionContext.executeQuery(maybeLabwork)
+    val p = Promise[LabWork]()
+    resultFuture.map{result =>
+      val resources = SPARQLTools.statementsFromString(result).map(degree => degree.s)
+      resources.map{resource =>
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{_ => p.success(labwork)}
+      }
+    }
+    p.future
   }
 
-  def delete(resource: Resource): Unit = {
+  def delete(resource: Resource): Future[Resource] =  {
+    val p = Promise[Resource]()
     val individual = Individual(resource)
     if(individual.props(RDF.typ).contains(LWM.LabWork)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph))
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
     }
+    p.future
   }
 
-  def get(resource: Resource): Future[Option[LabWork]] = ???
-
-  def all(): Future[Seq[Individual]] = Future{
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork))).map(labwork => Individual(labwork.s))
+  def all(): Future[List[Individual]] = {
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork)).map{stringResult =>
+      SPARQLTools.statementsFromString(stringResult).map(labwork => Individual(labwork.s)).toList
+    }
   }
 }
 
@@ -113,7 +122,7 @@ object LabworkGroups{
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(group: LabWorkGroup): Future[Individual] = Future {
+  def create(group: LabWorkGroup): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
       Statement(resource, RDF.typ, LWM.Group),
@@ -123,24 +132,37 @@ object LabworkGroups{
       Statement(resource, LWM.hasLabWork, group.labwork),
       Statement(group.labwork, LWM.hasGroup, resource)
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*))
-
-    Individual(resource)
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph,  statements: _*)).map{r =>
+      Individual(resource)
+    }
   }
 
-  def delete(group: LabWorkGroup) = {
-    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(Vocabulary.LWM.Group, Vocabulary.LWM.hasId, Literal(group.id))
-    val groupResources = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeGroup)).map(labwork => labwork.s)
-    groupResources.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
-  }
-  def delete(id: String) = {
-    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(Vocabulary.LWM.Group, Vocabulary.LWM.hasId, Literal(id))
-    val groupResources = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeGroup)).map(labGroup => labGroup.s)
-    groupResources.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
-  }
-  def all(): Future[Seq[Individual]] = Future{
 
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Group))).map(group => Individual(group.s))
+  def delete(group: LabWorkGroup): Future[LabWorkGroup] = {
+    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Group, Vocabulary.LWM.hasId, Literal(group.id))
+    val resultFuture = sparqlExecutionContext.executeQuery(maybeGroup)
+    val p = Promise[LabWorkGroup]()
+    resultFuture.map{result =>
+      val resources = SPARQLTools.statementsFromString(result).map(g => g.s)
+      resources.map{resource =>
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{_ => p.success(group)}
+      }
+    }
+    p.future
+  }
 
+  def delete(resource: Resource): Future[Resource] =  {
+    val p = Promise[Resource]()
+    val individual = Individual(resource)
+    if(individual.props(RDF.typ).contains(LWM.Group)){
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
+    }
+    p.future
+  }
+
+  def all(): Future[List[Individual]] = {
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Group)).map{stringResult =>
+      SPARQLTools.statementsFromString(stringResult).map(labwork => Individual(labwork.s)).toList
+    }
   }
 }

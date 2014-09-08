@@ -5,7 +5,7 @@ import play.api.data.Forms._
 
 import utils.semantic._
 
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 
 
 // ex: Course("Wirtschaftsinformatik", "WI")
@@ -20,7 +20,7 @@ object Degrees {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(degree: Degree): Future[Individual] = Future {
+  def create(degree: Degree): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
       Statement(resource, RDF.typ, LWM.Degree),
@@ -29,32 +29,51 @@ object Degrees {
       Statement(resource, RDFS.label, Literal(degree.name)),
       Statement(resource, LWM.hasName, Literal(degree.name))
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
-    Individual(resource)
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map{ b =>
+      Individual(resource)
+    }
+
   }
 
-  def delete(degree: Degree) = {
-    val maybeDegree = SPARQLBuilder.listIndividualsWithProperty(Vocabulary.LWM.hasId, Literal(degree.id))
-    val degreeResource = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(maybeDegree)).map(course => course.s)
-    degreeResource.map(res => sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(res, lwmGraph)))
+  def delete(degree: Degree): Future[Degree] = {
+    val maybeDegree = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Course, Vocabulary.LWM.hasId, Literal(degree.id))
+    val resultFuture = sparqlExecutionContext.executeQuery(maybeDegree)
+    val p = Promise[Degree]()
+    resultFuture.map{result =>
+      val resources = SPARQLTools.statementsFromString(result).map(degree => degree.s)
+      resources.map{resource =>
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{_ => p.success(degree)}
+      }
+    }
+    p.future
   }
 
-  def delete(resource: Resource): Unit = {
+  def delete(resource: Resource): Future[Resource] =  {
+    val p = Promise[Resource]()
     val individual = Individual(resource)
     if(individual.props(RDF.typ).contains(LWM.Degree)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph))
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
+    }else{
+      p.failure(new IllegalArgumentException("Resource is not a Degree"))
+    }
+    p.future
+  }
+
+  def all(): Future[List[Individual]] = {
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Degree)).map{stringResult =>
+      SPARQLTools.statementsFromString(stringResult).map(degree => Individual(degree.s)).toList
     }
   }
 
-  def all(): Future[Seq[Individual]] = Future{
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Degree))).map(course => Individual(course.s))
-  }
-
-  def exists(degree: Degree): Boolean = {
-    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${Literal(degree.id).toQueryString}}")
-    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${Literal(degree.name).toQueryString}}")
-    val c = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.RDFS.label} ${Literal(degree.name).toQueryString}}")
-    a || b || c
+  def exists(degree: Degree): Future[Boolean] = {
+    val aFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${Literal(degree.id).toQueryString}}")
+    val bFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${Literal(degree.name).toQueryString}}")
+    val cFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.RDFS.label} ${Literal(degree.name).toQueryString}}")
+    for{
+      a <- aFut
+      b <- bFut
+      c <- cFut
+    } yield a || b || c
   }
 }
 

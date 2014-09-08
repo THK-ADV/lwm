@@ -29,8 +29,7 @@ object StudentsManagement extends Controller with Authentication {
 import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
 
-  private implicit val timeout = Timeout(5.seconds)
-  private val sessionsHandler = Akka.system.actorSelection("user/sessions")
+  import utils.Global._
 
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
@@ -50,14 +49,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
   //  }
 
   def studentFirstTimeSelf = hasSession { session =>
-    Action { implicit request =>
+    Action.async { implicit request =>
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors => {
-          BadRequest(views.html.firstTimeInputStudents(formWithErrors))
+          Future.successful(BadRequest(views.html.firstTimeInputStudents(formWithErrors)))
         },
         student => {
-          Students.create(student)
-          Redirect(routes.StudentDashboardController.dashboard())
+          Students.create(student).map(_ => Redirect(routes.StudentDashboardController.dashboard()))
+
         }
       )
     }
@@ -73,8 +72,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
           }
         },
         student => {
-          Students.create(student)
-          Future.successful(Redirect(routes.StudentsManagement.index()))
+          Students.create(student).map(_ => Redirect(routes.StudentsManagement.index()))
         }
       )
     }
@@ -82,12 +80,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
   def studentRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
     Action.async(parse.json) { implicit request =>
-      for{
-        students <- Students.all()
-      } yield{
-        val id = (request.body \ "id").as[String]
-        Students.delete(Resource(id))
-        Ok(views.html.studentManagement(students.toList, UserForms.studentForm))
+      val id = (request.body \ "id").as[String]
+      Students.delete(Resource(id)).flatMap { deleted =>
+        Students.all().map { all =>
+          Ok(views.html.studentManagement(all, UserForms.studentForm))
+        }
       }
     }
   }

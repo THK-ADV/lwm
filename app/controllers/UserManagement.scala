@@ -25,14 +25,14 @@ object UserManagement extends Controller with Authentication {
 
 
   def userFirstTimeSelf = hasSession { session =>
-    Action { implicit request =>
+    Action.async { implicit request =>
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors => {
-          BadRequest(views.html.firstTimeInputUser(formWithErrors))
+          Future.successful(BadRequest(views.html.firstTimeInputUser(formWithErrors)))
         },
         user => {
-          Users.create(user)
-          Redirect(routes.AdministrationDashboardController.dashboard())
+          Users.create(user).map(_ => Redirect(routes.AdministrationDashboardController.dashboard()))
+
         }
       )
     }
@@ -47,8 +47,7 @@ object UserManagement extends Controller with Authentication {
           }
         },
         user => {
-          Users.create(user)
-          Future.successful(Redirect(routes.UserManagement.index()))
+          Users.create(user).map(_ => Redirect(routes.UserManagement.index()))
         }
       )
     }
@@ -56,12 +55,11 @@ object UserManagement extends Controller with Authentication {
 
   def userRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
     Action.async(parse.json) { implicit request =>
-      for{
-        users <- Users.all()
-      } yield{
-        val id = (request.body \ "id").as[String]
-        Users.delete(Resource(id))
-        Ok(views.html.userManagement(users.toList))
+      val id = (request.body \ "id").as[String]
+      Users.delete(Resource(id)).flatMap { deleted =>
+        Users.all().map { all =>
+          Redirect(routes.UserManagement.index())
+        }
       }
     }
   }

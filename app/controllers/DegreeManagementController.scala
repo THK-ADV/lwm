@@ -8,14 +8,15 @@ import utils.semantic.Resource
 import scala.concurrent.{Future, ExecutionContext}
 
 
-object DegreeManagementController extends Controller with Authentication{
+object DegreeManagementController extends Controller with Authentication {
+
   import ExecutionContext.Implicits.global
 
-  def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+  def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async { request =>
-      for{
+      for {
         degrees <- Degrees.all()
-      } yield{
+      } yield {
         Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm))
       }
     }
@@ -32,21 +33,19 @@ object DegreeManagementController extends Controller with Authentication{
           }
         },
         degree => {
-          Degrees.create(degree)
-          Future.successful(Redirect(routes.DegreeManagementController.index()))
+          Degrees.create(degree).map { _ => Redirect(routes.DegreeManagementController.index())}
         }
       )
     }
   }
 
-  def degreeRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+  def degreeRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async(parse.json) { implicit request =>
-      for{
-        degrees <- Degrees.all()
-      } yield{
-        val id = (request.body \ "id").as[String]
-        Degrees.delete(Resource(id))
-        Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm))
+      val id = (request.body \ "id").as[String]
+      Degrees.delete(Resource(id)).flatMap { deleted =>
+        Degrees.all().map { all =>
+          Ok(views.html.degreeManagement(all, DegreeForms.degreeForm))
+        }
       }
     }
   }

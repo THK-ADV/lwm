@@ -4,7 +4,7 @@ import play.api.data.Forms._
 import play.api.data._
 import utils.semantic._
 
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 
 object UserForms {
   val loginForm = Form(
@@ -51,7 +51,7 @@ object Users{
   import scala.concurrent.ExecutionContext.Implicits.global
 
 
-  def create(user: User): Future[Individual] = Future {
+  def create(user: User): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
       Statement(resource, RDF.typ, LWM.User),
@@ -64,20 +64,38 @@ object Users{
       Statement(resource, FOAF.mbox, Literal(user.email)),
       Statement(resource, RDFS.label, Literal(s"${user.firstname} ${user.lastname}"))
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
-    Individual(resource)
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map{r =>
+      Individual(resource)
+    }    
   }
 
-  def all(): Future[Seq[Individual]] = Future {
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.User))).map(user => Individual(user.s))
+  def delete(user: User): Future[User] = {
+    val maybeUser = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.User, Vocabulary.LWM.hasGmId, Literal(user.id))
+    val resultFuture = sparqlExecutionContext.executeQuery(maybeUser)
+    val p = Promise[User]()
+    resultFuture.map{result =>
+      val resources = SPARQLTools.statementsFromString(result).map(u => u.s)
+      resources.map{resource =>
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{_ => p.success(user)}
+      }
+    }
+    p.future
   }
 
-  def delete(resource: Resource): Unit = {
+  def delete(resource: Resource): Future[Resource] =  {
+    val p = Promise[Resource]()
     val individual = Individual(resource)
     if(individual.props(RDF.typ).contains(LWM.User)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph))
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
+    }
+    p.future
+  }
+
+  def all(): Future[List[Individual]] = {
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.User)).map{stringResult =>
+      SPARQLTools.statementsFromString(stringResult).map(user => Individual(user.s)).toList
     }
   }
 
-  def exists(uid: String): Boolean = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
+  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 }
