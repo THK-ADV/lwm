@@ -61,7 +61,8 @@ object Users{
       Statement(resource, FOAF.lastName, Literal(user.lastname)),
       Statement(resource, RDFS.label, Literal(s"${user.firstname} ${user.lastname}")),
       Statement(resource, NCO.phoneNumber, Literal(user.phone)),
-      Statement(resource, FOAF.mbox, Literal(user.email))
+      Statement(resource, FOAF.mbox, Literal(user.email)),
+      Statement(resource, RDFS.label, Literal(s"${user.firstname} ${user.lastname}"))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
     Individual(resource)

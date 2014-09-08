@@ -1,8 +1,17 @@
-@(startTime: Time, day: Weekdays.Weekday, entries: List[TimetableEntry])
+@(startTime: Time, dayId: String, labwork: Individual, entries: List[Resource])
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Individual
 
+@import utils.semantic.Resource
+@import utils.Global._
 
-@for(e <- entries.filter(entry => entry.day == day && entry.startTime == startTime)) {
-    <h6>Betreuer: <br /> @for(s <- e.supervisors) { @s <br /> }</h6>
-    <h6>Raum: @e.room </h6>
-    <br />
+@for(r <- entries; i = Individual(r); st = i.props.getOrElse(LWM.hasStartTime, List.empty[Time])) {
+    @if(st.nonEmpty && (st.head.toString == startTime.toString) && (i.props(LWM.hasWeekday).head.value == dayId)) {
+        <h6><b>Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
+            @(Individual(s).props.getOrElse(RDFS.label, List("")).head.toString)
+        }</h6>
+        <h6><b>Raum:</b>..to be added</h6>
+        <br />
+
+  }
 }

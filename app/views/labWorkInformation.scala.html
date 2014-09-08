@@ -1,0 +1,60 @@
+@(labwork: Individual, groups: List[Resource], assignments: List[Assignment])
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Resource
+@import utils.semantic.Individual
+@import utils.Global._
+
+<!DOCTYPE html>
+<html>
+    @head("Labwork Editor")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    <div class="row">
+                        <h4>Veranstaltung: @labwork.props.getOrElse(LWM.hasName, List("")).head @labwork.props.getOrElse(LWM.hasSemester, List("")).head</h4>
+                    </div>
+                    <div class="row">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Gruppen</div>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th>Gruppe</th><th>Anzahl</th></tr>
+                                    @for(r <- groups) {
+
+                                        <tr><td>@(Individual(r).props.getOrElse(LWM.hasId, List("")).head)</td> <td>@(Individual(r).props.getOrElse(LWM.hasMember, List.empty[Resource]).size)</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th>Id</th><th>Assignment</th></tr>
+                                    @for(a <- assignments) {
+                                        <tr><td>@a.id</td> <td>@a.name</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <a href="@routes.TimetableController.index(labwork.uri.value)" class="btn btn-primary" role="button">
+                            Timetable</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>
+
+

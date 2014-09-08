@@ -4,8 +4,9 @@ import controllers.StudentsManagement._
 import models._
 import play.api.mvc.{Action, Controller}
 import utils.Security.Authentication
-import utils.semantic.Resource
-
+import utils.semantic.Vocabulary.{OWL, RDFS, LWM}
+import utils.semantic.{RDFNode, Individual, Resource}
+import utils.Global._
 import scala.concurrent.Future
 
 /**
@@ -29,19 +30,15 @@ object LabworkManagementController extends Controller with Authentication {
     }
   }
 
+
+//TODO: ADD ASSIGNMENTS
   def edit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async { request =>
-      for {
-        courses <- Courses.all()
-        degrees <- Degrees.all()
-        labworks <- LabWorks.all()
-      } yield {
-        Ok(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
-      }
+        val labworkIndividual = Individual(Resource(id))
+        val groups = labworkIndividual.props.getOrElse(LWM.hasGroup, List.empty[Resource]).map(_.asResource().get)
+        Future.successful(Ok(views.html.labWorkInformation(labworkIndividual, groups, List(Assignment("1", "Variables")))))
     }
   }
-
-
 
 
   def labWorkPost() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
@@ -64,13 +61,13 @@ object LabworkManagementController extends Controller with Authentication {
     }
   }
 
-  def labworkRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+  def labworkRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async(parse.json) { implicit request =>
-      for{
+      for {
         labworks <- LabWorks.all()
         courses <- Courses.all()
         degrees <- Degrees.all()
-      } yield{
+      } yield {
         val id = (request.body \ "id").as[String]
         LabWorks.delete(Resource(id))
         Ok(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))

@@ -6,10 +6,6 @@ import utils.semantic._
 
 import scala.concurrent.Future
 
-
-
-
-// TODO semester, degree, course shouldnt be a string
 case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
@@ -47,7 +43,7 @@ object LabWorks {
   import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
+//TODO: ADD hasRoom
   def create(labWork: LabWork): Future[Individual] = Future {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val timetable = Timetables.create(Timetable(resource))

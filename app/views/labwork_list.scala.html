@@ -25,7 +25,7 @@
                 <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.LWM.hasDegree, List(Literal(""))).head.value)).props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
                 <td>@labwork.props.getOrElse(Vocabulary.LWM.hasGroup, List(Literal(""))).size</td>
                 <td>@labwork.props.getOrElse(Vocabulary.LWM.hasAssignmentCount, List(Literal("0"))).head.value</td>
-                <td><a class="glyphicon glyphicon-pencil"></a></td>
+                <td><a class="glyphicon glyphicon-pencil" href="@routes.LabworkManagementController.edit(labwork.uri.value)"></a></td>
                 <td><a href="javascript: deleteLabwork('@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
             </tr>
         }
