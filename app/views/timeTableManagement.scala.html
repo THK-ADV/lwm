@@ -1,4 +1,4 @@
-@(labwork: Individual, allSupervisors: List[Individual], timeslots: List[Time], table_entries: List[Resource], form: Form[TimetableEntryFormEntry])
+@(labwork: Individual, allSupervisors: List[Individual], timeslots: List[Time], table_entries: List[Resource], rooms: List[Individual], form: Form[TimetableEntryFormEntry])
 @import utils.semantic.Resource
 @import utils.semantic.Individual
 
@@ -28,7 +28,7 @@
                                     <h4 class="modal-title" id="myModalLabel">Neue Veranstaltung hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @timeTableManagement_form(labwork.uri, Weekdays.workWeek, timeslots, List(Room("2100", "Terminal Raum 1")), allSupervisors, TimeTableForm.timetableForm)
+                                @timeTableManagement_form(labwork.uri, Weekdays.workWeek, timeslots, rooms, allSupervisors, TimeTableForm.timetableForm)
                                 </div>
 
                             </div>

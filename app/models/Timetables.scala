@@ -113,7 +113,8 @@ object TimetableEntries{
       Statement(timetableEntryResource, LWM.hasEndTime, Literal(timetableEntry.endTime.toString)),
       Statement(timetableEntryResource, LWM.hasTimetable, timetableEntry.timetable),
       Statement(timetableEntry.timetable, LWM.hasEntry, timetableEntryResource),
-      Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri)
+      Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri),
+      Statement(timetableEntryResource, LWM.hasRoomId, Literal(timetableEntry.room))
     ) ::: timetableEntry.supervisors.map(supervisor => List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.supervises, timetableEntryResource))).flatten
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map{r =>
       Individual(timetableEntryResource)

@@ -15,7 +15,9 @@ object TimetableController extends Controller with Authentication {
 
   def index(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async { request =>
-      for (supervisors <- Users.all())
+      for {supervisors <- Users.all()
+           rooms <- Rooms.all()
+      }
       yield {
         val labWorkI = Individual(Resource(labworkid))
         val timetable = Individual((for (i <- labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
@@ -25,6 +27,7 @@ object TimetableController extends Controller with Authentication {
           supervisors.toList,
           TimeSlots.slotTimeMap.values.toList.sorted,
           entries,
+          rooms,
           TimeTableForm.timetableForm))
       }
     }
@@ -38,12 +41,14 @@ object TimetableController extends Controller with Authentication {
             formWithErrors => {
               for {e <- convert(labworkid, formWithErrors.get)
                    supervisors <- Users.all()
+                   rooms <- Rooms.all()
               } yield {
                 BadRequest(views.html.timeTableManagement(
                   Individual(Resource(labworkid)),
                   supervisors.toList,
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   Individual(e.timetable).props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get),
+                  rooms,
                   formWithErrors))
               }
             },

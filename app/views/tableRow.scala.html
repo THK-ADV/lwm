@@ -10,7 +10,7 @@
         <h6><b>Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
             @(Individual(s).props.getOrElse(RDFS.label, List("")).head.toString)
         }</h6>
-        <h6><b>Raum:</b>..to be added</h6>
+        <h6><b>Raum:</b> @i.props.getOrElse(LWM.hasRoomId, List.empty[Resource]).head.toString</h6>
         <br />
 
   }
