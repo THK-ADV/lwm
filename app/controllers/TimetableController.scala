@@ -77,5 +77,16 @@ object TimetableController extends Controller with Authentication {
     }
   }
 
+  def entryRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
+  Action.async(parse.json) {
+    implicit request =>
+      val entryId = (request.body \ "eId").as[String]
+      val labId = (request.body \ "lId").as[String]
+      for (s <- TimetableEntries.delete(Resource(entryId))) yield {
+      Redirect(routes.TimetableController.index(labId))
+      }
+  }
+  }
+
 
 }

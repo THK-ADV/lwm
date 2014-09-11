@@ -4,6 +4,7 @@ import controllers.LabworkManagementController._
 import models._
 import play.api.mvc.{Action, Controller}
 import utils.Security.Authentication
+import utils.semantic.Resource
 
 import scala.concurrent.Future
 
@@ -11,7 +12,8 @@ import scala.concurrent.Future
  * Room Management:
  *
  */
-object RoomManagementController extends Controller with Authentication{
+object RoomManagementController extends Controller with Authentication {
+
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
 
@@ -25,7 +27,7 @@ object RoomManagementController extends Controller with Authentication{
     }
   }
 
-  def roomPost = hasPermissions(Permissions.AdminRole.permissions.toList: _*){session =>
+  def roomPost = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
     Action.async { implicit request =>
       Rooms.Forms.roomForm.bindFromRequest.fold(
         formWithErrors => {
@@ -34,11 +36,22 @@ object RoomManagementController extends Controller with Authentication{
           }
         },
         room => {
-          Rooms.create(Room(room.roomId, room.name)).map{i =>
+          Rooms.create(Room(room.roomId, room.name)).map { i =>
             Redirect(routes.RoomManagementController.index())
           }
         }
       )
     }
+  }
+
+  def roomRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session =>
+      Action.async(parse.json) {
+        implicit request =>
+          val id = (request.body \ "id").as[String]
+          for (s<- Rooms.delete(Resource(id))) yield {
+            Redirect(routes.RoomManagementController.index())
+          }
+      }
   }
 }

@@ -18,12 +18,12 @@
         @for(t <- timeslots.sorted) {
             <tr>
                 <td>@t</td>
-                <td>@tableRow(t, Weekdays.Monday.uri.value, labwork, entries)</td>
-                <td>@tableRow(t, Weekdays.Tuesday.uri.value,labwork, entries)</td>
-                <td>@tableRow(t, Weekdays.Wednesday.uri.value,labwork, entries)</td>
-                <td>@tableRow(t, Weekdays.Thursday.uri.value,labwork, entries)</td>
-                <td>@tableRow(t, Weekdays.Friday.uri.value, labwork,entries)</td>
-                <td>@tableRow(t, Weekdays.Saturday.uri.value, labwork,entries)</td>
+                @tableRow(t, Weekdays.Monday.uri.value, labwork, entries) 
+                @tableRow(t, Weekdays.Tuesday.uri.value,labwork, entries)
+                @tableRow(t, Weekdays.Wednesday.uri.value,labwork, entries)
+                @tableRow(t, Weekdays.Thursday.uri.value,labwork, entries)
+                @tableRow(t, Weekdays.Friday.uri.value, labwork,entries)
+                @tableRow(t, Weekdays.Saturday.uri.value, labwork,entries)
             </tr>
         }
 

@@ -40,7 +40,7 @@ object Rooms{
     Individual(courseResource)
   }
 
-  def delete(room: Room): Future[Room] = {
+  def   delete(room: Room): Future[Room] = {
     val maybeRoom = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Room, Vocabulary.LWM.hasId, Literal(room.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeRoom)
     val p = Promise[Room]()

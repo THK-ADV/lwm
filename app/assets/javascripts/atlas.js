@@ -7,7 +7,7 @@ window.location.href = url.url;
 }
 
 function reload(data) {
-    window.location.reload(true);
+window.location.reload(true);
 }
 
 function deleteStudent(id) {
@@ -29,6 +29,14 @@ function deleteDegree(id) {
 
 function deleteLabwork(id) {
     ajaxRequest("/administration/labworks", "DELETE", "application/json", {id: id}, reload);
+}
+
+function deleteRoom(id) {
+    ajaxRequest("/administration/rooms", "DELETE", "application/json", {id: id}, reload);
+}
+
+function deleteTableEntry(entry, labwork) {
+    ajaxRequest("/administration/timetable", "DELETE", "application/json", {eId: entry, lId: labwork}, reload);
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
