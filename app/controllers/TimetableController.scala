@@ -21,6 +21,7 @@ object TimetableController extends Controller with Authentication {
         val labWorkI = Individual(Resource(labworkid))
         val timetable = Individual((for (i ← labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
         val entries = timetable.props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get)
+
         Ok(views.html.timeTableManagement(
           labWorkI,
           supervisors.toList,

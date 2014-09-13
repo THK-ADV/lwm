@@ -5,6 +5,7 @@ import java.util.UUID
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Global._
+import utils.semantic
 import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
 import utils.semantic._
 
@@ -70,9 +71,8 @@ object AssignmentForms {
   )(AssignmentAssociationFormModel.apply)(AssignmentAssociationFormModel.unapply))
 
   val assignmentSolutionForm = Form(mapping(
-    "name" -> nonEmptyText,
-    "text" -> nonEmptyText,
-    "assignemt" -> nonEmptyText
+    "filename" -> nonEmptyText,
+    "text" -> nonEmptyText
   )(AssignmentSolutionFormModel.apply)(AssignmentSolutionFormModel.unapply))
 }
 
@@ -112,7 +112,7 @@ object AssignmentAssociations {
 }
 
 case class AssignmentSolution(fileName: String, text: String, assignment: Resource)
-case class AssignmentSolutionFormModel(name: String, text: String, assignment: String)
+case class AssignmentSolutionFormModel(name: String, text: String)
 
 object AssignmentSolutions {
   def create(solution: AssignmentSolution): Future[Individual] = {
@@ -123,6 +123,7 @@ object AssignmentSolutions {
       Statement(solutionResource, RDF.typ, OWL.NamedIndividual),
       Statement(solutionResource, LWM.hasId, Literal(id.toString)),
       Statement(solutionResource, LWM.hasAssignment, solution.assignment),
+      Statement(solution.assignment, LWM.hasSolution, solutionResource),
       Statement(solutionResource, LWM.hasFileName, Literal(solution.fileName)),
       Statement(solutionResource, LWM.hasText, Literal(solution.text))
     )

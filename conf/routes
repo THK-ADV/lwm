@@ -58,6 +58,7 @@ DELETE        /administration/semesters                    controllers.SemesterM
 
 GET           /administration/assignments                     controllers.AssignmentManagementController.index()
 POST          /administration/assignments                     controllers.AssignmentManagementController.assignmentPost()
+POST          /administration/assignments/:id                 controllers.AssignmentManagementController.assignmentSolutionPost(id)
 DELETE        /administration/assignments                     controllers.AssignmentManagementController.assignmentRemoval()
 
 GET           /administration/labworks/:id/assignments        controllers.AssignmentManagementController.labAssignmentIndex(id)

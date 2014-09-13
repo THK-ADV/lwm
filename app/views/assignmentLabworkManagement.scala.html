@@ -1,4 +1,4 @@
-@(labwork: Resource, assignments: List[Resource], courses: List[Individual],form: Form[AssignmentAssociationFormModel])
+@(labwork: Resource, assignments: List[Resource], courses: List[Individual], asform: Form[AssignmentAssociationFormModel],sForm: Form[AssignmentSolutionFormModel])
 @import utils.semantic.Resource
 @import utils.semantic.Individual
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @assignment_list(assignments)
+                    @assignment_list(assignments, sForm)
                     <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                     </button>
@@ -25,7 +25,7 @@
                                     <h4 class="modal-title" id="myModalLabel">Neues Praktikum hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @assignmentAssociation_form(labwork, courses, form)
+                                @assignmentAssociation_form(labwork, courses, asform)
                                 </div>
 
                             </div>
