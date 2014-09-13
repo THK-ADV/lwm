@@ -31,6 +31,7 @@ object Rooms {
       Statement(courseResource, RDF.typ, LWM.Room),
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
       Statement(courseResource, LWM.hasName, Literal(room.name)),
+      Statement(courseResource, RDFS.label, Literal(room.name)),
       Statement(courseResource, LWM.hasId, Literal(room.id.toString)),
       Statement(courseResource, LWM.hasRoomId, Literal(room.roomId))
     )

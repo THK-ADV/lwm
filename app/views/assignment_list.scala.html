@@ -1,4 +1,4 @@
-@(assignments: List[Resource])
+@(assignments: List[Resource], form: Form[AssignmentSolutionFormModel])
 @import utils.Global._
 @import utils.semantic.{Resource, Individual, Vocabulary}
 
@@ -15,9 +15,24 @@
             <tr>
                 <td>@i.props(Vocabulary.RDFS.label)</td>
                 <td>@i.props(Vocabulary.LWM.hasDescription)</td>
-                <td>@i.props(Vocabulary.LWM.hasText)</td>
+                <td>@i.props(Vocabulary.LWM.hasTopic)</td>
+                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#solutionModal"></a></td>
                 <td><a href="javascript: deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove" ></a></td>
             </tr>
+            <div class="modal fade" id="solutionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
+                        </div>
+                        <div class="modal-body">
+                        @assignment_solution(i, form)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         }
     </table>
 

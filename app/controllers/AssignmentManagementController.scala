@@ -24,7 +24,7 @@ object AssignmentManagementController extends Controller with Authentication{
             assignments <- Assignments.all()
             courses <- Courses.all()
           } yield {
-            Ok(views.html.assignmentManagement(assignments.map(_.uri), courses, AssignmentForms.assignmentForm))
+            Ok(views.html.assignmentManagement(assignments.map(_.uri), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm))
           }
       }
   }
@@ -39,7 +39,7 @@ object AssignmentManagementController extends Controller with Authentication{
               assignments <- Assignments.all()
               courses <- Courses.all()
             } yield {
-              BadRequest(views.html.assignmentManagement(assignments.map(_.uri), courses, formWithErrors))
+              BadRequest(views.html.assignmentManagement(assignments.map(_.uri), courses, formWithErrors, AssignmentForms.assignmentSolutionForm))
             }
           },
           a =>
@@ -61,14 +61,35 @@ object AssignmentManagementController extends Controller with Authentication{
       }
   }
 
-  //TODO: Add association
+  def assignmentSolutionPost(assignmentid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session =>
+      Action.async{
+        implicit request =>
+        AssignmentForms.assignmentSolutionForm.bindFromRequest.fold(
+        formWithErrors => {
+          for {
+            assignments <- Assignments.all()
+            courses <- Courses.all()
+          } yield {
+            BadRequest(views.html.assignmentManagement(assignments.map(_.uri), courses, AssignmentForms.assignmentForm, formWithErrors))
+          }
+        },
+        a =>
+          AssignmentSolutions.create(AssignmentSolution(a.name, a.text, Resource(assignmentid))).map{_ =>
+          Redirect(routes.AssignmentManagementController.index())
+          }
+        )
+      }
+  }
+
+  //TODO: ADD ASSOCIATION
   def labAssignmentIndex(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session =>
       Action.async {
         request =>
           for(courses <- Courses.all())
           yield {
-            Ok(views.html.assignmentLabworkManagement(Resource(labworkid),Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, AssignmentForms.assignmentAssociationForm))
+            Ok(views.html.assignmentLabworkManagement(Resource(labworkid),Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, AssignmentForms.assignmentAssociationForm, AssignmentForms.assignmentSolutionForm))
           }
       }
   }
@@ -83,7 +104,7 @@ object AssignmentManagementController extends Controller with Authentication{
             assignments <- Assignments.all()
             courses <- Courses.all()
           } yield {
-            BadRequest(views.html.assignmentLabworkManagement(Resource(labworkid), Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, formWithErrors))
+            BadRequest(views.html.assignmentLabworkManagement(Resource(labworkid), Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, formWithErrors, AssignmentForms.assignmentSolutionForm))
           }
         },
           a => {

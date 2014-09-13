@@ -71,8 +71,7 @@ object AssignmentForms {
 
   val assignmentSolutionForm = Form(mapping(
     "name" -> nonEmptyText,
-    "text" -> nonEmptyText,
-    "assignemt" -> nonEmptyText
+    "text" -> nonEmptyText
   )(AssignmentSolutionFormModel.apply)(AssignmentSolutionFormModel.unapply))
 }
 
@@ -112,7 +111,7 @@ object AssignmentAssociations {
 }
 
 case class AssignmentSolution(name: String, text: String, assignment: Resource)
-case class AssignmentSolutionFormModel(name: String, text: String, assignment: String)
+case class AssignmentSolutionFormModel(name: String, text: String)
 
 object AssignmentSolutions {
   def create(solution: AssignmentSolution): Future[Individual] = {
@@ -124,7 +123,8 @@ object AssignmentSolutions {
       Statement(solutionResource, LWM.hasId, Literal(id.toString)),
       Statement(solutionResource, LWM.hasAssignment, solution.assignment),
       Statement(solutionResource, LWM.hasName, Literal(solution.name)),
-      Statement(solutionResource, LWM.hasText, Literal(solution.text))
+      Statement(solutionResource, LWM.hasText, Literal(solution.text)),
+      Statement(solution.assignment, LWM.hasSolution, solutionResource)
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b ⇒ Individual(solutionResource))

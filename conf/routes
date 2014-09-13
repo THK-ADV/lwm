@@ -17,9 +17,11 @@ GET           /administration/dashboard                       controllers.Admini
 GET           /administration/students                        controllers.StudentsManagement.index()
 POST          /administration/students                        controllers.StudentsManagement.studentPost()
 DELETE        /administration/students                        controllers.StudentsManagement.studentRemoval()
+POST          /administration/students/suggest                controllers.StudentsManagement.studentSuggestions()
 
 GET           /administration/labworks                        controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                    controllers.LabworkManagementController.edit(id)
+POST          /administration/labworks/:id                    controllers.LabworkManagementController.studentAddition(id)
 POST          /administration/labworks                        controllers.LabworkManagementController.labWorkPost()
 DELETE        /administration/labworks                        controllers.LabworkManagementController.labworkRemoval()
 
@@ -56,6 +58,7 @@ DELETE        /administration/semesters                       controllers.Semest
 
 GET           /administration/assignments                     controllers.AssignmentManagementController.index()
 POST          /administration/assignments                     controllers.AssignmentManagementController.assignmentPost()
+POST          /administration/assignments/:id                 controllers.AssignmentManagementController.assignmentSolutionPost(id)
 DELETE        /administration/assignments                     controllers.AssignmentManagementController.assignmentRemoval()
 
 GET           /administration/labworks/:id/assignments        controllers.AssignmentManagementController.labAssignmentIndex(id)

@@ -21,6 +21,7 @@ object TimetableController extends Controller with Authentication {
         val labWorkI = Individual(Resource(labworkid))
         val timetable = Individual((for (i ← labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
         val entries = timetable.props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get)
+
         Ok(views.html.timeTableManagement(
           labWorkI,
           supervisors.toList,
@@ -63,7 +64,7 @@ object TimetableController extends Controller with Authentication {
 
   def convert(id: String, entry: TimetableEntryFormEntry): Future[TimetableEntry] = {
     for (s ← Users.all()) yield {
-      val supervisors = s.filter(i ⇒ i.props(RDFS.label).head.value == entry.supervisors).map(_.uri).toList
+      val supervisors = s.filter(i ⇒ i.uri.value == entry.supervisors).map(_.uri).toList
       val timetableId = Individual(Resource(id)).props.getOrElse(LWM.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
 
       TimetableEntry(
