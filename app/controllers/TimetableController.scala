@@ -82,8 +82,8 @@ object TimetableController extends Controller with Authentication {
     implicit request =>
       val entryId = (request.body \ "eId").as[String]
       val labId = (request.body \ "lId").as[String]
-      for (s <- TimetableEntries.delete(Resource(entryId))) yield {
-      Redirect(routes.TimetableController.index(labId))
+      TimetableEntries.delete(Resource(entryId)).map { _ =>
+        Redirect(routes.TimetableController.index(labId))
       }
   }
   }
