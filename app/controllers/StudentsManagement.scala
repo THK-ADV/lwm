@@ -90,8 +90,8 @@ object StudentsManagement extends Controller with Authentication {
           "ids" -> JsArray(list.map(JsString)))
 
         render {
-          case Accepts.Json() ⇒ Ok(json)
-          case Accepts.JavaScript() => Ok(json)
+          case Accepts.Json()       ⇒ Ok(json)
+          case Accepts.JavaScript() ⇒ Ok(json)
         }
       }
 

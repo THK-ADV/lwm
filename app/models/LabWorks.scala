@@ -176,4 +176,6 @@ object LabworkGroups {
       SPARQLTools.statementsFromString(stringResult).map(labwork ⇒ Individual(labwork.s)).toList
     }
   }
+
+  def isLabWorkGroup(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Group}}")
 }

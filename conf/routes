@@ -21,6 +21,7 @@ POST          /administration/students/suggest             controllers.StudentsM
 
 GET           /administration/labworks                     controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                 controllers.LabworkManagementController.edit(id)
+POST          /administration/labworks/:id                 controllers.LabworkManagementController.studentAddition(id)
 POST          /administration/labworks                     controllers.LabworkManagementController.labWorkPost()
 DELETE        /administration/labworks                     controllers.LabworkManagementController.labworkRemoval()
 

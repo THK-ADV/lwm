@@ -98,6 +98,8 @@ object Students {
   def search(query: String, maxCount: Int): Future[List[String]] = search(query).map(_.take(maxCount))
 
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
+
+  def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Student}}")
 }
 
 object StudentForms {
