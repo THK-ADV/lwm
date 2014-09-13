@@ -1,0 +1,15 @@
+@(courses: List[Individual], form: Form[AssignmentFormModel])
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Individual
+
+    @helper.form(action = routes.AssignmentManagementController.assignmentPost()) {
+    @helper.inputText(form("id"), '_label -> "Titel:")
+    @helper.textarea(form("description"), '_label -> "Beschreibung")
+    @helper.textarea(form("text"), 'rows -> 10, 'cols -> 50, '_label -> "Aufgabe:")
+    @helper.inputText(form("topics"), '_label -> "Themen:")
+    @helper.inputCheckboxGroup(form("courses"), for {course <- courses; labelList <- course.props.get(LWM.hasName); label = labelList.headOption.getOrElse("")} yield course.uri.value -> label.toString, '_label -> "Veranstaltungen:")
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
+    </div>
+}

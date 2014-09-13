@@ -56,5 +56,12 @@ GET           /administration/semesters                    controllers.SemesterM
 POST          /administration/semesters                    controllers.SemesterManagementController.semesterPost()
 DELETE        /administration/semesters                    controllers.SemesterManagementController.semesterRemoval()
 
+GET           /administration/assignments                     controllers.AssignmentManagementController.index()
+POST          /administration/assignments                     controllers.AssignmentManagementController.assignmentPost()
+DELETE        /administration/assignments                     controllers.AssignmentManagementController.assignmentRemoval()
+
+GET           /administration/labworks/:id/assignments        controllers.AssignmentManagementController.labAssignmentIndex(id)
+POST          /administration/labworks/:id/assignments        controllers.AssignmentManagementController.labAssignmentPost(id)
+
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                controllers.Assets.at(path="/public", file)

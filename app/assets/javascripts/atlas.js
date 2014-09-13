@@ -43,6 +43,10 @@ function deleteSemester(id) {
     ajaxRequest("/administration/semesters", "DELETE", "application/json", {id: id}, reload);
 }
 
+function deleteAssignment(id) {
+    ajaxRequest("/administration/assignments", "DELETE", "application/json", {id: id}, reload);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

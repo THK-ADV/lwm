@@ -1,4 +1,5 @@
 @(labwork: Individual, groups: List[Individual], assignments: List[Individual])
+@import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.Resource
 @import utils.semantic.Individual
@@ -16,7 +17,7 @@
                 @navigation_admin()
                 <div class="col-md-9">
                     <div class="row">
-                        <h4>Veranstaltung: @labwork.props.getOrElse(LWM.hasName, List("")).head @labwork.props.getOrElse(LWM.hasSemester, List("")).head</h4>
+                        <h4>Veranstaltung: @labwork.props.getOrElse(LWM.hasName, List("")).head @Individual(Resource(labwork.props.getOrElse(LWM.hasSemester, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString</h4>
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
@@ -24,8 +25,8 @@
                             <table class="table table-bordered">
                                 <tbody>
                                     <tr><th>Gruppe</th><th>Anzahl</th></tr>
-                                    @for(r <- groups) {
-                                        <tr><td>@(r.props.getOrElse(LWM.hasId, List("")).head)</td> <td>@r.props.getOrElse(LWM.hasMember, List.empty[Resource]).size)</td></tr>
+                                    @for(r <- groups; g <- r.props(LWM.hasId)) {
+                                        <tr><td>@g.value</td> <td>@r.props.getOrElse(LWM.hasMember, List.empty[Resource]).size</td></tr>
                                     }
                                 </tbody>
                             </table>

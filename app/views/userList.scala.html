@@ -18,7 +18,6 @@
                 <td>@user.props.getOrElse(Vocabulary.LWM.hasGmId, List(Literal(""))).head.value</td>
                 <td>@user.props.getOrElse(Vocabulary.FOAF.lastName, List(Literal(""))).head.value</td>
                 <td>@user.props.getOrElse(Vocabulary.FOAF.firstName, List(Literal(""))).head.value</td>
-                <td><a class="glyphicon glyphicon-pencil"></a></td>
                 <td><a href="javascript: deleteUser('@user.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
             </tr>
         }

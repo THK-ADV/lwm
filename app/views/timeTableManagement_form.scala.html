@@ -6,10 +6,10 @@
 
 @helper.form(action = routes.TimetableController.timeTableEntryPost(labWorkId.value)) {
     @helper.select(form("day"), for(weekday <- weekdays) yield weekday.label -> weekday.label, '_label -> "Tag:")
-    @helper.select(form("room"), for (room <- rooms; labelList <- room.props.get(LWM.hasRoomId); label = labelList.headOption.getOrElse("")) yield label.toString -> label.toString, '_label -> "Raum:")
+    @helper.select(form("room"), for (room <- rooms; labelList <- room.props.get(LWM.hasRoomId); label = labelList.headOption.getOrElse("")) yield room.uri.value -> label.toString, '_label -> "Raum:")
     @helper.select(form("start"), for(st <- time) yield st.toString -> st.toString, '_label -> "Startzeit:")
     @helper.select(form("end"), for(et <- time) yield et.toString -> et.toString, '_label -> "Endzeit:")
-    @helper.select(form("supervisors"), for {supervisor <- supervisors; labelList <- supervisor.props.get(Vocabulary.RDFS.label); label = labelList.headOption.getOrElse("")} yield label.toString -> label.toString, '_label -> "Betreuer:")
+    @helper.select(form("supervisors"), for {supervisor <- supervisors; labelList <- supervisor.props.get(Vocabulary.RDFS.label); label = labelList.headOption.getOrElse("")} yield supervisor.uri.value -> label.toString, '_label -> "Betreuer:")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
         <button type="submit" class="btn btn-primary">Hinzufügen</button>

@@ -1,0 +1,24 @@
+@(assignments: List[Resource])
+@import utils.Global._
+@import utils.semantic.{Resource, Individual, Vocabulary}
+
+<div class="panel panel-default">
+    <div class="panel-heading">Aufgabenübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Id</th>
+            <th>Description</th>
+            <th>Topics</th>
+        </tr>
+        @for(assignment <- assignments; i = Individual(assignment)) {
+            <tr>
+                <td>@i.props(Vocabulary.RDFS.label)</td>
+                <td>@i.props(Vocabulary.LWM.hasDescription)</td>
+                <td>@i.props(Vocabulary.LWM.hasText)</td>
+                <td><a href="javascript: deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove" ></a></td>
+            </tr>
+        }
+    </table>
+
+</div>
