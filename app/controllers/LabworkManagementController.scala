@@ -53,8 +53,9 @@ object LabworkManagementController extends Controller with Authentication {
           }
         },
         labwork => {
-          LabWorks.create(labwork)
-          Future.successful(Redirect(routes.LabworkManagementController.index()))
+          LabWorks.create(labwork).map{ _ =>
+            Redirect(routes.LabworkManagementController.index())
+          }
         }
       )
     }

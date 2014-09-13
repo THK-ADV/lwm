@@ -26,7 +26,7 @@ object Rooms{
   import utils.semantic.Vocabulary._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(room: Room): Future[Individual] = Future{
+  def create(room: Room): Future[Individual] = {
     val courseResource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
       Statement(courseResource, RDF.typ, LWM.Room),
@@ -35,9 +35,7 @@ object Rooms{
       Statement(courseResource, LWM.hasId, Literal(room.id.toString)),
       Statement(courseResource, LWM.hasRoomId, Literal(room.roomId))
     )
-
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
-    Individual(courseResource)
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(_ => Individual(courseResource))
   }
 
   def   delete(room: Room): Future[Room] = {
