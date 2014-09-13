@@ -3,15 +3,16 @@ package models
 import java.util.UUID
 
 import utils.Global._
-import utils.semantic.Vocabulary.{OWL, LWM, RDF}
+import utils.semantic.Vocabulary.{ OWL, LWM, RDF }
 import utils.semantic._
 
-import scala.concurrent.{Promise, Future}
-
+import scala.concurrent.{ Promise, Future }
 
 case class ApplicationToken(student: Resource, labwork: Resource)
 
 object ApplicationTokens {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
   def create(token: ApplicationToken): Future[Individual] = {
     val id = UUID.randomUUID()
     val tokenResource = ResourceUtils.createResource(lwmNamespace, id)
