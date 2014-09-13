@@ -6,7 +6,7 @@
 
 <label>Aufgabe:</label> <h5>@assignment.props.getOrElse(LWM.hasText, List.empty[String]).head.toString</h5>
 @if(assignment.props.getOrElse(LWM.hasSolution, List.empty[Resource]).nonEmpty) {
-    <label>Name:</label> @Individual(Resource(assignment.props.getOrElse(LWM.hasSolution, List.empty[Resource]).head.value)).props.getOrElse(LWM.hasName, List.empty[String]).head.toString
+    <label>Name:</label> @Individual(Resource(assignment.props.getOrElse(LWM.hasSolution, List.empty[Resource]).head.value)).props.getOrElse(LWM.hasFileName, List.empty[String]).head.toString
     <br />
     <br />
     <label>Lösung:</label><br /><h5>@Individual(Resource(assignment.props.getOrElse(LWM.hasSolution, List.empty[Resource]).head.value)).props.getOrElse(LWM.hasText, List.empty[String]).head.toString</h5>
@@ -16,7 +16,7 @@
     </div>
 } else {
     @helper.form(action = routes.AssignmentManagementController.assignmentSolutionPost(assignment.uri.value)) {
-        @helper.inputText(form("name"), '_label -> "Name:")
+        @helper.inputText(form("filename"), '_label -> "Name:")
         @helper.textarea(form("text"), 'rows -> 15, 'cols -> 40, '_label -> "Lösung:")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>

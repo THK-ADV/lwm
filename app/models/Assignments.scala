@@ -5,6 +5,7 @@ import java.util.UUID
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Global._
+import utils.semantic
 import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
 import utils.semantic._
 
@@ -70,7 +71,7 @@ object AssignmentForms {
   )(AssignmentAssociationFormModel.apply)(AssignmentAssociationFormModel.unapply))
 
   val assignmentSolutionForm = Form(mapping(
-    "name" -> nonEmptyText,
+    "filename" -> nonEmptyText,
     "text" -> nonEmptyText
   )(AssignmentSolutionFormModel.apply)(AssignmentSolutionFormModel.unapply))
 }
@@ -110,7 +111,7 @@ object AssignmentAssociations {
   }
 }
 
-case class AssignmentSolution(name: String, text: String, assignment: Resource)
+case class AssignmentSolution(fileName: String, text: String, assignment: Resource)
 case class AssignmentSolutionFormModel(name: String, text: String)
 
 object AssignmentSolutions {
@@ -122,9 +123,9 @@ object AssignmentSolutions {
       Statement(solutionResource, RDF.typ, OWL.NamedIndividual),
       Statement(solutionResource, LWM.hasId, Literal(id.toString)),
       Statement(solutionResource, LWM.hasAssignment, solution.assignment),
-      Statement(solutionResource, LWM.hasName, Literal(solution.name)),
-      Statement(solutionResource, LWM.hasText, Literal(solution.text)),
-      Statement(solution.assignment, LWM.hasSolution, solutionResource)
+      Statement(solution.assignment, LWM.hasSolution, solutionResource),
+      Statement(solutionResource, LWM.hasFileName, Literal(solution.fileName)),
+      Statement(solutionResource, LWM.hasText, Literal(solution.text))
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b ⇒ Individual(solutionResource))

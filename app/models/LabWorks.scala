@@ -4,7 +4,7 @@ import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
 
-case class LabWork(id: String, name: String, groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
+case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
 
@@ -23,8 +23,6 @@ object LabWorkForms {
 
   val labworkForm = Form(
     mapping(
-      "id" -> nonEmptyText,
-      "name" -> nonEmptyText,
       "groupCount" -> number(min = 1),
       "assignmentCount" -> number(min = 1),
       "courseId" -> nonEmptyText,
@@ -33,16 +31,7 @@ object LabWorkForms {
     )(LabWork.apply)(LabWork.unapply)
   )
 
-  val studentToGroupAdditionForm = Form(
-    mapping(
-      "student" -> nonEmptyText,
-      "group" -> nonEmptyText
-    )(StudentToGroupAdditionFormModel.apply)(StudentToGroupAdditionFormModel.unapply)
-  )
 }
-
-case class StudentToGroupAddition(student: Resource, group: Resource)
-case class StudentToGroupAdditionFormModel(student: String, group: String)
 
 /**
   * Praktika
@@ -54,18 +43,22 @@ object LabWorks {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(labWork: LabWork): Future[Individual] = {
+    val courseIndividual = Individual(Resource(labWork.courseId))
     val resource = ResourceUtils.createResource(lwmNamespace)
     val timetable = Timetables.create(Timetable(resource))
+
+    val label = courseIndividual.props.getOrElse(RDFS.label, List(Literal(""))).head.asLiteral().get
+
     val statements = List(
       Statement(resource, RDF.typ, LWM.LabWork),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasId, Literal(labWork.id)),
-      Statement(resource, LWM.hasName, Literal(labWork.name)),
-      Statement(resource, RDFS.label, Literal(labWork.name)),
+      Statement(resource, RDFS.label, label),
       Statement(resource, LWM.hasTimetable, timetable.uri),
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
       Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
+      Statement(resource, LWM.allowsApplications, Literal("false")),
+      Statement(resource, LWM.isClosed, Literal("false")),
       Statement(resource, LWM.hasSemester, Resource(labWork.semester))
     ) ++ (1 to labWork.assignmentCount).map { c ⇒
         val assoc = ResourceUtils.createResource(lwmNamespace)
@@ -89,19 +82,6 @@ object LabWorks {
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
       Individual(resource)
     }
-  }
-
-  def delete(labwork: LabWork): Future[LabWork] = {
-    val maybeLabwork = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.LabWork, Vocabulary.LWM.hasId, Literal(labwork.id))
-    val resultFuture = sparqlExecutionContext.executeQuery(maybeLabwork)
-    val p = Promise[LabWork]()
-    resultFuture.map { result ⇒
-      val resources = SPARQLTools.statementsFromString(result).map(degree ⇒ degree.s)
-      resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(labwork) }
-      }
-    }
-    p.future
   }
 
   def delete(resource: Resource): Future[Resource] = {

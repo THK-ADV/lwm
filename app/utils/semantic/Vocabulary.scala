@@ -22,12 +22,16 @@ object Vocabulary {
     val LabWork = resource("LabWork")
     val Group = resource("Group")
     val Room = resource("Room")
+
     val Assignment = resource("Assignment")
     val AssignmentAssociation = resource("AssignmentAssociation")
     val AssignmentSolution = resource("AssignmentSolution")
+
     val Semester = resource("Semester")
     val WinterSemester = resource("WinterSemester")
     val SummerSemester = resource("SummerSemester")
+
+    val ApplicationToken = resource("ApplicationToken")
 
     val AutomationITMaster = resource("AutomationITMaster")
     val BusinessAdministrationAndEngineeringBachelor = resource("BusinessAdministrationAndEngineeringBachelor")
@@ -63,6 +67,8 @@ object Vocabulary {
     val hasSemester = property("hasSemester")
     val hasCourse = property("hasCourse")
     val hasAssignmentAssociation = property("hasAssignmentAssociation")
+    val allowsApplications = property("allowsApplications")
+    val isClosed = property("isClosed")
 
     val Weekday = resource("Weekday")
     val Monday = resource("Monday")
@@ -98,6 +104,10 @@ object Vocabulary {
     val hasAssignmentDate = property("hasAssignmentDate")
     val hasDueDate = property("hasDueDate")
     val hasOrderId = property("hasOrderId")
+
+    val hasApplicationToken = property("hasApplicationToken")
+
+    val hasFileName = property("hasFileName")
   }
 
   /**

@@ -62,3 +62,5 @@ libraryDependencies += "org.scalatestplus" %% "play" % "1.1.0" % "test" withSour
 libraryDependencies += "org.mockito" % "mockito-all" % "1.9.5" withSources() withJavadoc()
 
 libraryDependencies += "joda-time" % "joda-time" % "2.4" withSources() withJavadoc()
+
+libraryDependencies += "de.jollyday" % "jollyday" % "0.4.7" withSources() withJavadoc()
