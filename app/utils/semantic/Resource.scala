@@ -1,11 +1,11 @@
 package utils.semantic
 
-import java.net.{URLDecoder, URLEncoder}
+import java.net.{ URLDecoder, URLEncoder }
 import java.util.UUID
 import com.hp.hpl.jena.rdf.model.AnonId
 import scala.xml.XML._
 
-object ResourceUtils{
+object ResourceUtils {
   def createResource(ns: Namespace) = Resource(s"$ns${AnonId.create()}")
   def createResource(ns: Namespace, id: UUID) = Resource(s"$ns${id.toString}")
 }
@@ -18,7 +18,7 @@ trait RDFNode {
   def asLiteral(): Option[Literal]
 }
 
-case class Namespace(uri: String){
+case class Namespace(uri: String) {
   override def toString = s"$uri"
 }
 
@@ -80,9 +80,9 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
   }
 
   /**
-   * Lists all properties of this individual.
-   * @return the list of known properties in the union graph
-   */
+    * Lists all properties of this individual.
+    * @return the list of known properties in the union graph
+    */
   def properties: List[Statement] = {
     val response = executionContext.executeQueryBlocking(SPARQLBuilder.listIndividualProperties(uri))
     val xml = loadString(response)
@@ -91,13 +91,12 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
     t.toList
   }
 
-
   /**
-   * Adds a new statement to the named graph.
-   * @param p the predicate
-   * @param o the object
-   * @return true, if the update of the named graph was successful
-   */
+    * Adds a new statement to the named graph.
+    * @param p the predicate
+    * @param o the object
+    * @return true, if the update of the named graph was successful
+    */
   def add(p: Property, o: RDFNode)(implicit graph: NamedGraph): Boolean = {
     executionContext.executeUpdateBlocking(SPARQLBuilder.insertStatements(graph, Statement(uri, p, o)))
   }
@@ -112,11 +111,11 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
   }
 
   /**
-   * Checks whether the statement exists in the union graph.
-   * @param p the predicate
-   * @param o the object
-   * @return true, if the statement exists
-   */
+    * Checks whether the statement exists in the union graph.
+    * @param p the predicate
+    * @param o the object
+    * @return true, if the statement exists
+    */
   def exists(p: Property, o: RDFNode): Boolean = {
     executionContext.executeQueryBlocking(SPARQLBuilder.exists(Statement(uri, p, o))).contains("true")
   }

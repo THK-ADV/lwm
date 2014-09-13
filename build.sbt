@@ -1,3 +1,5 @@
+import com.typesafe.sbt.SbtScalariform
+import scalariform.formatter.preferences._
 import play.PlayImport._
 import play.PlayImport.PlayKeys._
 import play.twirl.sbt.Import._
@@ -5,6 +7,18 @@ import sbt._
 import Process._
 import Keys._
 import play._
+
+scalariformSettings
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(PreserveDanglingCloseParenthesis, true)
+  .setPreference(RewriteArrowSymbols, true)
+  .setPreference(AlignParameters, true)
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
 
 name := """lwm"""
 

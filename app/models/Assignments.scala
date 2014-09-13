@@ -5,17 +5,16 @@ import java.util.UUID
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Global._
-import utils.semantic.Vocabulary.{RDFS, OWL, LWM, RDF}
+import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
 import utils.semantic._
 
-import scala.concurrent.{Promise, Future}
+import scala.concurrent.{ Promise, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
-
 
 object Assignments {
   def create(assignment: Assignment): Future[Individual] = {
     val id = UUID.randomUUID()
-    val courseResource = ResourceUtils.createResource(lwmNamespace,id)
+    val courseResource = ResourceUtils.createResource(lwmNamespace, id)
     val statements = List(
       Statement(courseResource, RDF.typ, LWM.Assignment),
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
@@ -23,25 +22,25 @@ object Assignments {
       Statement(courseResource, RDFS.label, Literal(assignment.id)),
       Statement(courseResource, LWM.hasText, Literal(assignment.text)),
       Statement(courseResource, LWM.hasDescription, Literal(assignment.description))
-    ) ++ assignment.courses.map(c => Statement(courseResource, LWM.hasCourse, Resource(c))) ++ assignment.topics.map(t => Statement(courseResource, LWM.hasTopic, Literal(t)))
+    ) ++ assignment.courses.map(c ⇒ Statement(courseResource, LWM.hasCourse, Resource(c))) ++ assignment.topics.map(t ⇒ Statement(courseResource, LWM.hasTopic, Literal(t)))
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b => Individual(courseResource))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b ⇒ Individual(courseResource))
   }
 
-  def delete(resource: Resource): Future[Resource] =  {
+  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if(individual.props(RDF.typ).contains(LWM.Assignment)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
-    }else{
+    if (individual.props(RDF.typ).contains(LWM.Assignment)) {
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+    } else {
       p.failure(new IllegalArgumentException("Resource is not an Assignment"))
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Assignment)).map{stringResult =>
-      SPARQLTools.statementsFromString(stringResult).map(course => Individual(course.s)).toList
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Assignment)).map { stringResult ⇒
+      SPARQLTools.statementsFromString(stringResult).map(course ⇒ Individual(course.s)).toList
     }
   }
 }
@@ -52,7 +51,7 @@ case class AssignmentAssociation(assignment: Resource, labwork: Resource, assign
 
 case class AssignmentAssociationFormModel(assignment: String, labwork: String, assignmentDate: String, dueDate: String)
 
-object AssignmentForms{
+object AssignmentForms {
   val assignmentForm = Form(mapping(
     "id" -> nonEmptyText,
     "description" -> nonEmptyText,
@@ -71,7 +70,7 @@ object AssignmentForms{
   val assignmentSolutionForm = Form(mapping(
     "name" -> nonEmptyText,
     "text" -> nonEmptyText,
-    "assignemt"-> nonEmptyText
+    "assignemt" -> nonEmptyText
   )(AssignmentSolutionFormModel.apply)(AssignmentSolutionFormModel.unapply))
 }
 
@@ -89,27 +88,26 @@ object AssignmentAssociations {
       Statement(associationResource, LWM.hasLabWork, association.labwork)
     )
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b => Individual(associationResource))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b ⇒ Individual(associationResource))
   }
 
-  def delete(resource: Resource): Future[Resource] =  {
+  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if(individual.props(RDF.typ).contains(LWM.AssignmentAssociation)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
-    }else{
+    if (individual.props(RDF.typ).contains(LWM.AssignmentAssociation)) {
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+    } else {
       p.failure(new IllegalArgumentException("Resource is not an AssignmentAssociation"))
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.AssignmentAssociation)).map{stringResult =>
-      SPARQLTools.statementsFromString(stringResult).map(course => Individual(course.s)).toList
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.AssignmentAssociation)).map { stringResult ⇒
+      SPARQLTools.statementsFromString(stringResult).map(course ⇒ Individual(course.s)).toList
     }
   }
 }
-
 
 case class AssignmentSolution(name: String, text: String, assignment: Resource)
 case class AssignmentSolutionFormModel(name: String, text: String, assignment: String)
@@ -127,23 +125,23 @@ object AssignmentSolutions {
       Statement(solutionResource, LWM.hasText, Literal(solution.text))
     )
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b => Individual(solutionResource))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b ⇒ Individual(solutionResource))
   }
 
-  def delete(resource: Resource): Future[Resource] =  {
+  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if(individual.props(RDF.typ).contains(LWM.AssignmentSolution)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
-    }else{
+    if (individual.props(RDF.typ).contains(LWM.AssignmentSolution)) {
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+    } else {
       p.failure(new IllegalArgumentException("Resource is not an AssignmentSolution"))
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.AssignmentSolution)).map{stringResult =>
-      SPARQLTools.statementsFromString(stringResult).map(solution => Individual(solution.s)).toList
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.AssignmentSolution)).map { stringResult ⇒
+      SPARQLTools.statementsFromString(stringResult).map(solution ⇒ Individual(solution.s)).toList
     }
   }
 }

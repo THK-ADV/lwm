@@ -1,7 +1,7 @@
 package actors
 
 import actors.SessionHandler._
-import akka.actor.{Actor, Props}
+import akka.actor.{ Actor, Props }
 import controllers.Permissions
 import controllers.Permissions.Role
 import org.apache.commons.codec.digest.DigestUtils
@@ -9,7 +9,6 @@ import org.joda.time.DateTime
 import play.api.Configuration
 
 import scala.concurrent.Future
-
 
 object SessionHandler {
 
@@ -36,7 +35,7 @@ class SessionHandler(config: Configuration) extends Actor {
 
   import utils.LDAPAuthentication._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   private var sessions: Set[Session] = Set.empty
 
@@ -46,46 +45,44 @@ import scala.concurrent.ExecutionContext.Implicits.global
   val bindPort = config.getInt("lwm.bindPort").get
 
   def receive: Receive = {
-    case AuthenticationRequest(user, password) =>
+    case AuthenticationRequest(user, password) ⇒
       val authFuture = authenticate(user, password, bindHost, bindPort, DN)
-
-
 
       val requester = sender()
       authFuture.map {
-        case l@Left(error) =>
+        case l @ Left(error) ⇒
           requester ! l
-        case Right(success) =>
+        case Right(success) ⇒
           val sessionFuture = createSessionID(user)
-          sessionFuture map { session =>
+          sessionFuture map { session ⇒
             sessions += session
             requester ! Right(session)
           }
       }
-    case LogoutRequest(sessionID) =>
+    case LogoutRequest(sessionID) ⇒
       sessions.find(_.id == sessionID).map(sessions -= _)
-    case SessionRequest(id) =>
-      sessions.find(_.id == id) map { session =>
+    case SessionRequest(id) ⇒
+      sessions.find(_.id == id) map { session ⇒
         sender() ! session
       }
-    case SessionValidationRequest(id) =>
+    case SessionValidationRequest(id) ⇒
       val valid = sessions.exists(_.id == id)
-      if(valid){
-        sessions.find(_.id == id) map { session =>
+      if (valid) {
+        sessions.find(_.id == id) map { session ⇒
           sender() ! Valid(session)
         }
-      }else{
+      } else {
         sender() ! Invalid
-    }
+      }
 
-    case NameRequest(user) =>
+    case NameRequest(user) ⇒
       val requester = sender()
 
       val nameFuture = getName(user, bindHost, bindPort, DN)
 
-      nameFuture.map{
-        case Left(e) => println("ERROR")
-        case Right(maybeName) => maybeName map { name =>
+      nameFuture.map {
+        case Left(e) ⇒ println("ERROR")
+        case Right(maybeName) ⇒ maybeName map { name ⇒
           requester ! (name._1, name._2)
         }
       }
@@ -103,10 +100,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
     val groups = groupMembership(user, bindHost, bindPort, GDN)
 
     groups map {
-      case Left(error) =>
+      case Left(error) ⇒
         val role = getRoles(user, Nil)
         Session(sessionID, expirationDate, user, Nil, role)
-      case Right(gs) =>
+      case Right(gs) ⇒
         val role = getRoles(user, gs.toList)
         Session(sessionID, expirationDate, user, gs.toList, role)
     }

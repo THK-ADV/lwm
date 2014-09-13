@@ -2,51 +2,50 @@ package controllers
 
 import actors.SessionHandler
 import akka.util.Timeout
-import models.{Students, UserForms}
+import models.{ Students, UserForms }
 import play.api.libs.concurrent.Promise
-import play.api.mvc.{Action, Controller, Security}
+import play.api.mvc.{ Action, Controller, Security }
 import play.libs.Akka
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 /**
- * Session Management.
- */
+  * Session Management.
+  */
 object SessionManagement extends Controller {
 
   import akka.pattern.ask
 
-import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
-
 
   private implicit val timeout = Timeout(15.seconds)
   private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
-  def login() = Action.async { implicit request =>
+  def login() = Action.async { implicit request ⇒
 
     val loginData = UserForms.loginForm.bindFromRequest.fold(
-      formWithErrors => {
+      formWithErrors ⇒ {
         None
       },
-      login => {
+      login ⇒ {
         Some(login)
       }
     )
 
     loginData match {
-      case None => Future.successful(Unauthorized)
-      case Some(login) =>
+      case None ⇒ Future.successful(Unauthorized)
+      case Some(login) ⇒
         val timeoutFuture = Promise.timeout("Oops", 45.second)
         val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user, login.password)).mapTo[Either[String, SessionHandler.Session]]
 
         Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
-          case Left(message: String) =>
+          case Left(message: String) ⇒
             Unauthorized(message)
-          case Right(session: SessionHandler.Session) =>
+          case Right(session: SessionHandler.Session) ⇒
             val firstTime = Await.result(firstTimeCheck(session.user), atMost = 20.seconds)
             session.role match {
-              case Permissions.AdminRole =>
+              case Permissions.AdminRole ⇒
                 if (firstTime) {
                   Redirect(routes.FirstTimeSetupController.setupUser()).withSession(
                     Security.username -> login.user,
@@ -60,7 +59,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
                     "expires" -> session.expirationDate.toString
                   )
                 }
-              case _ =>
+              case _ ⇒
                 if (firstTime) {
                   Redirect(routes.FirstTimeSetupController.setupStudent()).withSession(
                     Security.username -> login.user,
@@ -75,16 +74,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
                   )
                 }
             }
-          case t: String => InternalServerError(t)
+          case t: String ⇒ InternalServerError(t)
         }
     }
 
-
   }
 
-  def firstTimeCheck(user: String): Future[Boolean] = Students.exists(user).map{b => !b}
+  def firstTimeCheck(user: String): Future[Boolean] = Students.exists(user).map { b ⇒ !b }
 
-  def logout() = Action { request =>
+  def logout() = Action { request ⇒
     import play.api.libs.json._
     request.session.get("session").map(sessionsHandler ! SessionHandler.LogoutRequest(_))
     val json = Json.toJson(Map(
@@ -95,7 +93,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
   }
 }
 
-
 object Permissions {
 
   sealed trait Permission
@@ -105,7 +102,6 @@ object Permissions {
   object UserDeletion extends Permission
 
   object UserModification extends Permission
-
 
   object UserInfoRead extends Permission
 

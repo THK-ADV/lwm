@@ -1,11 +1,11 @@
 package actors
 
-import javax.mail.search.{RecipientStringTerm, RecipientTerm, SearchTerm}
+import javax.mail.search.{ RecipientStringTerm, RecipientTerm, SearchTerm }
 
 import actors.EmailHandler.EmailResponse
-import akka.actor.{Props, Actor}
+import akka.actor.{ Props, Actor }
 import javax.mail._
-import javax.mail.internet.{MimeMultipart, InternetAddress}
+import javax.mail.internet.{ MimeMultipart, InternetAddress }
 import javax.mail.Message.RecipientType
 
 import com.sun.mail.imap.IMAPFolder
@@ -16,7 +16,6 @@ sealed trait EmailContent {
 }
 case class PlainTextContent(content: String) extends EmailContent
 case class HTMLContent(content: String) extends EmailContent
-
 
 object EmailHandler {
 
@@ -30,10 +29,10 @@ object EmailHandler {
 class EmailHandler(config: Configuration) extends Actor {
   val user = config.getString("lwm.email.user").get
   val password: String = config.getString("lwm.email.password").get
-  val host: String  = config.getString("lwm.email.host").get
+  val host: String = config.getString("lwm.email.host").get
   val protocol: String = config.getString("lwm.email.protocol").get
   val folderName: String = config.getString("lwm.email.folder").get
-  
+
   val props = System.getProperties
   props.setProperty("mail.store.protocol", protocol)
   val session = Session.getDefaultInstance(props, null)
@@ -43,7 +42,7 @@ class EmailHandler(config: Configuration) extends Actor {
   folder.open(Folder.READ_ONLY)
 
   def receive: Actor.Receive = {
-    case EmailHandler.MessageRequest(count) =>
+    case EmailHandler.MessageRequest(count) ⇒
       folder.close(false)
       folder.open(Folder.READ_ONLY)
       val latest = folder.search(new RecipientStringTerm(RecipientType.TO, "ap-praktikum@gm.fh-koeln.de")).takeRight(count)

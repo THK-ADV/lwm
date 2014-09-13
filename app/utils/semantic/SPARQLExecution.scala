@@ -5,16 +5,16 @@ import java.net.URLEncoder
 import akka.util.Timeout
 
 import scala.concurrent.Future
-import scalaj.http.{Http, HttpOptions}
+import scalaj.http.{ Http, HttpOptions }
 
 object SPARQLExecution {
-   def apply(queryHost: String, updateHost: String)(implicit timeout: Timeout) = new SPARQLExecution(updateHost, queryHost)
+  def apply(queryHost: String, updateHost: String)(implicit timeout: Timeout) = new SPARQLExecution(updateHost, queryHost)
 }
 
 class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeout: Timeout) {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def executeUpdate(update: String): Future[Boolean] = Future{
+  def executeUpdate(update: String): Future[Boolean] = Future {
     val updateEncoded = URLEncoder.encode(update, "UTF-8")
     Http.postData(updateHost, s"update=$updateEncoded")
       .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
@@ -31,7 +31,7 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
       .asString
   }
 
-  def executeBooleanQuery(query: String):Future[Boolean] = Future {
+  def executeBooleanQuery(query: String): Future[Boolean] = Future {
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
 
     Http.postData(queryHost, s"query=$queryEncoded")
@@ -49,7 +49,7 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
       .contains("success")
   }
 
-  def executeQueryBlocking(query: String):String =  {
+  def executeQueryBlocking(query: String): String = {
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
     Http.postData(queryHost, s"query=$queryEncoded")
       .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
@@ -57,7 +57,7 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
       .asString
   }
 
-  def executeBooleanQueryBlocking(query: String):Boolean =  {
+  def executeBooleanQueryBlocking(query: String): Boolean = {
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
 
     Http.postData(queryHost, s"query=$queryEncoded")
