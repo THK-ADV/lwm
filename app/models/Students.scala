@@ -68,6 +68,19 @@ object Students {
     }
   }
 
+  def get(gmId: String): Future[Resource] = {
+    val p = Promise[Resource]()
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, LWM.hasGmId, Literal(gmId))).map{result =>
+      val resource = SPARQLTools.statementsFromString(result).map(student => student.s)
+      if(resource.nonEmpty){
+        p.success(resource.head)
+      }else{
+        p.failure(new NoSuchElementException(s"There is no student with ID $gmId"))
+      }
+    }
+    p.future
+  }
+
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 }
 
