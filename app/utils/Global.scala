@@ -1,14 +1,14 @@
 package utils
 
-import actors.{EmailHandler, SessionHandler}
+import actors.{ EmailHandler, SessionHandler }
 import akka.util.Timeout
 import controllers.UserInfoManagement
-import models.{Students, Student}
+import models.{ Students, Student }
 import org.apache.jena.fuseki.FusekiCmd
 import play.api._
 import play.api.libs.concurrent.Akka
 import play.api.Play.current
-import utils.semantic.{Vocabulary, SPARQLExecution, Namespace, NamedGraph}
+import utils.semantic.{ Vocabulary, SPARQLExecution, Namespace, NamedGraph }
 
 import scala.concurrent.ExecutionContext
 

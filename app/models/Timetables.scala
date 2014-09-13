@@ -7,11 +7,10 @@ import play.api.data.Forms._
 import utils.semantic._
 import utils.semantic.Vocabulary.LWM
 
-import scala.concurrent.{Promise, Future}
+import scala.concurrent.{ Promise, Future }
 
-
-object Weekdays{
-  sealed trait Weekday{
+object Weekdays {
+  sealed trait Weekday {
     val uri: Resource
     val label: String
   }
@@ -47,27 +46,27 @@ object Weekdays{
   val workWeek = List(Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)
 }
 
-case class Time(hours: Int, minutes: Int) extends Ordered[Time]{
+case class Time(hours: Int, minutes: Int) extends Ordered[Time] {
   private val minutesOfDay = hours * 60 + minutes
 
   override def compare(other: Time): Int = math.signum(minutesOfDay - other.minutesOfDay)
   override def toString = s"$hours:$minutes"
 }
 
-object TimeSlots{
+object TimeSlots {
   val slotTimeMap = Map(
-    1 -> Time(7,30),
-    2 -> Time(8,15),
-    3 -> Time(9,0),
-    4 -> Time(9,45),
-    5 -> Time(10,30),
-    6 -> Time(11,15),
-    7 -> Time(12,0),
-    8 -> Time(12,45),
-    9 -> Time(13,30),
-    10 -> Time(14,15),
-    11 -> Time(15,0),
-    12 -> Time(15,45)
+    1 -> Time(7, 30),
+    2 -> Time(8, 15),
+    3 -> Time(9, 0),
+    4 -> Time(9, 45),
+    5 -> Time(10, 30),
+    6 -> Time(11, 15),
+    7 -> Time(12, 0),
+    8 -> Time(12, 45),
+    9 -> Time(13, 30),
+    10 -> Time(14, 15),
+    11 -> Time(15, 0),
+    12 -> Time(15, 45)
   )
 }
 
@@ -77,7 +76,7 @@ case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time,
 
 case class TimetableEntryFormEntry(day: String, startTime: String, endTime: String, room: String, supervisors: String)
 
-object Timetables{
+object Timetables {
   import utils.Global._
   import utils.semantic.Vocabulary._
 
@@ -96,8 +95,7 @@ object Timetables{
 
 }
 
-
-object TimetableEntries{
+object TimetableEntries {
   import utils.Global._
   import utils.semantic.Vocabulary._
 
@@ -115,39 +113,39 @@ object TimetableEntries{
       Statement(timetableEntry.timetable, LWM.hasEntry, timetableEntryResource),
       Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri),
       Statement(timetableEntryResource, LWM.hasRoomId, Literal(timetableEntry.room))
-    ) ::: timetableEntry.supervisors.map(supervisor => List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.supervises, timetableEntryResource))).flatten
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map{r =>
+    ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.supervises, timetableEntryResource))).flatten
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
       Individual(timetableEntryResource)
-    }    
+    }
   }
 
   def delete(entry: TimetableEntry): Future[TimetableEntry] = {
     val maybeEntry = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.TimetableEntry, Vocabulary.LWM.hasId, Literal(entry.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeEntry)
     val p = Promise[TimetableEntry]()
-    resultFuture.map{result =>
-      val resources = SPARQLTools.statementsFromString(result).map(u => u.s)
-      resources.map{resource =>
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{_ => p.success(entry)}
+    resultFuture.map { result ⇒
+      val resources = SPARQLTools.statementsFromString(result).map(u ⇒ u.s)
+      resources.map { resource ⇒
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(entry) }
       }
     }
     p.future
   }
 
-  def delete(resource: Resource): Future[Resource] =  {
+  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if(individual.props(RDF.typ).contains(LWM.TimetableEntry)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
-    }else{
+    if (individual.props(RDF.typ).contains(LWM.TimetableEntry)) {
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+    } else {
       p.failure(new IllegalArgumentException("Resource is not a TimetableEntry"))
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.TimetableEntry)).map{stringResult =>
-      SPARQLTools.statementsFromString(stringResult).map(user => Individual(user.s)).toList
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.TimetableEntry)).map { stringResult ⇒
+      SPARQLTools.statementsFromString(stringResult).map(user ⇒ Individual(user.s)).toList
     }
   }
 }
@@ -155,10 +153,10 @@ object TimetableEntries{
 object TimeTableForm {
   val timetableForm = Form(
     mapping(
-    "day" -> nonEmptyText,
-    "start" -> nonEmptyText,
-    "end" -> nonEmptyText,
-    "room" -> nonEmptyText,
-    "supervisors" -> nonEmptyText
-  )(TimetableEntryFormEntry.apply)(TimetableEntryFormEntry.unapply))
-  }
+      "day" -> nonEmptyText,
+      "start" -> nonEmptyText,
+      "end" -> nonEmptyText,
+      "room" -> nonEmptyText,
+      "supervisors" -> nonEmptyText
+    )(TimetableEntryFormEntry.apply)(TimetableEntryFormEntry.unapply))
+}

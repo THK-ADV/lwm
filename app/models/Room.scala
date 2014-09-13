@@ -6,14 +6,13 @@ import play.api.data.Form
 import play.api.data.Forms._
 import utils.semantic._
 
-import scala.concurrent.{Promise, Future}
-
+import scala.concurrent.{ Promise, Future }
 
 case class Room(roomId: String, name: String, id: UUID = UUID.randomUUID())
 case class RoomFormModel(roomId: String, name: String)
 
-object Rooms{
-  object Forms{
+object Rooms {
+  object Forms {
     val roomForm = Form(
       mapping(
         "id" -> nonEmptyText,
@@ -35,36 +34,36 @@ object Rooms{
       Statement(courseResource, LWM.hasId, Literal(room.id.toString)),
       Statement(courseResource, LWM.hasRoomId, Literal(room.roomId))
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(_ => Individual(courseResource))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(_ ⇒ Individual(courseResource))
   }
 
-  def   delete(room: Room): Future[Room] = {
+  def delete(room: Room): Future[Room] = {
     val maybeRoom = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Room, Vocabulary.LWM.hasId, Literal(room.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeRoom)
     val p = Promise[Room]()
-    resultFuture.map{result =>
-      val resources = SPARQLTools.statementsFromString(result).map(r => r.s)
-      resources.map{resource =>
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{_ => p.success(room)}
+    resultFuture.map { result ⇒
+      val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
+      resources.map { resource ⇒
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(room) }
       }
     }
     p.future
   }
 
-  def delete(resource: Resource): Future[Resource] =  {
+  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if(individual.props(RDF.typ).contains(LWM.Room)){
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map{b => p.success(resource)}
-    }else{
+    if (individual.props(RDF.typ).contains(LWM.Room)) {
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+    } else {
       p.failure(new IllegalArgumentException("Resource is not a Room"))
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Room)).map{stringResult =>
-      SPARQLTools.statementsFromString(stringResult).map(student => Individual(student.s)).toList
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Room)).map { stringResult ⇒
+      SPARQLTools.statementsFromString(stringResult).map(student ⇒ Individual(student.s)).toList
     }
   }
 }
