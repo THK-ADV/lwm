@@ -11,7 +11,7 @@
         @helper.inputText(labworks("assignmentCount"), '_label -> "Anzahl Termine:")
         @helper.select(labworks("degreeId"), for {degree <- degrees;labelList <- degree.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield degree.uri.value -> label.toString, '_label -> "Studiengang:")
         @helper.select(labworks("courseId"), for {course <- courses;labelList <- course.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> label.toString, '_label -> "Veranstaltung:")
-        @helper.select(labworks("semester"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield label.toString -> label.toString, '_label -> "Semester:")
+        @helper.select(labworks("semester"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             <button type="submit" class="btn btn-primary">Hinzufügen</button>

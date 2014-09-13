@@ -97,6 +97,7 @@ object Vocabulary {
     val hasAssignment = property("hasAssignment")
     val hasAssignmentDate = property("hasAssignmentDate")
     val hasDueDate = property("hasDueDate")
+    val hasOrderId = property("hasOrderId")
   }
 
   /**
