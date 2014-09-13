@@ -1,7 +1,5 @@
 package models
 
-import play.api.data.Form
-import play.api.data.Forms._
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
@@ -13,6 +11,9 @@ case class LabWorkApplication(courseID: String, gmID: String)
 // TODO course id should be courseResourceURI
 
 object LabWorkForms {
+  import play.api.data.Forms._
+  import play.api.data._
+
   val labWorkApplicationForm = Form(
     mapping(
       "courseID" -> nonEmptyText,
@@ -31,7 +32,17 @@ object LabWorkForms {
       "semester" -> nonEmptyText
     )(LabWork.apply)(LabWork.unapply)
   )
+
+  val studentToGroupAdditionForm = Form(
+    mapping(
+      "student" -> nonEmptyText,
+      "group" -> nonEmptyText
+    )(StudentToGroupAdditionFormModel.apply)(StudentToGroupAdditionFormModel.unapply)
+  )
 }
+
+case class StudentToGroupAddition(student: Resource, group: Resource)
+case class StudentToGroupAdditionFormModel(student: String, group: String)
 
 /**
   * Praktika
@@ -55,8 +66,13 @@ object LabWorks {
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
       Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
-      Statement(resource, LWM.hasSemester, Literal(labWork.semester))
-    )
+      Statement(resource, LWM.hasSemester, Resource(labWork.semester))
+    ) ++ (1 to labWork.assignmentCount).map { c ⇒
+        val assoc = ResourceUtils.createResource(lwmNamespace)
+        Statement(assoc, RDF.typ, LWM.AssignmentAssociation) :: Statement(assoc, RDF.typ, OWL.NamedIndividual) ::
+          Statement(assoc, LWM.hasLabWork, resource) :: Statement(assoc, LWM.hasOrderId, Literal(s"$c")) ::
+          Statement(resource, LWM.hasAssignmentAssociation, assoc) :: Nil
+      }.flatten
 
     for (i ← 'A'.toInt until 'A'.toInt + labWork.groupCount) {
       val group = ResourceUtils.createResource(lwmNamespace)

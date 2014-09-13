@@ -14,7 +14,7 @@
                 Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
                 @(Individual(s).props.getOrElse(RDFS.label, List("")).head.toString)
             }</h6>
-            <h6><b>Raum:</b> @i.props.getOrElse(LWM.hasRoomId, List.empty[Resource]).head.toString</h6>
+            <h6><b>Raum:</b> @Individual(Resource(i.props.getOrElse(LWM.hasRoom, List.empty[Resource]).head.value)).props.getOrElse(LWM.hasRoomId, List.empty[String]).head.toString</h6>
             <h6><b>Endzeit:</b> @et.head.toString</h6>
             <a href="javascript: deleteTableEntry('@r.asResource().get.value', '@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a>
             <br />
