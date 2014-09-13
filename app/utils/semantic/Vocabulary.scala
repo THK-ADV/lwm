@@ -22,6 +22,9 @@ object Vocabulary {
     val LabWork = resource("LabWork")
     val Group = resource("Group")
     val Room = resource("Room")
+    val Semester = resource("Semester")
+    val WinterSemester = resource("WinterSemester")
+    val SummerSemester = resource("SummerSemester")
 
     val AutomationITMaster = resource("AutomationITMaster")
     val BusinessAdministrationAndEngineeringBachelor = resource("BusinessAdministrationAndEngineeringBachelor")
@@ -80,6 +83,8 @@ object Vocabulary {
 
     val hasRoom = property("hasRoom")
     val hasRoomId = property("hasRoomId")
+
+    val hasYear = property("hasYear")
 
   }
 

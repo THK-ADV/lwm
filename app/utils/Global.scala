@@ -10,10 +10,11 @@ import play.api.libs.concurrent.Akka
 import play.api.Play.current
 import utils.semantic.{Vocabulary, SPARQLExecution, Namespace, NamedGraph}
 
+import scala.concurrent.ExecutionContext
+
 object Global extends GlobalSettings {
 
   import scala.concurrent.duration._
-
 
   private val updateHost = "http://localhost:3030/lwm/update"
   private val queryHost = "http://localhost:3030/lwm/query"
