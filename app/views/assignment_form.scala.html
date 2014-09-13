@@ -1,0 +1,12 @@
+@(courses: List[Individual], form: Form[Assignment])
+@import utils.semantic.Vocabulary
+@import utils.semantic.Individual
+
+    @helper.form(action = routes.LabworkManagementController.labWorkPost()) {
+    @helper.inputText(form("id"), '_label -> "Aufgabe Nr:")
+    @helper.textarea(form("description"), '_label -> "Beschreibung")
+    @helper.textarea(form("text"), '_label -> "Aufgabe:")
+    @helper.inputText(form("topics"), '_label -> "Themen:")
+    @helper.select(form("courses"), for {course <- courses; labelList <- course.props.get(Vocabulary.RDFS.label); label = labelList.headOption.getOrElse("")} yield label.toString -> course.uri.value, '_label -> "Veranstaltugen:")
+
+}
