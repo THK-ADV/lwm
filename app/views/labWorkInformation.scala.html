@@ -7,7 +7,7 @@
 
 <!DOCTYPE html>
 <html>
-    @head("Labwork Editor")
+    @head("Praktikum bearbeiten")
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -38,7 +38,7 @@
                                 Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
                             <table class="table table-bordered">
                                 <tbody>
-                                    <tr><th>Id</th><th>Assignment</th></tr>
+                                    <tr><th>Id</th><th>Aufgaben</th></tr>
                                     @for(a <- assignments) {
                                         <tr><td>@a.props.getOrElse(LWM.hasId, List("").head)</td> <td>@a.props.getOrElse(LWM.hasDescription, List("").head)</td></tr>
                                     }
@@ -48,7 +48,7 @@
                     </div>
                     <div class="row">
                         <a href="@routes.TimetableController.index(labwork.uri.value)" class="btn btn-primary" role="button">
-                            Timetable</a>
+                            Stundenplan</a>
                     </div>
                 </div>
             </div>
