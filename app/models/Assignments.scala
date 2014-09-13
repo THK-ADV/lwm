@@ -111,7 +111,7 @@ object AssignmentAssociations {
   }
 }
 
-case class AssignmentSolution(name: String, text: String, assignment: Resource)
+case class AssignmentSolution(fileName: String, text: String, assignment: Resource)
 case class AssignmentSolutionFormModel(name: String, text: String, assignment: String)
 
 object AssignmentSolutions {
@@ -123,7 +123,7 @@ object AssignmentSolutions {
       Statement(solutionResource, RDF.typ, OWL.NamedIndividual),
       Statement(solutionResource, LWM.hasId, Literal(id.toString)),
       Statement(solutionResource, LWM.hasAssignment, solution.assignment),
-      Statement(solutionResource, LWM.hasName, Literal(solution.name)),
+      Statement(solutionResource, LWM.hasFileName, Literal(solution.fileName)),
       Statement(solutionResource, LWM.hasText, Literal(solution.text))
     )
 

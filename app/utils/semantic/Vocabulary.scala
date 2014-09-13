@@ -106,6 +106,8 @@ object Vocabulary {
     val hasOrderId = property("hasOrderId")
 
     val hasApplicationToken = property("hasApplicationToken")
+
+    val hasFileName = property("hasFileName")
   }
 
   /**
