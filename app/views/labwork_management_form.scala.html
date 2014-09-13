@@ -5,8 +5,6 @@
 @import utils.semantic.Individual
 
     @helper.form(action = routes.LabworkManagementController.labWorkPost()) {
-        @helper.inputText(labworks("id"), '_label -> "Id: ")
-        @helper.inputText(labworks("name"), '_label -> "Name:")
         @helper.inputText(labworks("groupCount"), '_label -> "Anzahl Gruppen:")
         @helper.inputText(labworks("assignmentCount"), '_label -> "Anzahl Termine:")
         @helper.select(labworks("degreeId"), for {degree <- degrees;labelList <- degree.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield degree.uri.value -> label.toString, '_label -> "Studiengang:")

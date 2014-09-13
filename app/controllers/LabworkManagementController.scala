@@ -48,9 +48,7 @@ object LabworkManagementController extends Controller with Authentication {
             courses ← Courses.all()
             degrees ← Degrees.all()
             semesters ← Semesters.all()
-          } yield {
-            BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, formWithErrors))
-          }
+          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, formWithErrors))
         },
         labwork ⇒ {
           LabWorks.create(labwork).map { _ ⇒
@@ -85,7 +83,10 @@ object LabworkManagementController extends Controller with Authentication {
           isGroup ← LabworkGroups.isLabWorkGroup(groupResource)
         } yield {
           if (isStudent && isGroup) {
-            Individual(groupResource).add(LWM.hasMember, studentResource)(lwmGraph)
+            val ig = Individual(groupResource)
+            ig.add(LWM.hasMember, studentResource)(lwmGraph)
+            val is = Individual(studentResource)
+            is.add(LWM.memberOf, groupResource)(lwmGraph)
           }
           Redirect(routes.LabworkManagementController.index())
         }
