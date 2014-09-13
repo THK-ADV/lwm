@@ -6,20 +6,14 @@ import akka.actor.{ Actor, ActorRef, Props }
 import akka.util.Timeout
 import controllers.SessionManagement._
 import models.{ Users, Students, UserForms }
+import play.api.Logger
+import play.api.libs.json.{ JsArray, JsString, Json, JsObject }
 import play.api.mvc.{ Action, Controller, Security }
 import play.libs.Akka
 import utils.Security.Authentication
 import utils.semantic.Resource
 
 import scala.concurrent.Future
-
-object StudentWebSocketActor {
-  def props(out: ActorRef) = Props(new StudentWebSocketActor(out))
-}
-
-class StudentWebSocketActor(out: ActorRef) extends Actor {
-  override def receive: Receive = ???
-}
 
 object StudentsManagement extends Controller with Authentication {
 
@@ -39,11 +33,6 @@ object StudentsManagement extends Controller with Authentication {
       }
     }
   }
-
-  // TODO Websocket Actor
-  //  def socket = WebSocket.acceptWithActor[String, String] { request => out =>
-  //    StudentWebSocketActor.props(out)
-  //  }
 
   def studentFirstTimeSelf = hasSession { session ⇒
     Action.async { implicit request ⇒
@@ -82,6 +71,34 @@ object StudentsManagement extends Controller with Authentication {
           Ok(views.html.studentManagement(all, UserForms.studentForm))
         }
       }
+    }
+  }
+
+  def studentSuggestions = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async(parse.json) { implicit request ⇒
+      val query = (request.body \ "query").as[String]
+      val maxCountOpt = (request.body \ "maxCount").asOpt[String]
+      val listFuture = maxCountOpt match {
+        case None ⇒
+          Logger.info(s"Without maxCount")
+
+          Students.search(query)
+        case Some(c) ⇒
+          Logger.info(s"With maxCount = $c")
+
+          Students.search(query, c.toInt)
+      }
+      listFuture.map { list ⇒
+        val json = Json.obj(
+          "query" -> JsString(query),
+          "ids" -> JsArray(list.map(JsString)))
+
+        render {
+          case Accepts.Json() ⇒ Ok(json)
+          case Accepts.JavaScript() => Ok(json)
+        }
+      }
+
     }
   }
 }

@@ -81,6 +81,22 @@ object Students {
     p.future
   }
 
+  def search(query: String): Future[List[String]] = {
+    val sparqlQuery =
+      s"""
+        |SELECT ?s (${LWM.hasGmId} as ?p) ?o where {?s ${LWM.hasGmId} ?o
+        |FILTER regex(?o, "^$query")
+        |}
+      """.stripMargin
+
+    sparqlExecutionContext.executeQuery(sparqlQuery).map { result ⇒
+      val resources = SPARQLTools.statementsFromString(result)
+      resources.map(_.o.value).toList.sorted
+    }
+  }
+
+  def search(query: String, maxCount: Int): Future[List[String]] = search(query).map(_.take(maxCount))
+
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 }
 

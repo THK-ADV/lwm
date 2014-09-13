@@ -17,6 +17,7 @@ GET           /administration/dashboard                    controllers.Administr
 GET           /administration/students                     controllers.StudentsManagement.index()
 POST          /administration/students                     controllers.StudentsManagement.studentPost()
 DELETE        /administration/students                     controllers.StudentsManagement.studentRemoval()
+POST          /administration/students/suggest             controllers.StudentsManagement.studentSuggestions()
 
 GET           /administration/labworks                     controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                 controllers.LabworkManagementController.edit(id)
