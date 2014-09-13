@@ -54,6 +54,7 @@ object LabWorks {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, RDFS.label, label),
       Statement(resource, LWM.hasTimetable, timetable.uri),
+      Statement(timetable.uri, LWM.hasLabWork, resource),
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
       Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
