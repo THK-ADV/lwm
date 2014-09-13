@@ -24,6 +24,7 @@ object Vocabulary {
     val Room = resource("Room")
     val Assignment = resource("Assignment")
     val AssignmentAssociation = resource("AssignmentAssociation")
+    val AssignmentSolution = resource("AssignmentSolution")
     val Semester = resource("Semester")
     val WinterSemester = resource("WinterSemester")
     val SummerSemester = resource("SummerSemester")
@@ -93,7 +94,7 @@ object Vocabulary {
     val hasDescription = property("hasDescription")
     val hasText = property("hasText")
     val hasTopic = property("hasTopic")
-
+    val hasSolution = property("hasSolution")
 
     val hasAssignment = property("hasAssignment")
     val hasAssignmentDate = property("hasAssignmentDate")
