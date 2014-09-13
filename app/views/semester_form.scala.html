@@ -1,0 +1,10 @@
+@(options: List[String], form: Form[SemesterModelForm])
+
+@helper.form(action = routes.SemesterManagementController.semesterPost()) {
+    @helper.select(form("id"), for(semester <- options) yield semester -> semester, '_label -> "Semester:")
+    @helper.inputText(form("year"), '_label -> "Jahr")
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
+    </div>
+}

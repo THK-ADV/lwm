@@ -23,8 +23,9 @@ object LabworkManagementController extends Controller with Authentication {
         courses <- Courses.all()
         degrees <- Degrees.all()
         labworks <- LabWorks.all()
+        semesters <- Semesters.all()
       } yield {
-        Ok(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
+        Ok(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
       }
     }
   }
@@ -48,8 +49,9 @@ object LabworkManagementController extends Controller with Authentication {
             labworks <- LabWorks.all()
             courses <- Courses.all()
             degrees <- Degrees.all()
+            semesters <- Semesters.all()
           } yield {
-            BadRequest(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, formWithErrors))
+            BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, formWithErrors))
           }
         },
         labwork => {
@@ -70,8 +72,8 @@ object LabworkManagementController extends Controller with Authentication {
       } yield {
         val id = (request.body \ "id").as[String]
         LabWorks.delete(Resource(id))
-        Ok(views.html.labwork_management(labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
+        Redirect(routes.LabworkManagementController.index())
+        }
       }
-    }
   }
 }

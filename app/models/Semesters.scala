@@ -2,7 +2,8 @@ package models
 
 import java.util.UUID
 
-import com.hp.hpl.jena.rdf.model.AnonId
+import play.api.data.Form
+import play.api.data.Forms._
 import utils.Global._
 import utils.semantic.Vocabulary.{RDFS, OWL, LWM, RDF}
 import utils.semantic._
@@ -13,6 +14,8 @@ import scala.concurrent.{Promise, Future}
 sealed trait Semester {
   val year: Int
 }
+
+case class SemesterModelForm(semester: String, year: Int)
 
 case class SummerSemester(year: Int) extends Semester
 
@@ -78,5 +81,20 @@ object Semesters {
     p.future
   }
 
+  def all(): Future[List[Individual]] = {
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.SummerSemester)).map{stringResult =>
+      SPARQLTools.statementsFromString(stringResult).map(user => Individual(user.s)).toList
+    }
+  }
 
+  val options = List("Sommersemester", "Wintersemester")
+}
+
+object SemesterForm {
+  val semesterForm = Form(
+    mapping(
+      "id" -> nonEmptyText,
+      "year" -> number(min=2012)
+    )(SemesterModelForm.apply)(SemesterModelForm.unapply)
+  )
 }

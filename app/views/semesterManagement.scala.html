@@ -1,5 +1,6 @@
-@(semesters: List[Individual], labWorks: List[Individual], degrees: List[Individual], courses: List[Individual], form: Form[LabWork])
+@(semesters: List[Individual], options: List[String], form: Form[SemesterModelForm])
 @import utils.semantic.Individual
+
 <!DOCTYPE html>
 <html>
     @head("Praktikumsverwaltung")
@@ -10,8 +11,8 @@
             </div>
             <div class="row">
                 @navigation_admin()
-            <div class="col-md-9">
-                    @labwork_list(labWorks)
+                <div class="col-md-9">
+                    @semester_list(semesters)
                     <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                     </button>
@@ -24,13 +25,13 @@
                                     <h4 class="modal-title" id="myModalLabel">Neues Praktikum hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                    @labwork_management_form(semesters, degrees, courses, form)
+                                @semester_form(options, form)
                                 </div>
 
                             </div>
                         </div>
                     </div>
-            </div>
+                </div>
             </div>
             <div class="row">@footerAdmin()</div>
         </div>
