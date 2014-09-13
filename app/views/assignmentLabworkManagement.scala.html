@@ -1,10 +1,9 @@
-@(assignments: List[Resource], courses: List[Individual],form: Form[AssignmentFormModel])
-
+@(labwork: Resource, assignments: List[Resource], courses: List[Individual],form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.Resource
 @import utils.semantic.Individual
 <!DOCTYPE html>
 <html>
-    @head("Aufgabenverwaltung")
+    @head("Praktikumsverwaltung")
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -23,10 +22,10 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                    <h4 class="modal-title" id="myModalLabel">Neue Aufgabe <hinzufügen></hinzufügen></h4>
+                                    <h4 class="modal-title" id="myModalLabel">Neues Praktikum hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @assignment_form(courses, form)
+                                @assignmentAssociation_form(labwork, courses, form)
                                 </div>
 
                             </div>

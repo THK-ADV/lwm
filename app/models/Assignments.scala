@@ -47,6 +47,8 @@ object Assignments {
 
 case class Assignment(id: String, description: String, text: String, topics: List[String], courses: List[String])
 
+case class AssignmentFormModel(id: String, description: String, text: String, topics: String, courses: List[String])
+
 case class AssignmentAssociation(assignment: Resource, labwork: Resource, assignmentDate: Resource, dueDate: Resource)
 
 case class AssignmentAssociationFormModel(assignment: String, labwork: String, assignmentDate: String, dueDate: String)
@@ -56,9 +58,9 @@ object AssignmentForms {
     "id" -> nonEmptyText,
     "description" -> nonEmptyText,
     "text" -> nonEmptyText,
-    "topics" -> list(nonEmptyText),
+    "topics" -> nonEmptyText,
     "courses" -> list(nonEmptyText)
-  )(Assignment.apply)(Assignment.unapply))
+  )(AssignmentFormModel.apply)(AssignmentFormModel.unapply))
 
   val assignmentAssociationForm = Form(mapping(
     "assignment" -> nonEmptyText,
