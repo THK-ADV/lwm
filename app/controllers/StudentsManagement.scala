@@ -80,12 +80,8 @@ object StudentsManagement extends Controller with Authentication {
       val maxCountOpt = (request.body \ "maxCount").asOpt[String]
       val listFuture = maxCountOpt match {
         case None ⇒
-          Logger.info(s"Without maxCount")
-
           Students.search(query)
         case Some(c) ⇒
-          Logger.info(s"With maxCount = $c")
-
           Students.search(query, c.toInt)
       }
       listFuture.map { list ⇒
