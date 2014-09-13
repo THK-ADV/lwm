@@ -1,4 +1,4 @@
-@(labwork: Individual, groups: List[Resource], assignments: List[Assignment])
+@(labwork: Individual, groups: List[Individual], assignments: List[Individual])
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.Resource
 @import utils.semantic.Individual
@@ -25,8 +25,7 @@
                                 <tbody>
                                     <tr><th>Gruppe</th><th>Anzahl</th></tr>
                                     @for(r <- groups) {
-
-                                        <tr><td>@(Individual(r).props.getOrElse(LWM.hasId, List("")).head)</td> <td>@(Individual(r).props.getOrElse(LWM.hasMember, List.empty[Resource]).size)</td></tr>
+                                        <tr><td>@(r.props.getOrElse(LWM.hasId, List("")).head)</td> <td>@r.props.getOrElse(LWM.hasMember, List.empty[Resource]).size)</td></tr>
                                     }
                                 </tbody>
                             </table>
@@ -40,7 +39,7 @@
                                 <tbody>
                                     <tr><th>Id</th><th>Assignment</th></tr>
                                     @for(a <- assignments) {
-                                        <tr><td>@a.id</td> <td>@a.name</td></tr>
+                                        <tr><td>@a.props.getOrElse(LWM.hasId, List("").head)</td> <td>@a.props.getOrElse(LWM.hasDescription, List("").head)</td></tr>
                                     }
                                 </tbody>
                             </table>
