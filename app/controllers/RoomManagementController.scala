@@ -49,8 +49,8 @@ object RoomManagementController extends Controller with Authentication {
       Action.async(parse.json) {
         implicit request ⇒
           val id = (request.body \ "id").as[String]
-          Rooms.delete(Resource(id)).map{_ =>
-          Redirect(routes.RoomManagementController.index())
+          Rooms.delete(Resource(id)).map { _ ⇒
+            Redirect(routes.RoomManagementController.index())
           }
       }
   }

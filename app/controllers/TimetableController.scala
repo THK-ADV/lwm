@@ -1,10 +1,10 @@
 package controllers
 
 import models._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{RDFS, LWM}
-import utils.semantic.{Individual, Resource}
+import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.{ Individual, Resource }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -76,9 +76,9 @@ object TimetableController extends Controller with Authentication {
     }
   }
 
-  def entryRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session =>
+  def entryRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) {
-      implicit request =>
+      implicit request ⇒
         val entryId = (request.body \ "eId").as[String]
         val labId = (request.body \ "lId").as[String]
         TimetableEntries.delete(Resource(entryId)).map { _ ⇒
