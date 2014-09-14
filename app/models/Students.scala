@@ -30,7 +30,7 @@ object Students {
       Statement(resource, NCO.phoneNumber, Literal(student.phone)),
       Statement(resource, FOAF.mbox, Literal(student.email)),
       Statement(resource, LWM.hasEnrollment, Resource(student.degree)),
-      Statement(resource, LWM.registrationId, Literal(student.registrationNumber))
+      Statement(resource, LWM.hasRegistrationId, Literal(student.registrationNumber))
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒

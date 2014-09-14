@@ -49,7 +49,7 @@ object Vocabulary {
     val ProductDesignAndProcessDevelopmentMaster = resource("ProductDesignAndProcessDevelopmentMaster")
     val WebScienceMaster = resource("WebScienceMaster")
 
-    val registrationId = property("hasRegistrationId")
+    val hasRegistrationId = property("hasRegistrationId")
     val hasGmId = property("hasGmId")
     val isGmIdFor = property("isGmIdFor")
     val isRegistrationIdFor = property("isRegistrationIdFor")
@@ -88,7 +88,7 @@ object Vocabulary {
     val hasEntry = property("hasEntry")
     val hasLabWork = property("hasLabWork")
     val hasSupervisor = property("hasSupervisor")
-    val supervises = property("supervises")
+    val isSupervisorFor = property("isSupervisorFor")
 
     val hasRoom = property("hasRoom")
     val hasRoomId = property("hasRoomId")

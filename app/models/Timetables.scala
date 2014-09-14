@@ -116,7 +116,7 @@ object TimetableEntries {
       Statement(timetableEntry.timetable, LWM.hasEntry, timetableEntryResource),
       Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri),
       Statement(timetableEntryResource, LWM.hasRoom, Resource(timetableEntry.room))
-    ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.supervises, timetableEntryResource))).flatten
+    ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.isSupervisorFor, timetableEntryResource))).flatten
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
       Individual(timetableEntryResource)
     }
