@@ -18,10 +18,10 @@
             <th>Aufgabenanzahl</th>
             <th>Semester</th>
         </tr>
-        @for(labwork <- labworks) {
+        @for(labwork <- labworks; c <- labwork.props(Vocabulary.LWM.hasCourse); i = Individual(Resource(c.value))) {
             <tr>
-                <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.LWM.hasCourse, List(Literal(""))).head.value)).props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
-                <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.LWM.hasDegree, List(Literal(""))).head.value)).props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
+                <td>@i.props.getOrElse(Vocabulary.RDFS.label, List(Literal(""))).head.value</td>
+                <td>@Individual(Resource(i.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Literal(""))).head.value</td>
                 <td>@labwork.props.getOrElse(Vocabulary.LWM.hasGroup, List(Literal(""))).size</td>
                 <td>@labwork.props.getOrElse(Vocabulary.LWM.hasAssignmentCount, List(Literal("0"))).head.value</td>
                 <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.LWM.hasSemester, List(Literal(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Literal(""))).head.value</td>

@@ -4,7 +4,7 @@ import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
 
-case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
+case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
 
@@ -27,7 +27,6 @@ object LabWorkForms {
       "groupCount" -> number(min = 1),
       "assignmentCount" -> number(min = 1),
       "courseId" -> nonEmptyText,
-      "degreeId" -> nonEmptyText,
       "semester" -> nonEmptyText
     )(LabWork.apply)(LabWork.unapply)
   )
@@ -58,7 +57,6 @@ object LabWorks {
       Statement(resource, LWM.hasTimetable, timetable.uri),
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
-      Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
       Statement(resource, LWM.allowsApplications, Literal("false")),
       Statement(resource, LWM.isClosed, Literal("false")),
       Statement(resource, LWM.hasSemester, Resource(labWork.semester))

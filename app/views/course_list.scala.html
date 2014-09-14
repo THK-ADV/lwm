@@ -1,8 +1,8 @@
 @(courses: List[Individual])
-    @import utils.semantic.Individual
+    @import utils.semantic.{Individual, Resource}
     @import utils.semantic.Vocabulary
     @import utils.semantic.Literal
-
+    @import utils.Global._
 
     <div class="panel panel-default">
         <div class="panel-heading">Veranstaltungsübersicht</div>
@@ -11,11 +11,13 @@
             <tr>
                 <th>Name</th>
                 <th>ID</th>
+                <th>Studiengang</th>
             </tr>
             @for(course <- courses) {
                 <tr>
                     <td>@course.props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
                     <td>@course.props.getOrElse(Vocabulary.LWM.hasId, List(Literal(""))).head.value</td>
+                    <td>@Individual(Resource(course.props.getOrElse(Vocabulary.LWM.hasDegree, List(Literal(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Resource(""))).head.value</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
                     <td><a href="javascript: deleteCourse('@course.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
                 </tr>

@@ -1,4 +1,4 @@
-@(courses: List[Individual], form: Form[Course])
+@(degrees: List[Individual], courses: List[Individual], form: Form[CourseFormModel])
 @import utils.semantic.Individual
 
 
@@ -30,7 +30,7 @@
                                     <h4 class="modal-title" id="myModalLabel">Neue Veranstaltung hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @courseForm(form)
+                                @courseForm(degrees, form)
                                 </div>
 
                             </div>

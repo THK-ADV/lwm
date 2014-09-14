@@ -21,11 +21,10 @@ object LabworkManagementController extends Controller with Authentication {
     Action.async { request ⇒
       for {
         courses ← Courses.all()
-        degrees ← Degrees.all()
         labworks ← LabWorks.all()
         semesters ← Semesters.all()
       } yield {
-        Ok(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
+        Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
       }
     }
   }
@@ -48,9 +47,8 @@ object LabworkManagementController extends Controller with Authentication {
           for {
             labworks ← LabWorks.all()
             courses ← Courses.all()
-            degrees ← Degrees.all()
             semesters ← Semesters.all()
-          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, formWithErrors))
+          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
         },
         labwork ⇒ {
           LabWorks.create(labwork).map { _ ⇒

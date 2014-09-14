@@ -50,9 +50,9 @@ case class Assignment(id: String, description: String, text: String, topics: Lis
 
 case class AssignmentFormModel(id: String, description: String, text: String, topics: String, courses: List[String])
 
-case class AssignmentAssociation(assignment: Resource, labwork: Resource, assignmentDate: Resource, dueDate: Resource)
+case class AssignmentAssociation(assignment: Resource, labwork: Resource, dueDate: Resource)
 
-case class AssignmentAssociationFormModel(assignment: String, assignmentDate: String, dueDate: String)
+case class AssignmentAssociationFormModel(assignment: String, dueDate: String)
 
 object AssignmentForms {
   val assignmentForm = Form(mapping(
@@ -65,7 +65,6 @@ object AssignmentForms {
 
   val assignmentAssociationForm = Form(mapping(
     "assignment" -> nonEmptyText,
-    "assignmentDate" -> nonEmptyText,
     "dueDate" -> nonEmptyText
   )(AssignmentAssociationFormModel.apply)(AssignmentAssociationFormModel.unapply))
 
@@ -85,7 +84,6 @@ object AssignmentAssociations {
       Statement(associationResource, LWM.hasId, Literal(id.toString)),
       Statement(associationResource, LWM.hasAssignment, association.assignment),
       Statement(associationResource, LWM.hasDueDate, association.dueDate),
-      Statement(associationResource, LWM.hasAssignmentDate, association.assignmentDate),
       Statement(associationResource, LWM.hasLabWork, association.labwork)
     )
 

@@ -106,11 +106,48 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒ {
-              /* Assignments.create(Assignment(a.id, a.description, a.text, a.topics, a.courses)).map{_ =>
-            Redirect(routes.AssignmentManagementController.labAssignmentIndex(labworkid))*/
-              Future.successful(Redirect(routes.AssignmentManagementController.labAssignmentIndex(labworkid)))
+              AssignmentAssociations.create(AssignmentAssociation(Resource(a.assignment), Resource(labworkid), Resource(a.dueDate))).map { _ ⇒
+                Redirect(routes.LabworkManagementController.edit(labworkid))
+              }
             }
           )
+      }
+  }
+
+  def bindAssignment(labworkid: String, associationid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async {
+        implicit request ⇒
+          AssignmentForms.assignmentAssociationForm.bindFromRequest.fold(
+            formWithErrors ⇒ {
+              for {
+                assignments ← Assignments.all()
+                courses ← Courses.all()
+              } yield {
+                BadRequest(views.html.assignmentLabworkManagement(Resource(labworkid), Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, formWithErrors, AssignmentForms.assignmentSolutionForm))
+              }
+            },
+            a ⇒ {
+              val i = Individual(Resource(associationid))
+              i.add(LWM.hasAssignment, Resource(a.assignment))(lwmGraph)
+              i.add(LWM.hasDueDate, Resource(a.dueDate))(lwmGraph)
+              Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
+            }
+          )
+      }
+  }
+
+  //TODO: ADD DUE DATE
+  def bindRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async(parse.json) {
+        implicit request ⇒
+          val labworkid = (request.body \ "lId").as[String]
+          val associationid = (request.body \ "aId").as[String]
+          val i = Individual(Resource(associationid))
+          println("YEAYEYAEA")
+          i.remove(LWM.hasAssignment, i.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head)
+          Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
       }
   }
 

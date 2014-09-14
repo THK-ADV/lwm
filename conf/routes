@@ -3,58 +3,58 @@
 # ~~~~
 
 # Home page
-GET           /                                            controllers.Application.index
-GET           /login                                       controllers.Application.loginScreen
-POST          /api/sessions                                controllers.SessionManagement.login
-DELETE        /api/sessions                                controllers.SessionManagement.logout
+GET           /                                               controllers.Application.index
+GET           /login                                          controllers.Application.loginScreen
+POST          /api/sessions                                   controllers.SessionManagement.login
+DELETE        /api/sessions                                   controllers.SessionManagement.logout
 
-GET           /administration/users                        controllers.UserManagement.index()
-POST          /administration/users                        controllers.UserManagement.userPost()
-DELETE        /administration/users                        controllers.UserManagement.userRemoval()
+GET           /administration/users                           controllers.UserManagement.index()
+POST          /administration/users                           controllers.UserManagement.userPost()
+DELETE        /administration/users                           controllers.UserManagement.userRemoval()
 
-GET           /administration/dashboard                    controllers.AdministrationDashboardController.dashboard()
+GET           /administration/dashboard                       controllers.AdministrationDashboardController.dashboard()
 
-GET           /administration/students                     controllers.StudentsManagement.index()
-POST          /administration/students                     controllers.StudentsManagement.studentPost()
-DELETE        /administration/students                     controllers.StudentsManagement.studentRemoval()
-POST          /administration/students/suggest             controllers.StudentsManagement.studentSuggestions()
+GET           /administration/students                        controllers.StudentsManagement.index()
+POST          /administration/students                        controllers.StudentsManagement.studentPost()
+DELETE        /administration/students                        controllers.StudentsManagement.studentRemoval()
+POST          /administration/students/suggest                controllers.StudentsManagement.studentSuggestions()
 
-GET           /administration/labworks                     controllers.LabworkManagementController.index()
-GET           /administration/labworks/:id                 controllers.LabworkManagementController.edit(id)
-POST          /administration/labworks/:id                 controllers.LabworkManagementController.studentAddition(id)
-POST          /administration/labworks                     controllers.LabworkManagementController.labWorkPost()
-DELETE        /administration/labworks                     controllers.LabworkManagementController.labworkRemoval()
+GET           /administration/labworks                        controllers.LabworkManagementController.index()
+GET           /administration/labworks/:id                    controllers.LabworkManagementController.edit(id)
+POST          /administration/labworks/:id                    controllers.LabworkManagementController.studentAddition(id)
+POST          /administration/labworks                        controllers.LabworkManagementController.labWorkPost()
+DELETE        /administration/labworks                        controllers.LabworkManagementController.labworkRemoval()
 
-GET           /administration/degrees                      controllers.DegreeManagementController.index()
-POST          /administration/degrees                      controllers.DegreeManagementController.degreePost()
-DELETE        /administration/degrees                      controllers.DegreeManagementController.degreeRemoval()
+GET           /administration/degrees                         controllers.DegreeManagementController.index()
+POST          /administration/degrees                         controllers.DegreeManagementController.degreePost()
+DELETE        /administration/degrees                         controllers.DegreeManagementController.degreeRemoval()
 
-GET           /administration/courses                      controllers.CourseManagementController.index()
-POST          /administration/courses                      controllers.CourseManagementController.coursePost()
-DELETE        /administration/courses                      controllers.CourseManagementController.courseRemoval()
+GET           /administration/courses                         controllers.CourseManagementController.index()
+POST          /administration/courses                         controllers.CourseManagementController.coursePost()
+DELETE        /administration/courses                         controllers.CourseManagementController.courseRemoval()
 
-GET           /administration/firstTimeSetupStudent        controllers.FirstTimeSetupController.setupStudent()
-GET           /administration/firstTimeSetupUser           controllers.FirstTimeSetupController.setupUser()
+GET           /administration/firstTimeSetupStudent           controllers.FirstTimeSetupController.setupStudent()
+GET           /administration/firstTimeSetupUser              controllers.FirstTimeSetupController.setupUser()
 
-POST          /administration/firstTimeSetupStudent        controllers.StudentsManagement.studentFirstTimeSelf()
-POST          /administration/firstTimeSetupUser           controllers.UserManagement.userFirstTimeSelf()
+POST          /administration/firstTimeSetupStudent           controllers.StudentsManagement.studentFirstTimeSelf()
+POST          /administration/firstTimeSetupUser              controllers.UserManagement.userFirstTimeSelf()
 
-GET           /student/dashboard                           controllers.StudentDashboardController.dashboard()
+GET           /student/dashboard                              controllers.StudentDashboardController.dashboard()
 
-GET           /impressum                                   controllers.VisitorController.impressum()
-GET           /contact                                     controllers.VisitorController.contact()
+GET           /impressum                                      controllers.VisitorController.impressum()
+GET           /contact                                        controllers.VisitorController.contact()
 
-GET           /administration/timetable/:id                controllers.TimetableController.index(id)
-POST          /administration/timetable/:id                controllers.TimetableController.timeTableEntryPost(id)
-DELETE        /administration/timetable                    controllers.TimetableController.entryRemoval()
+GET           /administration/timetable/:id                   controllers.TimetableController.index(id)
+POST          /administration/timetable/:id                   controllers.TimetableController.timeTableEntryPost(id)
+DELETE        /administration/timetable                       controllers.TimetableController.entryRemoval()
 
-POST          /administration/rooms                        controllers.RoomManagementController.roomPost()
-GET           /administration/rooms                        controllers.RoomManagementController.index()
-DELETE        /administration/rooms                        controllers.RoomManagementController.roomRemoval()
+POST          /administration/rooms                           controllers.RoomManagementController.roomPost()
+GET           /administration/rooms                           controllers.RoomManagementController.index()
+DELETE        /administration/rooms                           controllers.RoomManagementController.roomRemoval()
 
-GET           /administration/semesters                    controllers.SemesterManagementController.index()
-POST          /administration/semesters                    controllers.SemesterManagementController.semesterPost()
-DELETE        /administration/semesters                    controllers.SemesterManagementController.semesterRemoval()
+GET           /administration/semesters                       controllers.SemesterManagementController.index()
+POST          /administration/semesters                       controllers.SemesterManagementController.semesterPost()
+DELETE        /administration/semesters                       controllers.SemesterManagementController.semesterRemoval()
 
 GET           /administration/assignments                     controllers.AssignmentManagementController.index()
 POST          /administration/assignments                     controllers.AssignmentManagementController.assignmentPost()
@@ -63,6 +63,8 @@ DELETE        /administration/assignments                     controllers.Assign
 
 GET           /administration/labworks/:id/assignments        controllers.AssignmentManagementController.labAssignmentIndex(id)
 POST          /administration/labworks/:id/assignments        controllers.AssignmentManagementController.labAssignmentPost(id)
+POST          /administration/labworks/:id/associations/:a    controllers.AssignmentManagementController.bindAssignment(id,a)
+DELETE        /administration/labworks/associations           controllers.AssignmentManagementController.bindRemoval()
 
 # Map static resources from the /public folder to the /assets URL path
-GET           /assets/*file                                controllers.Assets.at(path="/public", file)
+GET           /assets/*file                                   controllers.Assets.at(path="/public", file)

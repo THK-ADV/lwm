@@ -1,0 +1,42 @@
+@(labwork: Individual, lwAssignmentAssoc: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.{Individual, Resource}
+@import utils.Global._
+
+<div class="panel-heading">
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
+<table class="table table-bordered">
+    <tbody>
+        <tr><th>Id</th><th>Aufgabe</th><th>Abgabe</th></tr>
+        @for(a <- lwAssignmentAssoc; i <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
+            @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
+                <tr><td>@i.value</td>
+                    <td>@Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString
+                        <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                    <td></td>
+                </tr>
+            }else {
+                <tr><td>@i.value</td><td><button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#@i.value"></button>
+                </td>
+                    <td></td>
+                </tr>
+
+                <div class="modal fade" id="@i.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                    Close</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
+                            </div>
+                            <div class="modal-body">
+                            @labworkAssignment_form(a.uri, c.value.toInt - i.value.toInt, labwork, allAssignments, form)
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+            }
+    </tbody>
+</table>

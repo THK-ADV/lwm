@@ -1,4 +1,5 @@
 @(assignments: List[Resource], form: Form[AssignmentSolutionFormModel])
+@import utils.semantic.Vocabulary.LWM
 @import utils.Global._
 @import utils.semantic.{Resource, Individual, Vocabulary}
 
@@ -11,15 +12,15 @@
             <th>Beschreibung</th>
             <th>Themen</th>
         </tr>
-        @for(assignment <- assignments; i = Individual(assignment)) {
+        @for(assignment <- assignments; i = Individual(assignment); id <- i.props(LWM.hasId)) {
             <tr>
                 <td>@i.props(Vocabulary.RDFS.label)</td>
                 <td>@i.props(Vocabulary.LWM.hasDescription)</td>
                 <td>@i.props(Vocabulary.LWM.hasTopic)</td>
-                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#solutionModal"></a></td>
+                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id.value"></a></td>
                 <td><a href="javascript: deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove" ></a></td>
             </tr>
-            <div class="modal fade" id="solutionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal fade" id="@id.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
