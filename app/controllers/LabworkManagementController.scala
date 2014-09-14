@@ -84,9 +84,9 @@ object LabworkManagementController extends Controller with Authentication {
         } yield {
           if (isStudent && isGroup) {
             val ig = Individual(groupResource)
-            ig.add(LWM.hasMember, studentResource)(lwmGraph)
+            ig.add(LWM.hasMember, studentResource)
             val is = Individual(studentResource)
-            is.add(LWM.memberOf, groupResource)(lwmGraph)
+            is.add(LWM.memberOf, groupResource)
           }
           Redirect(routes.LabworkManagementController.index())
         }

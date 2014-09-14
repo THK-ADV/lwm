@@ -39,7 +39,7 @@ object Semesters {
         (semesterResource, sts)
     }
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, semesterStatement._2: _*)).map(_ ⇒ Individual(semesterStatement._1))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(semesterStatement._2: _*)).map(_ ⇒ Individual(semesterStatement._1))
   }
 
   def delete(semester: Semester): Future[Semester] = {
@@ -53,7 +53,7 @@ object Semesters {
         resultFuture.map { result ⇒
           val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
           resources.map { resource ⇒
-            sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(semester) }
+            sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(semester) }
           }
         }
       case ws: WinterSemester ⇒
@@ -64,7 +64,7 @@ object Semesters {
         resultFuture.map { result ⇒
           val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
           resources.map { resource ⇒
-            sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(semester) }
+            sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(semester) }
           }
         }
     }
@@ -75,7 +75,7 @@ object Semesters {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.Semester) || individual.props(RDF.typ).contains(LWM.SummerSemester) || individual.props(RDF.typ).contains(LWM.WinterSemester)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Semester"))
     }

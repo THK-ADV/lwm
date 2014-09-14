@@ -28,7 +28,7 @@ object Degrees {
       Statement(resource, RDFS.label, Literal(degree.name)),
       Statement(resource, LWM.hasName, Literal(degree.name))
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { b ⇒
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { b ⇒
       Individual(resource)
     }
 
@@ -41,7 +41,7 @@ object Degrees {
     resultFuture.map { result ⇒
       val resources = SPARQLTools.statementsFromString(result).map(degree ⇒ degree.s)
       resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(degree) }
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(degree) }
       }
     }
     p.future
@@ -51,7 +51,7 @@ object Degrees {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.Degree)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Degree"))
     }

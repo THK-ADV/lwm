@@ -63,7 +63,7 @@ object Users {
       Statement(resource, FOAF.mbox, Literal(user.email)),
       Statement(resource, RDFS.label, Literal(s"${user.firstname} ${user.lastname}"))
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(resource)
     }
   }
@@ -75,7 +75,7 @@ object Users {
     resultFuture.map { result ⇒
       val resources = SPARQLTools.statementsFromString(result).map(u ⇒ u.s)
       resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(user) }
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(user) }
       }
     }
     p.future
@@ -85,7 +85,7 @@ object Users {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.User)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     }
     p.future
   }

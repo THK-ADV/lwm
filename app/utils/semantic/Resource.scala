@@ -97,15 +97,15 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
     * @param o the object
     * @return true, if the update of the named graph was successful
     */
-  def add(p: Property, o: RDFNode)(implicit graph: NamedGraph): Boolean = {
-    executionContext.executeUpdateBlocking(SPARQLBuilder.insertStatements(graph, Statement(uri, p, o)))
+  def add(p: Property, o: RDFNode): Boolean = {
+    executionContext.executeUpdateBlocking(SPARQLBuilder.insertStatements(Statement(uri, p, o)))
   }
 
-  def remove(property: Property, value: RDFNode)(implicit graph: NamedGraph): Boolean = {
-    executionContext.executeUpdateBlocking(SPARQLBuilder.removeStatements(graph, Statement(uri, property, value)))
+  def remove(property: Property, value: RDFNode): Boolean = {
+    executionContext.executeUpdateBlocking(SPARQLBuilder.removeStatements(Statement(uri, property, value)))
   }
 
-  def update(property: Property, oldValue: RDFNode, newValue: RDFNode)(implicit graph: NamedGraph): Boolean = {
+  def update(property: Property, oldValue: RDFNode, newValue: RDFNode): Boolean = {
     remove(property, oldValue)
     add(property, newValue)
   }

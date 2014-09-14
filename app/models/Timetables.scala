@@ -92,7 +92,7 @@ object Timetables {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(timetable.labwork, LWM.hasTimetable, resource)
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*))
     Individual(resource)
   }
 
@@ -117,7 +117,7 @@ object TimetableEntries {
       Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri),
       Statement(timetableEntryResource, LWM.hasRoom, Resource(timetableEntry.room))
     ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.isSupervisorFor, timetableEntryResource))).flatten
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(timetableEntryResource)
     }
   }
@@ -129,7 +129,7 @@ object TimetableEntries {
     resultFuture.map { result ⇒
       val resources = SPARQLTools.statementsFromString(result).map(u ⇒ u.s)
       resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(entry) }
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(entry) }
       }
     }
     p.future
@@ -139,7 +139,7 @@ object TimetableEntries {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.TimetableEntry)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a TimetableEntry"))
     }
