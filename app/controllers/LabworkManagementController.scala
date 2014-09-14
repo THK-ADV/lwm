@@ -21,21 +21,22 @@ object LabworkManagementController extends Controller with Authentication {
     Action.async { request ⇒
       for {
         courses ← Courses.all()
-        degrees ← Degrees.all()
         labworks ← LabWorks.all()
         semesters ← Semesters.all()
       } yield {
-        Ok(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, LabWorkForms.labworkForm))
+        Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
       }
     }
   }
 
-  //TODO: ADD ASSIGNMENTS
-  def edit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def edit(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
-      val labworkIndividual = Individual(Resource(id))
-      val groups = labworkIndividual.props.getOrElse(LWM.hasGroup, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
-      Future.successful(Ok(views.html.labWorkInformation(labworkIndividual, groups, Nil)))
+      for (assignments ← Assignments.all()) yield {
+        val li = Individual(Resource(labworkid))
+        val groups = li.props.getOrElse(LWM.hasGroup, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
+        val labworkAssignments = li.props.getOrElse(LWM.hasAssignmentAssociation, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
+        Ok(views.html.labWorkInformation(li, groups, labworkAssignments, assignments, AssignmentForms.assignmentAssociationForm))
+      }
     }
   }
 
@@ -46,9 +47,8 @@ object LabworkManagementController extends Controller with Authentication {
           for {
             labworks ← LabWorks.all()
             courses ← Courses.all()
-            degrees ← Degrees.all()
             semesters ← Semesters.all()
-          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, degrees.toList, courses.toList, formWithErrors))
+          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
         },
         labwork ⇒ {
           LabWorks.create(labwork).map { _ ⇒

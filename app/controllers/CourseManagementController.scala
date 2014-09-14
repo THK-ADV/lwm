@@ -1,6 +1,6 @@
 package controllers
 
-import models.{ DegreeForms, CourseForms, Courses, Degrees }
+import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Resource
@@ -17,8 +17,9 @@ object CourseManagementController extends Controller with Authentication {
     Action.async { request ⇒
       for {
         courses ← Courses.all()
+        degrees ← Degrees.all()
       } yield {
-        Ok(views.html.courseManagement(courses.toList, CourseForms.courseForm))
+        Ok(views.html.courseManagement(degrees.toList, courses.toList, CourseForms.courseForm))
       }
     }
   }
@@ -28,13 +29,14 @@ object CourseManagementController extends Controller with Authentication {
       CourseForms.courseForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
+            courses ← Courses.all()
             degrees ← Degrees.all()
           } yield {
-            BadRequest(views.html.courseManagement(degrees.toList, formWithErrors))
+            BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors))
           }
         },
         course ⇒ {
-          Courses.create(course).map { _ ⇒
+          Courses.create(Course(course.name, course.id, Resource(course.degree))).map { _ ⇒
             Redirect(routes.CourseManagementController.index())
           }
         }
@@ -45,10 +47,8 @@ object CourseManagementController extends Controller with Authentication {
   def courseRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val id = (request.body \ "id").as[String]
-      Courses.delete(Resource(id)).flatMap { deleted ⇒
-        Courses.all().map { all ⇒
-          Ok(views.html.courseManagement(all, CourseForms.courseForm))
-        }
+      Courses.delete(Resource(id)).map { _ ⇒
+        Redirect(routes.CourseManagementController.index())
       }
     }
   }

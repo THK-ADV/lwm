@@ -7,9 +7,9 @@ import utils.semantic._
 
 import scala.concurrent.Future
 
-// Ex: Course("Algorithmen und Programmierung I, "AP1")
-case class Course(name: String, id: String)
-
+// Ex: Course("Algorithmen und Programmierung I", "AP1", "http://gm.fh-koeln.de/../Medieninformatik")
+case class Course(name: String, id: String, degree: Resource)
+case class CourseFormModel(name: String, id: String, degree: String)
 /**
   * Veranstaltungen
   */
@@ -26,7 +26,8 @@ object Courses {
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
       Statement(courseResource, LWM.hasId, Literal(course.id)),
       Statement(courseResource, RDFS.label, Literal(course.name)),
-      Statement(courseResource, LWM.hasName, Literal(course.name))
+      Statement(courseResource, LWM.hasName, Literal(course.name)),
+      Statement(courseResource, LWM.hasDegree, course.degree)
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(courseResource))
@@ -75,7 +76,8 @@ object Courses {
 object CourseForms {
   val courseForm = Form(mapping(
     "name" -> nonEmptyText,
-    "id" -> nonEmptyText
-  )(Course.apply)(Course.unapply))
+    "id" -> nonEmptyText,
+    "degree" -> nonEmptyText
+  )(CourseFormModel.apply)(CourseFormModel.unapply))
 }
 

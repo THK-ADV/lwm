@@ -1,4 +1,4 @@
-@(semesters: List[Individual], labWorks: List[Individual], degrees: List[Individual], courses: List[Individual], form: Form[LabWork])
+@(semesters: List[Individual], labWorks: List[Individual], courses: List[Individual], form: Form[LabWork])
 @import utils.semantic.Individual
 <!DOCTYPE html>
 <html>
@@ -24,7 +24,7 @@
                                     <h4 class="modal-title" id="myModalLabel">Neues Praktikum hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                    @labwork_management_form(semesters, degrees, courses, form)
+                                    @labwork_management_form(semesters, courses, form)
                                 </div>
 
                             </div>

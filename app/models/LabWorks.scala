@@ -4,13 +4,14 @@ import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
 
-case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, degreeId: String, semester: String)
+case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String)
 
 case class LabWorkApplication(courseID: String, gmID: String)
 
 // TODO course id should be courseResourceURI
 
 object LabWorkForms {
+
   import play.api.data.Forms._
   import play.api.data._
 
@@ -26,7 +27,6 @@ object LabWorkForms {
       "groupCount" -> number(min = 1),
       "assignmentCount" -> number(min = 1),
       "courseId" -> nonEmptyText,
-      "degreeId" -> nonEmptyText,
       "semester" -> nonEmptyText
     )(LabWork.apply)(LabWork.unapply)
   )
@@ -37,6 +37,7 @@ object LabWorkForms {
   * Praktika
   */
 object LabWorks {
+
   import utils.Global._
   import utils.semantic.Vocabulary._
 
@@ -54,10 +55,8 @@ object LabWorks {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, RDFS.label, label),
       Statement(resource, LWM.hasTimetable, timetable.uri),
-      Statement(timetable.uri, LWM.hasLabWork, resource),
       Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
-      Statement(resource, LWM.hasDegree, Resource(labWork.degreeId)),
       Statement(resource, LWM.allowsApplications, Literal("false")),
       Statement(resource, LWM.isClosed, Literal("false")),
       Statement(resource, LWM.hasSemester, Resource(labWork.semester))
@@ -110,6 +109,7 @@ object LabWorks {
 case class LabWorkGroup(id: String, labwork: Resource, studentsURIs: List[String])
 
 object LabworkGroups {
+
   import utils.Global._
   import utils.semantic.Vocabulary._
 
