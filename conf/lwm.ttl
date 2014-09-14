@@ -220,6 +220,14 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/hasPreparationTime
+
+:hasPreparationTime rdf:type owl:DatatypeProperty ;
+                    
+                    rdfs:domain :AssignmentAssociation .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/hasRegistrationId
 
 :hasRegistrationId rdf:type owl:DatatypeProperty ,

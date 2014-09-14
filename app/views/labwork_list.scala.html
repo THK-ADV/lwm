@@ -18,7 +18,7 @@
             <th>Aufgabenanzahl</th>
             <th>Semester</th>
         </tr>
-        @for(labwork <- labworks; c <- labwork.props(Vocabulary.LWM.hasCourse); i = Individual(Resource(c.value))) {
+        @for(labwork <- labworks; c <- labwork.props.getOrElse(Vocabulary.LWM.hasCourse, List(Resource(""))); i = Individual(c.asResource().get)) {
             <tr>
                 <td>@i.props.getOrElse(Vocabulary.RDFS.label, List(Literal(""))).head.value</td>
                 <td>@Individual(Resource(i.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Literal(""))).head.value</td>

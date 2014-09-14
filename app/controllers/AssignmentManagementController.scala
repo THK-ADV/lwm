@@ -4,7 +4,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.LWM
-import utils.semantic.{ Resource, Individual }
+import utils.semantic.{ Literal, Resource, Individual }
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
 
@@ -106,7 +106,7 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒ {
-              AssignmentAssociations.create(AssignmentAssociation(Resource(a.assignment), Resource(labworkid), Resource(a.dueDate))).map { _ ⇒
+              AssignmentAssociations.create(AssignmentAssociation(Resource(a.assignment), Resource(labworkid), a.preparationTime)).map { _ ⇒
                 Redirect(routes.LabworkManagementController.edit(labworkid))
               }
             }
@@ -129,8 +129,8 @@ object AssignmentManagementController extends Controller with Authentication {
             },
             a ⇒ {
               val i = Individual(Resource(associationid))
-              i.add(LWM.hasAssignment, Resource(a.assignment))(lwmGraph)
-              i.add(LWM.hasDueDate, Resource(a.dueDate))(lwmGraph)
+              i.add(LWM.hasAssignment, Resource(a.assignment))
+              i.add(LWM.hasPreparationTime, Literal(s"${a.preparationTime}"))
               Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
             }
           )
@@ -145,7 +145,6 @@ object AssignmentManagementController extends Controller with Authentication {
           val labworkid = (request.body \ "lId").as[String]
           val associationid = (request.body \ "aId").as[String]
           val i = Individual(Resource(associationid))
-          println("YEAYEYAEA")
           i.remove(LWM.hasAssignment, i.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head)
           Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
       }

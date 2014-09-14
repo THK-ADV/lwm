@@ -102,7 +102,7 @@ object Vocabulary {
 
     val hasAssignment = property("hasAssignment")
     val hasAssignmentDate = property("hasAssignmentDate")
-    val hasDueDate = property("hasDueDate")
+    val hasPreparationTime = property("hasPreparationTime")
     val hasOrderId = property("hasOrderId")
 
     val hasApplicationToken = property("hasApplicationToken")
