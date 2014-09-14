@@ -12,7 +12,7 @@ object Vocabulary {
   }
 
   object LWM extends ResourceHelper {
-    val ns = Namespace("http://lwm.gm.fh-koeln.de/ns/")
+    val ns = Namespace("http://lwm.gm.fh-koeln.de/")
     val prefix = Prefix("lwm")
 
     val Student = resource("Student")

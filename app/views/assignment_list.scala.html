@@ -7,9 +7,9 @@
 
     <table class="table">
         <tr>
-            <th>Id</th>
-            <th>Description</th>
-            <th>Topics</th>
+            <th>Titel</th>
+            <th>Beschreibung</th>
+            <th>Themen</th>
         </tr>
         @for(assignment <- assignments; i = Individual(assignment)) {
             <tr>
@@ -23,8 +23,8 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            <h4 class="modal-title" id="myModalLabel">Beschreibung</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Schließen</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Aufgabenbeschreibung</h4>
                         </div>
                         <div class="modal-body">
                         @assignment_solution(i, form)

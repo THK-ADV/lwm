@@ -1,0 +1,330 @@
+@prefix : <http://lwm.gm.fh-koeln.de/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://lwm.gm.fh-koeln.de/> .
+
+<http://lwm.gm.fh-koeln.de/> rdf:type owl:Ontology ;
+                             
+                             owl:versionIRI <http://lwm.gm.fh-koeln.de/1.0/> .
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://lwm.gm.fh-koeln.de/ApplicationToken
+
+:ApplicationToken rdf:type owl:Class ;
+                  
+                  rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Assignment
+
+:Assignment rdf:type owl:Class ;
+            
+            rdf:label "Praktikumsaufgabe" ;
+            
+            rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/AssignmentAssociation
+
+:AssignmentAssociation rdf:type owl:Class ;
+                       
+                       rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/AssignmentSolution
+
+:AssignmentSolution rdf:type owl:Class ;
+                    
+                    rdf:label "Musterlösung" ;
+                    
+                    rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Course
+
+:Course rdf:type owl:Class ;
+        
+        rdf:label "Veranstaltung" ;
+        
+        rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Degree
+
+:Degree rdf:type owl:Class ;
+        
+        rdf:label "Studiengang" ;
+        
+        rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Group
+
+:Group rdf:type owl:Class ;
+       
+       rdf:label "Praktikumsgruppe" ;
+       
+       rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/LabWork
+
+:LabWork rdf:type owl:Class ;
+         
+         rdf:label "Praktikum" ;
+         
+         rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Room
+
+:Room rdf:type owl:Class ;
+      
+      rdf:label "Raum" ;
+      
+      rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Semester
+
+:Semester rdf:type owl:Class ;
+          
+          rdf:label "Semester" ;
+          
+          rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/Student
+
+:Student rdf:type owl:Class ;
+         
+         rdf:label "Student" ;
+         
+         rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/SummerSemester
+
+:SummerSemester rdf:type owl:Class ;
+                
+                rdf:label "Sommersemester" ;
+                
+                rdf:subClassOf :Semester ;
+                
+                owl:disjointWith :WinterSemester .
+
+
+
+###  http://lwm.gm.fh-koeln.de/User
+
+:User rdf:type owl:Class ;
+      
+      rdf:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/WinterSemester
+
+:WinterSemester rdf:type owl:Class ;
+                
+                rdf:label "Wintersemester" ;
+                
+                rdf:subClassOf :Semester .
+
+
+
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+
+###  http://lwm.gm.fh-koeln.de/AutomationITMaster
+
+:AutomationITMaster rdf:type :Degree ,
+                             owl:NamedIndividual ;
+                    
+                    rdf:label "Automationstechnik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessAdministrationAndEngineeringBachelor
+
+:BusinessAdministrationAndEngineeringBachelor rdf:type :Degree ,
+                                                       owl:NamedIndividual ;
+                                              
+                                              rdf:label "Wirtschaftingenieurwesen (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsBachelor
+
+:BusinessInformationSystemsBachelor rdf:type :Degree ,
+                                             owl:NamedIndividual ;
+                                    
+                                    rdf:label "Wirtschaftsinformatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsBachelorJoint
+
+:BusinessInformationSystemsBachelorJoint rdf:type :Degree ,
+                                                  owl:NamedIndividual ;
+                                         
+                                         rdf:label "Wirtschaftsinformatik (Verbundstudium, Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsMaster
+
+:BusinessInformationSystemsMaster rdf:type :Degree ,
+                                           owl:NamedIndividual ;
+                                  
+                                  rdf:label "Wirtschaftsinformatik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsMasterJoint
+
+:BusinessInformationSystemsMasterJoint rdf:type :Degree ,
+                                                owl:NamedIndividual ;
+                                       
+                                       rdf:label "Wirtschaftsinformatik (Verbundstudium, Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ComputerEngineeringBachelor
+
+:ComputerEngineeringBachelor rdf:type :Degree ,
+                                      owl:NamedIndividual ;
+                             
+                             rdf:label "Technische Informatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ComputerScienceBachelor
+
+:ComputerScienceBachelor rdf:type :Degree ,
+                                  owl:NamedIndividual ;
+                         
+                         rdf:label "Allgemeine Informatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ComputerScienceMaster
+
+:ComputerScienceMaster rdf:type :Degree ,
+                                owl:NamedIndividual ;
+                       
+                       rdf:label "Allgemeine Informatik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ElectricalEngineeringBachelor
+
+:ElectricalEngineeringBachelor rdf:type :Degree ,
+                                        owl:NamedIndividual ;
+                               
+                               rdf:label "Elektrotechnik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/GeneralMechanicalEngineeringBachelor
+
+:GeneralMechanicalEngineeringBachelor rdf:type :Degree ,
+                                               owl:NamedIndividual ;
+                                      
+                                      rdf:label "Machinenbau (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/MediaInformaticsBachelor
+
+:MediaInformaticsBachelor rdf:type :Degree ,
+                                   owl:NamedIndividual ;
+                          
+                          rdf:label "Medieninformatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/MediaInformaticsMaster
+
+:MediaInformaticsMaster rdf:type :Degree ,
+                                 owl:NamedIndividual ;
+                        
+                        rdf:label "Medieninformatik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ProductDesignAndProcessDevelopmentMaster
+
+:ProductDesignAndProcessDevelopmentMaster rdf:type :Degree ,
+                                                   owl:NamedIndividual ;
+                                          
+                                          rdf:label "Produktdesign (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/WebScienceMaster
+
+:WebScienceMaster rdf:type :Degree ,
+                           owl:NamedIndividual ;
+                  
+                  rdf:label "Web Science (Master)" .
+
+
+
+
+
+#################################################################
+#
+#    General axioms
+#
+#################################################################
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ApplicationToken
+                :Assignment
+                :AssignmentAssociation
+                :AssignmentSolution
+                :Course
+                :Degree
+                :Group
+                :LabWork
+                :Room
+                :Semester
+                :Student
+                :User
+              )
+] .
+
+
+
+
+###  Generated by the OWL API (version 3.5.0) http://owlapi.sourceforge.net
+

@@ -50,7 +50,10 @@ case class Time(hours: Int, minutes: Int) extends Ordered[Time] {
   private val minutesOfDay = hours * 60 + minutes
 
   override def compare(other: Time): Int = math.signum(minutesOfDay - other.minutesOfDay)
-  override def toString = s"$hours:$minutes"
+  override def toString = {
+    val m = if (minutes < 10) s"0$minutes" else s"$minutes"
+    s"$hours:$m"
+  }
 }
 
 object TimeSlots {
