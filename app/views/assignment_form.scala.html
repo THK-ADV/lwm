@@ -10,10 +10,8 @@
     @helper.textarea(form("description"), '_label -> "Beschreibung")
     @helper.textarea(form("text"), 'rows -> 10, 'cols -> 50, '_label -> "Aufgabe:")
     @helper.inputText(form("topics"), '_label -> "Themen:")
-    @helper.inputCheckboxGroup(form("courses"), for {course <- courses; labelList <- course.props.get(LWM.hasName); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString + " - " + Individual(Resource(course.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value), '_label -> "Veranstaltungen:")
-    @for(course <- courses; labelList <- course.props.get(LWM.hasName); label = labelList.headOption.getOrElse("")) {
-      <input type="checkbox" name=""
-    }
+    @helper.inputCheckboxGroup(form("courses"), for {course <- courses; labelList <- course.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString + " - " + Individual(Resource(course.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value), '_label -> "Veranstaltungen:")
+
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
         <button type="submit" class="btn btn-primary">Hinzufügen</button>
