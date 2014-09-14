@@ -95,7 +95,7 @@ object Students {
     }
   }
 
-  def search(query: String, maxCount: Int): Future[List[String]] = search(query).map(_.take(maxCount))
+  def search(query: String, maxCount: Int): Future[List[String]] = if (maxCount > 0) search(query).map(_.take(maxCount)) else search(query)
 
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 
