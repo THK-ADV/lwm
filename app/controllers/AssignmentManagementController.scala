@@ -120,6 +120,7 @@ object AssignmentManagementController extends Controller with Authentication {
         implicit request ⇒
           AssignmentForms.assignmentAssociationForm.bindFromRequest.fold(
             formWithErrors ⇒ {
+              print("AAAAAAH")
               for {
                 assignments ← Assignments.all()
                 courses ← Courses.all()

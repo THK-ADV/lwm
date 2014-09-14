@@ -1,4 +1,5 @@
 @(labwork: Individual, lwAssignmentAssoc: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@import utils.semantic.Literal
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.semantic.{Individual, Resource}
 @import utils.Global._
@@ -7,21 +8,25 @@
     Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
 <table class="table table-bordered">
     <tbody>
-        <tr><th>Id</th><th>Aufgabe</th><th>Bearbeitungszeit</th></tr>
-        @for(a <- lwAssignmentAssoc; i <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
+        <tr><th>Blatt</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
+        @for(a <- lwAssignmentAssoc; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
             @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
-                <tr><td>@i.value</td>
-                    <td>@Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString
+                <tr>
+                    <td>@id.value</td>
+                    <td>
+                        @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString
                         <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
-                    <td></td>
+                    <td>
+                        @{a.props.getOrElse(LWM.hasPreparationTime, List(Literal("0"))).head.value.toInt + id.value.toInt}
+                    </td>
                 </tr>
             }else {
-                <tr><td>@i.value</td><td><button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#@i.value"></button>
+                <tr><td>@id.value</td><td><button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#@id.value"></button>
                 </td>
                     <td></td>
                 </tr>
 
-                <div class="modal fade" id="@i.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="@id.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -30,7 +35,7 @@
                                 <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
                             </div>
                             <div class="modal-body">
-                            @labworkAssignment_form(a.uri, c.value.toInt - i.value.toInt, labwork, allAssignments, form)
+                            @labworkAssignment_form(a.uri, c.value.toInt - id.value.toInt, labwork, allAssignments, form)
                             </div>
 
                         </div>
