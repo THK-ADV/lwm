@@ -1,4 +1,4 @@
-@(labwork: Individual, groups: List[Individual], assignments: List[Individual])
+@(labwork: Individual, groups: List[Individual], lwAssignments: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.Resource
@@ -34,16 +34,7 @@
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr><th>Id</th><th>Assignment</th></tr>
-                                    @for(a <- assignments) {
-                                        <tr><td>@a.props.getOrElse(LWM.hasId, List("").head)</td> <td>@a.props.getOrElse(LWM.hasDescription, List("").head)</td></tr>
-                                    }
-                                </tbody>
-                            </table>
+                            @labworkAssignmentTable(labwork, lwAssignments, allAssignments, form)
                         </div>
                     </div>
                     <div class="row">

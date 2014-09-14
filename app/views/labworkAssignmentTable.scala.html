@@ -1,0 +1,30 @@
+@(labwork: Individual, lwAssignmentAssoc: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Individual
+<!-- ALWAYS ADD +n TO WHEN THE LABWORK IS DUE -->
+<div class="panel-heading">
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
+<table class="table table-bordered">
+    <tbody>
+        <tr><th>Id</th><th>Assignment</th></tr>
+        @for(a <- lwAssignmentAssoc; i <- a.props(LWM.hasOrderId)) {
+            <tr><td>@i.value.toInt</td><td><button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button>
+            </td></tr>
+
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
+                        </div>
+                        <div class="modal-body">
+                        @labworkAssignment_form(labwork.uri, allAssignments, form)
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </tbody>
+</table>

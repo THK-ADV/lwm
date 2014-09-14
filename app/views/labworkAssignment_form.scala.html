@@ -1,0 +1,14 @@
+@(labworkId: Resource, assignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Resource
+@import utils.semantic.Individual
+
+    @helper.form(action = routes.AssignmentManagementController.labAssignmentPost(labworkId.value)) {
+    @helper.select(form("assignment"), for(a <- assignments) yield a.uri.value -> a.props.getOrElse(RDFS.label, List.empty[String]).head.toString, '_label -> "Aufgabe")
+    @helper.inputText(form("assignmentDate"), '_label -> "Veröffentlichungsdatum:")
+    @helper.inputText(form("dueDate"), '_label -> "Abgabedatum")
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
+    </div>
+}

@@ -52,7 +52,7 @@ case class AssignmentFormModel(id: String, description: String, text: String, to
 
 case class AssignmentAssociation(assignment: Resource, labwork: Resource, assignmentDate: Resource, dueDate: Resource)
 
-case class AssignmentAssociationFormModel(assignment: String, labwork: String, assignmentDate: String, dueDate: String)
+case class AssignmentAssociationFormModel(assignment: String, assignmentDate: String, dueDate: String)
 
 object AssignmentForms {
   val assignmentForm = Form(mapping(
@@ -65,7 +65,6 @@ object AssignmentForms {
 
   val assignmentAssociationForm = Form(mapping(
     "assignment" -> nonEmptyText,
-    "labwork" -> nonEmptyText,
     "assignmentDate" -> nonEmptyText,
     "dueDate" -> nonEmptyText
   )(AssignmentAssociationFormModel.apply)(AssignmentAssociationFormModel.unapply))

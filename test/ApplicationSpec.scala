@@ -1,8 +1,7 @@
 import play.api.test.Helpers._
 import play.api.test._
 
-
-class ApplicationSpec extends LWMBaseSpec{
+class ApplicationSpec extends LWMBaseSpec {
   "Application Controller" should {
     "redirect to Admin Dashboard with a valid admin session" in {
       val result = route(FakeRequest(GET, "/").withSession("session" -> "fakeAdmin")).get

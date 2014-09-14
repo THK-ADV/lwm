@@ -30,12 +30,14 @@ object LabworkManagementController extends Controller with Authentication {
     }
   }
 
-  //TODO: ADD ASSIGNMENTS
-  def edit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def edit(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
-      val labworkIndividual = Individual(Resource(id))
-      val groups = labworkIndividual.props.getOrElse(LWM.hasGroup, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
-      Future.successful(Ok(views.html.labWorkInformation(labworkIndividual, groups, Nil)))
+      for (assignments ← Assignments.all()) yield {
+        val li = Individual(Resource(labworkid))
+        val groups = li.props.getOrElse(LWM.hasGroup, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
+        val labworkAssignments = li.props.getOrElse(LWM.hasAssignmentAssociation, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
+        Ok(views.html.labWorkInformation(li, groups, labworkAssignments, assignments, AssignmentForms.assignmentAssociationForm))
+      }
     }
   }
 
