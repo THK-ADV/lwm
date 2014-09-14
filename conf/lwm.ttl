@@ -98,12 +98,6 @@
 
 
 
-###  http://lwm.gm.fh-koeln.de/hasMember
-
-:hasMember rdf:type owl:ObjectProperty .
-
-
-
 ###  http://lwm.gm.fh-koeln.de/hasRoom
 
 :hasRoom rdf:type owl:ObjectProperty ;
@@ -158,20 +152,6 @@
 
 
 
-###  http://lwm.gm.fh-koeln.de/isSupervisorFor
-
-:isSupervisorFor rdf:type owl:ObjectProperty ;
-                 
-                 rdfs:domain :User .
-
-
-
-###  http://lwm.gm.fh-koeln.de/memberOf
-
-:memberOf rdf:type owl:ObjectProperty .
-
-
-
 
 
 #################################################################
@@ -181,17 +161,16 @@
 #################################################################
 
 
-###  http://lwm.gm.fh-koeln.de/allowsApplication
+###  http://lwm.gm.fh-koeln.de/allowsApplications
 
-:allowsApplication rdf:type owl:DatatypeProperty ;
-                   
-                   rdfs:domain :LabWork .
+:allowsApplications rdf:type owl:DatatypeProperty .
 
 
 
 ###  http://lwm.gm.fh-koeln.de/hasAssignmentCount
 
-:hasAssignmentCount rdf:type owl:DatatypeProperty ;
+:hasAssignmentCount rdf:type owl:DatatypeProperty ,
+                             owl:FunctionalProperty ;
                     
                     rdfs:domain :LabWork .
 
@@ -199,42 +178,25 @@
 
 ###  http://lwm.gm.fh-koeln.de/hasDescription
 
-:hasDescription rdf:type owl:DatatypeProperty ;
-                
-                rdfs:domain :Assignment .
-
-
-
-###  http://lwm.gm.fh-koeln.de/hasDueDate
-
-:hasDueDate rdf:type owl:DatatypeProperty ;
-            
-            rdfs:domain :AssignmentAssociation .
+:hasDescription rdf:type owl:DatatypeProperty .
 
 
 
 ###  http://lwm.gm.fh-koeln.de/hasEndTime
 
-:hasEndTime rdf:type owl:DatatypeProperty ;
-            
-            rdfs:domain :TimetableEntry .
+:hasEndTime rdf:type owl:DatatypeProperty .
 
 
 
 ###  http://lwm.gm.fh-koeln.de/hasFileName
 
-:hasFileName rdf:type owl:DatatypeProperty ;
-             
-             rdfs:domain :AssignmentSolution .
+:hasFileName rdf:type owl:DatatypeProperty .
 
 
 
 ###  http://lwm.gm.fh-koeln.de/hasGmId
 
-:hasGmId rdf:type owl:DatatypeProperty ;
-         
-         rdfs:domain :Student ,
-                     :User .
+:hasGmId rdf:type owl:DatatypeProperty .
 
 
 
@@ -260,7 +222,8 @@
 
 ###  http://lwm.gm.fh-koeln.de/hasRegistrationId
 
-:hasRegistrationId rdf:type owl:DatatypeProperty ;
+:hasRegistrationId rdf:type owl:DatatypeProperty ,
+                            owl:FunctionalProperty ;
                    
                    rdfs:domain :Student .
 
@@ -276,17 +239,13 @@
 
 ###  http://lwm.gm.fh-koeln.de/hasStartTime
 
-:hasStartTime rdf:type owl:DatatypeProperty ;
-              
-              rdfs:domain :TimetableEntry .
+:hasStartTime rdf:type owl:DatatypeProperty .
 
 
 
 ###  http://lwm.gm.fh-koeln.de/hasText
 
-:hasText rdf:type owl:DatatypeProperty ;
-         
-         rdfs:domain :Assignment .
+:hasText rdf:type owl:DatatypeProperty .
 
 
 
@@ -300,17 +259,13 @@
 
 ###  http://lwm.gm.fh-koeln.de/hasYear
 
-:hasYear rdf:type owl:DatatypeProperty ;
-         
-         rdfs:domain :Semester .
+:hasYear rdf:type owl:DatatypeProperty .
 
 
 
 ###  http://lwm.gm.fh-koeln.de/isClosed
 
-:isClosed rdf:type owl:DatatypeProperty ;
-          
-          rdfs:domain :LabWork .
+:isClosed rdf:type owl:DatatypeProperty .
 
 
 
@@ -445,7 +400,9 @@
 
 :Timetable rdf:type owl:Class ;
            
-           rdfs:label "Stundenplan" .
+           rdfs:label "Stundenplan" ;
+           
+           rdfs:subClassOf owl:Thing .
 
 
 
@@ -453,7 +410,9 @@
 
 :TimetableEntry rdf:type owl:Class ;
                 
-                rdfs:label "Stundenplaneintrag" .
+                rdfs:label "Stundenplaneintrag" ;
+                
+                rdfs:subClassOf owl:Thing .
 
 
 
@@ -469,7 +428,9 @@
 
 :Weekday rdf:type owl:Class ;
          
-         rdfs:label "Wochentag" .
+         rdfs:label "Wochentag" ;
+         
+         rdfs:subClassOf owl:Thing .
 
 
 
@@ -492,6 +453,96 @@
 #################################################################
 
 
+###  http://lwm.gm.fh-koeln.de/AutomationITMaster
+
+:AutomationITMaster rdf:type :Degree ,
+                             owl:NamedIndividual ;
+                    
+                    rdfs:label "Automationstechnik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessAdministrationAndEngineeringBachelor
+
+:BusinessAdministrationAndEngineeringBachelor rdf:type :Degree ,
+                                                       owl:NamedIndividual ;
+                                              
+                                              rdfs:label "Wirtschaftingenieurwesen (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsBachelor
+
+:BusinessInformationSystemsBachelor rdf:type :Degree ,
+                                             owl:NamedIndividual ;
+                                    
+                                    rdfs:label "Wirtschaftsinformatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsBachelorJoint
+
+:BusinessInformationSystemsBachelorJoint rdf:type :Degree ,
+                                                  owl:NamedIndividual ;
+                                         
+                                         rdfs:label "Wirtschaftsinformatik (Verbundstudium, Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsMaster
+
+:BusinessInformationSystemsMaster rdf:type :Degree ,
+                                           owl:NamedIndividual ;
+                                  
+                                  rdfs:label "Wirtschaftsinformatik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BusinessInformationSystemsMasterJoint
+
+:BusinessInformationSystemsMasterJoint rdf:type :Degree ,
+                                                owl:NamedIndividual ;
+                                       
+                                       rdfs:label "Wirtschaftsinformatik (Verbundstudium, Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ComputerEngineeringBachelor
+
+:ComputerEngineeringBachelor rdf:type :Degree ,
+                                      owl:NamedIndividual ;
+                             
+                             rdfs:label "Technische Informatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ComputerScienceBachelor
+
+:ComputerScienceBachelor rdf:type :Degree ,
+                                  owl:NamedIndividual ;
+                         
+                         rdfs:label "Allgemeine Informatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ComputerScienceMaster
+
+:ComputerScienceMaster rdf:type :Degree ,
+                                owl:NamedIndividual ;
+                       
+                       rdfs:label "Allgemeine Informatik (Master)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ElectricalEngineeringBachelor
+
+:ElectricalEngineeringBachelor rdf:type :Degree ,
+                                        owl:NamedIndividual ;
+                               
+                               rdfs:label "Elektrotechnik (Bachelor)" .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/Friday
 
 :Friday rdf:type :Weekday ,
@@ -501,12 +552,48 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/GeneralMechanicalEngineeringBachelor
+
+:GeneralMechanicalEngineeringBachelor rdf:type :Degree ,
+                                               owl:NamedIndividual ;
+                                      
+                                      rdfs:label "Machinenbau (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/MediaInformaticsBachelor
+
+:MediaInformaticsBachelor rdf:type :Degree ,
+                                   owl:NamedIndividual ;
+                          
+                          rdfs:label "Medieninformatik (Bachelor)" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/MediaInformaticsMaster
+
+:MediaInformaticsMaster rdf:type :Degree ,
+                                 owl:NamedIndividual ;
+                        
+                        rdfs:label "Medieninformatik (Master)" .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/Monday
 
 :Monday rdf:type :Weekday ,
                  owl:NamedIndividual ;
         
         rdfs:label "Montag" .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ProductDesignAndProcessDevelopmentMaster
+
+:ProductDesignAndProcessDevelopmentMaster rdf:type :Degree ,
+                                                   owl:NamedIndividual ;
+                                          
+                                          rdfs:label "Produktdesign (Master)" .
 
 
 
@@ -546,112 +633,21 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/WebScienceMaster
+
+:WebScienceMaster rdf:type :Degree ,
+                           owl:NamedIndividual ;
+                  
+                  rdfs:label "Web Science (Master)" .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/Wednesday
 
 :Wednesday rdf:type :Weekday ,
                     owl:NamedIndividual ;
            
            rdfs:label "Mittwoch" .
-
-
-
-
-
-#################################################################
-#
-#    Annotations
-#
-#################################################################
-
-
-:MediaInformaticsBachelor rdfs:label "Medieninformatik (Bachelor)" .
-
-
-
-:ComputerEngineeringBachelor rdfs:label "Technische Informatik (Bachelor)" .
-
-
-
-:BusinessInformationSystemsMaster rdfs:label "Wirtschaftsinformatik (Master)" .
-
-
-
-:AutomationITMaster rdfs:label "Automationstechnik (Master)" .
-
-
-
-:MediaInformaticsMaster rdfs:label "Medieninformatik (Master)" .
-
-
-
-:GeneralMechanicalEngineeringBachelor rdfs:label "Machinenbau (Bachelor)" .
-
-
-
-:BusinessInformationSystemsBachelor rdfs:label "Wirtschaftsinformatik (Bachelor)" .
-
-
-
-:ComputerScienceMaster rdfs:label "Allgemeine Informatik (Master)" .
-
-
-
-:ProductDesignAndProcessDevelopmentMaster rdfs:label "Produktdesign (Master)" .
-
-
-
-:BusinessAdministrationAndEngineeringBachelor rdfs:label "Wirtschaftingenieurwesen (Bachelor)" .
-
-
-
-:WebScienceMaster rdfs:label "Web Science (Master)" .
-
-
-
-:BusinessInformationSystemsBachelorJoint rdfs:label "Wirtschaftsinformatik (Verbundstudium, Bachelor)" .
-
-
-
-:BusinessInformationSystemsMasterJoint rdfs:label "Wirtschaftsinformatik (Verbundstudium, Master)" .
-
-
-
-:ElectricalEngineeringBachelor rdfs:label "Elektrotechnik (Bachelor)" .
-
-
-
-:ComputerScienceBachelor rdfs:label "Allgemeine Informatik (Bachelor)" .
-
-
-
-
-
-#################################################################
-#
-#    General axioms
-#
-#################################################################
-
-
-[ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :ApplicationToken
-                :Assignment
-                :AssignmentAssociation
-                :AssignmentSolution
-                :Course
-                :Degree
-                :Group
-                :LabWork
-                :Room
-                :Semester
-                :Student
-                :Timetable
-                :TimetableEntry
-                :User
-                :Weekday
-                owl:Thing
-              )
-] .
 
 
 
