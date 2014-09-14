@@ -1,12 +1,10 @@
 import play.api.test.Helpers._
 import play.api.test._
 
-
-
-class AdminDashboardSpec extends LWMBaseSpec{
+class AdminDashboardSpec extends LWMBaseSpec {
 
   "AdminDashboard" should {
-    "redirect to default index if user does not have the right permissions" in  {
+    "redirect to default index if user does not have the right permissions" in {
       val result = route(FakeRequest(GET, "/administration/dashboard")).get
       redirectLocation(result) mustBe Some("/")
     }

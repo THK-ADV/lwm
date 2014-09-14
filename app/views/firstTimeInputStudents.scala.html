@@ -10,7 +10,6 @@
     <body>
     <div class="container-fluid">
         @import utils.semantic.Vocabulary
-
         @helper.form(action = routes.StudentsManagement.studentFirstTimeSelf()) {
             @helper.inputText(form("id"),'readonly -> "readonly", '_label -> "ADV Kennung")
             @helper.inputText(form("registrationNumber"), '_label -> "Matrikelnummer")
@@ -18,7 +17,9 @@
             @helper.inputText(form("lastname"), '_label -> "Nachname")
             @helper.inputText(form("email"), '_label -> "Email")
             @helper.inputText(form("phone"), '_label -> "Telefon")
-            @helper.select(form("degree"), for(d <- degrees) yield d.uri.value -> d.props.getOrElse(RDFS.label, List(Literal(d.uri.value))).head.value, '_label -> "Studiengang")
+            @helper.select(form("degree"), (for(d <- degrees) yield {
+                d.uri.value -> d.props.getOrElse(RDFS.label, List(Literal(d.uri.value))).head.value
+            }).sortBy(_._2), '_label -> "Studiengang")
             <div class="form-actions">
                 <button type="submit">Abschicken</button>
             </div>

@@ -12,14 +12,15 @@
                 <th>Name</th>
                 <th>ID</th>
             </tr>
-            @for(degree <- degrees) {
+            @degrees.map(i => (i.props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(Literal(""))).head.value, i.uri)).sortBy(_._1).map{degree =>
                 <tr>
-                    <td>@degree.props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
-                    <td>@degree.props.getOrElse(Vocabulary.LWM.hasId, List(Literal(""))).head.value</td>
+                    <td>@degree._1</td>
+                    <td>@degree._2</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td><a href="javascript: deleteDegree('@degree.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                    <td><a href="javascript: deleteDegree('@degree._3')" class="glyphicon glyphicon-remove" ></a></td>
                 </tr>
             }
+
         </table>
 
     </div>

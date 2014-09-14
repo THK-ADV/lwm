@@ -1,6 +1,6 @@
 @prefix : <http://lwm.gm.fh-koeln.de/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -458,7 +458,11 @@
 :AutomationITMaster rdf:type :Degree ,
                              owl:NamedIndividual ;
                     
-                    rdfs:label "Automationstechnik (Master)" .
+                    rdfs:label "Automationstechnik (Master)" ;
+                    
+                    :hasId "AIT" ;
+                    
+                    :hasName "Automationstechnik (Master)" .
 
 
 
@@ -467,7 +471,11 @@
 :BusinessAdministrationAndEngineeringBachelor rdf:type :Degree ,
                                                        owl:NamedIndividual ;
                                               
-                                              rdfs:label "Wirtschaftingenieurwesen (Bachelor)" .
+                                              rdfs:label "Wirtschaftingenieurwesen (Bachelor)" ;
+                                              
+                                              :hasId "ENGWI" ;
+                                              
+                                              :hasName "Wirtschaftsingenieurwesen (Bachelor)" .
 
 
 
@@ -476,7 +484,11 @@
 :BusinessInformationSystemsBachelor rdf:type :Degree ,
                                              owl:NamedIndividual ;
                                     
-                                    rdfs:label "Wirtschaftsinformatik (Bachelor)" .
+                                    rdfs:label "Wirtschaftsinformatik (Bachelor)" ;
+                                    
+                                    :hasId "WI" ;
+                                    
+                                    :hasName "Wirtschaftsinformatik (Bachelor)" .
 
 
 
@@ -485,7 +497,11 @@
 :BusinessInformationSystemsBachelorJoint rdf:type :Degree ,
                                                   owl:NamedIndividual ;
                                          
-                                         rdfs:label "Wirtschaftsinformatik (Verbundstudium, Bachelor)" .
+                                         rdfs:label "Wirtschaftsinformatik (Verbundstudium, Bachelor)" ;
+                                         
+                                         :hasId "WIV" ;
+                                         
+                                         :hasName "Wirtschaftsinformatik (Verbundstudium, Bachelor)" .
 
 
 
@@ -494,7 +510,11 @@
 :BusinessInformationSystemsMaster rdf:type :Degree ,
                                            owl:NamedIndividual ;
                                   
-                                  rdfs:label "Wirtschaftsinformatik (Master)" .
+                                  rdfs:label "Wirtschaftsinformatik (Master)" ;
+                                  
+                                  :hasName "Wirtschatftsinformatik (Master)" ;
+                                  
+                                  :hasId "WIM" .
 
 
 
@@ -503,7 +523,11 @@
 :BusinessInformationSystemsMasterJoint rdf:type :Degree ,
                                                 owl:NamedIndividual ;
                                        
-                                       rdfs:label "Wirtschaftsinformatik (Verbundstudium, Master)" .
+                                       rdfs:label "Wirtschaftsinformatik (Verbundstudium, Master)" ;
+                                       
+                                       :hasName "Wirtschaftsinformatik (Verbundstudium, Master)" ;
+                                       
+                                       :hasId "WIVM" .
 
 
 
@@ -512,7 +536,11 @@
 :ComputerEngineeringBachelor rdf:type :Degree ,
                                       owl:NamedIndividual ;
                              
-                             rdfs:label "Technische Informatik (Bachelor)" .
+                             rdfs:label "Technische Informatik (Bachelor)" ;
+                             
+                             :hasId "TI" ;
+                             
+                             :hasName "Technische Informatik (Bachelor)" .
 
 
 
@@ -521,7 +549,11 @@
 :ComputerScienceBachelor rdf:type :Degree ,
                                   owl:NamedIndividual ;
                          
-                         rdfs:label "Allgemeine Informatik (Bachelor)" .
+                         rdfs:label "Allgemeine Informatik (Bachelor)" ;
+                         
+                         :hasName "Allgemeine Informatik (Bachelor)" ;
+                         
+                         :hasId "AI" .
 
 
 
@@ -530,7 +562,11 @@
 :ComputerScienceMaster rdf:type :Degree ,
                                 owl:NamedIndividual ;
                        
-                       rdfs:label "Allgemeine Informatik (Master)" .
+                       rdfs:label "Allgemeine Informatik (Master)" ;
+                       
+                       :hasId "AIM" ;
+                       
+                       :hasName "Allgemeine Informatik (Master)" .
 
 
 
@@ -539,7 +575,11 @@
 :ElectricalEngineeringBachelor rdf:type :Degree ,
                                         owl:NamedIndividual ;
                                
-                               rdfs:label "Elektrotechnik (Bachelor)" .
+                               rdfs:label "Elektrotechnik (Bachelor)" ;
+                               
+                               :hasId "ENGE" ;
+                               
+                               :hasName "Elektrotechnik" .
 
 
 
@@ -557,7 +597,11 @@
 :GeneralMechanicalEngineeringBachelor rdf:type :Degree ,
                                                owl:NamedIndividual ;
                                       
-                                      rdfs:label "Machinenbau (Bachelor)" .
+                                      rdfs:label "Machinenbau (Bachelor)" ;
+                                      
+                                      :hasId "MB" ;
+                                      
+                                      :hasName "Maschinenbau (Bachelor)" .
 
 
 
@@ -566,7 +610,11 @@
 :MediaInformaticsBachelor rdf:type :Degree ,
                                    owl:NamedIndividual ;
                           
-                          rdfs:label "Medieninformatik (Bachelor)" .
+                          rdfs:label "Medieninformatik (Bachelor)" ;
+                          
+                          :hasName "Medieninformatik (Bachelor)" ;
+                          
+                          :hasId "MI" .
 
 
 
@@ -575,7 +623,11 @@
 :MediaInformaticsMaster rdf:type :Degree ,
                                  owl:NamedIndividual ;
                         
-                        rdfs:label "Medieninformatik (Master)" .
+                        rdfs:label "Medieninformatik (Master)" ;
+                        
+                        :hasId "MIM" ;
+                        
+                        :hasName "Medieninformatik (Master)" .
 
 
 
@@ -593,7 +645,11 @@
 :ProductDesignAndProcessDevelopmentMaster rdf:type :Degree ,
                                                    owl:NamedIndividual ;
                                           
-                                          rdfs:label "Produktdesign (Master)" .
+                                          rdfs:label "Produktdesign (Master)" ;
+                                          
+                                          :hasName "Produktdesign (Master)" ;
+                                          
+                                          :hasId "PD" .
 
 
 
@@ -638,7 +694,11 @@
 :WebScienceMaster rdf:type :Degree ,
                            owl:NamedIndividual ;
                   
-                  rdfs:label "Web Science (Master)" .
+                  rdfs:label "Web Science (Master)" ;
+                  
+                  :hasName "Web Science (Master)" ;
+                  
+                  :hasId "WSM" .
 
 
 
