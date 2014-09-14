@@ -7,7 +7,7 @@
     Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
 <table class="table table-bordered">
     <tbody>
-        <tr><th>Id</th><th>Aufgabe</th><th>Abgabe</th></tr>
+        <tr><th>Id</th><th>Aufgabe</th><th>Bearbeitungszeit</th></tr>
         @for(a <- lwAssignmentAssoc; i <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
             @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
                 <tr><td>@i.value</td>

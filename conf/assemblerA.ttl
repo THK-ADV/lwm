@@ -19,10 +19,21 @@ tdb:GraphTDB    rdfs:subClassOf  ja:Model .
     fuseki:serviceReadWriteGraphStore "data" ;     # SPARQL Graph store protocol (read and write)
     # A separate read-only graph store endpoint:
     fuseki:serviceReadGraphStore      "get" ;      # SPARQL Graph store protocol (read only)
-    fuseki:dataset                    <#tdb> ;
+    fuseki:dataset                    <#dataset2> ;
     .
 
-<#tdb> rdf:type tdb:DatasetTDB ;
+<#tdb> rdf:type tdb:GraphTDB ;
      tdb:location "store/" ;
      tdb:unionDefaultGraph true ;
      .
+
+<#dataset2> rdf:type ja:RDFDataset ;
+ ja:defaultGraph <#model2>;
+ .
+
+<#model2> a ja:InfModel;
+ ja:baseModel <#tdb>;
+ ja:reasoner
+ [ ja:reasonerURL
+ <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>];
+ .

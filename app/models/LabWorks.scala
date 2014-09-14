@@ -76,10 +76,10 @@ object LabWorks {
         Statement(group, LWM.hasId, Literal(s"${i.toChar}")),
         Statement(resource, LWM.hasGroup, group)
       )
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, groupStatements: _*))
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(groupStatements: _*))
     }
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(resource)
     }
   }
@@ -88,7 +88,7 @@ object LabWorks {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.LabWork)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     }
     p.future
   }
@@ -125,7 +125,7 @@ object LabworkGroups {
       Statement(resource, LWM.hasLabWork, group.labwork),
       Statement(group.labwork, LWM.hasGroup, resource)
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map { r ⇒
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(resource)
     }
   }
@@ -137,7 +137,7 @@ object LabworkGroups {
     resultFuture.map { result ⇒
       val resources = SPARQLTools.statementsFromString(result).map(g ⇒ g.s)
       resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(group) }
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(group) }
       }
     }
     p.future
@@ -147,7 +147,7 @@ object LabworkGroups {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.Group)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     }
     p.future
   }

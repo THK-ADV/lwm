@@ -5,7 +5,7 @@ import actors.SessionHandler.{ Invalid, Valid }
 import akka.actor.{ Actor, ActorRef, Props }
 import akka.util.Timeout
 import controllers.SessionManagement._
-import models.{ Users, Students, UserForms }
+import models.{ Degrees, Users, Students, UserForms }
 import play.api.Logger
 import play.api.libs.json.{ JsArray, JsString, Json, JsObject }
 import play.api.mvc.{ Action, Controller, Security }
@@ -38,7 +38,9 @@ object StudentsManagement extends Controller with Authentication {
     Action.async { implicit request ⇒
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
-          Future.successful(BadRequest(views.html.firstTimeInputStudents(formWithErrors)))
+          for {
+            degrees ← Degrees.all()
+          } yield BadRequest(views.html.firstTimeInputStudents(degrees, formWithErrors))
         },
         student ⇒ {
           Students.create(student).map(_ ⇒ Redirect(routes.StudentDashboardController.dashboard()))

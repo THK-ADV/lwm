@@ -35,7 +35,7 @@ object Rooms {
       Statement(courseResource, LWM.hasId, Literal(room.id.toString)),
       Statement(courseResource, LWM.hasRoomId, Literal(room.roomId))
     )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(_ ⇒ Individual(courseResource))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(_ ⇒ Individual(courseResource))
   }
 
   def delete(room: Room): Future[Room] = {
@@ -45,7 +45,7 @@ object Rooms {
     resultFuture.map { result ⇒
       val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
       resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(room) }
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(room) }
       }
     }
     p.future
@@ -55,7 +55,7 @@ object Rooms {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.Room)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Room"))
     }

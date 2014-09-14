@@ -30,7 +30,7 @@ object Courses {
       Statement(courseResource, LWM.hasDegree, course.degree)
     )
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(lwmGraph, statements: _*)).map(b ⇒ Individual(courseResource))
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(courseResource))
   }
 
   def delete(course: Course): Future[Course] = {
@@ -40,7 +40,7 @@ object Courses {
     resultFuture.map { result ⇒
       val resources = SPARQLTools.statementsFromString(result).map(course ⇒ course.s)
       resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { _ ⇒ p.success(course) }
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(course) }
       }
     }
     p.future
@@ -50,7 +50,7 @@ object Courses {
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.Course)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource, lwmGraph)).map { b ⇒ p.success(resource) }
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Course"))
     }

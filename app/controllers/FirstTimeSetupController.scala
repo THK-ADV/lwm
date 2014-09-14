@@ -2,7 +2,7 @@ package controllers
 
 import actors.SessionHandler
 import controllers.UserManagement._
-import models.{ Users, Student, User, UserForms }
+import models._
 import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
@@ -21,9 +21,12 @@ object FirstTimeSetupController extends Controller with Authentication {
 
   def setupStudent() = hasSession { session ⇒
     Action.async { implicit request ⇒
-      for (name ← (sessionsHandler ? SessionHandler.NameRequest(session.user)).mapTo[(String, String)]) yield {
+      for {
+        name ← (sessionsHandler ? SessionHandler.NameRequest(session.user)).mapTo[(String, String)]
+        degrees ← Degrees.all()
+      } yield {
         val filledForm = UserForms.studentForm.fill(Student(session.user, name._1, name._2, "", "", "", ""))
-        Ok(views.html.firstTimeInputStudents(filledForm))
+        Ok(views.html.firstTimeInputStudents(degrees, filledForm))
       }
     }
   }

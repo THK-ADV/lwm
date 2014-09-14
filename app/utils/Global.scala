@@ -21,7 +21,6 @@ object Global extends GlobalSettings {
 
   implicit val timeout = Timeout(10.seconds)
   implicit val sparqlExecutionContext = SPARQLExecution(queryHost, updateHost)
-  implicit val lwmGraph = NamedGraph("http://lwm.gm.fh-koeln.de/")
   val lwmNamespace = Namespace("http://lwm.gm.fh-koeln.de/")
 
   override def onStart(app: Application) {
