@@ -60,8 +60,6 @@ object Degrees {
 
   def all(): Future[List[Individual]] = {
     sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Degree)).map { stringResult ⇒
-      println(SPARQLBuilder.listIndividualsWithClass(LWM.Degree))
-      println(s"Result is: $stringResult")
       SPARQLTools.statementsFromString(stringResult).map(degree ⇒ Individual(degree.s)).toList
     }
   }
