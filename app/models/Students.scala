@@ -81,7 +81,7 @@ object Students {
     p.future
   }
 
-  private def search(query: String): Future[List[(String, String)]] = {
+  private def search(query: String): Future[List[(String, String, String)]] = {
     val sparqlQuery =
       s"""
         |SELECT ?s (${LWM.hasGmId} as ?p) ?o where {?s ${LWM.hasGmId} ?o
@@ -96,13 +96,13 @@ object Students {
       statements.map { statement ⇒
         val individual = Individual(statement.s)
         val name = individual.props.getOrElse(RDFS.label, List(Literal(""))).head.value
-        (statement.o.value, name)
+        (statement.o.value, name, statement.s.value)
       }
     }
     r.map(_.toList)
   }
 
-  def search(query: String, maxCount: Int): Future[List[(String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
+  def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
 
