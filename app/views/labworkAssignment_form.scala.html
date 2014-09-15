@@ -2,9 +2,9 @@
 @import utils.semantic.Vocabulary.{RDFS, LWM}
 @import utils.semantic.Resource
 @import utils.semantic.Individual
+@import utils.Global._
 
-    @helper.form(action = routes.AssignmentManagementController.bindAssignment(labwork.uri.value, association.value)) {
-    @helper.select(form("assignment"), for(a <- assignments) yield a.uri.value -> a.props.getOrElse(RDFS.label, List.empty[String]).head.toString, '_label -> "Aufgabe:")
+    @helper.form(action = routes.AssignmentManagementController.bindAssignment(labwork.uri.value, association.value)) {    @helper.select(form("assignment"), for(a <- assignments; c <- a.props(LWM.hasCourse); d <- Individual(Resource(c.value)).props(LWM.hasDegree); l <- labwork.props(LWM.hasCourse) pa <- ) yield )
     @helper.select(form("preparationTime"), for(d <- 1 to due) yield ("+" + d.toString) -> ("+" + d.toString),'_label -> "Bearbeitungszeit:")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>

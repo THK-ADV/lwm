@@ -3,7 +3,7 @@ package controllers
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ Literal, Resource, Individual }
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
@@ -23,6 +23,10 @@ object AssignmentManagementController extends Controller with Authentication {
             assignments ← Assignments.all()
             courses ← Courses.all()
           } yield {
+            assignments.foreach {
+              a ⇒
+                println(Individual(Resource(a.props.getOrElse(LWM.hasCourse, List(Resource(""))).head.value)).props.getOrElse(LWM.hasDegree, List(Literal(""))).head.value)
+            }
             Ok(views.html.assignmentManagement(assignments.map(_.uri), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm))
           }
       }
