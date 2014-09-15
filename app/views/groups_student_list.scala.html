@@ -1,4 +1,5 @@
 @(labwork: Individual, group: Individual, students: List[Individual])
+@import play.utils.UriEncoding
 @import utils.semantic.Vocabulary.{LWM, FOAF}
 @import utils.semantic.{Individual, Literal}
     <!-- TODO: ADD SEARCH BAR -->
@@ -14,8 +15,8 @@
 
         </tbody>
     </table>
-    <div class="row">
-        @student_autocomplete_field
-        <a class="btn btn-primary btn-xs glyphicon glyphicon-plus" href="javascript: retreiveStudent('@labwork.uri.value', '@group.uri.value')"></a>
-    </div>
+</div>
+<div class="row">
+    @student_autocomplete_field()
+    <a class="btn btn-primary btn-xs glyphicon glyphicon-plus" href="javascript: retrieveStudent('@labwork.uri.value','@group.uri.value')"></a>
 </div>
