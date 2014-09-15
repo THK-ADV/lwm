@@ -48,7 +48,9 @@ function deleteAssignment(id) {
 }
 
 function deleteBinding(labid, aid) {
-    ajaxRequest("/administration/labworks/associations", "DELETE", "application/json", {lId: labid, aId: aid}, reload);
+    var l = encodeURIComponent(labid);
+    var a = encodeURIComponent(aid);
+    ajaxRequest("/administration/labworks/"+l+"/associations/"+a, "DELETE", "application/json", {lId: labid, aId: aid}, reload);
 }
 
 function addStudentToGroup(labid, groupid) {

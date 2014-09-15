@@ -142,8 +142,7 @@ object AssignmentManagementController extends Controller with Authentication {
       }
   }
 
-  //TODO: ADD DUE DATE
-  def bindRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  def bindRemoval(labworkid: String, associationid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async(parse.json) {
         implicit request ⇒

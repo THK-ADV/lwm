@@ -21,10 +21,10 @@ GET           /administration/students/suggest                    controllers.St
 
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
-POST          /administration/labworks/:id                        controllers.LabworkManagementController.studentAddition(id)
+POST          /administration/labworks/:id                        controllers.GroupManagementController.studentAddition(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
 DELETE        /administration/labworks                            controllers.LabworkManagementController.labworkRemoval()
-DELETE        /administration/labworks/:id                        controllers.LabworkManagementController.studentRemoval(id)
+DELETE        /administration/labworks/:id                        controllers.GroupManagementController.studentRemoval(id)
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()
@@ -65,7 +65,7 @@ DELETE        /administration/assignments                         controllers.As
 GET           /administration/labworks/:id/assignments            controllers.AssignmentManagementController.labAssignmentIndex(id)
 POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.labAssignmentPost(id)
 POST          /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindAssignment(id,a)
-DELETE        /administration/labworks/associations               controllers.AssignmentManagementController.bindRemoval()
+DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 
 
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
