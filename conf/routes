@@ -65,6 +65,7 @@ DELETE        /administration/assignments                         controllers.As
 GET           /administration/labworks/:id/assignments            controllers.AssignmentManagementController.labAssignmentIndex(id)
 POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.labAssignmentPost(id)
 POST          /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindAssignment(id,a)
+PUT           /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindEdit(id, a)
 DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 
 

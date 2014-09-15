@@ -6,7 +6,7 @@
     @helper.form(action = routes.CourseManagementController.coursePost()) {
         @helper.inputText(form("id"), '_label -> "Id:")
         @helper.inputText(form("name"), '_label -> "Name:")
-        @helper.select(form("degree"), for(d <- degrees; label <- d.props(RDFS.label)) yield d.uri.value -> label.value, '_label -> "Studiengang:")
+        @helper.select(form("degree"), for(degree <- degrees; label <- degree.props(RDFS.label)) yield degree.uri.value -> label.value, '_label -> "Studiengang:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             <button type="submit" class="btn btn-primary">Hinzufügen</button>

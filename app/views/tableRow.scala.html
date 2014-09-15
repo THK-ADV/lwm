@@ -1,20 +1,20 @@
 @(startTime: Time, dayId: String, labwork: Individual, entries: List[Resource])
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.semantic.Individual
-@import utils.semantic.Resource
+@import utils.semantic.{Resource, Literal}
 @import utils.Global._
-
 
 
 @if(entries.filter(e => (Individual(e).props(LWM.hasWeekday).head.value == dayId) && (Individual(e).props(LWM.hasStartTime).head.value == startTime.toString)).nonEmpty) {
     <td class="success">
-    @for(r <- entries.filter(e => Individual(e).props(LWM.hasWeekday).head.value == dayId); i = Individual(r); st = i.props.getOrElse(LWM.hasStartTime, List.empty[Time]); et = i.props.getOrElse(LWM.hasEndTime, List.empty[Time])) {
-            @if(st.head.toString == startTime.toString) {
+    @for(r <- entries.filter(e => Individual(e).props(LWM.hasWeekday).head.value == dayId); i = Individual(r); st = i.props.getOrElse(LWM.hasStartTime, List(Literal(""))); et = i.props.getOrElse(LWM.hasEndTime, List(Literal("")))) {
+        @if(st.head.toString == startTime.toString) {
             <h6><b>
-                Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List.empty[Resource]).map(_.asResource().get)) {
-                @(Individual(s).props.getOrElse(RDFS.label, List("")).head.toString)
+                Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
+                @(Individual(s).props.getOrElse(RDFS.label, List(Literal(""))).head.value)
             }</h6>
-            <h6><b>Raum:</b> @Individual(Resource(i.props.getOrElse(LWM.hasRoom, List.empty[Resource]).head.value)).props.getOrElse(LWM.hasRoomId, List.empty[String]).head.toString</h6>
+            <h6><b>
+                Raum:</b> @Individual(Resource(i.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(Literal(""))).head.value</h6>
             <h6><b>Endzeit:</b> @et.head.toString</h6>
             <a href="javascript: deleteTableEntry('@r.asResource().get.value', '@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a>
             <br />
@@ -22,9 +22,9 @@
     }
     </td>
 } else {
-    @if(entries.filter(e => (Individual(e).props(LWM.hasWeekday).head.value == dayId) && (startTime <= Time(Individual(e).props(LWM.hasEndTime).head.value.split(":")(0).toInt,Individual(e).props(LWM.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(Individual(e).props(LWM.hasStartTime).head.value.split(":")(0).toInt,Individual(e).props(LWM.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
+    @if(entries.filter(e => (Individual(e).props(LWM.hasWeekday).head.value == dayId) && (startTime <= Time(Individual(e).props(LWM.hasEndTime).head.value.split(":")(0).toInt, Individual(e).props(LWM.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(Individual(e).props(LWM.hasStartTime).head.value.split(":")(0).toInt, Individual(e).props(LWM.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
         <td class="success"></td>
-    }else {
+    } else {
         <td></td>
     }
 }

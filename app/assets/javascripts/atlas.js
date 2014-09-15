@@ -64,6 +64,15 @@ function removeStudentFromGroup(labid, student, groupid) {
     ajaxRequest("/administration/labworks/"+e, "DELETE", "application/json", {student: student, group: groupid}, reload);
 }
 
+
+function setPreparationTime(labid, gid, aid) {
+    var newTime = $('#selectPreparationTime').find(":selected").text().split("+")[1];
+    var e = encodeURIComponent(labid);
+    var a = encodeURIComponent(aid);
+    ajaxRequest("/administration/labworks/"+e+"/associations/"+a, "PUT", "application/json", {time: newTime, group: gid}, reload);
+}
+
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({
