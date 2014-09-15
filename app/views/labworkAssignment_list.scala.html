@@ -1,4 +1,4 @@
-@(labwork: Individual, lwAssignmentAssoc: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@(labwork: Individual, associations: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.Literal
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.semantic.{Individual, Resource}
@@ -9,7 +9,7 @@
 <table class="table table-bordered">
     <tbody>
         <tr><th>Blatt</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
-        @for(a <- lwAssignmentAssoc; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
+        @for(a <- associations; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
             @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
                 <tr>
                     <td>@id.value</td>

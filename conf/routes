@@ -24,6 +24,7 @@ GET           /administration/labworks/:id                        controllers.La
 POST          /administration/labworks/:id                        controllers.LabworkManagementController.studentAddition(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
 DELETE        /administration/labworks                            controllers.LabworkManagementController.labworkRemoval()
+DELETE        /administration/labworks/:id                        controllers.LabworkManagementController.studentRemoval(id)
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()

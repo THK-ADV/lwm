@@ -51,10 +51,15 @@ function deleteBinding(labid, aid) {
     ajaxRequest("/administration/labworks/associations", "DELETE", "application/json", {lId: labid, aId: aid}, reload);
 }
 
-function retrieveStudent(labid, groupid) {
+function addStudentToGroup(labid, groupid) {
     var student = $('#autocomplete').val();
     var e = encodeURIComponent(labid);
     ajaxRequest("/administration/labworks/"+e, "POST", "application/json", {student: student,group: groupid}, reload);
+}
+
+function removeStudentFromGroup(labid, student, groupid) {
+    var e = encodeURIComponent(labid);
+    ajaxRequest("/administration/labworks/"+e, "DELETE", "application/json", {student: student, group: groupid}, reload);
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
