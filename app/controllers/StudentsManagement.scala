@@ -1,28 +1,14 @@
 package controllers
 
-import actors.SessionHandler
-import actors.SessionHandler.{ Invalid, Valid }
-import akka.actor.{ Actor, ActorRef, Props }
-import akka.util.Timeout
-import controllers.SessionManagement._
-import models.{ Degrees, Users, Students, UserForms }
-import play.api.Logger
-import play.api.libs.json.{ JsArray, JsString, Json, JsObject }
-import play.api.mvc.{ Action, Controller, Security }
-import play.libs.Akka
+import models.{ Degrees, Students, UserForms }
+import play.api.libs.json.{ JsArray, JsString, Json }
+import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Resource
 
-import scala.concurrent.Future
-
 object StudentsManagement extends Controller with Authentication {
 
-  import akka.pattern.ask
-
   import scala.concurrent.ExecutionContext.Implicits.global
-  import scala.concurrent.duration._
-
-  import utils.Global._
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
@@ -77,24 +63,18 @@ object StudentsManagement extends Controller with Authentication {
   }
 
   def studentSuggestions = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async(parse.json) { implicit request ⇒
-      val query = (request.body \ "query").as[String]
-      val maxCountOpt = (request.body \ "maxCount").asOpt[String]
-      val listFuture = maxCountOpt match {
-        case None ⇒
-          Students.search(query)
-        case Some(c) ⇒
-          Students.search(query, c.toInt)
-      }
-      listFuture.map { list ⇒
-        val json = Json.obj(
-          "query" -> JsString(query),
-          "ids" -> JsArray(list.map(JsString)))
+    Action.async { implicit request ⇒
+      val query = request.queryString.getOrElse("q", List("")).head
+      val max = request.queryString.getOrElse("max", List("0")).head
+      Students.search(query, max.toInt).map { suggestions ⇒
 
-        render {
-          case Accepts.Json()       ⇒ Ok(json)
-          case Accepts.JavaScript() ⇒ Ok(json)
-        }
+        Ok(Json.obj(
+          "query" -> JsString(query),
+          "suggestions" -> JsArray(suggestions.map(s ⇒ Json.obj(
+            "name" -> JsString(s._2),
+            "id" -> JsString(s._1)
+          )))
+        ).toString())
       }
 
     }
