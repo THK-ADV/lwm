@@ -23,10 +23,6 @@ object AssignmentManagementController extends Controller with Authentication {
             assignments ← Assignments.all()
             courses ← Courses.all()
           } yield {
-            assignments.foreach {
-              a ⇒
-                println(Individual(Resource(a.props.getOrElse(LWM.hasCourse, List(Resource(""))).head.value)).props.getOrElse(LWM.hasDegree, List(Literal(""))).head.value)
-            }
             Ok(views.html.assignmentManagement(assignments.map(_.uri), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm))
           }
       }

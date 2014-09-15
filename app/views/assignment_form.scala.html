@@ -1,19 +1,20 @@
 @(courses: List[Individual], form: Form[AssignmentFormModel])
-@import utils.semantic.Vocabulary.RDFS
-@import utils.semantic.{Resource, Literal}
-@import utils.semantic.Vocabulary.LWM
-@import utils.semantic.Individual
-@import utils.Global._
+    @import utils.semantic.Vocabulary.{RDFS, LWM}
+    @import utils.semantic.{Resource, Literal}
+    @import utils.semantic.Individual
+    @import utils.Global._
 
     @helper.form(action = routes.AssignmentManagementController.assignmentPost()) {
-    @helper.inputText(form("id"), '_label -> "Titel:")
-    @helper.textarea(form("description"), '_label -> "Beschreibung")
-    @helper.textarea(form("text"), 'rows -> 10, 'cols -> 50, '_label -> "Aufgabe:")
-    @helper.inputText(form("topics"), '_label -> "Themen:")
-    @helper.inputCheckboxGroup(form("courses"), for {course <- courses; labelList <- course.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString + " - " + Individual(Resource(course.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value), '_label -> "Veranstaltungen:")
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-        <button type="submit" class="btn btn-primary">Hinzufügen</button>
-    </div>
-}
+        @helper.inputText(form("id"), '_label -> "Titel:")
+        @helper.textarea(form("description"), '_label -> "Beschreibung")
+        @helper.textarea(form("text"), 'rows -> 10, 'cols -> 50, '_label -> "Aufgabe:")
+        @helper.inputText(form("topics"), '_label -> "Themen:")
+        <label>Veranstaltungen:</label> <br />
+        @for((c, index) <- courses.zipWithIndex; l <- c.props(RDFS.label); d <- c.props(LWM.hasDegree); i = Individual(Resource(d.value))) {
+            <input type="checkbox" name="courses[@index]" value="@c.uri.value"> @l - @i.props.getOrElse(RDFS.label, List(Literal(""))).head.value <br />
+        }
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+        </div>
+    }
