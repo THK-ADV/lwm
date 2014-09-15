@@ -53,8 +53,8 @@ function deleteBinding(labid, aid) {
 
 function retrieveStudent(labid, groupid) {
     var student = $('#autocomplete').val();
-    alert(encodeURI(labid));
-    //ajaxRequest("", "POST", "application/json", {student: student,group: groupid}, reload);
+    var e = encodeURIComponent(labid);
+    ajaxRequest("/administration/labworks/"+e, "POST", "application/json", {student: student,group: groupid}, reload);
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
