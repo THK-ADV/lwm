@@ -1,0 +1,17 @@
+@(students: List[Individual])
+@import utils.semantic.Vocabulary.{LWM, FOAF}
+@import utils.semantic.{Individual, Literal}
+    <!-- TODO: ADD SEARCH BAR -->
+<div class="panel panel-default">
+    <div class="panel-heading">Studenten</div>
+    <table class="table table-bordered">
+        <tbody>
+            <tr><th>Vorname</th><th>Nachname</th><th>Kennung</th><th>Matrikelnummer</th><th>Fehltermine</th></tr>
+
+            @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(Literal(""))); ln <- s.props.getOrElse(FOAF.lastName, List(Literal(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(Literal(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(Literal("")))) {
+                <tr><td>@fn.value</td> <td>@ln.value</td> <td>@gm.value</td> <td>@m.value</td> <td>0</td></tr>
+            }
+
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,30 @@
+@(labwork: Individual, group: Individual, students: List[Individual], associations: List[Individual])
+@import utils.semantic.{Individual, Literal}
+@import utils.semantic.Vocabulary.LWM
+@import utils.Global._
+
+<!DOCTYPE html>
+<html>
+    @head("Gruppe Detailverwaltung")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    <h4>Gruppe @{group.props.getOrElse(LWM.hasId, List(Literal(""))).head.value} Detailverwaltung</h4>
+                    <div class="row">
+                    @groups_student_list(students)
+                    </div>
+                    <div class="row">
+                    @groups_associated_assignment_list(labwork, associations)
+                    </div>
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>
+

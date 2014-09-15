@@ -26,7 +26,7 @@
                                 <tbody>
                                     <tr><th>Gruppe</th><th>Anzahl</th></tr>
                                     @for(r <- groups; g <- r.props(LWM.hasId)) {
-                                        <tr><td>@g.value</td> <td>@r.props.getOrElse(LWM.hasMember, List.empty[Resource]).size</td></tr>
+                                        <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, r.uri.value)">@g.value</a></td> <td>@r.props.getOrElse(LWM.hasMember, List.empty[Resource]).size</td></tr>
                                     }
                                 </tbody>
                             </table>
