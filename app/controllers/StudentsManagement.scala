@@ -70,7 +70,10 @@ object StudentsManagement extends Controller with Authentication {
 
         Ok(Json.obj(
           "query" -> JsString(query),
-          "suggestions" -> JsArray(suggestions.map(JsString))
+          "suggestions" -> JsArray(suggestions.map(s ⇒ Json.obj(
+            "name" -> JsString(s._2),
+            "id" -> JsString(s._1)
+          )))
         ).toString())
       }
 
