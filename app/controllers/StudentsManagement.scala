@@ -64,17 +64,13 @@ object StudentsManagement extends Controller with Authentication {
 
   def studentSuggestions = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      val query = request.queryString.getOrElse("q", List("")).head
-      val max = request.queryString.getOrElse("max", List("0")).head
-      Students.search(query, max.toInt).map { suggestions ⇒
+      val query = request.queryString.getOrElse("term", List("")).head
+      Students.search(query, -1).map { suggestions ⇒
 
-        Ok(Json.obj(
-          "query" -> JsString(query),
-          "suggestions" -> JsArray(suggestions.map(s ⇒ Json.obj(
-            "name" -> JsString(s._2),
-            "id" -> JsString(s._1)
-          )))
-        ).toString())
+        Ok(JsArray(suggestions.map(s ⇒ Json.obj(
+          "label" -> JsString(s"(${s._1}) ${s._2}"),
+          "value" -> JsString(s._1)
+        ))).toString())
       }
 
     }
