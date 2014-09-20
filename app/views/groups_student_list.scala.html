@@ -1,8 +1,7 @@
 @(labwork: Individual, group: Individual, students: List[Individual])
-@import play.utils.UriEncoding
 @import utils.semantic.Vocabulary.{LWM, FOAF}
 @import utils.semantic.{Individual, Literal}
-    <!-- TODO: ADD SEARCH BAR -->
+
 <div class="panel panel-default">
     <div class="panel-heading">Studenten</div>
     <table class="table table-bordered">
@@ -10,7 +9,7 @@
             <tr><th>Vorname</th><th>Nachname</th><th>Kennung</th><th>Matrikelnummer</th><th>Fehltermine</th></tr>
 
             @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(Literal(""))); ln <- s.props.getOrElse(FOAF.lastName, List(Literal(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(Literal(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(Literal("")))) {
-                <tr><td>@fn.value</td> <td>@ln.value</td> <td>@gm.value</td> <td>@m.value</td> <td>0</td></tr>
+                <tr><td>@fn.value</td> <td>@ln.value</td> <td>@gm.value</td> <td>@m.value</td> <td>0</td> <td><a class="glyphicon glyphicon-remove" href="javascript: removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')"></a></td></tr>
             }
 
         </tbody>
@@ -18,5 +17,5 @@
 </div>
 <div class="row">
     @student_autocomplete_field()
-    <a class="btn btn-primary btn-xs glyphicon glyphicon-plus" href="javascript: retrieveStudent('@labwork.uri.value','@group.uri.value')"></a>
+    <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
 </div>

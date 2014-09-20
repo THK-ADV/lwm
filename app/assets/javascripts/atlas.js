@@ -48,14 +48,30 @@ function deleteAssignment(id) {
 }
 
 function deleteBinding(labid, aid) {
-    ajaxRequest("/administration/labworks/associations", "DELETE", "application/json", {lId: labid, aId: aid}, reload);
+    var l = encodeURIComponent(labid);
+    var a = encodeURIComponent(aid);
+    ajaxRequest("/administration/labworks/"+l+"/associations/"+a, "DELETE", "application/json", {lId: labid, aId: aid}, reload);
 }
 
-function retrieveStudent(labid, groupid) {
+function addStudentToGroup(labid, groupid) {
     var student = $('#autocomplete').val();
-    alert(encodeURI(labid));
-    //ajaxRequest("", "POST", "application/json", {student: student,group: groupid}, reload);
+    var e = encodeURIComponent(labid);
+    ajaxRequest("/administration/labworks/"+e, "POST", "application/json", {student: student,group: groupid}, reload);
 }
+
+function removeStudentFromGroup(labid, student, groupid) {
+    var e = encodeURIComponent(labid);
+    ajaxRequest("/administration/labworks/"+e, "DELETE", "application/json", {student: student, group: groupid}, reload);
+}
+
+
+function setPreparationTime(labid, gid, aid) {
+    var newTime = $('#selectPreparationTime').find(":selected").text().split("+")[1];
+    var e = encodeURIComponent(labid);
+    var a = encodeURIComponent(aid);
+    ajaxRequest("/administration/labworks/"+e+"/associations/"+a, "PUT", "application/json", {time: newTime, group: gid}, reload);
+}
+
 
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";

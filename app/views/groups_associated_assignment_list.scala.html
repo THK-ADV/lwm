@@ -1,42 +1,45 @@
-@(labwork: Individual, associations: List[Individual])
-@import utils.semantic.{Individual, Resource, Literal}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
-@import utils.Global._
-<div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
-<table class="table table-bordered">
-    <tbody>
-        <tr><th>Blatt</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
-        @for(a <- associations; id <- a.props(LWM.hasOrderId)) {
-            @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
-                <tr>
-                    <td>@id.value</td>
-                    <td>
-                        @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString
-                        <a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@a.uri.value"></a>
-                    <td>
-                    @{
-                        a.props.getOrElse(LWM.hasPreparationTime, List(Literal("0"))).head.value.toInt + id.value.toInt
+@(labwork: Individual, group: Individual, associations: List[Individual])
+    @import utils.semantic.{Individual, Resource, Literal}
+    @import utils.semantic.Vocabulary.{LWM, RDFS}
+    @import utils.Global._
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(Literal("0"))).head.value</div>
+        <table class="table table-bordered">
+            <tbody>
+                <tr><th>Blatt</th> <th>Aufgabe</th> <th>Abgabetermin</th></tr>
+                @for(a <- associations; id <- a.props(LWM.hasOrderId)) {
+                    @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
+                        <tr>
+                            <td>@id.value</td>
+                            <td>
+                            @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value
+                            <td>
+                                @{a.props.getOrElse(LWM.hasPreparationTime, List(Literal("0"))).head.value.toInt + id.value.toInt}
+                                <a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a>
+
+                                <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                                    Close</span></button>
+                                                <h4 class="modal-title" id="myModalLabel">Neue Abgabe hinzufügen</h4>
+                                            </div>
+                                            <div class="modal-body">
+
+                <!-- CHANGES THE ORIGINAL ASSOCIATION. NOT THE UNIQUE GROUP ONE. TODO: ADD INDIVIDUAL GROUP ASSOCIATIONS -->
+                                            @groups_assignment_association_update(labwork, group, a)
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     }
-                    </td>
-
-                    <div class="modal fade" id="@a.uri.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
-                                        Close</span></button>
-                                    <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
-                                </div>
-                                <div class="modal-body">
-                                @groups_assignment_association_adaptation(a, labwork)
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
+                }
+            </tbody>
+        </table>
+    </div>

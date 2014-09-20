@@ -1,7 +1,7 @@
-@(labwork: Individual, groups: List[Individual], lwAssignments: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@(labwork: Individual, groups: List[Individual], associations: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Vocabulary.LWM
-@import utils.semantic.Resource
+@import utils.semantic.{Resource, Literal}
 @import utils.semantic.Individual
 @import utils.Global._
 
@@ -17,7 +17,7 @@
                 @navigation_admin()
                 <div class="col-md-9">
                     <div class="row">
-                        <h4>Veranstaltung: @labwork.props.getOrElse(RDFS.label, List("")).head @Individual(Resource(labwork.props.getOrElse(LWM.hasSemester, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString</h4>
+                        <h4>Veranstaltung: @labwork.props.getOrElse(RDFS.label, List(Literal(""))).head.value @Individual(Resource(labwork.props.getOrElse(LWM.hasSemester, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value</h4>
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
@@ -26,7 +26,7 @@
                                 <tbody>
                                     <tr><th>Gruppe</th><th>Anzahl</th></tr>
                                     @for(r <- groups; g <- r.props(LWM.hasId)) {
-                                        <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, r.uri.value)">@g.value</a></td> <td>@r.props.getOrElse(LWM.hasMember, List.empty[Resource]).size</td></tr>
+                                        <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, r.uri.value)">@g.value</a></td> <td>@r.props.getOrElse(LWM.hasMember, List.empty).size</td></tr>
                                     }
                                 </tbody>
                             </table>
@@ -34,7 +34,7 @@
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
-                            @labworkAssignment_list(labwork, lwAssignments, allAssignments, form)
+                            @labworkAssignment_list(labwork, associations, allAssignments, form)
                         </div>
                     </div>
                     <div class="row">

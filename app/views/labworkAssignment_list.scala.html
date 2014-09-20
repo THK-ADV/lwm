@@ -1,20 +1,20 @@
-@(labwork: Individual, lwAssignmentAssoc: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@(labwork: Individual, associations: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.Literal
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.semantic.{Individual, Resource}
 @import utils.Global._
 
 <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List("").head)</div>
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(Literal(""))).head.value</div>
 <table class="table table-bordered">
     <tbody>
         <tr><th>Blatt</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
-        @for(a <- lwAssignmentAssoc; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
+        @for(a <- associations; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
             @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
                 <tr>
                     <td>@id.value</td>
                     <td>
-                        @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head.value)).props.getOrElse(RDFS.label, List.empty[String]).head.toString
+                        @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value
                         <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
                     <td>
                         @{a.props.getOrElse(LWM.hasPreparationTime, List(Literal("0"))).head.value.toInt + id.value.toInt}

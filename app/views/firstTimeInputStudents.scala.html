@@ -9,7 +9,6 @@
     @head("First Time Setup")
     <body>
     <div class="container-fluid">
-        @import utils.semantic.Vocabulary
         @helper.form(action = routes.StudentsManagement.studentFirstTimeSelf()) {
             @helper.inputText(form("id"),'readonly -> "readonly", '_label -> "ADV Kennung")
             @helper.inputText(form("registrationNumber"), '_label -> "Matrikelnummer")

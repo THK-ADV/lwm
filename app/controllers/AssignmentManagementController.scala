@@ -23,10 +23,6 @@ object AssignmentManagementController extends Controller with Authentication {
             assignments ← Assignments.all()
             courses ← Courses.all()
           } yield {
-            assignments.foreach {
-              a ⇒
-                println(Individual(Resource(a.props.getOrElse(LWM.hasCourse, List(Resource(""))).head.value)).props.getOrElse(LWM.hasDegree, List(Literal(""))).head.value)
-            }
             Ok(views.html.assignmentManagement(assignments.map(_.uri), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm))
           }
       }
@@ -124,7 +120,6 @@ object AssignmentManagementController extends Controller with Authentication {
         implicit request ⇒
           AssignmentForms.assignmentAssociationForm.bindFromRequest.fold(
             formWithErrors ⇒ {
-              print("AAAAAAH")
               for {
                 assignments ← Assignments.all()
                 courses ← Courses.all()
@@ -142,8 +137,7 @@ object AssignmentManagementController extends Controller with Authentication {
       }
   }
 
-  //TODO: ADD DUE DATE
-  def bindRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  def bindRemoval(labworkid: String, associationid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async(parse.json) {
         implicit request ⇒
@@ -152,6 +146,18 @@ object AssignmentManagementController extends Controller with Authentication {
           val i = Individual(Resource(associationid))
           i.remove(LWM.hasAssignment, i.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head)
           Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
+      }
+  }
+
+  def bindEdit(labworkid: String, associationid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async(parse.json) { implicit request ⇒
+        val ia = Individual(Resource(associationid))
+        val ot = ia.props.getOrElse(LWM.hasPreparationTime, List(Literal(""))).head
+        val nt = (request.body \ "time").as[String]
+        val gid = (request.body \ "group").as[String]
+        ia.update(LWM.hasPreparationTime, ot, Literal(nt))
+        Future.successful(Redirect(routes.GroupManagementController.index(labworkid, gid)))
       }
   }
 

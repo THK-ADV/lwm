@@ -6,7 +6,7 @@
 <!-- TODO: REWRITE AVAILABLE ASSIGNMENTS BASED ON DEGREE -->
     @helper.form(action = routes.AssignmentManagementController.bindAssignment(labwork.uri.value, association.value)) {
     @helper.select(form("assignment"), for(a <- assignments; l <- a.props(RDFS.label)) yield a.uri.value -> l.value , '_label -> "Aufgaben")
-    @helper.select(form("preparationTime"), for(d <- 1 to due) yield ("+" + d.toString) -> ("+" + d.toString),'_label -> "Bearbeitungszeit:")
+    @helper.select(form("preparationTime"), for(d <- 1 to due) yield d.toString -> ("+" + d.toString),'_label -> "Bearbeitungszeit:")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
         <button type="submit" class="btn btn-primary">Hinzufügen</button>
