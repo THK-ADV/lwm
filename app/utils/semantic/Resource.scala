@@ -3,7 +3,7 @@ package utils.semantic
 import java.net.{ URLDecoder, URLEncoder }
 import java.util.UUID
 import com.hp.hpl.jena.rdf.model.{ ResourceFactory, AnonId }
-import org.joda.time.DateTime
+import org.joda.time.{ LocalDate, DateTime }
 import scala.xml.XML._
 
 object ResourceUtils {
@@ -63,12 +63,12 @@ case class StringLiteral(value: String, encoded: Boolean = false) extends Litera
   override def toQueryString: String = if (value == null) s"""""""" else s""""$encodedString""""
 }
 
-case class DateTimeLiteral(dateTime: DateTime, encoded: Boolean = false) extends Literal {
-  override val value: String = dateTime.toString("yyyy-MM-dd")
+case class DateLiteral(date: LocalDate, encoded: Boolean = false) extends Literal {
+  override val value: String = date.toString("yyyy-MM-dd")
 
   override def asResource(): Option[Resource] = None
 
-  override def asLiteral(): Option[DateTimeLiteral] = Some(this)
+  override def asLiteral(): Option[DateLiteral] = Some(this)
 
   override def toQueryString: String = if (value == null) s"""""""" else s""""$decodedString""""
 }

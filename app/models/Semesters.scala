@@ -3,7 +3,7 @@ package models
 import java.util.UUID
 
 import com.hp.hpl.jena.rdf.model.AnonId
-import org.joda.time.DateTime
+import org.joda.time.{ LocalDate, DateTime }
 import play.api.data.Form
 import utils.Global._
 import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
@@ -15,18 +15,18 @@ import scala.concurrent.{ Promise, Future }
 
 sealed trait Semester {
   val year: Int
-  val startDate: DateTime
-  val endDate: DateTime
+  val startDate: LocalDate
+  val endDate: LocalDate
 }
 
 case class SummerSemester(year: Int) extends Semester {
-  override val startDate = new DateTime(year, 3, 1, 0, 0)
-  override val endDate = new DateTime(year, 8, 31, 0, 0)
+  override val startDate = new LocalDate(year, 3, 1)
+  override val endDate = new LocalDate(year, 8, 31)
 }
 
 case class WinterSemester(year: Int) extends Semester {
-  override val startDate = new DateTime(year, 9, 1, 0, 0)
-  override val endDate = new DateTime(year + 1, 2, 28, 0, 0)
+  override val startDate = new LocalDate(year, 9, 1)
+  override val endDate = new LocalDate(year + 1, 2, 28)
 }
 
 case class SemesterModelForm(semester: String, year: Int)
@@ -37,8 +37,8 @@ object Semesters {
   def create(semester: Semester) = {
 
     def startEndList(res: Resource) = List(
-      Statement(res, LWM.hasStartDate, DateTimeLiteral(semester.startDate)),
-      Statement(res, LWM.hasEndDate, DateTimeLiteral(semester.endDate))
+      Statement(res, LWM.hasStartDate, DateLiteral(semester.startDate)),
+      Statement(res, LWM.hasEndDate, DateLiteral(semester.endDate))
     )
     val semesterStatement = semester match {
       case ss: SummerSemester ⇒

@@ -39,9 +39,7 @@ object TimetableController extends Controller with Authentication {
     session ⇒
       Action.async(parse.json) {
         implicit request ⇒
-          println("SCHEDULING")
           val maybeLabworkid = (request.body \ "id").asOpt[String]
-          println(maybeLabworkid)
           maybeLabworkid.map { labworkid ⇒
             val i = Individual(Resource(labworkid))
             val maybeSemester = i.props.get(LWM.hasSemester)
@@ -55,7 +53,10 @@ object TimetableController extends Controller with Authentication {
               SemesterDatesGenerator(timetable, semester)
             }
           }
-          Future.successful(Ok(""))
+          maybeLabworkid match {
+            case Some(id) ⇒ Future.successful(Redirect(routes.TimetableController.index(id)))
+            case None     ⇒ Future.successful(Redirect(routes.LabworkManagementController.index()))
+          }
       }
   }
 

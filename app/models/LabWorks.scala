@@ -2,12 +2,12 @@ package models
 
 import java.util.Date
 
-import org.joda.time.DateTime
+import org.joda.time.{ LocalDate, DateTime }
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
 
-case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: DateTime, endDate: DateTime)
+case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: LocalDate, endDate: LocalDate)
 case class LabWorkFormModel(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: Date, endDate: Date)
 
 case class LabWorkApplication(courseID: String, gmID: String)
@@ -63,8 +63,8 @@ object LabWorks {
       Statement(resource, LWM.hasTimetable, timetable.uri),
       Statement(resource, LWM.hasAssignmentCount, StringLiteral(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
-      Statement(resource, LWM.hasStartDate, DateTimeLiteral(labWork.startDate)),
-      Statement(resource, LWM.hasEndDate, DateTimeLiteral(labWork.endDate)),
+      Statement(resource, LWM.hasStartDate, DateLiteral(labWork.startDate)),
+      Statement(resource, LWM.hasEndDate, DateLiteral(labWork.endDate)),
       Statement(resource, LWM.allowsApplications, StringLiteral("false")),
       Statement(resource, LWM.isClosed, StringLiteral("false")),
       Statement(resource, LWM.hasSemester, Resource(labWork.semester))
@@ -81,7 +81,7 @@ object LabWorks {
         Statement(group, RDF.typ, LWM.Group),
         Statement(group, RDF.typ, OWL.NamedIndividual),
         Statement(group, LWM.hasLabWork, resource),
-        Statement(group, LWM.hasId, StringLiteral(s"${i.toChar}")),
+        Statement(group, LWM.hasGroupId, StringLiteral(s"${i.toChar}")),
         Statement(resource, LWM.hasGroup, group)
       )
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(groupStatements: _*))
@@ -128,7 +128,7 @@ object LabworkGroups {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Group),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasId, StringLiteral(group.id)),
+      Statement(resource, LWM.hasGroupId, StringLiteral(group.id)),
       Statement(resource, RDFS.label, StringLiteral(s"Gruppe ${group.id}")),
       Statement(resource, LWM.hasLabWork, group.labwork),
       Statement(group.labwork, LWM.hasGroup, resource)

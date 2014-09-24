@@ -33,7 +33,4 @@ tdb:GraphTDB    rdfs:subClassOf  ja:Model .
 
 <#model2> a ja:InfModel;
  ja:baseModel <#tdb>;
- ja:reasoner
- [ ja:reasonerURL
- <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>];
  .

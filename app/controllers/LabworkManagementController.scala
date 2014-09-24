@@ -2,7 +2,7 @@ package controllers
 
 import controllers.StudentsManagement._
 import models._
-import org.joda.time.DateTime
+import org.joda.time.{ LocalDate, DateTime }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ OWL, RDFS, LWM }
@@ -58,8 +58,8 @@ object LabworkManagementController extends Controller with Authentication {
               labwork.assignmentCount,
               labwork.courseId,
               labwork.semester,
-              new DateTime(labwork.startDate.getTime),
-              new DateTime(labwork.endDate.getTime))).map { _ ⇒
+              new LocalDate(labwork.startDate.getTime),
+              new LocalDate(labwork.endDate.getTime))).map { _ ⇒
               Redirect(routes.LabworkManagementController.index())
             }
         }

@@ -5,12 +5,11 @@ import java.util.UUID
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Global._
-import utils.semantic
-import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
+import utils.semantic.Vocabulary.{ LWM, OWL, RDF, RDFS }
 import utils.semantic._
 
-import scala.concurrent.{ Promise, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ Future, Promise }
 
 object Assignments {
   def create(assignment: Assignment): Future[Individual] = {
@@ -84,6 +83,7 @@ object AssignmentAssociations {
       Statement(associationResource, LWM.hasId, StringLiteral(id.toString)),
       Statement(associationResource, LWM.hasAssignment, association.assignment),
       Statement(associationResource, LWM.hasPreparationTime, StringLiteral(s"${association.preparationTime}")),
+      Statement(association.labwork, LWM.hasAssignmentAssociation, associationResource),
       Statement(associationResource, LWM.hasLabWork, association.labwork)
     )
 
@@ -109,6 +109,7 @@ object AssignmentAssociations {
 }
 
 case class AssignmentSolution(fileName: String, text: String, assignment: Resource)
+
 case class AssignmentSolutionFormModel(name: String, text: String)
 
 object AssignmentSolutions {

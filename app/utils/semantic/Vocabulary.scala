@@ -19,13 +19,10 @@ object Vocabulary {
     val User = resource("User")
     val Degree = resource("Degree")
     val Course = resource("Course")
-    val LabWork = resource("LabWork")
-    val Group = resource("Group")
+
     val Room = resource("Room")
 
-    val Assignment = resource("Assignment")
-    val AssignmentAssociation = resource("AssignmentAssociation")
-    val AssignmentSolution = resource("AssignmentSolution")
+    val hasId = property("hasId")
 
     val Semester = resource("Semester")
     val WinterSemester = resource("WinterSemester")
@@ -58,13 +55,15 @@ object Vocabulary {
 
     val hasEnrollment = property("hasEnrollment")
 
-    val hasId = property("hasId")
+    val LabWork = resource("LabWork")
+    val Group = resource("Group")
+    val hasGroupId = property("hasGroupId")
+
     val hasName = property("hasName")
     val hasGroup = property("hasGroup")
     val hasMember = property("hasMember")
     val memberOf = property("memberOf")
     val hasDegree = property("hasDegree")
-
     val hasAssignmentCount = property("hasAssignmentCount")
     val hasSemester = property("hasSemester")
     val hasCourse = property("hasCourse")
@@ -97,15 +96,22 @@ object Vocabulary {
 
     val hasYear = property("hasYear")
 
+    val Assignment = resource("Assignment")
+    val AssignmentSolution = resource("AssignmentSolution")
     val hasDescription = property("hasDescription")
     val hasText = property("hasText")
     val hasTopic = property("hasTopic")
     val hasSolution = property("hasSolution")
 
+    // Labwork -> Assignment
+    val AssignmentAssociation = resource("AssignmentAssociation")
     val hasAssignment = property("hasAssignment")
-    val hasAssignmentDate = property("hasAssignmentDate")
     val hasPreparationTime = property("hasPreparationTime")
     val hasOrderId = property("hasOrderId")
+
+    val ScheduleAssociation = resource("ScheduleAssociation")
+    // Group -> ScheduleAssociation
+    val hasScheduleAssociation = property("hasScheduleAssociation")
 
     val hasApplicationToken = property("hasApplicationToken")
 
