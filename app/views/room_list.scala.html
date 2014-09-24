@@ -1,6 +1,6 @@
 @(rooms: List[Individual])
 @import utils.semantic.Individual
-@import utils.semantic.Literal
+@import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary
 
 
@@ -14,8 +14,8 @@
         </tr>
         @for(room <- rooms) {
             <tr>
-                <td>@room.props.getOrElse(Vocabulary.LWM.hasRoomId, List(Literal(""))).head.value</td>
-                <td>@room.props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value</td>
+                <td>@room.props.getOrElse(Vocabulary.LWM.hasRoomId, List(StringLiteral(""))).head.value</td>
+                <td>@room.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value</td>
                 <td><a class="glyphicon glyphicon-pencil"></a></td>
                 <td><a href="javascript: deleteRoom('@room.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
             </tr>

@@ -55,13 +55,13 @@ object Users {
     val statements = List(
       Statement(resource, RDF.typ, LWM.User),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGmId, Literal(user.id)),
-      Statement(resource, FOAF.firstName, Literal(user.firstname)),
-      Statement(resource, FOAF.lastName, Literal(user.lastname)),
-      Statement(resource, RDFS.label, Literal(s"${user.firstname} ${user.lastname}")),
-      Statement(resource, NCO.phoneNumber, Literal(user.phone)),
-      Statement(resource, FOAF.mbox, Literal(user.email)),
-      Statement(resource, RDFS.label, Literal(s"${user.firstname} ${user.lastname}"))
+      Statement(resource, LWM.hasGmId, StringLiteral(user.id)),
+      Statement(resource, FOAF.firstName, StringLiteral(user.firstname)),
+      Statement(resource, FOAF.lastName, StringLiteral(user.lastname)),
+      Statement(resource, RDFS.label, StringLiteral(s"${user.firstname} ${user.lastname}")),
+      Statement(resource, NCO.phoneNumber, StringLiteral(user.phone)),
+      Statement(resource, FOAF.mbox, StringLiteral(user.email)),
+      Statement(resource, RDFS.label, StringLiteral(s"${user.firstname} ${user.lastname}"))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(resource)
@@ -69,7 +69,7 @@ object Users {
   }
 
   def delete(user: User): Future[User] = {
-    val maybeUser = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.User, Vocabulary.LWM.hasGmId, Literal(user.id))
+    val maybeUser = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.User, Vocabulary.LWM.hasGmId, StringLiteral(user.id))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeUser)
     val p = Promise[User]()
     resultFuture.map { result ⇒
@@ -96,5 +96,5 @@ object Users {
     }
   }
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
+  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
 }

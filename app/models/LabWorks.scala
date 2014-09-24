@@ -1,10 +1,14 @@
 package models
 
+import java.util.Date
+
+import org.joda.time.DateTime
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
 
-case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String)
+case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: DateTime, endDate: DateTime)
+case class LabWorkFormModel(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: Date, endDate: Date)
 
 case class LabWorkApplication(courseID: String, gmID: String)
 
@@ -27,8 +31,10 @@ object LabWorkForms {
       "groupCount" -> number(min = 1),
       "assignmentCount" -> number(min = 1),
       "courseId" -> nonEmptyText,
-      "semester" -> nonEmptyText
-    )(LabWork.apply)(LabWork.unapply)
+      "semester" -> nonEmptyText,
+      "startDate" -> date,
+      "endDate" -> date
+    )(LabWorkFormModel.apply)(LabWorkFormModel.unapply)
   )
 
 }
@@ -46,24 +52,26 @@ object LabWorks {
   def create(labWork: LabWork): Future[Individual] = {
     val courseIndividual = Individual(Resource(labWork.courseId))
     val resource = ResourceUtils.createResource(lwmNamespace)
-    val timetable = Timetables.create(Timetable(resource))
+    val timetable = Timetables.create(Timetable(resource, labWork.startDate, labWork.endDate))
 
-    val label = courseIndividual.props.getOrElse(RDFS.label, List(Literal(""))).head.asLiteral().get
+    val label = courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.asLiteral().get
 
     val statements = List(
       Statement(resource, RDF.typ, LWM.LabWork),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, RDFS.label, label),
       Statement(resource, LWM.hasTimetable, timetable.uri),
-      Statement(resource, LWM.hasAssignmentCount, Literal(labWork.assignmentCount.toString)),
+      Statement(resource, LWM.hasAssignmentCount, StringLiteral(labWork.assignmentCount.toString)),
       Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
-      Statement(resource, LWM.allowsApplications, Literal("false")),
-      Statement(resource, LWM.isClosed, Literal("false")),
+      Statement(resource, LWM.hasStartDate, DateTimeLiteral(labWork.startDate)),
+      Statement(resource, LWM.hasEndDate, DateTimeLiteral(labWork.endDate)),
+      Statement(resource, LWM.allowsApplications, StringLiteral("false")),
+      Statement(resource, LWM.isClosed, StringLiteral("false")),
       Statement(resource, LWM.hasSemester, Resource(labWork.semester))
     ) ++ (1 to labWork.assignmentCount).map { c ⇒
         val assoc = ResourceUtils.createResource(lwmNamespace)
         Statement(assoc, RDF.typ, LWM.AssignmentAssociation) :: Statement(assoc, RDF.typ, OWL.NamedIndividual) ::
-          Statement(assoc, LWM.hasLabWork, resource) :: Statement(assoc, LWM.hasOrderId, Literal(s"$c")) ::
+          Statement(assoc, LWM.hasLabWork, resource) :: Statement(assoc, LWM.hasOrderId, StringLiteral(s"$c")) ::
           Statement(resource, LWM.hasAssignmentAssociation, assoc) :: Nil
       }.flatten
 
@@ -73,7 +81,7 @@ object LabWorks {
         Statement(group, RDF.typ, LWM.Group),
         Statement(group, RDF.typ, OWL.NamedIndividual),
         Statement(group, LWM.hasLabWork, resource),
-        Statement(group, LWM.hasId, Literal(s"${i.toChar}")),
+        Statement(group, LWM.hasId, StringLiteral(s"${i.toChar}")),
         Statement(resource, LWM.hasGroup, group)
       )
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(groupStatements: _*))
@@ -120,8 +128,8 @@ object LabworkGroups {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Group),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasId, Literal(group.id)),
-      Statement(resource, RDFS.label, Literal(s"Gruppe ${group.id}")),
+      Statement(resource, LWM.hasId, StringLiteral(group.id)),
+      Statement(resource, RDFS.label, StringLiteral(s"Gruppe ${group.id}")),
       Statement(resource, LWM.hasLabWork, group.labwork),
       Statement(group.labwork, LWM.hasGroup, resource)
     )
@@ -131,7 +139,7 @@ object LabworkGroups {
   }
 
   def delete(group: LabWorkGroup): Future[LabWorkGroup] = {
-    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Group, Vocabulary.LWM.hasId, Literal(group.id))
+    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Group, Vocabulary.LWM.hasId, StringLiteral(group.id))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeGroup)
     val p = Promise[LabWorkGroup]()
     resultFuture.map { result ⇒

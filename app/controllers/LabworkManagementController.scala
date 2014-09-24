@@ -2,6 +2,7 @@ package controllers
 
 import controllers.StudentsManagement._
 import models._
+import org.joda.time.DateTime
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ OWL, RDFS, LWM }
@@ -51,9 +52,16 @@ object LabworkManagementController extends Controller with Authentication {
           } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
         },
         labwork ⇒ {
-          LabWorks.create(labwork).map { _ ⇒
-            Redirect(routes.LabworkManagementController.index())
-          }
+          LabWorks.create(
+            LabWork(
+              labwork.groupCount,
+              labwork.assignmentCount,
+              labwork.courseId,
+              labwork.semester,
+              new DateTime(labwork.startDate.getTime),
+              new DateTime(labwork.endDate.getTime))).map { _ ⇒
+              Redirect(routes.LabworkManagementController.index())
+            }
         }
       )
     }

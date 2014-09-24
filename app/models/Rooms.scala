@@ -30,16 +30,16 @@ object Rooms {
     val statements = List(
       Statement(courseResource, RDF.typ, LWM.Room),
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
-      Statement(courseResource, LWM.hasName, Literal(room.name)),
-      Statement(courseResource, RDFS.label, Literal(room.name)),
-      Statement(courseResource, LWM.hasId, Literal(room.id.toString)),
-      Statement(courseResource, LWM.hasRoomId, Literal(room.roomId))
+      Statement(courseResource, LWM.hasName, StringLiteral(room.name)),
+      Statement(courseResource, RDFS.label, StringLiteral(room.name)),
+      Statement(courseResource, LWM.hasId, StringLiteral(room.id.toString)),
+      Statement(courseResource, LWM.hasRoomId, StringLiteral(room.roomId))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(_ ⇒ Individual(courseResource))
   }
 
   def delete(room: Room): Future[Room] = {
-    val maybeRoom = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Room, Vocabulary.LWM.hasId, Literal(room.id.toString))
+    val maybeRoom = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Room, Vocabulary.LWM.hasId, StringLiteral(room.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeRoom)
     val p = Promise[Room]()
     resultFuture.map { result ⇒

@@ -1,5 +1,5 @@
 @(labwork: Individual, group: Individual, students: List[Individual], associations: List[Individual])
-@import utils.semantic.{Individual, Literal}
+@import utils.semantic.{Individual, StringLiteral}
 @import utils.semantic.Vocabulary.LWM
 @import utils.Global._
 
@@ -14,7 +14,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    <h4>Gruppe @{group.props.getOrElse(LWM.hasId, List(Literal(""))).head.value} Detailverwaltung</h4>
+                    <h4>Gruppe @{group.props.getOrElse(LWM.hasId, List(StringLiteral(""))).head.value} Detailverwaltung</h4>
                     <div class="row">
                     @groups_student_list(labwork, group, students)
                     </div>

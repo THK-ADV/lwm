@@ -1,11 +1,11 @@
 @(labwork: Individual, group: Individual, associations: List[Individual])
-    @import utils.semantic.{Individual, Resource, Literal}
+    @import utils.semantic.{Individual, Resource, StringLiteral}
     @import utils.semantic.Vocabulary.{LWM, RDFS}
     @import utils.Global._
 
     <div class="panel panel-default">
         <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(Literal("0"))).head.value</div>
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral("0"))).head.value</div>
         <table class="table table-bordered">
             <tbody>
                 <tr><th>Blatt</th> <th>Aufgabe</th> <th>Abgabetermin</th></tr>
@@ -14,9 +14,9 @@
                         <tr>
                             <td>@id.value</td>
                             <td>
-                            @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value
+                            @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
                             <td>
-                                @{a.props.getOrElse(LWM.hasPreparationTime, List(Literal("0"))).head.value.toInt + id.value.toInt}
+                                @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + id.value.toInt}
                                 <a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a>
 
                                 <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

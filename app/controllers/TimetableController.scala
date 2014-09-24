@@ -3,6 +3,7 @@ package controllers
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
+import utils.SemesterDatesGenerator
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ Individual, Resource }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,6 +15,7 @@ object TimetableController extends Controller with Authentication {
 
   def index(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
+
       for {
         supervisors ← Users.all()
         rooms ← Rooms.all()
@@ -31,6 +33,30 @@ object TimetableController extends Controller with Authentication {
           TimeTableForm.timetableForm))
       }
     }
+  }
+
+  def generateSchedule() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async(parse.json) {
+        implicit request ⇒
+          println("SCHEDULING")
+          val maybeLabworkid = (request.body \ "id").asOpt[String]
+          println(maybeLabworkid)
+          maybeLabworkid.map { labworkid ⇒
+            val i = Individual(Resource(labworkid))
+            val maybeSemester = i.props.get(LWM.hasSemester)
+            val maybeTimetable = i.props.get(LWM.hasTimetable)
+            for {
+              timetableList ← maybeTimetable
+              semesterList ← maybeSemester
+            } {
+              val timetable = timetableList.head.asResource().get
+              val semester = semesterList.head.asResource().get
+              SemesterDatesGenerator(timetable, semester)
+            }
+          }
+          Future.successful(Ok(""))
+      }
   }
 
   def timeTableEntryPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
@@ -66,12 +92,11 @@ object TimetableController extends Controller with Authentication {
     for (s ← Users.all()) yield {
       val supervisors = s.filter(i ⇒ i.uri.value == entry.supervisors).map(_.uri).toList
       val timetableId = Individual(Resource(id)).props.getOrElse(LWM.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
-
       TimetableEntry(
-        Weekdays.workWeek.filter(p ⇒ p.label == entry.day).head,
+        Weekdays.workWeek.values.filter(p ⇒ p.label == entry.day).head,
         Time(entry.startTime.split(":")(0).toInt, entry.startTime.split(":")(1).toInt),
         Time(entry.endTime.split(":")(0).toInt, entry.endTime.split(":")(1).toInt),
-        entry.room,
+        Resource(entry.room),
         supervisors,
         timetableId)
     }

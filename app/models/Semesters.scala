@@ -3,6 +3,7 @@ package models
 import java.util.UUID
 
 import com.hp.hpl.jena.rdf.model.AnonId
+import org.joda.time.DateTime
 import play.api.data.Form
 import utils.Global._
 import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
@@ -14,11 +15,19 @@ import scala.concurrent.{ Promise, Future }
 
 sealed trait Semester {
   val year: Int
+  val startDate: DateTime
+  val endDate: DateTime
 }
 
-case class SummerSemester(year: Int) extends Semester
+case class SummerSemester(year: Int) extends Semester {
+  override val startDate = new DateTime(year, 3, 1, 0, 0)
+  override val endDate = new DateTime(year, 8, 31, 0, 0)
+}
 
-case class WinterSemester(year: Int) extends Semester
+case class WinterSemester(year: Int) extends Semester {
+  override val startDate = new DateTime(year, 9, 1, 0, 0)
+  override val endDate = new DateTime(year + 1, 2, 28, 0, 0)
+}
 
 case class SemesterModelForm(semester: String, year: Int)
 
@@ -26,17 +35,22 @@ object Semesters {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(semester: Semester) = {
+
+    def startEndList(res: Resource) = List(
+      Statement(res, LWM.hasStartDate, DateTimeLiteral(semester.startDate)),
+      Statement(res, LWM.hasEndDate, DateTimeLiteral(semester.endDate))
+    )
     val semesterStatement = semester match {
       case ss: SummerSemester ⇒
         val id = s"Sommersemester_${semester.year}"
         val semesterResource = Resource(s"$lwmNamespace$id")
-        val sts = List(Statement(semesterResource, LWM.hasYear, Literal(s"${semester.year}")), Statement(semesterResource, RDF.typ, OWL.NamedIndividual), Statement(semesterResource, LWM.hasId, Literal(id)), Statement(semesterResource, RDF.typ, LWM.SummerSemester), Statement(semesterResource, RDF.typ, LWM.Semester), Statement(semesterResource, RDFS.label, Literal(s"Sommersemester ${semester.year}")))
-        (semesterResource, sts)
+        val sts = List(Statement(semesterResource, LWM.hasYear, StringLiteral(s"${semester.year}")), Statement(semesterResource, RDF.typ, OWL.NamedIndividual), Statement(semesterResource, LWM.hasId, StringLiteral(id)), Statement(semesterResource, RDF.typ, LWM.SummerSemester), Statement(semesterResource, RDF.typ, LWM.Semester), Statement(semesterResource, RDFS.label, StringLiteral(s"Sommersemester ${semester.year}")))
+        (semesterResource, sts ++ startEndList(semesterResource))
       case ws: WinterSemester ⇒
         val id = s"Wintersemester${semester.year}"
         val semesterResource = Resource(s"$lwmNamespace$id")
-        val sts = List(Statement(semesterResource, LWM.hasYear, Literal(s"${semester.year}")), Statement(semesterResource, RDF.typ, OWL.NamedIndividual), Statement(semesterResource, LWM.hasId, Literal(id)), Statement(semesterResource, RDF.typ, LWM.WinterSemester), Statement(semesterResource, RDF.typ, LWM.Semester), Statement(semesterResource, RDFS.label, Literal(s"Wintersemester ${semester.year}")))
-        (semesterResource, sts)
+        val sts = List(Statement(semesterResource, LWM.hasYear, StringLiteral(s"${semester.year}")), Statement(semesterResource, RDF.typ, OWL.NamedIndividual), Statement(semesterResource, LWM.hasId, StringLiteral(id)), Statement(semesterResource, RDF.typ, LWM.WinterSemester), Statement(semesterResource, RDF.typ, LWM.Semester), Statement(semesterResource, RDFS.label, StringLiteral(s"Wintersemester ${semester.year}")))
+        (semesterResource, sts ++ startEndList(semesterResource))
     }
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(semesterStatement._2: _*)).map(_ ⇒ Individual(semesterStatement._1))
@@ -47,7 +61,7 @@ object Semesters {
     semester match {
       case ss: SummerSemester ⇒
         val id = s"Sommersemester_${semester.year}"
-        val maybeSemester = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.SummerSemester, Vocabulary.LWM.hasId, Literal(id))
+        val maybeSemester = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.SummerSemester, Vocabulary.LWM.hasId, StringLiteral(id))
         val resultFuture = sparqlExecutionContext.executeQuery(maybeSemester)
 
         resultFuture.map { result ⇒
@@ -58,7 +72,7 @@ object Semesters {
         }
       case ws: WinterSemester ⇒
         val id = s"Wintersemester${semester.year}"
-        val maybeSemester = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.SummerSemester, Vocabulary.LWM.hasId, Literal(id))
+        val maybeSemester = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.SummerSemester, Vocabulary.LWM.hasId, StringLiteral(id))
         val resultFuture = sparqlExecutionContext.executeQuery(maybeSemester)
 
         resultFuture.map { result ⇒

@@ -23,7 +23,7 @@ object SPARQLBuilder {
   def listIndividualsWithClass(uri: Resource) =
     s"SELECT ?s (${rdf.typ} as ?p) ($uri as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s ${rdf.typ} $uri}"
 
-  def listIndividualsWithProperty(p: Property, value: Literal) =
+  def listIndividualsWithProperty(p: Property, value: StringLiteral) =
     s"""SELECT ?s ($p as ?p) (${value.toQueryString} as ?o) WHERE {?s ${rdf.typ} ${owl.NamedIndividual} . ?s $p ${value.toQueryString}}"""
 
   def listIndividualsWithResource(p: Property, value: Resource) =

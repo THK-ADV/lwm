@@ -2,7 +2,7 @@ import models.{ Courses, Course }
 import org.scalatest.concurrent.{ Futures, ScalaFutures }
 import org.scalatest.time.{ Millis, Seconds, Span }
 import utils.semantic.Vocabulary.{ RDFS, LWM }
-import utils.semantic.{ Literal, Statement, Individual }
+import utils.semantic.{ StringLiteral, Statement, Individual }
 
 class CoursesSpec extends LWMBaseSpec {
   import utils.Global._
@@ -14,9 +14,9 @@ class CoursesSpec extends LWMBaseSpec {
 
       whenReady(returnValue) { result ⇒
         result.getClass mustEqual classOf[Individual]
-        result.properties must contain(Statement(result.uri, LWM.hasId, Literal(course.id)))
-        result.properties must contain(Statement(result.uri, LWM.hasName, Literal(course.name)))
-        result.properties must contain(Statement(result.uri, RDFS.label, Literal(course.name)))
+        result.properties must contain(Statement(result.uri, LWM.hasId, StringLiteral(course.id)))
+        result.properties must contain(Statement(result.uri, LWM.hasName, StringLiteral(course.name)))
+        result.properties must contain(Statement(result.uri, RDFS.label, StringLiteral(course.name)))
         assert(Courses.exists(course))
       }
 

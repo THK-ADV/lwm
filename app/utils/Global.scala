@@ -19,7 +19,7 @@ object Global extends GlobalSettings {
   private val updateHost = "http://localhost:3030/lwm/update"
   private val queryHost = "http://localhost:3030/lwm/query"
 
-  implicit val timeout = Timeout(10.seconds)
+  implicit val timeout = Timeout(30.seconds)
   implicit val sparqlExecutionContext = SPARQLExecution(queryHost, updateHost)
   val lwmNamespace = Namespace("http://lwm.gm.fh-koeln.de/")
 

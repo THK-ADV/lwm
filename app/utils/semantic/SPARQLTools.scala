@@ -28,7 +28,7 @@ object SPARQLTools {
       }).toMap
 
       if (l) {
-        Statement(Resource(res("s")), Property(res("p")), Literal(res("o")))
+        Statement(Resource(res("s")), Property(res("p")), StringLiteral(res("o")))
       } else {
         Statement(Resource(res("s")), Property(res("p")), Resource(res("o")))
       }

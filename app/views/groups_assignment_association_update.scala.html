@@ -1,11 +1,11 @@
 @(labwork: Individual, group: Individual, association: Individual)
-@import utils.semantic.{Individual, Resource, Literal}
+@import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 
     <!-- CHANGES THE ORIGINAL ASSOCIATION. NOT THE UNIQUE GROUP ONE. TODO: ADD INDIVIDUAL GROUP ASSOCIATIONS -->
     <label>Neue Abgabe: </label>
     <select id="selectPreparationTime">
-    @for(n <- 1 to labwork.props.getOrElse(LWM.hasAssignmentCount, List(Literal(""))).head.value.toInt - association.props.getOrElse(LWM.hasOrderId, List(Literal(""))).head.value.toInt) {
+    @for(n <- 1 to labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral(""))).head.value.toInt - association.props.getOrElse(LWM.hasOrderId, List(StringLiteral(""))).head.value.toInt) {
         <option>+@n</option>
     }
     </select>

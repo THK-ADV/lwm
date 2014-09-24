@@ -24,9 +24,9 @@ object Courses {
     val statements = List(
       Statement(courseResource, RDF.typ, LWM.Course),
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
-      Statement(courseResource, LWM.hasId, Literal(course.id)),
-      Statement(courseResource, RDFS.label, Literal(course.name)),
-      Statement(courseResource, LWM.hasName, Literal(course.name)),
+      Statement(courseResource, LWM.hasId, StringLiteral(course.id)),
+      Statement(courseResource, RDFS.label, StringLiteral(course.name)),
+      Statement(courseResource, LWM.hasName, StringLiteral(course.name)),
       Statement(courseResource, LWM.hasDegree, course.degree)
     )
 
@@ -34,7 +34,7 @@ object Courses {
   }
 
   def delete(course: Course): Future[Course] = {
-    val maybeCourse = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Course, Vocabulary.LWM.hasId, Literal(course.id))
+    val maybeCourse = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Course, Vocabulary.LWM.hasId, StringLiteral(course.id))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeCourse)
     val p = Promise[Course]()
     resultFuture.map { result ⇒
@@ -64,8 +64,8 @@ object Courses {
   }
 
   def exists(course: Course): Future[Boolean] = {
-    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${Literal(course.id).toQueryString}}")
-    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${Literal(course.name).toQueryString}}")
+    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${StringLiteral(course.id).toQueryString}}")
+    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${StringLiteral(course.name).toQueryString}}")
     for {
       aRes ← a
       bRes ← b

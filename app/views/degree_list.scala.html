@@ -1,7 +1,7 @@
 @(degrees: List[Individual])
     @import utils.semantic.Individual
     @import utils.semantic.Vocabulary
-    @import utils.semantic.Literal
+    @import utils.semantic.StringLiteral
 
 
     <div class="panel panel-default">
@@ -12,7 +12,7 @@
                 <th>Name</th>
                 <th>ID</th>
             </tr>
-            @degrees.map(i => (i.props.getOrElse(Vocabulary.LWM.hasName, List(Literal(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(Literal(""))).head.value, i.uri)).sortBy(_._1).map{degree =>
+            @degrees.map(i => (i.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value, i.uri)).sortBy(_._1).map{degree =>
                 <tr>
                     <td>@degree._1</td>
                     <td>@degree._2</td>

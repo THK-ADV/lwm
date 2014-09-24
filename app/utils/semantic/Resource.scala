@@ -2,12 +2,14 @@ package utils.semantic
 
 import java.net.{ URLDecoder, URLEncoder }
 import java.util.UUID
-import com.hp.hpl.jena.rdf.model.AnonId
+import com.hp.hpl.jena.rdf.model.{ ResourceFactory, AnonId }
+import org.joda.time.DateTime
 import scala.xml.XML._
 
 object ResourceUtils {
   def createResource(ns: Namespace) = Resource(s"$ns${AnonId.create()}")
   def createResource(ns: Namespace, id: UUID) = Resource(s"$ns${id.toString}")
+
 }
 
 trait RDFNode {
@@ -44,9 +46,13 @@ case class Property(value: String) extends RDFNode {
   override def toQueryString: String = toString
 }
 
-case class Literal(value: String, encoded: Boolean = false) extends RDFNode {
-  val encodedString = if (encoded) value else URLEncoder.encode(value, "UTF-8")
-  val decodedString = if (encoded) URLDecoder.decode(value, "UTF-8") else value
+trait Literal extends RDFNode {
+  val encoded: Boolean
+  lazy val encodedString = if (encoded) value else URLEncoder.encode(value, "UTF-8")
+  lazy val decodedString = if (encoded) URLDecoder.decode(value, "UTF-8") else value
+}
+
+case class StringLiteral(value: String, encoded: Boolean = false) extends Literal {
 
   override def toString = decodedString
 
@@ -55,6 +61,16 @@ case class Literal(value: String, encoded: Boolean = false) extends RDFNode {
   override def asLiteral(): Option[Literal] = Some(this)
 
   override def toQueryString: String = if (value == null) s"""""""" else s""""$encodedString""""
+}
+
+case class DateTimeLiteral(dateTime: DateTime, encoded: Boolean = false) extends Literal {
+  override val value: String = dateTime.toString("yyyy-MM-dd")
+
+  override def asResource(): Option[Resource] = None
+
+  override def asLiteral(): Option[DateTimeLiteral] = Some(this)
+
+  override def toQueryString: String = if (value == null) s"""""""" else s""""$decodedString""""
 }
 
 case class NamedGraph(uri: String) {

@@ -19,11 +19,11 @@ object Assignments {
     val statements = List(
       Statement(courseResource, RDF.typ, LWM.Assignment),
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
-      Statement(courseResource, LWM.hasId, Literal(id.toString)),
-      Statement(courseResource, RDFS.label, Literal(assignment.id)),
-      Statement(courseResource, LWM.hasText, Literal(assignment.text)),
-      Statement(courseResource, LWM.hasDescription, Literal(assignment.description))
-    ) ++ assignment.courses.map(c ⇒ Statement(courseResource, LWM.hasCourse, Resource(c))) ++ assignment.topics.map(t ⇒ Statement(courseResource, LWM.hasTopic, Literal(t)))
+      Statement(courseResource, LWM.hasId, StringLiteral(id.toString)),
+      Statement(courseResource, RDFS.label, StringLiteral(assignment.id)),
+      Statement(courseResource, LWM.hasText, StringLiteral(assignment.text)),
+      Statement(courseResource, LWM.hasDescription, StringLiteral(assignment.description))
+    ) ++ assignment.courses.map(c ⇒ Statement(courseResource, LWM.hasCourse, Resource(c))) ++ assignment.topics.map(t ⇒ Statement(courseResource, LWM.hasTopic, StringLiteral(t)))
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(courseResource))
   }
@@ -81,9 +81,9 @@ object AssignmentAssociations {
     val statements = List(
       Statement(associationResource, RDF.typ, LWM.AssignmentAssociation),
       Statement(associationResource, RDF.typ, OWL.NamedIndividual),
-      Statement(associationResource, LWM.hasId, Literal(id.toString)),
+      Statement(associationResource, LWM.hasId, StringLiteral(id.toString)),
       Statement(associationResource, LWM.hasAssignment, association.assignment),
-      Statement(associationResource, LWM.hasPreparationTime, Literal(s"${association.preparationTime}")),
+      Statement(associationResource, LWM.hasPreparationTime, StringLiteral(s"${association.preparationTime}")),
       Statement(associationResource, LWM.hasLabWork, association.labwork)
     )
 
@@ -118,11 +118,11 @@ object AssignmentSolutions {
     val statements = List(
       Statement(solutionResource, RDF.typ, LWM.AssignmentSolution),
       Statement(solutionResource, RDF.typ, OWL.NamedIndividual),
-      Statement(solutionResource, LWM.hasId, Literal(id.toString)),
+      Statement(solutionResource, LWM.hasId, StringLiteral(id.toString)),
       Statement(solutionResource, LWM.hasAssignment, solution.assignment),
       Statement(solution.assignment, LWM.hasSolution, solutionResource),
-      Statement(solutionResource, LWM.hasFileName, Literal(solution.fileName)),
-      Statement(solutionResource, LWM.hasText, Literal(solution.text))
+      Statement(solutionResource, LWM.hasFileName, StringLiteral(solution.fileName)),
+      Statement(solutionResource, LWM.hasText, StringLiteral(solution.text))
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(solutionResource))

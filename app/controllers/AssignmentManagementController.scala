@@ -4,7 +4,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDFS, LWM }
-import utils.semantic.{ Literal, Resource, Individual }
+import utils.semantic.{ StringLiteral, Resource, Individual }
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
 
@@ -130,7 +130,7 @@ object AssignmentManagementController extends Controller with Authentication {
             a ⇒ {
               val i = Individual(Resource(associationid))
               i.add(LWM.hasAssignment, Resource(a.assignment))
-              i.add(LWM.hasPreparationTime, Literal(s"${a.preparationTime}"))
+              i.add(LWM.hasPreparationTime, StringLiteral(s"${a.preparationTime}"))
               Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
             }
           )
@@ -153,10 +153,10 @@ object AssignmentManagementController extends Controller with Authentication {
     session ⇒
       Action.async(parse.json) { implicit request ⇒
         val ia = Individual(Resource(associationid))
-        val ot = ia.props.getOrElse(LWM.hasPreparationTime, List(Literal(""))).head
+        val ot = ia.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral(""))).head
         val nt = (request.body \ "time").as[String]
         val gid = (request.body \ "group").as[String]
-        ia.update(LWM.hasPreparationTime, ot, Literal(nt))
+        ia.update(LWM.hasPreparationTime, ot, StringLiteral(nt))
         Future.successful(Redirect(routes.GroupManagementController.index(labworkid, gid)))
       }
   }

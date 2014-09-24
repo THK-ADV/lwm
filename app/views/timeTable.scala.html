@@ -4,13 +4,13 @@
 @import utils.semantic.Individual
 <!--TODO Weekday -> List[Entry]-->
 
-@import utils.semantic.{Resource, Literal}
+@import utils.semantic.{Resource, StringLiteral}
 @import utils.Global._
 
 <div class= "panel panel-default">
 
     <div class="panel-heading">
-        <h5>@labwork.props.getOrElse(RDFS.label, List(Literal(""))).head.value @Individual(Resource(labwork.props(LWM.hasSemester).head.value)).props.getOrElse(RDFS.label, List(Literal(""))).head.value</h5>
+        <h5>@labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value @Individual(Resource(labwork.props(LWM.hasSemester).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</h5>
     </div>
     <table class="table table-bordered">
     <tbody>

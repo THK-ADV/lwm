@@ -15,9 +15,13 @@
                 @navigation_admin()
                 <div class="col-md-9">
                     @timeTable(timeslots, labwork, table_entries)
-                    <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
+                    <div class="row">
+                        <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button>
+                        <a href="javascript: ajaxRequest('@routes.TimetableController.generateSchedule()', 'POST', 'application/json', {id : '@labwork.uri.value'}, reload);" class="btn btn-primary" role="button">
+                            Staffelplan generieren
 
-                    </button>
+                        </a>
+                    </div>
 
                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -28,7 +32,7 @@
                                    <h4 class="modal-title" id="myModalLabel">Neuen Stundenplaneintrag hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @timeTableManagement_form(labwork.uri, Weekdays.workWeek, timeslots, rooms, allSupervisors, TimeTableForm.timetableForm)
+                                @timeTableManagement_form(labwork.uri, Weekdays.workWeek.values.toList.sortBy(_.index), timeslots, rooms, allSupervisors, TimeTableForm.timetableForm)
                                 </div>
 
                             </div>

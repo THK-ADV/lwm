@@ -45,9 +45,11 @@ GET           /student/dashboard                                  controllers.St
 GET           /impressum                                          controllers.VisitorController.impressum()
 GET           /contact                                            controllers.VisitorController.contact()
 
+POST          /administration/schedule                            controllers.TimetableController.generateSchedule()
 GET           /administration/timetable/:id                       controllers.TimetableController.index(id)
 POST          /administration/timetable/:id                       controllers.TimetableController.timeTableEntryPost(id)
 DELETE        /administration/timetable                           controllers.TimetableController.entryRemoval()
+
 
 POST          /administration/rooms                               controllers.RoomManagementController.roomPost()
 GET           /administration/rooms                               controllers.RoomManagementController.index()

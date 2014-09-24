@@ -1,6 +1,6 @@
 @(users: List[Individual])
 @import utils.semantic.Individual
-@import utils.semantic.Literal
+@import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary
 
 
@@ -15,9 +15,9 @@
         </tr>
         @for(user <- users) {
             <tr>
-                <td>@user.props.getOrElse(Vocabulary.LWM.hasGmId, List(Literal(""))).head.value</td>
-                <td>@user.props.getOrElse(Vocabulary.FOAF.lastName, List(Literal(""))).head.value</td>
-                <td>@user.props.getOrElse(Vocabulary.FOAF.firstName, List(Literal(""))).head.value</td>
+                <td>@user.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value</td>
+                <td>@user.props.getOrElse(Vocabulary.FOAF.lastName, List(StringLiteral(""))).head.value</td>
+                <td>@user.props.getOrElse(Vocabulary.FOAF.firstName, List(StringLiteral(""))).head.value</td>
                 <td><a href="javascript: deleteUser('@user.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
             </tr>
         }

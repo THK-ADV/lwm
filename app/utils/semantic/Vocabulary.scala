@@ -30,6 +30,8 @@ object Vocabulary {
     val Semester = resource("Semester")
     val WinterSemester = resource("WinterSemester")
     val SummerSemester = resource("SummerSemester")
+    val hasStartDate = property("hasStartDate")
+    val hasEndDate = property("hasEndDate")
 
     val ApplicationToken = resource("ApplicationToken")
 

@@ -20,7 +20,7 @@ object ApplicationTokens {
       Statement(tokenResource, RDF.typ, LWM.ApplicationToken),
       Statement(tokenResource, RDF.typ, OWL.NamedIndividual),
       Statement(token.student, LWM.hasApplicationToken, tokenResource),
-      Statement(tokenResource, LWM.hasId, Literal(id.toString)),
+      Statement(tokenResource, LWM.hasId, StringLiteral(id.toString)),
       Statement(tokenResource, LWM.hasLabWork, token.labwork)
     )
 

@@ -24,9 +24,9 @@ object Degrees {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Degree),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasId, Literal(degree.id)),
-      Statement(resource, RDFS.label, Literal(degree.name)),
-      Statement(resource, LWM.hasName, Literal(degree.name))
+      Statement(resource, LWM.hasId, StringLiteral(degree.id)),
+      Statement(resource, RDFS.label, StringLiteral(degree.name)),
+      Statement(resource, LWM.hasName, StringLiteral(degree.name))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { b ⇒
       Individual(resource)
@@ -35,7 +35,7 @@ object Degrees {
   }
 
   def delete(degree: Degree): Future[Degree] = {
-    val maybeDegree = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Course, Vocabulary.LWM.hasId, Literal(degree.id))
+    val maybeDegree = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Course, Vocabulary.LWM.hasId, StringLiteral(degree.id))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeDegree)
     val p = Promise[Degree]()
     resultFuture.map { result ⇒
@@ -65,9 +65,9 @@ object Degrees {
   }
 
   def exists(degree: Degree): Future[Boolean] = {
-    val aFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${Literal(degree.id).toQueryString}}")
-    val bFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${Literal(degree.name).toQueryString}}")
-    val cFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.RDFS.label} ${Literal(degree.name).toQueryString}}")
+    val aFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${StringLiteral(degree.id).toQueryString}}")
+    val bFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${StringLiteral(degree.name).toQueryString}}")
+    val cFut = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.RDFS.label} ${StringLiteral(degree.name).toQueryString}}")
     for {
       a ← aFut
       b ← bFut

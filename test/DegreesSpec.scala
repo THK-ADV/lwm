@@ -1,6 +1,6 @@
 import models.{ Degrees, Courses, Degree }
 import utils.semantic.Vocabulary.{ RDFS, LWM }
-import utils.semantic.{ Literal, Statement, Individual }
+import utils.semantic.{ StringLiteral, Statement, Individual }
 
 class DegreesSpec extends LWMBaseSpec {
   import utils.Global._
@@ -12,9 +12,9 @@ class DegreesSpec extends LWMBaseSpec {
 
       whenReady(returnValue) { result ⇒
         result.getClass mustEqual classOf[Individual]
-        result.properties must contain(Statement(result.uri, LWM.hasId, Literal(degree.id)))
-        result.properties must contain(Statement(result.uri, LWM.hasName, Literal(degree.name)))
-        result.properties must contain(Statement(result.uri, RDFS.label, Literal(degree.name)))
+        result.properties must contain(Statement(result.uri, LWM.hasId, StringLiteral(degree.id)))
+        result.properties must contain(Statement(result.uri, LWM.hasName, StringLiteral(degree.name)))
+        result.properties must contain(Statement(result.uri, RDFS.label, StringLiteral(degree.name)))
         assert(Degrees.exists(degree))
       }
 

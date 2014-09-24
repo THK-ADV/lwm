@@ -1,5 +1,5 @@
 @(degrees: List[Individual], form: Form[Student])
-@import utils.semantic.Literal
+@import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Individual
 
@@ -17,7 +17,7 @@
             @helper.inputText(form("email"), '_label -> "Email")
             @helper.inputText(form("phone"), '_label -> "Telefon")
             @helper.select(form("degree"), (for(d <- degrees) yield {
-                d.uri.value -> d.props.getOrElse(RDFS.label, List(Literal(d.uri.value))).head.value
+                d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
             }).sortBy(_._2), '_label -> "Studiengang")
             <div class="form-actions">
                 <button type="submit">Abschicken</button>

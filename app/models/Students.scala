@@ -23,14 +23,14 @@ object Students {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Student),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGmId, Literal(student.gmId)),
-      Statement(resource, FOAF.firstName, Literal(student.firstname)),
-      Statement(resource, FOAF.lastName, Literal(student.lastname)),
-      Statement(resource, RDFS.label, Literal(s"${student.firstname} ${student.lastname}")),
-      Statement(resource, NCO.phoneNumber, Literal(student.phone)),
-      Statement(resource, FOAF.mbox, Literal(student.email)),
+      Statement(resource, LWM.hasGmId, StringLiteral(student.gmId)),
+      Statement(resource, FOAF.firstName, StringLiteral(student.firstname)),
+      Statement(resource, FOAF.lastName, StringLiteral(student.lastname)),
+      Statement(resource, RDFS.label, StringLiteral(s"${student.firstname} ${student.lastname}")),
+      Statement(resource, NCO.phoneNumber, StringLiteral(student.phone)),
+      Statement(resource, FOAF.mbox, StringLiteral(student.email)),
       Statement(resource, LWM.hasEnrollment, Resource(student.degree)),
-      Statement(resource, LWM.hasRegistrationId, Literal(student.registrationNumber))
+      Statement(resource, LWM.hasRegistrationId, StringLiteral(student.registrationNumber))
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
@@ -39,7 +39,7 @@ object Students {
   }
 
   def delete(student: Student): Future[Student] = {
-    val maybeStudent = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, Vocabulary.LWM.hasGmId, Literal(student.gmId))
+    val maybeStudent = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, Vocabulary.LWM.hasGmId, StringLiteral(student.gmId))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeStudent)
     val p = Promise[Student]()
     resultFuture.map { result ⇒
@@ -70,7 +70,7 @@ object Students {
 
   def get(gmId: String): Future[Resource] = {
     val p = Promise[Resource]()
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, LWM.hasGmId, Literal(gmId))).map { result ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, LWM.hasGmId, StringLiteral(gmId))).map { result ⇒
       val resource = SPARQLTools.statementsFromString(result).map(student ⇒ student.s)
       if (resource.nonEmpty) {
         p.success(resource.head)
@@ -95,7 +95,7 @@ object Students {
       val statements = SPARQLTools.statementsFromString(result)
       statements.map { statement ⇒
         val individual = Individual(statement.s)
-        val name = individual.props.getOrElse(RDFS.label, List(Literal(""))).head.value
+        val name = individual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
         (statement.o.value, name, statement.s.value)
       }
     }
@@ -104,7 +104,7 @@ object Students {
 
   def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${Literal(uid).toQueryString}}")
+  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
 
   def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Student}}")
 }
