@@ -8,24 +8,25 @@ import utils.semantic.{ StringLiteral, Individual, Resource }
 import scala.annotation.tailrec
 
 object SemesterDatesGenerator {
-  case class AssignmentDateAssociation(group: (String, Resource), association: (Int, (Resource, Int)), date: LocalDate)
-  case class DueDateAssociation(group: Resource, association: Resource, date: LocalDate)
+  case class AssignmentDateAssociation(group: (String, Resource), association: (Int, (Resource, Int)), date: SemesterDate)
+  case class DueDateAssociation(group: Resource, association: Resource, date: SemesterDate)
+  case class SemesterDate(date: LocalDate, entry: TimetableEntry)
 
   import utils.Global._
 
-  private def generateDateList(startDate: LocalDate, endDate: LocalDate): List[LocalDate] = {
+  private def generateDateList(startDate: LocalDate, endDate: LocalDate, entry: TimetableEntry): List[SemesterDate] = {
     @tailrec
-    def generateDateList(next: LocalDate, list: List[LocalDate]): List[LocalDate] = {
-      if (next.compareTo(endDate) >= 0) next :: list else generateDateList(next.plusWeeks(1), next :: list)
+    def generateDateList(next: SemesterDate, list: List[SemesterDate]): List[SemesterDate] = {
+      if (next.date.compareTo(endDate) >= 0) next :: list else generateDateList(SemesterDate(next.date.plusWeeks(1), entry), next :: list)
     }
 
-    generateDateList(startDate, Nil)
+    generateDateList(SemesterDate(startDate, entry), Nil)
   }
 
   def apply(timetable: Resource, semester: Resource) = {
     Timetables.get(timetable).map { t ⇒
 
-      val entryResource = Individual(timetable).props.getOrElse(LWM.hasEntry, Nil)
+      val entryResource = Individual(timetable).props.getOrElse(LWM.hasTimetableEntry, Nil)
       val entries = entryResource.map { entry ⇒
         TimetableEntries.get(entry.asResource().get)
       }.flatten
@@ -33,12 +34,12 @@ object SemesterDatesGenerator {
       val available = entries.map { entry ⇒
         val firstDate = t.startDate.plusDays(entry.day.index)
         val lastDate = t.endDate.plusDays(entry.day.index)
-        generateDateList(firstDate, lastDate)
+        generateDateList(firstDate, lastDate, entry)
       }.flatten
 
       val holidays = (Holidays(t.startDate.year().get()) ++ Holidays(t.endDate.year().get())).toMap.keys.toList
 
-      var possibleDates = (available diff holidays).sortWith((a, b) ⇒ a.compareTo(b) < 0)
+      var possibleDates = available.filterNot(d ⇒ holidays.contains(d.date)).sortWith((a, b) ⇒ a.date.compareTo(b.date) < 0)
 
       val labwork = Individual(t.labwork)
       val groupCount = labwork.props.getOrElse(LWM.hasGroup, Nil).size
@@ -74,7 +75,7 @@ object SemesterDatesGenerator {
       }
 
       val assignmentsPerGroup = assignmentDates.groupBy(_.group._2).map { group ⇒
-        group._1 -> group._2.sortWith((a, b) ⇒ a.date.compareTo(b.date) < 0)
+        group._1 -> group._2.sortWith((a, b) ⇒ a.date.date.compareTo(b.date.date) < 0)
       }
 
       val dues = assignmentsPerGroup.map { entry ⇒
@@ -92,7 +93,7 @@ object SemesterDatesGenerator {
 
       val schedule = assignmentDates.map { date ⇒
         val due = dues((date.association._2._1, date.group._2)).head
-        ScheduleAssociation(date.group._2, date.association._2._1, date.date, due.date)
+        ScheduleAssociation(date.group._2, date.association._2._1, date.date.date, due.date.date, date.date.entry.ownResource.get, due.date.entry.ownResource.get)
       }
 
       schedule.map { s ⇒

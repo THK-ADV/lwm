@@ -93,7 +93,7 @@ object TimeSlots {
 
 case class Timetable(labwork: Resource, startDate: LocalDate, endDate: LocalDate, id: UUID = UUID.randomUUID())
 
-case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time, room: Resource, supervisors: List[Resource], timetable: Resource, id: UUID = UUID.randomUUID())
+case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time, room: Resource, supervisors: List[Resource], timetable: Resource, id: UUID = UUID.randomUUID(), ownResource: Option[Resource] = None)
 
 case class TimetableEntryFormEntry(day: String, startTime: String, endTime: String, room: String, supervisors: String)
 
@@ -155,7 +155,7 @@ object TimetableEntries {
       Statement(timetableEntryResource, LWM.hasId, StringLiteral(timetableEntry.id.toString)),
       Statement(timetableEntryResource, LWM.hasEndTime, StringLiteral(timetableEntry.endTime.toString)),
       Statement(timetableEntryResource, LWM.hasTimetable, timetableEntry.timetable),
-      Statement(timetableEntry.timetable, LWM.hasEntry, timetableEntryResource),
+      Statement(timetableEntry.timetable, LWM.hasTimetableEntry, timetableEntryResource),
       Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri),
       Statement(timetableEntryResource, LWM.hasRoom, timetableEntry.room) // TODO das ist wahrscheinlich was falsch
     ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.isSupervisorFor, timetableEntryResource))).flatten
@@ -219,7 +219,7 @@ object TimetableEntries {
       val id = idList.head.asLiteral().get.decodedString
       val supervisors = supervisorsList.map(_.asResource().get)
       val timetable = timetableList.head.asResource().get
-      TimetableEntry(day.get, startTime, endTime, room, supervisors, timetable, UUID.fromString(id))
+      TimetableEntry(day.get, startTime, endTime, room, supervisors, timetable, UUID.fromString(id), Some(resource))
     }
   }
 }

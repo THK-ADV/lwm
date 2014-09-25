@@ -12,7 +12,7 @@ import utils.semantic._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise }
 
-case class ScheduleAssociation(group: Resource, assignmentAssoc: Resource, assignmentDate: LocalDate, dueDate: LocalDate)
+case class ScheduleAssociation(group: Resource, assignmentAssoc: Resource, assignmentDate: LocalDate, dueDate: LocalDate, assignmentDateTimetableEntry: Resource, dueDateTimetableEntry: Resource)
 
 object ScheduleAssociations {
   def create(assignment: ScheduleAssociation): Future[Individual] = {
@@ -22,10 +22,12 @@ object ScheduleAssociations {
     val statements = List(
       Statement(assocResource, RDF.typ, LWM.ScheduleAssociation),
       Statement(assocResource, RDF.typ, OWL.NamedIndividual),
-      Statement(assocResource, LWM.hasStartDate, DateLiteral(assignment.assignmentDate)),
-      Statement(assocResource, LWM.hasEndDate, DateLiteral(assignment.dueDate)),
+      Statement(assocResource, LWM.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
+      Statement(assocResource, LWM.hasDueDate, DateLiteral(assignment.dueDate)),
       Statement(assocResource, LWM.hasGroup, assignment.group),
       Statement(assignment.group, LWM.hasScheduleAssociation, assocResource),
+      Statement(assocResource, LWM.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
+      Statement(assocResource, LWM.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
       Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
     )
 
@@ -49,16 +51,56 @@ object ScheduleAssociations {
     }
   }
 
-  def dueDate(group: Resource, association: Resource): LocalDate = {
-    val query =
+  def dates(group: Resource, association: Resource): (LocalDate, LocalDate) = {
+    val query1 =
       s"""
-        |SELECT ?s (${LWM.hasEndDate} as ?p) ?o where {
-        | ${group.toQueryString} ${LWM.hasScheduleAssociation.toQueryString} ?s .
+        |SELECT ?s (${LWM.hasAssignmentDate} as ?p) ?o where {
+        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?s .
         | ?s ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
-        | ?s ${LWM.hasEndDate} ?o .
+        | ?s ${LWM.hasAssignmentDate} ?o .
         |}
       """.stripMargin
 
-    LocalDate.parse(SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).head.o.value)
+    val query2 =
+      s"""
+        |SELECT ?s (${LWM.hasDueDate} as ?p) ?o where {
+        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?s .
+        | ?s ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?s ${LWM.hasDueDate} ?o .
+        |}
+      """.stripMargin
+
+    (LocalDate.parse(SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query1)).head.o.value), LocalDate.parse(SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2)).head.o.value))
+  }
+
+  def times(group: Resource, association: Resource): (Time, Time) = {
+    val query1 =
+      s"""
+        |SELECT ?s (${LWM.hasStartTime} as ?p) ?o where {
+        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?sca .
+        | ?sca ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?sca ${LWM.hasAssignmentDateTimetableEntry} ?s .
+        | ?s ${LWM.hasStartTime} ?o .
+        |}
+      """.stripMargin
+
+    val query2 =
+      s"""
+        |SELECT ?s (${LWM.hasStartTime} as ?p) ?o where {
+        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?sca .
+        | ?sca ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?sca ${LWM.hasDueDateTimetableEntry} ?s .
+        | ?s ${LWM.hasStartTime} ?o .
+        |}
+      """.stripMargin
+
+    val time1 = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query1)).head.o.asLiteral().get.decodedString.split(":")
+    val time2 = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2)).head.o.asLiteral().get.decodedString.split(":")
+    val h1 = time1(0).toInt
+    val m1 = time1(1).toInt
+
+    val h2 = time2(0).toInt
+    val m2 = time2(1).toInt
+    (Time(h1, m1), Time(h2, m2))
   }
 }

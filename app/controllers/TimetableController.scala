@@ -22,7 +22,7 @@ object TimetableController extends Controller with Authentication {
       } yield {
         val labWorkI = Individual(Resource(labworkid))
         val timetable = Individual((for (i ← labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
-        val entries = timetable.props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get)
+        val entries = timetable.props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get)
 
         Ok(views.html.timeTableManagement(
           labWorkI,
@@ -75,7 +75,7 @@ object TimetableController extends Controller with Authentication {
                   Individual(Resource(labworkid)),
                   supervisors.toList,
                   TimeSlots.slotTimeMap.values.toList.sorted,
-                  Individual(e.timetable).props.getOrElse(LWM.hasEntry, List.empty[Resource]).map(_.asResource().get),
+                  Individual(e.timetable).props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get),
                   rooms,
                   formWithErrors))
               }

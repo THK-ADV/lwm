@@ -86,7 +86,7 @@ object Vocabulary {
     val hasEndTime = property("hasEndTime")
     val hasWeekday = property("hasWeekday")
     val hasTimetable = property("hasTimetable")
-    val hasEntry = property("hasEntry")
+    val hasTimetableEntry = property("hasEntry")
     val hasLabWork = property("hasLabWork")
     val hasSupervisor = property("hasSupervisor")
     val isSupervisorFor = property("isSupervisorFor")
@@ -110,6 +110,10 @@ object Vocabulary {
     val hasOrderId = property("hasOrderId")
 
     val ScheduleAssociation = resource("ScheduleAssociation")
+    val hasAssignmentDateTimetableEntry = property("hasAssignmentDateTimetableEntry")
+    val hasDueDateTimetableEntry = property("hasDueDateTimetableEntry")
+    val hasAssignmentDate = property("hasAssignmentDate")
+    val hasDueDate = property("hasDueDate")
     // Group -> ScheduleAssociation
     val hasScheduleAssociation = property("hasScheduleAssociation")
 
