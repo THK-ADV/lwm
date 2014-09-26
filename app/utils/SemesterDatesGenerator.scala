@@ -38,7 +38,6 @@ object SemesterDatesGenerator {
       }.flatten
 
       val holidays = (Holidays(t.startDate.year().get()) ++ Holidays(t.endDate.year().get())).toMap.keys.toList
-
       var possibleDates = available.filterNot(d ⇒ holidays.contains(d.date)).sortWith((a, b) ⇒ a.date.compareTo(b.date) < 0)
 
       val labwork = Individual(t.labwork)
