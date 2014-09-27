@@ -17,7 +17,7 @@
                     @timeTable(timeslots, labwork, table_entries)
                     <div class="row">
                         <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button>
-                        <a href="javascript: ajaxRequest('@routes.TimetableController.generateSchedule()', 'POST', 'application/json', {id : '@labwork.uri.value'}, reload);" class="btn btn-primary" role="button">
+                        <a href="javascript: createSchedule('@routes.TimetableController.generateSchedule()', '@labwork.uri.value')" class="btn btn-primary" role="button">
                             Staffelplan generieren
 
                         </a>

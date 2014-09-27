@@ -80,6 +80,9 @@ function setPreparationTime(labid, gid, aid) {
     ajaxRequest("/administration/labworks/"+e+"/associations/"+a, "PUT", "application/json", {time: newTime, group: gid}, reload);
 }
 
+function createSchedule(uri, id) {
+    ajaxRequest(uri, 'POST', 'application/json', {id: id}, reload);
+}
 
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
@@ -92,6 +95,7 @@ function ajaxRequest(url, type, cType, data, funct) {
             funct(message);
         },
         error: function (error) {
+            alert("Shit");
             console.log(error);
         }
     });

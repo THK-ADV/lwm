@@ -128,7 +128,6 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒ {
-              println(s"Binding: $a")
               val i = Individual(Resource(associationid))
               i.add(LWM.hasAssignment, Resource(a.assignment))
               i.add(LWM.hasPreparationTime, StringLiteral(s"${a.preparationTime}"))
