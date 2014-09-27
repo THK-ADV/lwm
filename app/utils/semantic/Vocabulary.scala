@@ -120,6 +120,12 @@ object Vocabulary {
     val hasApplicationToken = property("hasApplicationToken")
 
     val hasFileName = property("hasFileName")
+
+    val Blacklist = resource("Blacklist")
+    val BlacklistDate = resource("BlacklistDate")
+    val hasBlacklistDate = property("hasBlacklistDate")
+    val hasBlacklist = property("hasBlacklist")
+    val hasDate = property("hasDate")
   }
 
   /**

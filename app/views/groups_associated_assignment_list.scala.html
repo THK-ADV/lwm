@@ -18,10 +18,10 @@
                             <td>@id.value</td>
                             <td>
                                 @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value <br />
-                                <!--ScheduleAssociations.dates(group.uri, a.uri)._1 ScheduleAssociations.times(group.uri, a.uri)._1 -->
+                                @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._1)
                             </td>
                             <td>
-                                <!-- ScheduleAssociations.dates(group.uri, a.uri)._2 ScheduleAssociations.times(group.uri, a.uri)._2 -->
+                                @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._2)
                                 <a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a>
 
                                 <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

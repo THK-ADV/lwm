@@ -1,8 +1,8 @@
 @(form: Form[RoomFormModel])
 <div>
 @helper.form(action = routes.RoomManagementController.roomPost()) {
-    @helper.inputText(form("id"), '_label -> "Id:")
-    @helper.inputText(form("name"), '_label -> "Name:")
+    @helper.inputText(form("id"), '_label -> "Raumnummer:")
+    @helper.inputText(form("name"), '_label -> "Bezeichnung:")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
         <button type="submit" class="btn btn-primary">Hinzufügen</button>

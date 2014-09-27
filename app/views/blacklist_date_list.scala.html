@@ -1,0 +1,28 @@
+@(title: String, dates: List[Individual], blacklist: Individual)
+@import utils.semantic.Vocabulary
+@import utils.semantic.Individual
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">Blacklist Details: @title</div>
+
+    <table class="table">
+        <tr>
+            <th>Datum</th>
+        </tr>
+        @for(date <- dates) {
+            @date.props.get(Vocabulary.LWM.hasDate).map { dateList =>
+                @dateList.headOption.map { dn =>
+                    @dn.asLiteral().map { d =>
+                        <tr>
+                            <td>@d.decodedString</td>
+                            <td><a class="glyphicon glyphicon-pencil"></a></td>
+                            <td><a href="javascript: deleteBlacklistDate('@blacklist.uri.value', '@date.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                        </tr>
+                    }
+                }
+            }
+        }
+    </table>
+
+</div>

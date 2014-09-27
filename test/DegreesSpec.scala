@@ -15,7 +15,7 @@ class DegreesSpec extends LWMBaseSpec {
         result.properties must contain(Statement(result.uri, LWM.hasId, StringLiteral(degree.id)))
         result.properties must contain(Statement(result.uri, LWM.hasName, StringLiteral(degree.name)))
         result.properties must contain(Statement(result.uri, RDFS.label, StringLiteral(degree.name)))
-        assert(Degrees.exists(degree))
+        whenReady(Degrees.exists(degree)){b => assert(b)}
       }
 
     }
@@ -23,7 +23,7 @@ class DegreesSpec extends LWMBaseSpec {
     "remove an existing Degree" in {
       val degree = Degree("Test Degree 1", "td1")
       Degrees.delete(degree)
-      assert(!Degrees.exists(degree))
+      whenReady(Degrees.exists(degree)){b => assert(!b)}
     }
 
   }
