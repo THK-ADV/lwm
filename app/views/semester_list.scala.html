@@ -10,10 +10,10 @@
         <tr>
             <th>Semester</th>
         </tr>
-        @for(semester<- semesters; id <- semester.props(LWM.hasId)) {
+        @for(semester<- semesters) {
             <tr>
                 <td>@semester.props(RDFS.label)</td>
-                <td>@affirmation_widget(s"${id.value}",s"deleteSemester('${semester.uri.value}')")</td></tr>
+                <td><a href="javascript: if(affirm()) deleteSemester('@semester.uri.value')" class="glyphicon glyphicon-remove"></a></td></tr>
         }
     </table>
 

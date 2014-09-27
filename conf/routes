@@ -23,8 +23,10 @@ GET           /administration/labworks                            controllers.La
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks/:id                        controllers.GroupManagementController.studentAddition(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
+PUT           /administration/labworks                            controllers.LabworkManagementController.setVisibility()
 DELETE        /administration/labworks                            controllers.LabworkManagementController.labworkRemoval()
 DELETE        /administration/labworks/:id                        controllers.GroupManagementController.studentRemoval(id)
+
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()

@@ -12,11 +12,11 @@
             <th>Raum</th>
             <th>Bezeichnung</th>
         </tr>
-        @for(room <- rooms; id <- room.props(Vocabulary.LWM.hasId)) {
+        @for(room <- rooms) {
             <tr>
                 <td>@room.props.getOrElse(Vocabulary.LWM.hasRoomId, List(StringLiteral(""))).head.value</td>
                 <td>@room.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value</td>
-                <td>@affirmation_widget(s"${id.value}",s"deleteRoom('${room.uri.value}')")</td>
+                <td><a href="javascript: if(affirm()) deleteRoom('@room.uri.value')" class="glyphicon glyphicon-remove"></a></td>
             </tr>
         }
     </table>

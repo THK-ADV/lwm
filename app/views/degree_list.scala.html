@@ -17,7 +17,7 @@
                     <td>@degree._1</td>
                     <td>@degree._2</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td>@affirmation_widget(s"${degree._2}",s"deleteDegree('${degree._3}')")</td></tr>
+                    <td><a href="javascript: if(affirm()) deleteDegree('@degree._3')" class="glyphicon glyphicon-remove"></a></td></tr>
             }
 
         </table>

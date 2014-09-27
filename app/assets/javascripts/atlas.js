@@ -76,6 +76,14 @@ function createSchedule(uri, id) {
     ajaxRequest(uri, 'POST', 'application/json', {id: id}, reload);
 }
 
+function affirm() {
+    return confirm("Sind sie sicher?");
+}
+
+function setVisible(uri, labid, visible) {
+    ajaxRequest(uri, 'PUT', 'application/json', {id: labid, visibility: visible}, reload);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

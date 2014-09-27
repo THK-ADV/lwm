@@ -6,7 +6,7 @@ import org.joda.time.{ LocalDate, DateTime }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ OWL, RDFS, LWM }
-import utils.semantic.{ RDFNode, Individual, Resource }
+import utils.semantic._
 import utils.Global._
 import scala.concurrent.Future
 
@@ -74,5 +74,23 @@ object LabworkManagementController extends Controller with Authentication {
         Redirect(routes.LabworkManagementController.index())
       }
     }
+  }
+
+  def setVisibility() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async(parse.json) {
+        implicit request ⇒
+          val id = (request.body \ "id").as[String]
+          val visibility = (request.body \ "visibility").as[String]
+          val li = Individual(Resource(id))
+
+          li.props(LWM.allowsApplications).map { e ⇒
+            e.value match {
+              case "true"  ⇒ li.update(LWM.allowsApplications, e, StringLiteral("false"))
+              case "false" ⇒ li.update(LWM.allowsApplications, e, StringLiteral("true"))
+            }
+          }
+          Future.successful(Redirect(routes.LabworkManagementController.index()))
+      }
   }
 }
