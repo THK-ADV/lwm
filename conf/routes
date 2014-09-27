@@ -46,6 +46,13 @@ GET           /impressum                                          controllers.Vi
 GET           /contact                                            controllers.VisitorController.contact()
 
 POST          /administration/schedule                            controllers.TimetableController.generateSchedule()
+
+GET           /administration/blacklist                           controllers.BlacklistManagementController.index()
+POST          /administration/blacklist                           controllers.BlacklistManagementController.blacklistPost()
+GET           /administration/blacklist/:id                       controllers.BlacklistManagementController.blacklistEdit(id)
+DELETE        /administration/blacklist/dates                     controllers.BlacklistManagementController.blacklistDateDelete()
+POST          /administration/blacklist/dates                     controllers.BlacklistManagementController.blacklistDatePost()
+
 GET           /administration/timetable/:id                       controllers.TimetableController.index(id)
 POST          /administration/timetable/:id                       controllers.TimetableController.timeTableEntryPost(id)
 DELETE        /administration/timetable                           controllers.TimetableController.entryRemoval()

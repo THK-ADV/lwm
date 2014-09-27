@@ -1,0 +1,12 @@
+@(semesters: List[Individual], form: Form[BlacklistFormModel])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.RDFS
+<div>
+    @helper.form(action = routes.BlacklistManagementController.blacklistPost()) {
+        @helper.select(form("semesterResource"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+        </div>
+    }
+</div>

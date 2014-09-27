@@ -1,0 +1,25 @@
+@(blacklists: List[Individual])
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Resource
+@import utils.semantic.StringLiteral
+@import utils.semantic.Individual
+@import utils.Global._
+
+<div class="panel panel-default">
+    <div class="panel-heading">Blacklistübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Semester</th>
+        </tr>
+        @for(blacklist <- blacklists) {
+            <tr>
+                <td>@blacklist.props.get(LWM.hasSemester).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.head.asLiteral().map(_.decodedString)))) </td>
+                <td><a href="@routes.BlacklistManagementController.blacklistEdit(blacklist.uri.value)" class="glyphicon glyphicon-pencil"></a></td>
+                <td><a href="javascript: deleteBlacklistDate('@blacklist.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+            </tr>
+        }
+    </table>
+
+</div>

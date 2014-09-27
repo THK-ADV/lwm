@@ -1,0 +1,17 @@
+@(blacklist: Individual, semester: Individual, form: Form[BlacklistDateFormModel])
+@import java.util.Date
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.RDFS
+<div>
+    @defining(form.fill(BlacklistDateFormModel(blacklist.uri.value, semester.uri.value, new Date()))){ f =>
+        @helper.form(action = routes.BlacklistManagementController.blacklistDatePost()) {
+            @helper.inputDate(f("date"), '_label -> "Datum")
+            @helper.inputText(f("blacklistResource"), '_label -> "Blacklist")
+            @helper.inputText(f("semesterResource"), '_label -> "Semester")
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+                <button type="submit" class="btn btn-primary">Hinzufügen</button>
+            </div>
+        }
+    }
+</div>
