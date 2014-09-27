@@ -19,7 +19,6 @@
                         </td>
                     <td>
                         @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + id.value.toInt}
-                        @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt}
                     </td>
                 </tr>
             }else {

@@ -18,7 +18,6 @@ object GroupManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         request ⇒
-          println(groupId)
           val lI = Individual(Resource(labworkId))
           val gI = Individual(Resource(groupId))
           val s = gI.props.getOrElse(LWM.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))

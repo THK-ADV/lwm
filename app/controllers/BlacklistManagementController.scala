@@ -38,7 +38,6 @@ object BlacklistManagementController extends Controller with Authentication {
 
       sparqlExecutionContext.executeQuery(query).flatMap { result ⇒
         BlacklistDates.getAll(Resource(id)).map { dates ⇒
-          println(dates)
           val title = SPARQLTools.statementsFromString(result).head.o.asLiteral().get.decodedString
 
           val semester = Individual(SPARQLTools.statementsFromString(result).head.s.asResource().get)
@@ -74,8 +73,6 @@ object BlacklistManagementController extends Controller with Authentication {
     Action.async { implicit request ⇒
       Blacklists.Forms.blacklistDateForm.bindFromRequest.fold(
         formWithErrors ⇒ {
-          println(s"Failure: $formWithErrors")
-          println(s"${formWithErrors.data}")
           for {
             all ← Blacklists.all()
             semesters ← Semesters.all()

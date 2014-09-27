@@ -146,14 +146,11 @@ object BlacklistDates {
         |?d ${LWM.hasDate} ?o .
         |}
       """.stripMargin
-    println(query)
 
     val list = sparqlExecutionContext.executeQuery(
       query).map { stringResult ⇒
         SPARQLTools.statementsFromString(stringResult).map(blacklist ⇒ LocalDate.parse(blacklist.o.asLiteral().get.decodedString)).toList
       }
-
-    list.map { l ⇒ println(l) }
     list
   }
 }

@@ -51,7 +51,7 @@ object ScheduleAssociations {
     }
   }
 
-  def dates(group: Resource, association: Resource): (LocalDate, LocalDate) = {
+  def dates(group: Resource, association: Resource): Option[(LocalDate, LocalDate)] = {
     val query1 =
       s"""
         |SELECT ?s (${LWM.hasAssignmentDate} as ?p) ?o where {
@@ -70,10 +70,16 @@ object ScheduleAssociations {
         |}
       """.stripMargin
 
-    (LocalDate.parse(SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query1)).head.o.value), LocalDate.parse(SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2)).head.o.value))
+    for {
+      st1 ← SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query1)).headOption
+      st2 ← SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2)).headOption
+      assLit ← st1.o.asLiteral()
+      dueLit ← st2.o.asLiteral()
+    } yield (LocalDate.parse(assLit.decodedString), LocalDate.parse(dueLit.decodedString))
+
   }
 
-  def times(group: Resource, association: Resource): (Time, Time) = {
+  def times(group: Resource, association: Resource): Option[(Time, Time)] = {
     val query1 =
       s"""
         |SELECT ?s (${LWM.hasStartTime} as ?p) ?o where {
@@ -94,13 +100,17 @@ object ScheduleAssociations {
         |}
       """.stripMargin
 
-    val time1 = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query1)).head.o.asLiteral().get.decodedString.split(":")
-    val time2 = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2)).head.o.asLiteral().get.decodedString.split(":")
-    val h1 = time1(0).toInt
-    val m1 = time1(1).toInt
-
-    val h2 = time2(0).toInt
-    val m2 = time2(1).toInt
-    (Time(h1, m1), Time(h2, m2))
+    for {
+      st1 ← SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query1)).headOption
+      st2 ← SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2)).headOption
+      startTime ← st1.o.asLiteral()
+      st = startTime.decodedString.split(":")
+      h1 = st(0).toInt
+      m1 = st(1).toInt
+      endTime ← st2.o.asLiteral()
+      et = endTime.decodedString.split(":")
+      h2 = et(0).toInt
+      m2 = et(1).toInt
+    } yield (Time(h1, m1), Time(h2, m2))
   }
 }
