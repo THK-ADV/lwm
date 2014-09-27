@@ -22,7 +22,7 @@
         </tr>
         @for(labwork <- labworks; v <- labwork.props(LWM.allowsApplications);label <- labwork.props(RDFS.label); c <- labwork.props.getOrElse(Vocabulary.LWM.hasCourse, List(Resource(""))); i = Individual(c.asResource().get)) {
             <tr>
-                <td>@if(v.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisibile('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
+                <td>@if(v.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
                 <td>@i.props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
                 <td>@Individual(Resource(i.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
                 <td>@labwork.props.getOrElse(Vocabulary.LWM.hasGroup, List(StringLiteral(""))).size</td>
