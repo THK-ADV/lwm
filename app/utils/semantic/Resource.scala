@@ -34,6 +34,8 @@ case class Resource(value: String) extends RDFNode {
   override def asLiteral(): Option[Literal] = None
 
   override def toQueryString: String = toString
+
+  def getPath: String = value.split(Vocabulary.LWM.ns.uri)(1)
 }
 
 case class Property(value: String) extends RDFNode {

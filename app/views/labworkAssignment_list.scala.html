@@ -15,7 +15,8 @@
                     <td>@id.value</td>
                     <td>
                         @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
-                        <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                        <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" data-dismiss="modal"></a>
+                        </td>
                     <td>
                         @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + id.value.toInt}
                     </td>

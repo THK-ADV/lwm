@@ -13,14 +13,13 @@
                 <th>ID</th>
                 <th>Studiengang</th>
             </tr>
-            @for(course <- courses) {
+            @for(course <- courses; id <- course.props(Vocabulary.LWM.hasId)) {
                 <tr>
                     <td>@course.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value</td>
-                    <td>@course.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value</td>
+                    <td>@id.value</td>
                     <td>@Individual(Resource(course.props.getOrElse(Vocabulary.LWM.hasDegree, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Resource(""))).head.value</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td><a href="javascript: deleteCourse('@course.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
-                </tr>
+                    <td>@affirmation_widget(s"${id.value}",s"deleteCourse('${course.uri.value}')")</td></tr>
             }
         </table>
 

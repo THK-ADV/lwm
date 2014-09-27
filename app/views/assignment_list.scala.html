@@ -12,15 +12,15 @@
             <th>Beschreibung</th>
             <th>Themen</th>
         </tr>
-        @for(assignment <- assignments; i = Individual(assignment); id <- i.props.get(LWM.hasId)) {
+        @for(assignment <- assignments; i = Individual(assignment); id <- i.props(LWM.hasId)) {
             <tr>
                 <td>@i.props(Vocabulary.RDFS.label)</td>
                 <td>@i.props(Vocabulary.LWM.hasDescription)</td>
                 <td>@i.props(Vocabulary.LWM.hasTopic)</td>
-                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id.head.value"></a></td>
-                <td><a href="javascript: deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove" ></a></td>
-            </tr>
-            <div class="modal fade" id="@id.head.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@i.props(Vocabulary.RDFS.label).toString.trim"></a></td>
+                <td>@affirmation_widget(s"${id.value}",s"deleteAssignment('${assignment.value}')")</td></tr>
+
+            <div class="modal fade" id="@i.props(Vocabulary.RDFS.label).toString.trim" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
