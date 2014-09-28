@@ -1,0 +1,17 @@
+@(openLabworks: List[Individual])
+@import utils.semantic.{Individual, Resource}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+<!-- TODO: ADD BUTTON FUNCTIONALITY -->
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Praktikumsanmeldung</div>
+        <table class="table">
+            <th>Praktikum</th>
+            <th>Anmelden</th>
+            <tbody>
+                @for(labwork <- openLabworks; label <- labwork.props(RDFS.label)) {
+                    <tr><td>@label</td><td><a href="#" class="glyphicon glyphicon-ok-circle"></a></td></tr>
+                }
+            </tbody>
+        </table>
+    </div>

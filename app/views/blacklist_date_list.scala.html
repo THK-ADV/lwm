@@ -17,7 +17,7 @@
                         <tr>
                             <td>@d.decodedString</td>
                             <td><a class="glyphicon glyphicon-pencil"></a></td>
-                            <td><a href="javascript: deleteBlacklistDate('@blacklist.uri.value', '@date.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                            <td><a href="javascript: if(affirm()) deleteBlacklistDate('@blacklist.uri.value', '@date.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
                         </tr>
                     }
                 }

@@ -69,6 +69,18 @@ object BlacklistManagementController extends Controller with Authentication {
     }
   }
 
+  def blacklistDelete = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async(parse.json) {
+      implicit request ⇒
+        val id = (request.body \ "id").as[String]
+        for (dates ← BlacklistDates.getAll(Resource(id))) yield {
+          dates.foreach(d ⇒ BlacklistDates.delete(d.uri))
+          Blacklists.delete(Resource(id))
+          Redirect(routes.BlacklistManagementController.index())
+        }
+    }
+  }
+
   def blacklistDatePost = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       Blacklists.Forms.blacklistDateForm.bindFromRequest.fold(
@@ -116,7 +128,7 @@ object BlacklistManagementController extends Controller with Authentication {
 
       maybeDeleted match {
         case Some(deleted) ⇒ deleted.map { id ⇒
-          Redirect(routes.BlacklistManagementController.blacklistEdit(id.value))
+          Redirect(routes.BlacklistManagementController.blacklistEdit(listId.get))
         }
         case None ⇒ Future.successful(Redirect(routes.BlacklistManagementController.index()))
       }

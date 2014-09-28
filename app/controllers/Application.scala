@@ -25,7 +25,8 @@ object Application extends Controller with Authentication {
   def index() = hasSession { session ⇒
     Action { request ⇒
       session.role match {
-        case Permissions.AdminRole   ⇒ Redirect(routes.AdministrationDashboardController.dashboard())
+        case Permissions.AdminRole ⇒
+          Redirect(routes.AdministrationDashboardController.dashboard())
         case Permissions.DefaultRole ⇒ Redirect(routes.StudentDashboardController.dashboard())
       }
     }
