@@ -48,11 +48,11 @@ function deleteAssignment(id) {
 }
 
 function deleteBlacklist(id) {
-    ajaxRequest("/administration/blacklists", "DELETE", "application/json", {id: id}, reload);
+    ajaxRequest("/administration/blacklist", "DELETE", "application/json", {id: id}, reload);
 }
 
 function deleteBlacklistDate(listId, dateId) {
-    ajaxRequest("/administration/blacklists/dates", "DELETE", "application/json", {listId: listId, dateId : dateId}, reload);
+    ajaxRequest("/administration/blacklist/dates", "DELETE", "application/json", {listId: listId, dateId : dateId}, reload);
 }
 
 function deleteBinding(labid, aid) {

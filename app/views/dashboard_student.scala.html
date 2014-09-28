@@ -1,12 +1,22 @@
-@(openCourses: List[LabWork], courseApplicationForm: Form[LabWorkApplication])
+@(openLabworks: List[Individual], courseApplicationForm: Form[LabWorkApplication])
+@import utils.semantic.Individual
+
 <!DOCTYPE html>
 <html>
     @head("Dashboard")
     <body>
-        @header_loggedIn_student()
-    <div class="container-fluid">
-        @dashboard_student_classEnrolement()
-    </div>
-        @footer()
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_student()
+            </div>
+            <div class="row">
+                @navigation_student()
+                <div class="col-md-9">
+                @dashboard_student_classEnrolement(openLabworks)
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+
     </body>
-</html>
+    </html>
