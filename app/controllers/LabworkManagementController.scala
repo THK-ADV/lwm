@@ -32,11 +32,18 @@ object LabworkManagementController extends Controller with Authentication {
 
   def edit(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
-      for (assignments ← Assignments.all()) yield {
-        val li = Individual(Resource(labworkid))
-        val groups = li.props.getOrElse(LWM.hasGroup, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
-        val labworkAssignments = li.props.getOrElse(LWM.hasAssignmentAssociation, List.empty[Resource]).map(r ⇒ Individual(r.asResource().get))
-        Ok(views.html.labWorkInformation(li, groups, labworkAssignments, assignments, AssignmentForms.assignmentAssociationForm))
+      for {
+        assignments ← Assignments.all()
+        li = Individual(Resource(labworkid))
+        mappedLabwork = li.props.getOrElse(LWM.hasCourse, List(Resource(""))).map(e ⇒ (e, Individual(Resource(e.value)).props(LWM.hasDegree).head.value)).head
+        courseMappedAssignments = assignments.map(e ⇒ (e, e.props(LWM.hasCourse)))
+        courseFilteredAssignments = courseMappedAssignments.filter(p ⇒ p._2.contains(mappedLabwork._1))
+        degreeMappedAssignments = courseMappedAssignments.map(e ⇒ (e._1, e._2.map(r ⇒ Individual(Resource(r.value)).props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)))
+        filteredAssignments = degreeMappedAssignments.filter(e ⇒ e._2.contains(mappedLabwork._2)).map(_._1)
+      } yield {
+        val groups = li.props.getOrElse(LWM.hasGroup, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+        val associations = li.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+        Ok(views.html.labWorkInformation(li, groups, associations, filteredAssignments, AssignmentForms.assignmentAssociationForm))
       }
     }
   }
