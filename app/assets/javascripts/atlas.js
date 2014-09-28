@@ -92,11 +92,6 @@ function setVisible(uri, labid, visible) {
     ajaxRequest(uri, 'PUT', 'application/json', {id: labid, visibility: visible}, reload);
 }
 
-function autocomplete(uri, id) {
-    $("#"+id).autocomplete({
-        source: uri
-    });
-}
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({
