@@ -1,4 +1,4 @@
-@(labwork: Individual, associations: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@(labwork: Individual, labworkAssociations: List[Individual], labworkAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.semantic.{Individual, Resource}
@@ -9,7 +9,7 @@
 <table class="table table-bordered">
     <tbody>
         <tr><th>Termin</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
-        @for(a <- associations; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
+        @for(a <- labworkAssociations; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
             @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
                 <tr>
                     <td>@id.value</td>
@@ -36,7 +36,7 @@
                                 <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
                             </div>
                             <div class="modal-body">
-                            @labworkAssignment_form(a.uri, c.value.toInt - id.value.toInt, labwork, allAssignments, form)
+                            @labworkAssignment_form(a.uri, c.value.toInt - id.value.toInt, labwork, labworkAssignments, form)
                             </div>
 
                         </div>

@@ -1,4 +1,4 @@
-@(labwork: Individual, groups: List[Individual], associations: List[Individual], allAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.{Resource, StringLiteral}
@@ -34,7 +34,7 @@
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
-                            @labworkAssignment_list(labwork, associations, allAssignments, form)
+                            @labworkAssignment_list(labwork, labworkAssociations, labworkAssignments, form)
                         </div>
                     </div>
                     <div class="row">

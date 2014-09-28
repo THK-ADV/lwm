@@ -12,15 +12,15 @@
             <th>Beschreibung</th>
             <th>Themen</th>
         </tr>
-        @for(assignment <- assignments; i = Individual(assignment)) {
+        @for(assignment <- assignments; i = Individual(assignment); id <- i.props(LWM.hasId)) {
             <tr>
                 <td>@i.props(Vocabulary.RDFS.label)</td>
                 <td>@i.props(Vocabulary.LWM.hasDescription)</td>
                 <td>@i.props(Vocabulary.LWM.hasTopic)</td>
-                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@i.props(Vocabulary.RDFS.label).toString.trim"></a></td>
+                <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a></td>
                 <td><a href="javascript: if(affirm()) deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove"></a></td></tr>
 
-            <div class="modal fade" id="@i.props(Vocabulary.RDFS.label).toString.trim" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
