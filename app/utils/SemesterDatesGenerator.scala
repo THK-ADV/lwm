@@ -51,7 +51,7 @@ object SemesterDatesGenerator {
 
         if (possibleDates.size < groupCount * assignmentCount) {
           println(s"ERROR: Not enough available assignment dates for $groupCount groups with $assignmentCount assignments")
-        }else{
+        } else {
           val orderedAssocs = (for {
             assocNode ← labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil)
             assoc = assocNode.asResource().get

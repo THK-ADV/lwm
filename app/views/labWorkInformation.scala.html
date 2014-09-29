@@ -1,4 +1,4 @@
-@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], form: Form[AssignmentAssociationFormModel])
+@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabWorkFormModel])
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.{Resource, StringLiteral}
@@ -16,8 +16,8 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    <div class="row">
-                        <h4>Veranstaltung: @labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value @Individual(Resource(labwork.props.getOrElse(LWM.hasSemester, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</h4>
+                    <div class = "row">
+                    @labwork_information_head(labwork, semesters, courses, lform)
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
