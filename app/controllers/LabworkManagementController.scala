@@ -158,7 +158,6 @@ object LabworkManagementController extends Controller with Authentication {
       Action.async(parse.json) {
         implicit request ⇒
           val id = (request.body \ "id").as[String]
-          val visibility = (request.body \ "visibility").as[String]
           val li = Individual(Resource(id))
 
           li.props(LWM.allowsApplications).map { e ⇒
