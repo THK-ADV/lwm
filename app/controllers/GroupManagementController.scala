@@ -46,6 +46,11 @@ object GroupManagementController extends Controller with Authentication {
             ig.add(LWM.hasMember, studentResource)
             val is = Individual(studentResource)
             is.add(LWM.memberOf, groupResource)
+            ig.props.get(LWM.hasScheduleAssociation).map { assocs ⇒
+              assocs.foreach { ass ⇒
+                is.add(LWM.hasScheduleAssociation, ass)
+              }
+            }
           }
           Redirect(routes.LabworkManagementController.index())
         }

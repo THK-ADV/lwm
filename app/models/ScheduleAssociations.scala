@@ -31,6 +31,19 @@ object ScheduleAssociations {
       Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
     )
 
+    val query =
+      s"""
+        | select (${assignment.group} as ?s) (${LWM.hasMember} as ?p) ?o where {
+        |  ${assignment.group} ${LWM.hasMember} ?o
+        | }
+      """.stripMargin
+
+    sparqlExecutionContext.executeQuery(query).map { result ⇒
+      val stmnt = SPARQLTools.statementsFromString(result)
+      val students = stmnt.map(s ⇒ Statement(s.s, LWM.hasScheduleAssociation, assocResource))
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(students: _*))
+    }
+
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
   }
 
