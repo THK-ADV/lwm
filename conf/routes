@@ -22,6 +22,7 @@ GET           /administration/students/suggest                    controllers.St
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks/:id                        controllers.GroupManagementController.studentAddition(id)
+POST          /administration/labworks/edit/:id                   controllers.LabworkManagementController.metaEdit(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
 PUT           /administration/labworks                            controllers.LabworkManagementController.setVisibility()
 DELETE        /administration/labworks                            controllers.LabworkManagementController.labworkRemoval()

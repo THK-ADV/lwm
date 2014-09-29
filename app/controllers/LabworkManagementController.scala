@@ -101,20 +101,17 @@ object LabworkManagementController extends Controller with Authentication {
       }
 
       for {
-        groups ← groupsFuture
-        course ← courseFuture
-        degree ← degreeFuture
-        associations ← associationsFuture
-        allowedAssociationsFuture ← allowedAssociationsFutureFuture
-        allowedAssociations ← allowedAssociationsFuture
+        assignments ← Assignments.all()
+        li = Individual(Resource(labworkid))
+        mappedLabwork = li.props.getOrElse(LWM.hasCourse, List(Resource(""))).map(e ⇒ (e, Individual(Resource(e.value)).props(LWM.hasDegree).head.value)).head
+        courseMappedAssignments = assignments.map(e ⇒ (e, e.props(LWM.hasCourse)))
+        courseFilteredAssignments = courseMappedAssignments.filter(p ⇒ p._2.contains(mappedLabwork._1))
+        degreeMappedAssignments = courseMappedAssignments.map(e ⇒ (e._1, e._2.map(r ⇒ Individual(Resource(r.value)).props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)))
+        filteredAssignments = degreeMappedAssignments.filter(e ⇒ e._2.contains(mappedLabwork._2)).map(_._1)
       } yield {
-        Ok(views.html.labWorkInformation(
-          labworkIndividual,
-          groups.toList.map(node ⇒ Individual(node.asResource().get)),
-          associations.toList.map(node ⇒ Individual(node.asResource().get)),
-          allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
-          AssignmentForms.assignmentAssociationForm
-        ))
+        val groups = li.props.getOrElse(LWM.hasGroup, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+        val associations = li.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+        Ok(views.html.labWorkInformation(li, groups, associations, filteredAssignments, AssignmentForms.assignmentAssociationForm))
       }
     }
   }
@@ -169,6 +166,37 @@ object LabworkManagementController extends Controller with Authentication {
             }
           }
           Future.successful(Redirect(routes.LabworkManagementController.index()))
+      }
+  }
+
+  def metaEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async {
+        implicit request ⇒
+          LabWorkForms.labworkForm.bindFromRequest.fold(
+            formWithErrors ⇒ {
+              for {
+                labworks ← LabWorks.all()
+                courses ← Courses.all()
+                semesters ← Semesters.all()
+              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
+            },
+            labwork ⇒ {
+              val i = Individual(Resource(id))
+              for {
+                course ← i.props(LWM.hasCourse)
+                sD ← i.props(LWM.hasStartDate)
+                eD ← i.props(LWM.hasEndDate)
+                semester ← i.props(LWM.hasSemester)
+              } yield {
+                i.update(LWM.hasCourse, course, Resource(labwork.courseId))
+                i.update(LWM.hasStartDate, sD, DateLiteral(new LocalDate(labwork.startDate)))
+                i.update(LWM.hasEndDate, eD, DateLiteral(new LocalDate(labwork.endDate)))
+                i.update(LWM.hasSemester, semester, Resource(labwork.semester))
+              }
+              Future.successful(Redirect(routes.LabworkManagementController.edit(id)))
+            }
+          )
       }
   }
 }
