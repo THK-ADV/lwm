@@ -1,0 +1,19 @@
+@(labwork: Individual, groups: List[Individual])
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+
+<div class="panel panel-default">
+    <div class="panel-heading">Gruppen</div>
+    <table class="table table-bordered">
+        <tbody>
+            <tr><th>Gruppe</th><th>Anzahl</th></tr>
+            @for(r <- groups; g <- r.props(LWM.hasGroupId)) {
+                <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, r.uri.value)">@g.value</a></td> <td>@r.props.getOrElse(LWM.hasMember, List.empty).size</td></tr>
+            }
+        </tbody>
+    </table>
+    <div class="panel-footer"><a href="javascript: edit('add new', '@labwork.uri.value', 'hasLabWork', 'group', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a>
+    </div>
+</div>
+
+

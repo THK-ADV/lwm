@@ -20,17 +20,7 @@
                     @labwork_information_head(labwork, semesters, courses, lform)
                     </div>
                     <div class="row">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">Gruppen</div>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr><th>Gruppe</th><th>Anzahl</th></tr>
-                                    @for(r <- groups; g <- r.props(LWM.hasGroupId)) {
-                                        <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, r.uri.value)">@g.value</a></td> <td>@r.props.getOrElse(LWM.hasMember, List.empty).size</td></tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
+                    @labwork_individual_group_population(labwork, groups)
                     </div>
                     <div class="row">
                         <div class="panel panel-default">

@@ -5,7 +5,7 @@ import models._
 import org.joda.time.{ LocalDate, DateTime }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ OWL, RDFS, LWM }
+import utils.semantic.Vocabulary.{ RDF, OWL, RDFS, LWM }
 import utils.semantic._
 import utils.Global._
 import scala.concurrent.Future
@@ -32,20 +32,93 @@ object LabworkManagementController extends Controller with Authentication {
 
   def edit(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
+
+      val labworkIndividual = Individual(Resource(labworkid))
+
+      val labworkDegreeQuery =
+        s"""
+          |select (<$labworkid> as ?s) (${LWM.hasDegree} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasCourse} ?course .
+          |  ?course ${LWM.hasDegree} ?o .
+          |}
+        """.stripMargin
+
+      val labworkCourseQuery =
+        s"""
+          |select (<$labworkid> as ?s) (${LWM.hasCourse} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasCourse} ?o .
+          |}
+        """.stripMargin
+
+      val groupQuery =
+        s"""
+          |select (<$labworkid> as ?s) (${LWM.hasGroup} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasGroup} ?o
+          |}
+        """.stripMargin
+
+      val associationsQuery =
+        s"""
+          |select (<$labworkid> as ?s) (${LWM.hasAssignmentAssociation} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasAssignmentAssociation} ?o
+          |}
+        """.stripMargin
+
+      def allowedAssociationsQuery(course: Resource) =
+        s"""
+          |select ?s (${RDF.typ} as ?p) (${LWM.Assignment} as ?o) where {
+          | ?s ${RDF.typ} ${LWM.Assignment} .
+          | ?s ${LWM.hasCourse} $course .
+          |}
+        """.stripMargin
+
+      val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o)
+      }
+
+      val associationsFuture = sparqlExecutionContext.executeQuery(associationsQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o)
+      }
+
+      val degreeFuture = sparqlExecutionContext.executeQuery(labworkDegreeQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o)
+      }
+
+      val courseFuture = sparqlExecutionContext.executeQuery(labworkCourseQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o)
+      }
+
+      val allowedAssociationsFutureFuture = for {
+        degree ← degreeFuture
+        course ← courseFuture
+
+      } yield {
+        val q = allowedAssociationsQuery(course.head.asResource().get)
+
+        sparqlExecutionContext.executeQuery(q).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.s)
+        }
+      }
       for {
-        assignments ← Assignments.all()
         semesters ← Semesters.all()
         courses ← Courses.all()
-        li = Individual(Resource(labworkid))
-        mappedLabwork = li.props.getOrElse(LWM.hasCourse, List(Resource(""))).map(e ⇒ (e, Individual(Resource(e.value)).props(LWM.hasDegree).head.value)).head
-        courseMappedAssignments = assignments.map(e ⇒ (e, e.props(LWM.hasCourse)))
-        courseFilteredAssignments = courseMappedAssignments.filter(p ⇒ p._2.contains(mappedLabwork._1))
-        degreeMappedAssignments = courseMappedAssignments.map(e ⇒ (e._1, e._2.map(r ⇒ Individual(Resource(r.value)).props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)))
-        filteredAssignments = degreeMappedAssignments.filter(e ⇒ e._2.contains(mappedLabwork._2)).map(_._1)
+        groups ← groupsFuture
+        course ← courseFuture
+        degree ← degreeFuture
+        associations ← associationsFuture
+        allowedAssociationsFuture ← allowedAssociationsFutureFuture
+        allowedAssociations ← allowedAssociationsFuture
       } yield {
-        val groups = li.props.getOrElse(LWM.hasGroup, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-        val associations = li.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-        Ok(views.html.labWorkInformation(li, groups, associations, filteredAssignments, semesters, courses, AssignmentForms.assignmentAssociationForm, LabWorkForms.labworkForm))
+        Ok(views.html.labWorkInformation(
+          labworkIndividual,
+          groups.toList.map(node ⇒ Individual(node.asResource().get)),
+          associations.toList.map(node ⇒ Individual(node.asResource().get)),
+          allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
+          semesters,
+          courses,
+          AssignmentForms.assignmentAssociationForm,
+          LabWorkForms.labworkForm
+        ))
       }
     }
   }

@@ -81,6 +81,7 @@ POST          /administration/labworks/:id/associations/:a        controllers.As
 PUT           /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindEdit(id, a)
 DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 
+POST          /administration/edits                               controllers.EditsManagementController.edit()
 
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
 # Map static resources from the /public folder to the /assets URL path
