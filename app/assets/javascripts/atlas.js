@@ -92,8 +92,8 @@ function setVisible(uri, labid, visible) {
     ajaxRequest(uri, 'PUT', 'application/json', {id: labid, visibility: visible}, reload);
 }
 
-function edit(p, r, s, v, u) {
-    ajaxRequest("/administration/edits", "POST", "application/json", {predicate: p, resource: r, statements: s, values: v, redirect: u}, reload);
+function edit(pred, obj, vals, stmts, res, oldvals, uri) {
+    ajaxRequest("/administration/edits", "POST", "application/json", {predicate: pred, object: obj, values: vals, statements: stmts, resource: res, old: oldvals, redirect: uri}, reload);
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
