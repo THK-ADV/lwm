@@ -8,7 +8,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral("0"))).head.value</div>
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size</div>
         <table class="table table-bordered">
             <tbody>
                 <tr><th>Blatt</th> <th>Aufgabe</th> <th>Abgabetermin</th></tr>

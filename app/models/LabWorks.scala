@@ -7,10 +7,11 @@ import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
 
-case class LabWork(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: LocalDate, endDate: LocalDate)
-case class LabWorkFormModel(groupCount: Int, assignmentCount: Int, courseId: String, semester: String, startDate: Date, endDate: Date)
+case class LabWork(course: Resource, semester: Resource)
+case class LabWorkFormModel(courseId: String, semester: String)
+case class LabworkUpdateModel(courseId: String, semester: String, startDate: Date, endDate: Date)
 
-case class LabWorkApplication(courseID: String, gmID: String)
+case class LabWorkApplication(courseResource: String, gmID: String)
 
 // TODO course id should be courseResourceURI
 
@@ -21,20 +22,25 @@ object LabWorkForms {
 
   val labWorkApplicationForm = Form(
     mapping(
-      "courseID" -> nonEmptyText,
+      "courseResource" -> nonEmptyText,
       "gmID" -> nonEmptyText
     )(LabWorkApplication.apply)(LabWorkApplication.unapply)
   )
 
   val labworkForm = Form(
     mapping(
-      "groupCount" -> number(min = 1),
-      "assignmentCount" -> number(min = 1),
+      "courseId" -> nonEmptyText,
+      "semester" -> nonEmptyText
+    )(LabWorkFormModel.apply)(LabWorkFormModel.unapply)
+  )
+
+  val labworkUpdateForm = Form(
+    mapping(
       "courseId" -> nonEmptyText,
       "semester" -> nonEmptyText,
       "startDate" -> date,
       "endDate" -> date
-    )(LabWorkFormModel.apply)(LabWorkFormModel.unapply)
+    )(LabworkUpdateModel.apply)(LabworkUpdateModel.unapply)
   )
 
 }
@@ -50,9 +56,14 @@ object LabWorks {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(labWork: LabWork): Future[Individual] = {
-    val courseIndividual = Individual(Resource(labWork.courseId))
+    val semesterIndividual = Individual(labWork.semester)
+    val startDate = semesterIndividual.props.getOrElse(LWM.hasStartDate, List(new DateLiteral(LocalDate.now()))).head
+    val endDate = semesterIndividual.props.getOrElse(LWM.hasEndDate, List(new DateLiteral(LocalDate.now()))).head
+
+    val courseIndividual = Individual(labWork.course)
+
     val resource = ResourceUtils.createResource(lwmNamespace)
-    val timetable = Timetables.create(Timetable(resource, labWork.startDate, labWork.endDate))
+    val timetable = Timetables.create(Timetable(resource, LocalDate.parse(startDate.value), LocalDate.parse(endDate.value)))
 
     val label = courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.asLiteral().get
 
@@ -61,31 +72,13 @@ object LabWorks {
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, RDFS.label, label),
       Statement(resource, LWM.hasTimetable, timetable.uri),
-      Statement(resource, LWM.hasAssignmentCount, StringLiteral(labWork.assignmentCount.toString)),
-      Statement(resource, LWM.hasCourse, Resource(labWork.courseId)),
-      Statement(resource, LWM.hasStartDate, DateLiteral(labWork.startDate)),
-      Statement(resource, LWM.hasEndDate, DateLiteral(labWork.endDate)),
+      Statement(resource, LWM.hasCourse, labWork.course),
+      Statement(resource, LWM.hasStartDate, startDate),
+      Statement(resource, LWM.hasEndDate, endDate),
       Statement(resource, LWM.allowsApplications, StringLiteral("false")),
       Statement(resource, LWM.isClosed, StringLiteral("false")),
-      Statement(resource, LWM.hasSemester, Resource(labWork.semester))
-    ) ++ (1 to labWork.assignmentCount).map { c ⇒
-        val assoc = ResourceUtils.createResource(lwmNamespace)
-        Statement(assoc, RDF.typ, LWM.AssignmentAssociation) :: Statement(assoc, RDF.typ, OWL.NamedIndividual) ::
-          Statement(assoc, LWM.hasLabWork, resource) :: Statement(assoc, LWM.hasOrderId, StringLiteral(s"$c")) ::
-          Statement(resource, LWM.hasAssignmentAssociation, assoc) :: Nil
-      }.flatten
-
-    for (i ← 'A'.toInt until 'A'.toInt + labWork.groupCount) {
-      val group = ResourceUtils.createResource(lwmNamespace)
-      val groupStatements = List(
-        Statement(group, RDF.typ, LWM.Group),
-        Statement(group, RDF.typ, OWL.NamedIndividual),
-        Statement(group, LWM.hasLabWork, resource),
-        Statement(group, LWM.hasGroupId, StringLiteral(s"${i.toChar}")),
-        Statement(resource, LWM.hasGroup, group)
-      )
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(groupStatements: _*))
-    }
+      Statement(resource, LWM.hasSemester, labWork.semester)
+    )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(resource)

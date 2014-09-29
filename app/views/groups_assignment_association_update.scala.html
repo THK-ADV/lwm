@@ -5,7 +5,7 @@
     <!-- CHANGES THE ORIGINAL ASSOCIATION. NOT THE UNIQUE GROUP ONE. TODO: ADD INDIVIDUAL GROUP ASSOCIATIONS -->
     <label>Neue Abgabe: </label>
     <select id="selectPreparationTime">
-    @for(n <- 0 to labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral(""))).head.value.toInt - association.props.getOrElse(LWM.hasOrderId, List(StringLiteral(""))).head.value.toInt) {
+    @for(n <- 0 to labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size - association.props.getOrElse(LWM.hasOrderId, List(StringLiteral(""))).head.value.toInt) {
         <option>+@n</option>
     }
     </select>

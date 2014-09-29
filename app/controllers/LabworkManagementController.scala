@@ -101,17 +101,25 @@ object LabworkManagementController extends Controller with Authentication {
       }
 
       for {
-        assignments ← Assignments.all()
-        li = Individual(Resource(labworkid))
-        mappedLabwork = li.props.getOrElse(LWM.hasCourse, List(Resource(""))).map(e ⇒ (e, Individual(Resource(e.value)).props(LWM.hasDegree).head.value)).head
-        courseMappedAssignments = assignments.map(e ⇒ (e, e.props(LWM.hasCourse)))
-        courseFilteredAssignments = courseMappedAssignments.filter(p ⇒ p._2.contains(mappedLabwork._1))
-        degreeMappedAssignments = courseMappedAssignments.map(e ⇒ (e._1, e._2.map(r ⇒ Individual(Resource(r.value)).props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)))
-        filteredAssignments = degreeMappedAssignments.filter(e ⇒ e._2.contains(mappedLabwork._2)).map(_._1)
+        groups ← groupsFuture
+        semesters ← Semesters.all()
+        courses ← Courses.all()
+        course ← courseFuture
+        degree ← degreeFuture
+        associations ← associationsFuture
+        allowedAssociationsFuture ← allowedAssociationsFutureFuture
+        allowedAssociations ← allowedAssociationsFuture
       } yield {
-        val groups = li.props.getOrElse(LWM.hasGroup, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-        val associations = li.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-        Ok(views.html.labWorkInformation(li, groups, associations, filteredAssignments, AssignmentForms.assignmentAssociationForm))
+        Ok(views.html.labWorkInformation(
+          labworkIndividual,
+          groups.toList.map(node ⇒ Individual(node.asResource().get)),
+          associations.toList.map(node ⇒ Individual(node.asResource().get)),
+          allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
+          semesters, courses,
+          AssignmentForms.assignmentAssociationForm,
+          LabWorkForms.labworkUpdateForm
+        ))
+
       }
     }
   }
@@ -128,13 +136,7 @@ object LabworkManagementController extends Controller with Authentication {
         },
         labwork ⇒ {
           LabWorks.create(
-            LabWork(
-              labwork.groupCount,
-              labwork.assignmentCount,
-              labwork.courseId,
-              labwork.semester,
-              new LocalDate(labwork.startDate.getTime),
-              new LocalDate(labwork.endDate.getTime))).map { _ ⇒
+            LabWork(Resource(labwork.courseId), Resource(labwork.semester))).map { _ ⇒
               Redirect(routes.LabworkManagementController.index())
             }
         }
@@ -173,13 +175,13 @@ object LabworkManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         implicit request ⇒
-          LabWorkForms.labworkForm.bindFromRequest.fold(
+          LabWorkForms.labworkUpdateForm.bindFromRequest.fold(
             formWithErrors ⇒ {
               for {
                 labworks ← LabWorks.all()
                 courses ← Courses.all()
                 semesters ← Semesters.all()
-              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
+              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
             },
             labwork ⇒ {
               val i = Individual(Resource(id))

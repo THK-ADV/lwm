@@ -64,7 +64,6 @@ object Vocabulary {
     val hasMember = property("hasMember")
     val memberOf = property("memberOf")
     val hasDegree = property("hasDegree")
-    val hasAssignmentCount = property("hasAssignmentCount")
     val hasSemester = property("hasSemester")
     val hasCourse = property("hasCourse")
     val hasAssignmentAssociation = property("hasAssignmentAssociation")

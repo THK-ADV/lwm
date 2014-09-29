@@ -5,11 +5,11 @@
 @import utils.Global._
 
 <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral(""))).head.value</div>
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size</div>
 <table class="table table-bordered">
     <tbody>
         <tr><th>Termin</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
-        @for(a <- labworkAssociations; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
+        @for(a <- labworkAssociations; id <- a.props(LWM.hasOrderId)) {
             @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
                 <tr>
                     <td>@id.value</td>
@@ -36,7 +36,7 @@
                                 <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
                             </div>
                             <div class="modal-body">
-                            @labworkAssignment_form(a.uri, c.value.toInt - id.value.toInt, labwork, labworkAssignments, form)
+                            @labworkAssignment_form(a.uri, labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size - id.value.toInt, labwork, labworkAssignments, form)
                             </div>
 
                         </div>
