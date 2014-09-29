@@ -1,31 +1,40 @@
-@(startTime: Time, dayId: String, labwork: Individual, entries: List[Resource])
-@import utils.semantic.Vocabulary.{LWM, RDFS}
-@import utils.semantic.Individual
-@import utils.semantic.{Resource, StringLiteral}
-@import utils.Global._
+@(startTime: Time, dayId: String, labwork: Individual, entries: List[Individual])
+    @import utils.semantic.Vocabulary.{LWM, RDFS}
+    @import utils.semantic.Individual
+    @import utils.semantic.{Resource, StringLiteral}
+    @import utils.Global._
 
 
-@if(entries.filter(e => (Individual(e).props(LWM.hasWeekday).head.value == dayId) && (Individual(e).props(LWM.hasStartTime).head.value == startTime.toString)).nonEmpty) {
-    <td class="success">
-    @for(r <- entries.filter(e => Individual(e).props(LWM.hasWeekday).head.value == dayId); i = Individual(r); st = i.props.getOrElse(LWM.hasStartTime, List(StringLiteral(""))); et = i.props.getOrElse(LWM.hasEndTime, List(StringLiteral("")))) {
-        @if(st.head.toString == startTime.toString) {
-            <h6><b>
-                Betreuer:</b>@for(s <- i.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
-                @(Individual(s).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
-            }</h6>
-            <h6><b>
-                Raum:</b> @Individual(Resource(i.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value</h6>
-            <h6><b>Endzeit:</b> @et.head.toString</h6>
-            <a href="javascript: deleteTableEntry('@r.asResource().get.value', '@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a>
-            <br />
+    @defining(entries.filter(e => {
+        (e.props(LWM.hasWeekday).head.value == dayId) && (e.props(LWM.hasStartTime).head.value == startTime.toString)
+    })) { list =>
+
+        @if(list.nonEmpty) {
+            <td class="success">
+            @for(r <- entries.filter(e => e.props(LWM.hasWeekday).head.value == dayId); st = r.props.getOrElse(LWM.hasStartTime, List(StringLiteral(""))); et = r.props.getOrElse(LWM.hasEndTime, List(StringLiteral("")))) {
+                @if(st.head.toString == startTime.toString) {
+                    <h6><b>
+                        Betreuer:</b>@for(s <- r.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
+                        @(Individual(s).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+                    }</h6>
+                    <h6><b>
+                        Raum:</b> @Individual(Resource(r.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value</h6>
+                    <h6><b>Endzeit:</b> @et.head.toString</h6>
+                    <a href="javascript: deleteTableEntry('@r.uri.value', '@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a>
+                    <br />
+                }
+            }
+            </td>
+        } else {
+            @if(entries.filter(e => (e.props(LWM.hasWeekday).head.value == dayId) && (startTime <= Time(e.props(LWM.hasEndTime).head.value.split(":")(0).toInt, e.props(LWM.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(e.props(LWM.hasStartTime).head.value.split(":")(0).toInt, e.props(LWM.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
+                <td class="success"></td>
+            } else {
+                <td></td>
+            }
         }
+
     }
-    </td>
-} else {
-    @if(entries.filter(e => (Individual(e).props(LWM.hasWeekday).head.value == dayId) && (startTime <= Time(Individual(e).props(LWM.hasEndTime).head.value.split(":")(0).toInt, Individual(e).props(LWM.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(Individual(e).props(LWM.hasStartTime).head.value.split(":")(0).toInt, Individual(e).props(LWM.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
-        <td class="success"></td>
-    } else {
-        <td></td>
-    }
-}
+
+
+
 

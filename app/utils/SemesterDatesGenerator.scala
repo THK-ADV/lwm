@@ -6,6 +6,7 @@ import utils.semantic.Vocabulary.LWM
 import utils.semantic.{ StringLiteral, Individual, Resource }
 
 import scala.annotation.tailrec
+import scala.concurrent.{ Promise, Future }
 
 object SemesterDatesGenerator {
   case class AssignmentDateAssociation(group: (String, Resource), association: (Int, (Resource, Int)), date: SemesterDate)
@@ -24,7 +25,8 @@ object SemesterDatesGenerator {
     generateDateList(SemesterDate(startDate, entry), Nil)
   }
 
-  def apply(timetable: Resource, semester: Resource) = {
+  def create(timetable: Resource, semester: Resource): Future[Boolean] = {
+    val p = Promise[Boolean]()
     Timetables.get(timetable).map { t ⇒
 
       val entryResource = Individual(timetable).props.getOrElse(LWM.hasTimetableEntry, Nil)
@@ -51,6 +53,7 @@ object SemesterDatesGenerator {
 
         if (possibleDates.size < groupCount * assignmentCount) {
           println(s"ERROR: Not enough available assignment dates for $groupCount groups with $assignmentCount assignments")
+          p.failure(new IllegalArgumentException("Not enough available assignment dates for $groupCount groups with $assignmentCount assignments"))
         } else {
           val orderedAssocs = (for {
             assocNode ← labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil)
@@ -101,9 +104,11 @@ object SemesterDatesGenerator {
           schedule.map { s ⇒
             ScheduleAssociations.create(s)
           }
+          p.success(true)
         }
 
       }
     }
+    p.future
   }
 }
