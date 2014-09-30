@@ -14,7 +14,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @timeTable(timeslots, labwork, table_entries)
+                    @timetable(timeslots, labwork, table_entries, rooms)
                     <div class="row">
                         <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button>
                         <a href="javascript: createSchedule('@routes.TimetableController.generateSchedule()', '@labwork.uri.value')" class="btn btn-primary" role="button">
@@ -32,7 +32,7 @@
                                    <h4 class="modal-title" id="myModalLabel">Neuen Stundenplaneintrag hinzufügen</h4>
                                 </div>
                                 <div class="modal-body">
-                                @timeTableManagement_form(labwork.uri, Weekdays.workWeek.values.toList.sortBy(_.index), timeslots, rooms, allSupervisors, TimeTableForm.timetableForm)
+                                @timetable_management_form(labwork.uri, Weekdays.workWeek.values.toList.sortBy(_.index), timeslots, rooms, allSupervisors, form)
                                 </div>
 
                             </div>

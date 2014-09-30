@@ -58,8 +58,9 @@ DELETE        /administration/blacklist/dates                     controllers.Bl
 POST          /administration/blacklist/dates                     controllers.BlacklistManagementController.blacklistDatePost()
 
 GET           /administration/timetable/:id                       controllers.TimetableController.index(id)
-POST          /administration/timetable/:id                       controllers.TimetableController.timeTableEntryPost(id)
-DELETE        /administration/timetable                           controllers.TimetableController.entryRemoval()
+POST          /administration/timetable/:id                       controllers.TimetableController.entryPost(id)
+POST          /administration/timetable/:id/entries/:e            controllers.TimetableController.entryEdit(id, e)
+DELETE        /administration/timetable/:id/entries               controllers.TimetableController.entryRemoval(id)
 
 
 POST          /administration/rooms                               controllers.RoomManagementController.roomPost()

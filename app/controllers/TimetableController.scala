@@ -24,7 +24,7 @@ object TimetableController extends Controller with Authentication {
         val timetable = Individual((for (i ← labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
         val entries = timetable.props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r))
 
-        Ok(views.html.timeTableManagement(
+        Ok(views.html.timetable_management(
           labWorkI,
           supervisors.toList,
           TimeSlots.slotTimeMap.values.toList.sorted,
@@ -59,7 +59,7 @@ object TimetableController extends Controller with Authentication {
       }
   }
 
-  def timeTableEntryPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  def entryPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async {
         implicit request ⇒
@@ -70,7 +70,7 @@ object TimetableController extends Controller with Authentication {
                 supervisors ← Users.all()
                 rooms ← Rooms.all()
               } yield {
-                BadRequest(views.html.timeTableManagement(
+                BadRequest(views.html.timetable_management(
                   Individual(Resource(labworkid)),
                   supervisors.toList,
                   TimeSlots.slotTimeMap.values.toList.sorted,
@@ -102,7 +102,7 @@ object TimetableController extends Controller with Authentication {
     }
   }
 
-  def entryRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def entryRemoval(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) {
       implicit request ⇒
         val entryId = (request.body \ "eId").as[String]
@@ -111,5 +111,40 @@ object TimetableController extends Controller with Authentication {
           Redirect(routes.TimetableController.index(labId))
         }
     }
+  }
+
+  def entryEdit(timetableId: String, entryId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async {
+        implicit request ⇒
+          val ti = Individual(Resource(timetableId))
+          val ei = Individual(Resource(entryId))
+          TimeTableForm.timetableEditForm.bindFromRequest.fold(
+            formWithErrors ⇒ {
+              for {
+                supervisors ← Users.all()
+                rooms ← Rooms.all()
+              } yield {
+                BadRequest(views.html.timetable_management(
+                  Individual(Resource(ti.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value)),
+                  supervisors.toList,
+                  TimeSlots.slotTimeMap.values.toList.sorted,
+                  ti.props.getOrElse(LWM.hasTimetableEntry, List(Resource(""))).map(_.asResource().get).map(r ⇒ Individual(r)),
+                  rooms,
+                  TimeTableForm.timetableForm))
+              }
+            },
+            entry ⇒ {
+              for {
+                s ← ei.props(LWM.hasSupervisor)
+                r ← ei.props(LWM.hasRoom)
+              } yield {
+                ei.update(LWM.hasSupervisor, s, Resource(entry.supervisors))
+                ei.update(LWM.hasRoom, r, Resource(entry.room))
+              }
+              Future.successful(Redirect(routes.TimetableController.index(ti.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value)))
+            }
+          )
+      }
   }
 }

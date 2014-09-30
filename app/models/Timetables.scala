@@ -138,6 +138,8 @@ case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time,
 
 case class TimetableEntryFormEntry(day: String, startTime: String, endTime: String, room: String, supervisors: String)
 
+case class TimetableEntryEditForm(supervisors: String, room: String)
+
 object Timetables {
 
   import utils.Global._
@@ -274,4 +276,11 @@ object TimeTableForm {
       "room" -> nonEmptyText,
       "supervisors" -> nonEmptyText
     )(TimetableEntryFormEntry.apply)(TimetableEntryFormEntry.unapply))
+
+  val timetableEditForm = Form(
+    mapping(
+      "supervisors" -> nonEmptyText,
+      "rooms" -> nonEmptyText
+    )(TimetableEntryEditForm.apply)(TimetableEntryEditForm.unapply)
+  )
 }

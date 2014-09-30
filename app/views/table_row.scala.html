@@ -1,0 +1,55 @@
+@(startTime: Time, dayId: String, labwork: Individual, entries: List[Individual], rooms: List[Individual])
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Individual
+@import utils.semantic.{Resource, StringLiteral}
+@import utils.Global._
+
+
+@defining(entries.filter(e => {
+    (e.props(LWM.hasWeekday).head.value == dayId) && (e.props(LWM.hasStartTime).head.value == startTime.toString)
+})) { list =>
+
+    @if(list.nonEmpty) {
+        <td class="success">
+        @for(e <- list; t <- e.props.getOrElse(LWM.hasTimetable, List(Resource(""))); et = e.props.getOrElse(LWM.hasEndTime, List(StringLiteral(""))); id <- e.props.getOrElse(LWM.hasId, List(StringLiteral("")))) {
+                <h6><b>Betreuer:</b>
+                    @for(s <- e.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
+                    @(Individual(s).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+                }
+                </h6>
+
+                <h6><b>Raum:</b> @Individual(Resource(e.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value</h6>
+                <h6><b>Endzeit:</b> @et.head.toString</h6>
+
+                <a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a>
+                <a href="javascript: if(affirm()) deleteTableEntry('@e.uri.value', '@t.value','@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a><br />
+
+            <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Neues Praktikum hinzufügen</h4>
+                        </div>
+                        <div class="modal-body">
+                        @timetable_entry_edit_form(e, Resource(t.value), e.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(r=> Individual(Resource(r.value))), rooms, TimeTableForm.timetableEditForm)
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        </td>
+    } else {
+        @if(entries.filter(e => (e.props(LWM.hasWeekday).head.value == dayId) && (startTime <= Time(e.props(LWM.hasEndTime).head.value.split(":")(0).toInt, e.props(LWM.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(e.props(LWM.hasStartTime).head.value.split(":")(0).toInt, e.props(LWM.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
+            <td class="success"></td>
+        } else {
+            <td></td>
+        }
+    }
+
+}
+
+
+
+

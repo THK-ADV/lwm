@@ -4,7 +4,7 @@
 
 @import utils.semantic.Vocabulary._
 
-@helper.form(action = routes.TimetableController.timeTableEntryPost(labWorkId.value)) {
+@helper.form(action = routes.TimetableController.entryPost(labWorkId.value)) {
     @helper.select(form("day"), for(weekday <- weekdays) yield weekday.label -> weekday.label, '_label -> "Tag:")
     @helper.select(form("room"), for (room <- rooms; labelList <- room.props.get(LWM.hasRoomId); label = labelList.headOption.getOrElse("")) yield room.uri.value -> label.toString, '_label -> "Raum:")
     @helper.select(form("start"), for(st <- time) yield st.toString -> st.toString, '_label -> "Startzeit:")
