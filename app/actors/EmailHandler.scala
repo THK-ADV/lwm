@@ -37,7 +37,7 @@ class EmailHandler(config: Configuration) extends Actor {
   props.setProperty("mail.store.protocol", protocol)
 
   val session = Session.getDefaultInstance(props, null)
-  session.setDebug(true)
+  session.setDebug(false)
   val store = session.getStore(protocol)
   store.connect(host, user, password)
   val folder = store.getFolder(folderName).asInstanceOf[IMAPFolder]
