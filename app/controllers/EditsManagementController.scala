@@ -45,7 +45,9 @@ object EditsManagementController extends Controller with Authentication {
                     }.map { _ ⇒ Ok(uri) }
                 }
 
-              case "assignmentassociation" ⇒ AssignmentAssociations.create(AssignmentAssociation(Resource(resource))).map { _ ⇒ Ok(uri) }
+              case "assignmentassociation" ⇒
+
+                AssignmentAssociations.create(AssignmentAssociation(Resource(resource), mappedValues.getOrElse("hasorderid", "0").toInt)).map { _ ⇒ Ok(uri) }
 
               case "bindassociationvalues" ⇒
                 individual.add(LWM.hasAssignment, Resource(mappedValues.getOrElse("hasassignment", "")))

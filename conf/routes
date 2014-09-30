@@ -77,7 +77,7 @@ POST          /administration/assignments                         controllers.As
 POST          /administration/assignments/:id                     controllers.AssignmentManagementController.assignmentSolutionPost(id)
 DELETE        /administration/assignments                         controllers.AssignmentManagementController.assignmentRemoval()
 
-POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.assignmentAssociationPost(id)
+#POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.assignmentAssociationPost(id)
 POST          /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindAssignment(id,a)
 DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 

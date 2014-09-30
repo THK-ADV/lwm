@@ -81,27 +81,27 @@ object AssignmentManagementController extends Controller with Authentication {
       }
   }
 
-  def assignmentAssociationPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
-    session ⇒
-      Action.async {
-        implicit request ⇒
-          AssignmentForms.assignmentAssociationForm.bindFromRequest.fold(
-            formWithErrors ⇒ {
-              for {
-                assignments ← Assignments.all()
-                courses ← Courses.all()
-              } yield {
-                BadRequest(views.html.assignmentLabworkManagement(Resource(labworkid), Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, formWithErrors, AssignmentForms.assignmentSolutionForm))
-              }
-            },
-            a ⇒ {
-              AssignmentAssociations.create(AssignmentAssociation(Resource(labworkid))).map { _ ⇒
-                Redirect(routes.LabworkManagementController.edit(labworkid))
-              }
-            }
-          )
-      }
-  }
+  //  def assignmentAssociationPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  //    session ⇒
+  //      Action.async {
+  //        implicit request ⇒
+  //          AssignmentForms.assignmentAssociationForm.bindFromRequest.fold(
+  //            formWithErrors ⇒ {
+  //              for {
+  //                assignments ← Assignments.all()
+  //                courses ← Courses.all()
+  //              } yield {
+  //                BadRequest(views.html.assignmentLabworkManagement(Resource(labworkid), Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, formWithErrors, AssignmentForms.assignmentSolutionForm))
+  //              }
+  //            },
+  //            a ⇒ {
+  //              AssignmentAssociations.create(AssignmentAssociation(Resource(labworkid))).map { _ ⇒
+  //                Redirect(routes.LabworkManagementController.edit(labworkid))
+  //              }
+  //            }
+  //          )
+  //      }
+  //  }
 
   def bindAssignment(labworkid: String, associationid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒

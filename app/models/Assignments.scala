@@ -49,7 +49,7 @@ case class Assignment(id: String, description: String, text: String, topics: Lis
 
 case class AssignmentFormModel(id: String, description: String, text: String, topics: String, courses: List[String])
 
-case class AssignmentAssociation(labwork: Resource)
+case class AssignmentAssociation(labwork: Resource, orderId: Int)
 
 case class AssignmentAssociationFormModel(assignment: String, preparationTime: Int)
 
@@ -81,6 +81,7 @@ object AssignmentAssociations {
       Statement(associationResource, RDF.typ, LWM.AssignmentAssociation),
       Statement(associationResource, RDF.typ, OWL.NamedIndividual),
       Statement(associationResource, LWM.hasId, StringLiteral(id.toString)),
+      Statement(associationResource, LWM.hasOrderId, StringLiteral(s"${association.orderId}")),
       Statement(association.labwork, LWM.hasAssignmentAssociation, associationResource),
       Statement(associationResource, LWM.hasLabWork, association.labwork)
     )

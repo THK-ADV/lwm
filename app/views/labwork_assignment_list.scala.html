@@ -45,4 +45,4 @@
             }
     </tbody>
 </table>
-<div class="panel-footer"><a href="javascript: edit('add new', 'assignmentAssociation', 'none','hasLabWork', '@labwork.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></div>
+<div class="panel-footer"><a href="javascript: edit('add new', 'assignmentAssociation', '@labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size','hasOrderId', '@labwork.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></div>
