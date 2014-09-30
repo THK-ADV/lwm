@@ -26,7 +26,7 @@ object Global extends GlobalSettings {
   override def onStart(app: Application) {
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
-    // Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
+    Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
     Logger.debug("Application has started")
   }
 
