@@ -84,7 +84,7 @@ function createSchedule(uri, id) {
     ajaxRequest(uri, 'POST', 'application/json', {id: id}, reload);
 }
 
-function affirm() {
+function confirmed() {
     return confirm("Sind sie sicher?");
 }
 

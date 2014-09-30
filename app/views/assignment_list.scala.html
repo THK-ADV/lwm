@@ -18,7 +18,7 @@
                 <td>@i.props(Vocabulary.LWM.hasDescription)</td>
                 <td>@i.props(Vocabulary.LWM.hasTopic)</td>
                 <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a></td>
-                <td><a href="javascript: if(affirm()) deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove"></a></td></tr>
+                <td><a href="javascript: if(confirmed()) deleteAssignment('@assignment.value')" class="glyphicon glyphicon-remove"></a></td></tr>
 
             <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

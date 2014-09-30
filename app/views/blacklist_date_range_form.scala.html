@@ -1,0 +1,19 @@
+@(blacklist: Individual, semester: Individual, form: Form[BlacklistDateRangeFormModel])
+@import java.util.Date
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.RDFS
+@import org.joda.time.LocalDate
+<div>
+@defining(form.fill(BlacklistDateRangeFormModel(blacklist.uri.value, semester.uri.value, LocalDate.now(), LocalDate.now()))){ f =>
+    @helper.form(action = routes.BlacklistManagementController.blacklistDateRangePost()) {
+        @helper.inputDate(f("startDate"), '_label -> "Startdatum")
+        @helper.inputDate(f("endDate"), '_label -> "Enddatum")
+        @helper.inputText(f("blacklistResource"), '_label -> "Blacklist")
+        @helper.inputText(f("semesterResource"), '_label -> "Semester")
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+        </div>
+    }
+}
+</div>

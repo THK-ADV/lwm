@@ -13,7 +13,8 @@ import scala.concurrent.{ Promise, Future }
 case class Blacklist(semester: Resource, id: UUID = UUID.randomUUID())
 case class BlacklistFormModel(semesterResource: String)
 case class BlacklistDate(blacklist: Resource, date: LocalDate, id: UUID = UUID.randomUUID())
-case class BlacklistDateFormModel(blacklistResource: String, semesterResource: String, date: Date)
+case class BlacklistDateFormModel(blacklistResource: String, semesterResource: String, date: LocalDate)
+case class BlacklistDateRangeFormModel(blacklistResource: String, semesterResource: String, startDate: LocalDate, endDate: LocalDate)
 
 object Blacklists {
   object Forms {
@@ -27,8 +28,17 @@ object Blacklists {
       mapping(
         "blacklistResource" -> nonEmptyText,
         "semesterResource" -> nonEmptyText,
-        "date" -> date
+        "date" -> jodaLocalDate
       )(BlacklistDateFormModel.apply)(BlacklistDateFormModel.unapply)
+    )
+
+    val blacklistDateRangeForm = Form(
+      mapping(
+        "blacklistResource" -> nonEmptyText,
+        "semesterResource" -> nonEmptyText,
+        "startDate" -> jodaLocalDate,
+        "endDate" -> jodaLocalDate
+      )(BlacklistDateRangeFormModel.apply)(BlacklistDateRangeFormModel.unapply)
     )
   }
 

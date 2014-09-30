@@ -56,6 +56,7 @@ DELETE        /administration/blacklist                           controllers.Bl
 GET           /administration/blacklist/:id                       controllers.BlacklistManagementController.blacklistEdit(id)
 DELETE        /administration/blacklist/dates                     controllers.BlacklistManagementController.blacklistDateDelete()
 POST          /administration/blacklist/dates                     controllers.BlacklistManagementController.blacklistDatePost()
+POST          /administration/blacklist/ranges                    controllers.BlacklistManagementController.blacklistDateRangePost()
 
 GET           /administration/timetable/:id                       controllers.TimetableController.index(id)
 POST          /administration/timetable/:id                       controllers.TimetableController.timeTableEntryPost(id)
