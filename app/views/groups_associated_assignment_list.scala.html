@@ -21,7 +21,7 @@
                             </td>
                             <td>
                                 @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._2)
-                                @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral(""))).head.value.toInt + index}
+                                @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + index}
                             </td>
                         </tr>
                 }
