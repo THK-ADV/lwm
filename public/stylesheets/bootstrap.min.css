@@ -42,6 +42,12 @@ a {
 a:active, a:hover {
     outline: 0
 }
+<<<<<<< HEAD
+=======
+a.glyphicon.glyphicon-ok-circle{
+    color: #12A61F
+}
+>>>>>>> a33b7bd1c7a4af787a7554c1968d5adadfc97ff8
 
 abbr[title] {
     border-bottom: 1px dotted
@@ -1134,6 +1140,7 @@ a:focus {
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px
 }
+
 
 a.glyphicon.glyphicon-ok-circle {
     color: #12A61F
