@@ -10,15 +10,15 @@
         Enddatum</th> <th>Semester</th> <th></th>
     </tr>
     <tbody>
-    @for(course <- labwork.props(LWM.hasCourse); ic = Individual(Resource(course.value)); degree <- ic.props(LWM.hasDegree); id = Individual(Resource(degree.value)); sD = labwork.props(LWM.hasStartDate); eD = labwork.props(LWM.hasEndDate); aNr = labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size; gNr = labwork.props.getOrElse(LWM.hasGroup, Nil); sem = labwork.props(LWM.hasSemester)) {
+    @for(course <- labwork.props.get(LWM.hasCourse); courseIndividual = Individual(Resource(course.head.value)); degree <- courseIndividual.props.get(LWM.hasDegree); degreeIndividual = Individual(Resource(degree.head.value)); startDates <- labwork.props.get(LWM.hasStartDate); endDates <- labwork.props.get(LWM.hasEndDate); assignmentCount = labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size; groupCount = labwork.props.getOrElse(LWM.hasGroup, Nil).size; sem <- labwork.props.get(LWM.hasSemester)) {
         <tr>
             <td>@if(labwork.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
-            <td>@ic.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
-            <td>@id.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
-            <td>@gNr.size</td>
-            <td>@aNr</td>
-            <td>@sD.head.value</td>
-            <td>@eD.head.value</td>
+            <td>@courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+            <td>@degreeIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+            <td>@groupCount</td>
+            <td>@assignmentCount</td>
+            <td>@startDates.head.value</td>
+            <td>@endDates.head.value</td>
             <td>@Individual(Resource(sem.head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
             <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#myModal"></a></td>
         </tr>
@@ -31,9 +31,8 @@
                         <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
                     </div>
                     <div class="modal-body">
-                    @labworkAssignment_edit_form(labwork, course.value, sem.head.value, semesters, courses, form)
+                    @labworkAssignment_edit_form(labwork, course.head.value, sem.head.value, semesters, courses, form)
                     </div>
-
                 </div>
             </div>
         </div>

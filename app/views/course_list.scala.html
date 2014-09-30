@@ -19,7 +19,7 @@
                     <td>@course.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value</td>
                     <td>@Individual(Resource(course.props.getOrElse(Vocabulary.LWM.hasDegree, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Resource(""))).head.value</td>
                     <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td><a href="javascript: if(affirm()) deleteCourse('@course.uri.value')" class="glyphicon glyphicon-remove"></a> </td></tr>
+                    <td><a href="javascript: if(confirmed()) deleteCourse('@course.uri.value')" class="glyphicon glyphicon-remove"></a> </td></tr>
             }
         </table>
 

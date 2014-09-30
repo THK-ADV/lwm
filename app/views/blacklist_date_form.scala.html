@@ -2,8 +2,9 @@
 @import java.util.Date
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary.RDFS
+@import org.joda.time.LocalDate
 <div>
-    @defining(form.fill(BlacklistDateFormModel(blacklist.uri.value, semester.uri.value, new Date()))){ f =>
+    @defining(form.fill(BlacklistDateFormModel(blacklist.uri.value, semester.uri.value, LocalDate.now()))){ f =>
         @helper.form(action = routes.BlacklistManagementController.blacklistDatePost()) {
             @helper.inputDate(f("date"), '_label -> "Datum")
             @helper.inputText(f("blacklistResource"), '_label -> "Blacklist")

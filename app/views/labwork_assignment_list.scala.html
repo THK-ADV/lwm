@@ -16,7 +16,7 @@
                         @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
 
                         @if(assignments.nonEmpty) {
-                        <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" data-dismiss="modal"></a>
+                        <a href="javascript: if(confirmed()) deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" data-dismiss="modal"></a>
                         }else {
                         <button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#@index"></button>
                         }
@@ -24,7 +24,7 @@
                     <td>
                     @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + index}
                     </td>
-                    <td><a href="javascript: edit('remove', 'assignmentAssociation', '@a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value , @a.props.getOrElse(LWM.hasPreparationTime, List(Resource(""))).head.value', 'hasAssignment,hasPreparationTime', '@a.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
+                    <td><a href="javascript: edit('remove', 'assignmentAssociation', '@a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value , @a.props.getOrElse(LWM.hasPreparationTime, List(Resource("0"))).head.value', 'hasAssignment,hasPreparationTime', '@a.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
                 </tr>
 
                 <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

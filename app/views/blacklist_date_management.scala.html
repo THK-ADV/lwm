@@ -1,10 +1,10 @@
-@(semester: String, semesterIndividual: Individual, dates: List[Individual], blacklist: Individual,form: Form[BlacklistDateFormModel])
-@import utils.semantic.Individual
+@(semester: String, semesterIndividual: Individual, dates: List[Individual], blacklist: Individual, dateForm: Form[BlacklistDateFormModel], rangeForm: Form[BlacklistDateRangeFormModel])
+    @import utils.semantic.Individual
 
 <!DOCTYPE html>
 
-<html>
-    @head(s"Blacklistverwaltung: $semester")
+    <html>
+        @head(s"Blacklistverwaltung: $semester")
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -12,34 +12,54 @@
             </div>
             <div class="row">
                 @navigation_admin()
-                <div class="col-md-9">
-                    @blacklist_date_list(semester, dates, blacklist)
+            <div class="col-md-9">
+                @blacklist_date_list(semester, dates, blacklist)
 
 
-                    <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
+            <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
+                        Datum hinzufügen
+            </button>
+            <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal2">
+                            Zeitraum hinzufügen
+            </button>
 
-                    </button>
-
-                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">
                                         Close</span></button>
-                                    <h4 class="modal-title" id="myModalLabel">Neue Blacklist hinzufügen</h4>
-                                </div>
-                                <div class="modal-body">
-                                @blacklist_date_form(blacklist, semesterIndividual, form)
-                                </div>
-
-                            </div>
+                            <h4 class="modal-title" id="myModalLabel">Neues Datum hinzufügen</h4>
                         </div>
+                        <div class="modal-body">
+                        @blacklist_date_form(blacklist, semesterIndividual, dateForm)
+                        </div>
+
                     </div>
                 </div>
+            </div>
+
+            <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">
+                                        Close</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Neuen Zeitraum hinzufügen</h4>
+                        </div>
+                        <div class="modal-body">
+                        @blacklist_date_range_form(blacklist, semesterIndividual, rangeForm)
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            </div>
             </div>
 
 
             <div class="row">@footerAdmin()</div>
         </div>
     </body>
-</html>
+    </html>

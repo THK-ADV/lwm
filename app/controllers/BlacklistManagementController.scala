@@ -1,7 +1,7 @@
 package controllers
 
 import models._
-import org.joda.time.LocalDate
+import org.joda.time.{ Days, Interval, LocalDate }
 import play.api.mvc.{ Action, Controller }
 import utils.Global._
 import utils.Security.Authentication
@@ -43,7 +43,7 @@ object BlacklistManagementController extends Controller with Authentication {
           val semester = Individual(SPARQLTools.statementsFromString(result).head.s.asResource().get)
           val blacklist = Individual(Resource(id))
 
-          Ok(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm))
+          Ok(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm))
         }
       }
     }
@@ -103,12 +103,51 @@ object BlacklistManagementController extends Controller with Authentication {
             val result = sparqlExecutionContext.executeQueryBlocking(query)
             val title = SPARQLTools.statementsFromString(result).head.o.asLiteral().get.decodedString
 
-            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, formWithErrors))
+            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, formWithErrors, Blacklists.Forms.blacklistDateRangeForm))
 
           }
         },
         blacklist ⇒ {
-          BlacklistDates.create(BlacklistDate(Resource(blacklist.blacklistResource), new LocalDate(blacklist.date.getTime))).map { i ⇒
+          BlacklistDates.create(BlacklistDate(Resource(blacklist.blacklistResource), blacklist.date)).map { i ⇒
+            Redirect(routes.BlacklistManagementController.blacklistEdit(blacklist.blacklistResource))
+          }
+        }
+      )
+    }
+  }
+
+  def blacklistDateRangePost = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { implicit request ⇒
+      Blacklists.Forms.blacklistDateRangeForm.bindFromRequest.fold(
+        formWithErrors ⇒ {
+          for {
+            all ← Blacklists.all()
+            semesters ← Semesters.all()
+            dates ← BlacklistDates.getAll(Resource(formWithErrors.data("blacklistResource")))
+          } yield {
+            val blacklist = Individual(Resource(formWithErrors.data("blacklistResource")))
+            val semester = Individual(Resource(formWithErrors.data("semesterResource")))
+
+            val query =
+              s"""
+              |select ?s (${RDFS.label} as ?p) ?o where{
+              | ${semester.uri} ${RDFS.label} ?o .
+              |}
+            """.stripMargin
+
+            val result = sparqlExecutionContext.executeQueryBlocking(query)
+            val title = SPARQLTools.statementsFromString(result).head.o.asLiteral().get.decodedString
+
+            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm))
+
+          }
+        },
+        blacklist ⇒ {
+          val dates = for (d ← 0 to Days.daysBetween(blacklist.startDate, blacklist.endDate).getDays) yield blacklist.startDate.plusDays(d)
+
+          Future.sequence(dates.map { date ⇒
+            BlacklistDates.create(BlacklistDate(Resource(blacklist.blacklistResource), date))
+          }).map { i ⇒
             Redirect(routes.BlacklistManagementController.blacklistEdit(blacklist.blacklistResource))
           }
         }

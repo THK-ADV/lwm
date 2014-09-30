@@ -35,8 +35,9 @@ function deleteRoom(id) {
     ajaxRequest("/administration/rooms", "DELETE", "application/json", {id: id}, reload);
 }
 
-function deleteTableEntry(entry, labwork) {
-    ajaxRequest("/administration/timetable", "DELETE", "application/json", {eId: entry, lId: labwork}, reload);
+function deleteTableEntry(entry, timetable, labwork) {
+    var tu = encodeURIComponent(timetable);
+    ajaxRequest("/administration/timetable/"+tu+"/entries", "DELETE", "application/json", {eId: entry, lId: labwork}, reload);
 }
 
 function deleteSemester(id) {
@@ -72,19 +73,11 @@ function removeStudentFromGroup(labid, student, groupid) {
     ajaxRequest("/administration/labworks/"+e, "DELETE", "application/json", {student: student, group: groupid}, reload);
 }
 
-
-function setPreparationTime(labid, gid, aid) {
-    var newTime = $('#selectPreparationTime').find(":selected").text().split("+")[1];
-    var e = encodeURIComponent(labid);
-    var a = encodeURIComponent(aid);
-    ajaxRequest("/administration/labworks/"+e+"/associations/"+a, "PUT", "application/json", {time: newTime, group: gid}, reload);
-}
-
 function createSchedule(uri, id) {
     ajaxRequest(uri, 'POST', 'application/json', {id: id}, reload);
 }
 
-function affirm() {
+function confirmed() {
     return confirm("Sind sie sicher?");
 }
 
