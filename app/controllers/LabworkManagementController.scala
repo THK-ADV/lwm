@@ -99,7 +99,6 @@ object LabworkManagementController extends Controller with Authentication {
           SPARQLTools.statementsFromString(result).map(_.s)
         }
       }
-
       for {
         groups ← groupsFuture
         semesters ← Semesters.all()
@@ -110,7 +109,7 @@ object LabworkManagementController extends Controller with Authentication {
         allowedAssociationsFuture ← allowedAssociationsFutureFuture
         allowedAssociations ← allowedAssociationsFuture
       } yield {
-        Ok(views.html.labWorkInformation(
+        Ok(views.html.labwork_information(
           labworkIndividual,
           groups.toList.map(node ⇒ Individual(node.asResource().get)),
           associations.toList.map(node ⇒ Individual(node.asResource().get)),
@@ -119,7 +118,6 @@ object LabworkManagementController extends Controller with Authentication {
           AssignmentForms.assignmentAssociationForm,
           LabWorkForms.labworkUpdateForm
         ))
-
       }
     }
   }

@@ -92,6 +92,10 @@ function setVisible(uri, labid, visible) {
     ajaxRequest(uri, 'PUT', 'application/json', {id: labid, visibility: visible}, reload);
 }
 
+function edit(pred, obj, vals, stmts, res, oldvals, uri) {
+    ajaxRequest("/administration/edits", "POST", "application/json", {predicate: pred, object: obj, values: vals, statements: stmts, resource: res, old: oldvals, redirect: uri}, reload);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

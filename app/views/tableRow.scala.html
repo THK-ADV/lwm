@@ -16,6 +16,7 @@
                     <h6><b>
                         Betreuer:</b>@for(s <- r.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
                         @(Individual(s).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+                        <!-- TODO: ADD EDITABLE ENTRIES -->
                     }</h6>
                     <h6><b>
                         Raum:</b> @Individual(Resource(r.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value</h6>

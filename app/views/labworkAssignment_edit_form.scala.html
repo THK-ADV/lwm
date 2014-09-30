@@ -20,7 +20,7 @@
         @helper.select(f("semester"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+            <button type="submit" class="btn btn-primary">Aktualisieren</button>
         </div>
     }
 }

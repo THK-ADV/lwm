@@ -81,18 +81,7 @@ object AssignmentManagementController extends Controller with Authentication {
       }
   }
 
-  //TODO: ADD ASSOCIATION
-  def labAssignmentIndex(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
-    session ⇒
-      Action.async {
-        request ⇒
-          for (courses ← Courses.all()) yield {
-            Ok(views.html.assignmentLabworkManagement(Resource(labworkid), Individual(Resource(labworkid)).props(LWM.hasAssignmentAssociation).map(_.asResource().get), courses, AssignmentForms.assignmentAssociationForm, AssignmentForms.assignmentSolutionForm))
-          }
-      }
-  }
-
-  def labAssignmentPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  def assignmentAssociationPost(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async {
         implicit request ⇒
@@ -106,7 +95,7 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒ {
-              AssignmentAssociations.create(AssignmentAssociation(Resource(a.assignment), Resource(labworkid), a.preparationTime)).map { _ ⇒
+              AssignmentAssociations.create(AssignmentAssociation(Resource(labworkid))).map { _ ⇒
                 Redirect(routes.LabworkManagementController.edit(labworkid))
               }
             }

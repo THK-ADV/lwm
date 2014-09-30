@@ -76,12 +76,11 @@ POST          /administration/assignments                         controllers.As
 POST          /administration/assignments/:id                     controllers.AssignmentManagementController.assignmentSolutionPost(id)
 DELETE        /administration/assignments                         controllers.AssignmentManagementController.assignmentRemoval()
 
-GET           /administration/labworks/:id/assignments            controllers.AssignmentManagementController.labAssignmentIndex(id)
-POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.labAssignmentPost(id)
+POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.assignmentAssociationPost(id)
 POST          /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindAssignment(id,a)
-PUT           /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindEdit(id, a)
 DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 
+POST          /administration/edits                               controllers.EditsManagementController.edit()
 
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
 # Map static resources from the /public folder to the /assets URL path
