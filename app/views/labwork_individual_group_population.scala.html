@@ -7,8 +7,8 @@
     <table class="table table-bordered">
         <tbody>
             <tr><th>Gruppe</th><th>Anzahl</th></tr>
-            @for(r <- groups; g <- r.props(LWM.hasGroupId)) {
-                <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, r.uri.value)">@g.value</a></td> <td>@r.props.getOrElse(LWM.hasMember, List.empty).size</td><td><a href="javascript: edit('remove', 'group', 'none', 'hasLabwork', '@r.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td></tr>
+            @for(g <- groups; gId <- g.props(LWM.hasGroupId)) {
+                <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, g.uri.value)">@gId.value</a></td> <td>@g.props.getOrElse(LWM.hasMember, List.empty).size</td><td><a href="javascript: edit('remove', 'group', 'none', 'hasLabwork', '@g.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td></tr>
             }
         </tbody>
     </table>

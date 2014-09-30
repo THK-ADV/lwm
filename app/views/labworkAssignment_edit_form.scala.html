@@ -1,4 +1,4 @@
-@(labwork: Individual, courseId: String, semester: String, semesters: List[Individual], courses: List[Individual], labworks: Form[LabWorkFormModel])
+@(labwork: Individual, courseId: String, semester: String, semesters: List[Individual], courses: List[Individual], labworks: Form[LabworkUpdateModel])
 @import utils.semantic.DateLiteral
 @import org.joda.time.LocalDate
 @import utils.semantic.Resource
@@ -8,22 +8,19 @@
 @import utils.semantic.Vocabulary._
 @import utils.semantic.Individual
 
-@defining(labworks.fill(LabWorkFormModel(labwork.props(LWM.hasGroup).size,
-                        labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral("0"))).head.value.toInt,
+@defining(labworks.fill(LabworkUpdateModel(
                         courseId,
                         semester,
-                        LocalDate.parse(labwork.props.getOrElse(LWM.hasStartDate, List(DateLiteral(new LocalDate()))).head.value).toDate,
-                        LocalDate.parse(labwork.props.getOrElse(LWM.hasEndDate, List(DateLiteral(new LocalDate()))).head.value).toDate))) { f =>
+                        LocalDate.parse(labwork.props.getOrElse(LWM.hasStartDate, DateLiteral(LocalDate.now()) :: Nil).head.value).toDate,
+                        LocalDate.parse(labwork.props.getOrElse(LWM.hasEndDate, DateLiteral(LocalDate.now()) :: Nil).head.value).toDate))) { f =>
     @helper.form(action = routes.LabworkManagementController.metaEdit(labwork.uri.value)) {
-        @helper.inputText(f("groupCount"), '_label -> "Anzahl Gruppen:")
-        @helper.inputText(f("assignmentCount"), '_label -> "Anzahl Termine:")
         @helper.inputDate(f("startDate"), '_label -> "Praktikumsbeginn")
         @helper.inputDate(f("endDate"), '_label -> "Praktikumsende")
         @helper.select(f("courseId"), for {course <- courses; labelList <- course.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString + " - " + Individual(Resource(course.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value), '_label -> "Veranstaltung:")
         @helper.select(f("semester"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+            <button type="submit" class="btn btn-primary">Aktualisieren</button>
         </div>
     }
 }

@@ -22,7 +22,7 @@ object TimetableController extends Controller with Authentication {
       } yield {
         val labWorkI = Individual(Resource(labworkid))
         val timetable = Individual((for (i ← labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
-        val entries = timetable.props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get)
+        val entries = timetable.props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r))
 
         Ok(views.html.timeTableManagement(
           labWorkI,
@@ -40,23 +40,22 @@ object TimetableController extends Controller with Authentication {
       Action.async(parse.json) {
         implicit request ⇒
           val maybeLabworkid = (request.body \ "id").asOpt[String]
-          maybeLabworkid.map { labworkid ⇒
+          val r = maybeLabworkid.map { labworkid ⇒
             val i = Individual(Resource(labworkid))
             val maybeSemester = i.props.get(LWM.hasSemester)
             val maybeTimetable = i.props.get(LWM.hasTimetable)
-            for {
+            val scheduleFuture = for {
               timetableList ← maybeTimetable
               semesterList ← maybeSemester
-            } {
+            } yield {
               val timetable = timetableList.head.asResource().get
               val semester = semesterList.head.asResource().get
-              SemesterDatesGenerator(timetable, semester)
+              SemesterDatesGenerator.create(timetable, semester)
             }
+            scheduleFuture
           }
-          maybeLabworkid match {
-            case Some(id) ⇒ Future.successful(Redirect(routes.TimetableController.index(id)))
-            case None     ⇒ Future.successful(Redirect(routes.LabworkManagementController.index()))
-          }
+
+          Future.successful(Redirect(routes.LabworkManagementController.index()))
       }
   }
 
@@ -75,7 +74,7 @@ object TimetableController extends Controller with Authentication {
                   Individual(Resource(labworkid)),
                   supervisors.toList,
                   TimeSlots.slotTimeMap.values.toList.sorted,
-                  Individual(e.timetable).props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get),
+                  Individual(e.timetable).props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
                   formWithErrors))
               }

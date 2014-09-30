@@ -100,24 +100,23 @@ object LabworkManagementController extends Controller with Authentication {
         }
       }
       for {
+        groups ← groupsFuture
         semesters ← Semesters.all()
         courses ← Courses.all()
-        groups ← groupsFuture
         course ← courseFuture
         degree ← degreeFuture
         associations ← associationsFuture
         allowedAssociationsFuture ← allowedAssociationsFutureFuture
         allowedAssociations ← allowedAssociationsFuture
       } yield {
-        Ok(views.html.labWorkInformation(
+        Ok(views.html.labwork_information(
           labworkIndividual,
           groups.toList.map(node ⇒ Individual(node.asResource().get)),
           associations.toList.map(node ⇒ Individual(node.asResource().get)),
           allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
-          semesters,
-          courses,
+          semesters, courses,
           AssignmentForms.assignmentAssociationForm,
-          LabWorkForms.labworkForm
+          LabWorkForms.labworkUpdateForm
         ))
       }
     }
@@ -135,13 +134,7 @@ object LabworkManagementController extends Controller with Authentication {
         },
         labwork ⇒ {
           LabWorks.create(
-            LabWork(
-              labwork.groupCount,
-              labwork.assignmentCount,
-              labwork.courseId,
-              labwork.semester,
-              new LocalDate(labwork.startDate.getTime),
-              new LocalDate(labwork.endDate.getTime))).map { _ ⇒
+            LabWork(Resource(labwork.courseId), Resource(labwork.semester))).map { _ ⇒
               Redirect(routes.LabworkManagementController.index())
             }
         }
@@ -163,7 +156,6 @@ object LabworkManagementController extends Controller with Authentication {
       Action.async(parse.json) {
         implicit request ⇒
           val id = (request.body \ "id").as[String]
-          val visibility = (request.body \ "visibility").as[String]
           val li = Individual(Resource(id))
 
           li.props(LWM.allowsApplications).map { e ⇒
@@ -180,13 +172,13 @@ object LabworkManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         implicit request ⇒
-          LabWorkForms.labworkForm.bindFromRequest.fold(
+          LabWorkForms.labworkUpdateForm.bindFromRequest.fold(
             formWithErrors ⇒ {
               for {
                 labworks ← LabWorks.all()
                 courses ← Courses.all()
                 semesters ← Semesters.all()
-              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
+              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
             },
             labwork ⇒ {
               val i = Individual(Resource(id))

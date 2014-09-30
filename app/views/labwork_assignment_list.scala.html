@@ -5,29 +5,29 @@
 @import utils.Global._
 
 <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral(""))).head.value</div>
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size</div>
 <table class="table table-bordered">
     <tbody>
         <tr><th>Termin</th><th>Aufgabe</th><th>Abgabetermin</th></tr>
-        @for(a <- labworkAssociations; id <- a.props(LWM.hasOrderId); c <- labwork.props(LWM.hasAssignmentCount)) {
-            @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
+        @for((a, index) <- labworkAssociations.zip(Stream from 1); assignments = a.props.getOrElse(LWM.hasAssignment, Nil)) {
                 <tr>
-                    <td>@id.value</td>
+                    <td>@index</td>
                     <td>
                         @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+
+                        @if(assignments.nonEmpty) {
                         <a href="javascript: deleteBinding('@labwork.uri.value', '@a.uri.value')" class="glyphicon glyphicon-remove" data-dismiss="modal"></a>
-                        </td>
-                    <td>
-                        @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + id.value.toInt}
+                        }else {
+                        <button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#@index"></button>
+                        }
                     </td>
-                </tr>
-            }else {
-                    <tr><td>@id.value</td><td><button class="btn btn-primary btn-xs glyphicon glyphicon-plus" data-toggle="modal" data-target="#@id.value"></button>
-                </td>
-                    <td></td>
+                    <td>
+                    @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + index}
+                    </td>
+                    <td><a href="javascript: edit('remove', 'assignmentAssociation', '@a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value , @a.props.getOrElse(LWM.hasPreparationTime, List(Resource(""))).head.value', 'hasAssignment,hasPreparationTime', '@a.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
                 </tr>
 
-                <div class="modal fade" id="@id.value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -36,13 +36,13 @@
                                 <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
                             </div>
                             <div class="modal-body">
-                            @labworkAssignment_form(a.uri, c.value.toInt - id.value.toInt, labwork, labworkAssignments, form)
+                            @labworkAssignment_form(a.uri, labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size - index  , labwork, labworkAssignments, form)
                             </div>
 
                         </div>
                     </div>
                 </div>
             }
-            }
     </tbody>
 </table>
+<div class="panel-footer"><a href="javascript: edit('add new', 'assignmentAssociation', 'none','hasLabWork', '@labwork.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></div>

@@ -1,7 +1,4 @@
-@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabWorkFormModel])
-@import utils.semantic.Vocabulary.RDFS
-@import utils.semantic.Vocabulary.LWM
-@import utils.semantic.{Resource, StringLiteral}
+@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabworkUpdateModel])
 @import utils.semantic.Individual
 @import utils.Global._
 
@@ -24,7 +21,7 @@
                     </div>
                     <div class="row">
                         <div class="panel panel-default">
-                            @labworkAssignment_list(labwork, labworkAssociations, labworkAssignments, form)
+                        @labwork_assignment_list(labwork, labworkAssociations, labworkAssignments, form)
                         </div>
                     </div>
                     <div class="row">

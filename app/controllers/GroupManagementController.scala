@@ -20,8 +20,8 @@ object GroupManagementController extends Controller with Authentication {
         request ⇒
           val lI = Individual(Resource(labworkId))
           val gI = Individual(Resource(groupId))
-          val s = gI.props.getOrElse(LWM.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-          val a = lI.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+          val s = gI.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))
+          val a = lI.props.getOrElse(LWM.hasAssignmentAssociation, Nil).map(r ⇒ Individual(Resource(r.value)))
           Future.successful(Ok(views.html.groups_detail_management(lI, gI, s, a)))
 
       }

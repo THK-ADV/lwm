@@ -8,42 +8,22 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentCount, List(StringLiteral("0"))).head.value</div>
+    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size</div>
         <table class="table table-bordered">
             <tbody>
                 <tr><th>Blatt</th> <th>Aufgabe</th> <th>Abgabetermin</th></tr>
-                @for(a <- associations; id <- a.props(LWM.hasOrderId)) {
-                    @if(a.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).nonEmpty) {
+                @for((a, index) <- associations.zip(Stream from 1)) {
                         <tr>
-                            <td>@id.value</td>
+                            <td>@{index + 1}</td>
                             <td>
                                 @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value <br />
                                 @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._1)
                             </td>
                             <td>
                                 @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._2)
-                                <a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a>
-
-                                <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
-                                                    Close</span></button>
-                                                <h4 class="modal-title" id="myModalLabel">Neue Abgabe hinzufügen</h4>
-                                            </div>
-                                            <div class="modal-body">
-
-                <!-- CHANGES THE ORIGINAL ASSOCIATION. NOT THE UNIQUE GROUP ONE. TODO: ADD INDIVIDUAL GROUP ASSOCIATIONS -->
-                                            @groups_assignment_association_update(labwork, group, a)
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
+                                @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral(""))).head.value.toInt + index}
                             </td>
                         </tr>
-                    }
                 }
             </tbody>
         </table>
