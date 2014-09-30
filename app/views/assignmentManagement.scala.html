@@ -1,4 +1,4 @@
-@(assignments: List[Resource], courses: List[Individual], aForm: Form[AssignmentFormModel], sForm: Form[AssignmentSolutionFormModel])
+@(assignments: List[Individual], courses: List[Individual], aForm: Form[AssignmentFormModel], sForm: Form[AssignmentSolutionFormModel])
 
 @import utils.semantic.Resource
 @import utils.semantic.Individual
@@ -13,7 +13,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @assignment_list(assignments, sForm)
+                    @assignment_list(assignments, courses, sForm)
                     <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                     </button>

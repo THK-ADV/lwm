@@ -3,8 +3,9 @@ package controllers
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Resource
-
+import utils.semantic.Vocabulary.LWM
+import utils.semantic.{ StringLiteral, Individual, Resource }
+import utils.Global._
 import scala.concurrent.{ Future, ExecutionContext }
 
 object DegreeManagementController extends Controller with Authentication {
@@ -46,6 +47,33 @@ object DegreeManagementController extends Controller with Authentication {
           Ok(views.html.degreeManagement(all, DegreeForms.degreeForm))
         }
       }
+    }
+  }
+
+  def degreeEdit(degreeid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { implicit request ⇒
+      val i = Individual(Resource(degreeid))
+      DegreeForms.degreeForm.bindFromRequest.fold(
+        formWithErrors ⇒ {
+          for {
+            degrees ← Degrees.all()
+          } yield {
+            BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors))
+          }
+        },
+        degree ⇒ {
+          val maybeId = i.props(LWM.hasId)
+          val maybeName = i.props(LWM.hasName)
+          for {
+            id ← maybeId
+            name ← maybeName
+          } yield {
+            i.update(LWM.hasId, id, StringLiteral(degree.id))
+            i.update(LWM.hasName, name, StringLiteral(degree.name))
+          }
+          Future.successful(Redirect(routes.DegreeManagementController.index()))
+        }
+      )
     }
   }
 }
