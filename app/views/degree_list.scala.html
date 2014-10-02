@@ -2,7 +2,7 @@
     @import utils.semantic.Individual
     @import utils.semantic.Vocabulary
     @import utils.semantic.StringLiteral
-
+    @import utils.Global._
 
     <div class="panel panel-default">
         <div class="panel-heading">Studiengangsübersicht</div>
@@ -12,12 +12,29 @@
                 <th>Name</th>
                 <th>ID</th>
             </tr>
-            @degrees.map(i => (i.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value, i.uri)).sortBy(_._1).map{degree =>
+            @degrees.map(i => (i.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value, i)).sortBy(_._1).map { degree =>
                 <tr>
                     <td>@degree._1</td>
                     <td>@degree._2</td>
-                    <td><a class="glyphicon glyphicon-pencil"></a></td>
-                    <td><a href="javascript: if(confirmed()) deleteDegree('@degree._3')" class="glyphicon glyphicon-remove"></a></td></tr>
+                    <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@degree._2"></a></td>
+                    <td><a href="javascript: if(confirmed()) deleteDegree('@degree._3.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+
+                    <div class="modal fade" id="@degree._2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                        Close</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">Neue Veranstaltung hinzufügen</h4>
+                                </div>
+                                <div class="modal-body">
+                                @degree_edit_form(degree._3, DegreeForms.degreeForm)
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </tr>
             }
 
         </table>

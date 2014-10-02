@@ -1,0 +1,17 @@
+@(course: Individual, degrees: List[Individual], form: Form[CourseFormModel])
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+
+    @defining(form.fill(CourseFormModel(course.props.getOrElse(LWM.hasName, List(StringLiteral(""))).head.value, course.props.getOrElse(LWM.hasId, List(StringLiteral(""))).head.value, course.props.getOrElse(LWM.hasDegree, List(StringLiteral(""))).head.value))) {f=>
+
+            @helper.form(action = routes.CourseManagementController.courseEdit(course.uri.value)) {
+                @helper.inputText(f("id"), '_label -> "Id:")
+                @helper.inputText(f("name"), '_label -> "Name:")
+                @helper.select(f("degree"), for(d <- degrees) yield d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value ,'_label -> "Studiengang:")
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+                    <button type="submit" class="btn btn-primary">Ändern</button>
+                </div>
+            }
+
+}

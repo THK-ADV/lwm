@@ -1,4 +1,4 @@
-@(courses: List[Individual])
+@(degrees: List[Individual], courses: List[Individual])
     @import utils.semantic.{Individual, Resource}
     @import utils.semantic.Vocabulary
     @import utils.semantic.StringLiteral
@@ -13,13 +13,29 @@
                 <th>ID</th>
                 <th>Studiengang</th>
             </tr>
-            @for(course <- courses) {
+            @for(course <- courses; id <- course.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral("")))) {
                 <tr>
                     <td>@course.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value</td>
                     <td>@course.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value</td>
                     <td>@Individual(Resource(course.props.getOrElse(Vocabulary.LWM.hasDegree, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Resource(""))).head.value</td>
-                    <td><a class="glyphicon glyphicon-pencil"></a></td>
+                    <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a></td>
                     <td><a href="javascript: if(confirmed()) deleteCourse('@course.uri.value')" class="glyphicon glyphicon-remove"></a> </td></tr>
+
+                <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                    Close</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
+                            </div>
+                            <div class="modal-body">
+                            @course_edit_form(course, degrees, CourseForms.courseForm)
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
             }
         </table>
 

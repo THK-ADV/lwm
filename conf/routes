@@ -22,6 +22,7 @@ GET           /administration/students/suggest                    controllers.St
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks/:id                        controllers.GroupManagementController.studentAddition(id)
+GET           /administration/labwroks/:id/export                 controllers.LabworkManagementController.export(id)
 POST          /administration/labworks/edit/:id                   controllers.LabworkManagementController.metaEdit(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
 PUT           /administration/labworks                            controllers.LabworkManagementController.setVisibility()
@@ -34,10 +35,12 @@ POST          /administration/labworkApplications                 controllers.La
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()
 DELETE        /administration/degrees                             controllers.DegreeManagementController.degreeRemoval()
+POST          /administration/degrees/:id                         controllers.DegreeManagementController.degreeEdit(id)
 
 GET           /administration/courses                             controllers.CourseManagementController.index()
 POST          /administration/courses                             controllers.CourseManagementController.coursePost()
 DELETE        /administration/courses                             controllers.CourseManagementController.courseRemoval()
+POST          /administration/courses/:id                         controllers.CourseManagementController.courseEdit(id)
 
 GET           /administration/firstTimeSetupStudent               controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser                  controllers.FirstTimeSetupController.setupUser()
@@ -69,6 +72,7 @@ DELETE        /administration/timetable/:id/entries               controllers.Ti
 POST          /administration/rooms                               controllers.RoomManagementController.roomPost()
 GET           /administration/rooms                               controllers.RoomManagementController.index()
 DELETE        /administration/rooms                               controllers.RoomManagementController.roomRemoval()
+POST          /administration/rooms/:id                           controllers.RoomManagementController.roomEdit(id)
 
 GET           /administration/semesters                           controllers.SemesterManagementController.index()
 POST          /administration/semesters                           controllers.SemesterManagementController.semesterPost()
@@ -76,10 +80,10 @@ DELETE        /administration/semesters                           controllers.Se
 
 GET           /administration/assignments                         controllers.AssignmentManagementController.index()
 POST          /administration/assignments                         controllers.AssignmentManagementController.assignmentPost()
-POST          /administration/assignments/:id                     controllers.AssignmentManagementController.assignmentSolutionPost(id)
+POST          /administration/assignments/:id                     controllers.AssignmentManagementController.assignmentEdit(id)
+POST          /administration/assignments/:id/solutions           controllers.AssignmentManagementController.assignmentSolutionPost(id)
 DELETE        /administration/assignments                         controllers.AssignmentManagementController.assignmentRemoval()
 
-#POST          /administration/labworks/:id/assignments            controllers.AssignmentManagementController.assignmentAssociationPost(id)
 POST          /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindAssignment(id,a)
 DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 

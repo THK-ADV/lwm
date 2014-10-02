@@ -1,5 +1,6 @@
 @(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabworkUpdateModel])
-@import utils.semantic.Individual
+@import utils.semantic.{Individual, Resource}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.Global._
 
 <!DOCTYPE html>
@@ -26,7 +27,8 @@
                     </div>
                     <div class="row">
                         <a href="@routes.TimetableController.index(labwork.uri.value)" class="btn btn-primary" role="button">
-                            Stundenplan</a>
+                            Stundenplan
+                        </a>
                     </div>
                 </div>
             </div>

@@ -1,8 +1,7 @@
 @(rooms: List[Individual])
 @import utils.semantic.Individual
 @import utils.semantic.StringLiteral
-@import utils.semantic.Vocabulary
-
+@import utils.semantic.Vocabulary._
 
 <div class="panel panel-default">
     <div class="panel-heading">Raumübersicht</div>
@@ -12,13 +11,29 @@
             <th>Raum</th>
             <th>Bezeichnung</th>
         </tr>
-        @for(room <- rooms) {
+        @for(room <- rooms; id <- room.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral("")))) {
             <tr>
                 <td>@room.props.getOrElse(Vocabulary.LWM.hasRoomId, List(StringLiteral(""))).head.value</td>
                 <td>@room.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value</td>
+                <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a></td>
                 <td><a href="javascript: if(confirmed()) deleteRoom('@room.uri.value')" class="glyphicon glyphicon-remove"></a></td>
             </tr>
-        }
+            <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                    Close</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Raum ändern</h4>
+                        </div>
+                        <div class="modal-body">
+                        @room_edit_form(room, Rooms.Forms.roomForm)
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+               }
     </table>
 
 </div>
