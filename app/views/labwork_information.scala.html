@@ -1,4 +1,4 @@
-@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabworkUpdateModel])
+@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkApplications: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabworkUpdateModel])
 @import utils.semantic.{Individual, Resource}
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.Global._
@@ -15,7 +15,7 @@
                 @navigation_admin()
                 <div class="col-md-9">
                     <div class = "row">
-                    @labwork_information_head(labwork, semesters, courses, lform)
+                    @labwork_information_head(labwork, semesters, courses, labworkApplications.size, lform)
                     </div>
                     <div class="row">
                     @labwork_individual_group_population(labwork, groups)
