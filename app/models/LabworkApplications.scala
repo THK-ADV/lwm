@@ -17,7 +17,7 @@ object LabworkApplications {
       mapping(
         "applicant" -> nonEmptyText,
         "labwork" -> nonEmptyText,
-        "partners" -> list(nonEmptyText)
+        "partners" -> list(text)
       )(LabworkApplicationFormModel.apply)(LabworkApplicationFormModel.unapply)
     )
   }
@@ -34,6 +34,7 @@ object LabworkApplications {
       Statement(applicationResource, RDF.typ, OWL.NamedIndividual),
       Statement(applicationResource, LWM.hasId, StringLiteral(application.id.toString)),
       Statement(applicationResource, LWM.hasApplicant, application.applicant),
+      Statement(application.applicant, LWM.hasPendingApplication, applicationResource),
       Statement(applicationResource, LWM.hasLabWork, application.labwork)
     ) ++ application.partners.map(p ⇒ Statement(applicationResource, LWM.hasPartner, p))
 

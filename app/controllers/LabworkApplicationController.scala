@@ -20,40 +20,34 @@ object LabworkApplicationController extends Controller with Authentication {
       Action.async { implicit request ⇒
         LabworkApplications.Forms.labworkApplicationForm.bindFromRequest.fold(
           formWithErrors ⇒ {
-            println(formWithErrors)
-            Future.successful(BadRequest(""))
+            Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
           },
           s ⇒ {
             Students.get(s.applicant).flatMap { applicantResource ⇒
-              println(applicantResource)
-              val applicantIndividual = Individual(applicantResource)
               val labworkIndividual = Individual(Resource(s.labwork))
 
               val applicationsAllowed = labworkIndividual.props.getOrElse(LWM.allowsApplications, List(StringLiteral("false"))).head.value.toBoolean
-              println(applicationsAllowed)
               if (applicationsAllowed) {
                 val partnersFuture = s.partners.map(Students.get)
                 val partnerList = partnersFuture.foldLeft(Future.successful(List.empty[Resource])) { (partners, fut) ⇒
-                  fut.flatMap { res ⇒
-                    partners.map { list ⇒
+                  partners.flatMap { list ⇒
+                    fut.map { res ⇒
                       res :: list
+                    }.recover {
+                      case NonFatal(t) ⇒ list
                     }
-                  }.recover {
-                    case NonFatal(t) ⇒ Nil
                   }
                 }
 
                 partnerList.flatMap { list ⇒
-                  println(list)
                   val labworkApplication = LabworkApplication(applicantResource, Resource(s.labwork), list)
                   LabworkApplications.create(labworkApplication).map { l ⇒
-                    println(s"Created $l")
                     Redirect(routes.StudentDashboardController.dashboard())
                   }
                 }
 
               } else {
-                Future.successful(BadRequest(""))
+                Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
               }
             }.recover {
               case NonFatal(t) ⇒
