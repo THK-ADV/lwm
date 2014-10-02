@@ -1,4 +1,4 @@
-@(openLabworks: List[Individual])
+@(openLabworks: List[Individual], form: Form[LabworkApplicationFormModel])
 @import utils.semantic.{Individual, Resource}
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 <!-- TODO: ADD BUTTON FUNCTIONALITY AND FORM -->
@@ -10,14 +10,11 @@
             <th>Wunsch</th>
             <th>Anmelden</th>
             <tbody>
-                @for(labwork <- openLabworks; label <- labwork.props(RDFS.label)) {
-                        <tr><td>@label</td>
-                            <td>@for(index <- 0 until 3) {
-                                Student @{index + 1}: <input type="text" name="mates[@index]"> <br />
-                                }</td>
-                            <script type="text/javascript">
-                            </script>
-                            <td><a href="#" class="glyphicon glyphicon-ok-circle"></a></td></tr>
+                @for(labwork <- openLabworks; label <- labwork.props.get(RDFS.label)) {
+                        <tr>
+                            <td>@label.headOption.fold("")(_.toString)</td>
+                            <td>@dashboard_labwork_application_form(labwork, form)</td>
+                        </tr>
                 }
             </tbody>
         </table>

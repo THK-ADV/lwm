@@ -125,6 +125,14 @@ object Vocabulary {
     val hasBlacklistDate = property("hasBlacklistDate")
     val hasBlacklist = property("hasBlacklist")
     val hasDate = property("hasDate")
+
+    val LabworkApplication = resource("LabworkApplication")
+    val hasPartner = property("hasPartner")
+    val hasApplicant = property("hasApplicant")
+
+    val LabworkApplicationList = resource("LabworkApplicationList")
+    val hasApplicationList = property("hasApplicationList")
+
   }
 
   /**

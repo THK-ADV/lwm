@@ -1,0 +1,17 @@
+@(labwork: Individual, form: Form[LabworkApplicationFormModel])
+@import utils.semantic.Individual
+
+@defining(form.fill(LabworkApplicationFormModel(form.data("applicant"), labwork.uri.value, Nil))){prefilled =>
+    @helper.form(action = routes.LabworkApplicationController.labworkApplicationPost()) {
+        @defining(prefilled("applicant")) { applicantField =>
+            <input type="hidden" name="@applicantField.name" id="@applicantField.id" value="@applicantField.value">
+        }
+        @defining(prefilled("labwork")) { labworkField =>
+            <input type="hidden" name="@labworkField.name" id="@labworkField.id" value="@labworkField.value">
+        }
+        @helper.repeat(prefilled("partners"), min=3){partnerField =>
+            @helper.inputText(partnerField, '_label -> "Partnerwunsch (ADV Kennung)")
+        }
+        <td><button type="submit" class="btn btn-primary glyphicon glyphicon-ok-circle"></button></td>
+    }
+}
