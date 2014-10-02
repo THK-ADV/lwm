@@ -64,13 +64,6 @@ object LabworkManagementController extends Controller with Authentication {
           |}
         """.stripMargin
 
-      val applicantsQuery =
-        s"""
-          |select (<$labworkid> as ?s) (${LWM.hasApplicant} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasApplicant} ?o
-          |}
-        """.stripMargin
-
       def allowedAssociationsQuery(course: Resource) =
         s"""
           |select ?s (${RDF.typ} as ?p) (${LWM.Assignment} as ?o) where {
@@ -95,9 +88,6 @@ object LabworkManagementController extends Controller with Authentication {
         SPARQLTools.statementsFromString(result).map(_.o)
       }
 
-      val applicantsFuture = sparqlExecutionContext.executeQuery(applicantsQuery).map { result ⇒
-        SPARQLTools.statementsFromString(result).map(_.o)
-      }
       val allowedAssociationsFutureFuture = for {
         degree ← degreeFuture
         course ← courseFuture
