@@ -24,7 +24,7 @@ object StudentDashboardController extends Controller {
         properLabworks = mappedLabworks.filter(p ⇒ properCourses.map(_.uri.value).contains(p._2)).map(_._1)
         availableLabworks = properLabworks.filter(p ⇒ p.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "true")
       } yield {
-        Ok(views.html.dashboard_student(availableLabworks, LabWorkForms.labWorkApplicationForm))
+        Ok(views.html.dashboard_student(availableLabworks, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }
 
     }

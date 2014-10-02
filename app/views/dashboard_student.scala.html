@@ -1,4 +1,4 @@
-@(openLabworks: List[Individual], courseApplicationForm: Form[LabWorkApplication])
+@(openLabworks: List[Individual], courseApplicationForm: Form[LabworkApplicationFormModel])
 @import utils.semantic.Individual
 
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
             <div class="row">
                 @navigation_student()
                 <div class="col-md-9">
-                @dashboard_student_classEnrolement(openLabworks)
+                @dashboard_student_classEnrolement(openLabworks, courseApplicationForm)
                 </div>
             </div>
             <div class="row">@footerAdmin()</div>

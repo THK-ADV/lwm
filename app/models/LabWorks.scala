@@ -11,21 +11,12 @@ case class LabWork(course: Resource, semester: Resource)
 case class LabWorkFormModel(courseId: String, semester: String)
 case class LabworkUpdateModel(courseId: String, semester: String, startDate: Date, endDate: Date)
 
-case class LabWorkApplication(courseResource: String, gmID: String)
-
 // TODO course id should be courseResourceURI
 
 object LabWorkForms {
 
   import play.api.data.Forms._
   import play.api.data._
-
-  val labWorkApplicationForm = Form(
-    mapping(
-      "courseResource" -> nonEmptyText,
-      "gmID" -> nonEmptyText
-    )(LabWorkApplication.apply)(LabWorkApplication.unapply)
-  )
 
   val labworkForm = Form(
     mapping(
@@ -64,6 +55,7 @@ object LabWorks {
 
     val resource = ResourceUtils.createResource(lwmNamespace)
     val timetable = Timetables.create(Timetable(resource, LocalDate.parse(startDate.value), LocalDate.parse(endDate.value)))
+    val labworkApplicationList = LabworkApplicationLists.create(LabworkApplicationList(resource))
 
     val label = courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.asLiteral().get
 
@@ -80,8 +72,10 @@ object LabWorks {
       Statement(resource, LWM.hasSemester, labWork.semester)
     )
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
-      Individual(resource)
+    labworkApplicationList.flatMap { list ⇒
+      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
+        Individual(resource)
+      }
     }
   }
 
