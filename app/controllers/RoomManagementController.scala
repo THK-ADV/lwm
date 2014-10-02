@@ -67,11 +67,9 @@ object RoomManagementController extends Controller with Authentication {
             }
           },
           room ⇒ {
-            val maybeId = i.props(LWM.hasRoomId)
-            val maybeName = i.props(LWM.hasName)
             for {
-              id ← maybeId
-              name ← maybeName
+              id ← i.props(LWM.hasRoomId)
+              name ← i.props(LWM.hasName)
             } yield {
               i.update(LWM.hasRoomId, id, StringLiteral(room.roomId))
               i.update(LWM.hasName, name, StringLiteral(room.name))

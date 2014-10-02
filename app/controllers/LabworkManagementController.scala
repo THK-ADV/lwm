@@ -198,4 +198,28 @@ object LabworkManagementController extends Controller with Authentication {
           )
       }
   }
+
+  def export(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async {
+      request ⇒
+        val i = Individual(Resource(labworkid))
+        val groupQuery =
+          s"""
+          |select (<$labworkid> as ?s) (${LWM.hasGroup} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasGroup} ?o
+          |}
+        """.stripMargin
+
+        val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o)
+        }
+
+        for {
+          groups ← groupsFuture
+        } yield {
+          val groupsWithStudents = groups.map(r ⇒ Individual(Resource(r.value))).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value))))).toMap
+          Ok(views.html.labwork_exported_groups(i, groupsWithStudents))
+        }
+    }
+  }
 }

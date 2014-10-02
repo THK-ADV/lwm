@@ -62,11 +62,9 @@ object DegreeManagementController extends Controller with Authentication {
           }
         },
         degree ⇒ {
-          val maybeId = i.props(LWM.hasId)
-          val maybeName = i.props(LWM.hasName)
           for {
-            id ← maybeId
-            name ← maybeName
+            id ← i.props(LWM.hasId)
+            name ← i.props(LWM.hasName)
           } yield {
             i.update(LWM.hasId, id, StringLiteral(degree.id))
             i.update(LWM.hasName, name, StringLiteral(degree.name))
