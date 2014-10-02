@@ -17,14 +17,16 @@ object StudentDashboardController extends Controller {
         student ← Students.get(session.user)
         courses ← Courses.all()
         labworks ← LabWorks.all()
-        studentDegree = Individual(student).props(LWM.hasEnrollment).head.value
+        si = Individual(student)
+        studentDegree = si.props(LWM.hasEnrollment).head.value
         mappedCourses = courses.map(c ⇒ (c, c.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value))
         properCourses = mappedCourses.filter(p ⇒ p._2 == studentDegree).map(_._1)
         mappedLabworks = labworks.map(l ⇒ (l, l.props.getOrElse(LWM.hasCourse, List(Resource(""))).head.value))
         properLabworks = mappedLabworks.filter(p ⇒ properCourses.map(_.uri.value).contains(p._2)).map(_._1)
         availableLabworks = properLabworks.filter(p ⇒ p.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "true")
+        pendingApplications = si.props.getOrElse(LWM.hasPendingApplication, Nil).map(r ⇒ Individual(Resource(r.value)))
       } yield {
-        Ok(views.html.dashboard_student(availableLabworks, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+        Ok(views.html.dashboard_student(availableLabworks, pendingApplications, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }
 
     }

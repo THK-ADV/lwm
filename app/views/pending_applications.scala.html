@@ -1,0 +1,22 @@
+@(pending: List[Individual])
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.Global._
+<div class="panel panel-default">
+    <div class="panel-heading">Angemeldete Praktikas</div>
+    <table class="table">
+    <tr>
+        <th>Praktikum</th>
+        <th>Status</th>
+    </tr>
+    <tbody>
+        @for(a <- pending; labwork = Individual(Resource(a.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value))) {
+            <tr>
+                <td>@labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+                <td>Pending..</td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+</div>

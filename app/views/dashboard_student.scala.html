@@ -1,9 +1,9 @@
-@(openLabworks: List[Individual], courseApplicationForm: Form[LabworkApplicationFormModel])
-@import utils.semantic.Individual
+@(openLabworks: List[Individual], pendingApplications: List[Individual], courseApplicationForm: Form[LabworkApplicationFormModel])
+    @import utils.semantic.Individual
 
 <!DOCTYPE html>
-<html>
-    @head("Dashboard")
+    <html>
+        @head("Dashboard")
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -11,10 +11,16 @@
             </div>
             <div class="row">
                 @navigation_student()
-                <div class="col-md-9">
+            <div class="col-md-9">
+                <div class="row">
                 @dashboard_student_classEnrolement(openLabworks, courseApplicationForm)
                 </div>
+                <div class="row">
+                @pending_applications(pendingApplications)
+                </div>
             </div>
+            </div>
+
             <div class="row">@footerAdmin()</div>
         </div>
 
