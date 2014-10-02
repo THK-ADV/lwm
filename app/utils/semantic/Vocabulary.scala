@@ -129,6 +129,7 @@ object Vocabulary {
     val LabworkApplication = resource("LabworkApplication")
     val hasPartner = property("hasPartner")
     val hasApplicant = property("hasApplicant")
+    val hasPendingApplication = property("hasPendingApplication")
 
     val LabworkApplicationList = resource("LabworkApplicationList")
     val hasApplicationList = property("hasApplicationList")
