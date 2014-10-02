@@ -3,28 +3,39 @@ package controllers
 import controllers.AdministrationDashboardController._
 import models._
 import play.api.mvc.{ Action, Controller }
-import utils.semantic.{ StringLiteral, Resource, Individual }
+import utils.semantic.{ SPARQLTools, StringLiteral, Resource, Individual }
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object StudentDashboardController extends Controller {
+  import utils.Global._
 
   def dashboard = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
     Action.async {
+      def availableLabworks(student: Resource) = {
+        val query =
+          s"""
+                   select ($student as ?s) (${LWM.allowsApplications} as ?p) ?o where {
+                     $student ${LWM.hasEnrollment} ?degree .
+                     ?course ${LWM.hasDegree} ?degree .
+                     ?o ${LWM.hasCourse} ?course .
+                     ?o ${LWM.allowsApplications} "true" .
+                   }
+                 """.stripMargin
+
+        sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
+        }
+      }
+
       for {
         student ← Students.get(session.user)
-        courses ← Courses.all()
-        labworks ← LabWorks.all()
-        studentDegree = Individual(student).props(LWM.hasEnrollment).head.value
-        mappedCourses = courses.map(c ⇒ (c, c.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value))
-        properCourses = mappedCourses.filter(p ⇒ p._2 == studentDegree).map(_._1)
-        mappedLabworks = labworks.map(l ⇒ (l, l.props.getOrElse(LWM.hasCourse, List(Resource(""))).head.value))
-        properLabworks = mappedLabworks.filter(p ⇒ properCourses.map(_.uri.value).contains(p._2)).map(_._1)
-        availableLabworks = properLabworks.filter(p ⇒ p.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "true")
+        availableLabworks ← availableLabworks(student)
+        labworkList = availableLabworks.map(r ⇒ Individual(r)).toList
       } yield {
-        Ok(views.html.dashboard_student(availableLabworks, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+        Ok(views.html.dashboard_student(labworkList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }
 
     }
