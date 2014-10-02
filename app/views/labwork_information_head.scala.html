@@ -1,4 +1,4 @@
-@(labwork: Individual, semesters: List[Individual], courses: List[Individual], form: Form[LabworkUpdateModel])
+@(labwork: Individual, semesters: List[Individual], courses: List[Individual], applications: Int,form: Form[LabworkUpdateModel])
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.{Resource, StringLiteral}
@@ -6,7 +6,7 @@
 @import utils.Global._
 <table class="table">
     <tr>
-        <th>Sichtbarkeit</th><th>Veranstaltung</th> <th>Studiengang</th> <th>Gruppenanzahl</th> <th>Aufgabenanzahl</th> <th>Startdatum</th> <th>
+        <th>Sichtbarkeit</th><th>Veranstaltung</th> <th>Studiengang</th> <th>Gruppenanzahl</th><th>Aufgabenanzahl</th> <th>Startdatum</th> <th>
         Enddatum</th> <th>Semester</th> <th></th>
     </tr>
     <tbody>
@@ -22,6 +22,7 @@
             <td>@Individual(Resource(sem.head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
             <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#myModal"></a></td>
         </tr>
+        <tr><td>Anmeldungen: @applications</td></tr>
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">

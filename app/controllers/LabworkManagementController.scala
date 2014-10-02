@@ -64,6 +64,13 @@ object LabworkManagementController extends Controller with Authentication {
           |}
         """.stripMargin
 
+      val applicantsQuery =
+        s"""
+          |select (<$labworkid> as ?s) (${LWM.hasApplicant} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasApplicant} ?o
+          |}
+        """.stripMargin
+
       def allowedAssociationsQuery(course: Resource) =
         s"""
           |select ?s (${RDF.typ} as ?p) (${LWM.Assignment} as ?o) where {
@@ -88,6 +95,9 @@ object LabworkManagementController extends Controller with Authentication {
         SPARQLTools.statementsFromString(result).map(_.o)
       }
 
+      val applicantsFuture = sparqlExecutionContext.executeQuery(applicantsQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o)
+      }
       val allowedAssociationsFutureFuture = for {
         degree ← degreeFuture
         course ← courseFuture
@@ -100,6 +110,7 @@ object LabworkManagementController extends Controller with Authentication {
         }
       }
       for {
+        allApplications ← LabworkApplications.all()
         groups ← groupsFuture
         semesters ← Semesters.all()
         courses ← Courses.all()
@@ -109,10 +120,13 @@ object LabworkManagementController extends Controller with Authentication {
         allowedAssociationsFuture ← allowedAssociationsFutureFuture
         allowedAssociations ← allowedAssociationsFuture
       } yield {
+        val applications = allApplications.filter(r ⇒ r.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value == labworkid)
+
         Ok(views.html.labwork_information(
           labworkIndividual,
           groups.toList.map(node ⇒ Individual(node.asResource().get)),
           associations.toList.map(node ⇒ Individual(node.asResource().get)),
+          applications,
           allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
           semesters, courses,
           AssignmentForms.assignmentAssociationForm,
