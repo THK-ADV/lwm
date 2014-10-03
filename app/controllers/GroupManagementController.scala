@@ -43,9 +43,12 @@ object GroupManagementController extends Controller with Authentication {
         } yield {
           if (isStudent && isGroup) {
             val ig = Individual(groupResource)
+            val labwork = ig.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.asResource().get
             ig.add(LWM.hasMember, studentResource)
             val is = Individual(studentResource)
             is.add(LWM.memberOf, groupResource)
+            val appLabworkTuple = is.props.getOrElse(LWM.hasPendingApplication, List(Resource(""))).map(e ⇒ (e, Individual(e.asResource().get).props.getOrElse(LWM.hasLabWork, List(Resource(""))).filter(l ⇒ l.value == labwork.value)))
+            is.remove(LWM.hasPendingApplication, appLabworkTuple.head._1)
             ig.props.get(LWM.hasScheduleAssociation).map { assocs ⇒
               assocs.foreach { ass ⇒
                 is.add(LWM.hasScheduleAssociation, ass)
