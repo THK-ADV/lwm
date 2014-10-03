@@ -4,6 +4,7 @@ import java.util.UUID
 
 import play.api.data.Form
 import play.api.data.Forms._
+import utils.Global._
 import utils.semantic._
 
 import scala.concurrent.Future
@@ -29,6 +30,22 @@ object LabworkApplications {
 
   def create(application: LabworkApplication): Future[Individual] = {
     val applicationResource = ResourceUtils.createResource(lwmNamespace, application.id)
+
+    def applicationList(labwork: Resource) = {
+      val query =
+        s"""
+             |select ($labwork as ?s) (${LWM.hasApplicationList} as ?p) ?o where {
+             | $labwork ${LWM.hasApplicationList} ?o .
+             |}
+           """.stripMargin
+
+      sparqlExecutionContext.executeQuery(query).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
+      }
+    }
+
+    val list = applicationList(application.labwork)
+
     val statements = List(
       Statement(applicationResource, RDF.typ, LWM.LabworkApplication),
       Statement(applicationResource, RDF.typ, OWL.NamedIndividual),
@@ -38,7 +55,12 @@ object LabworkApplications {
       Statement(applicationResource, LWM.hasLabWork, application.labwork)
     ) ++ application.partners.map(p ⇒ Statement(applicationResource, LWM.hasPartner, p))
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(applicationResource))
+    list.flatMap { al ⇒
+      al.headOption.fold(sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(applicationResource))) { r ⇒
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(Statement(r, LWM.hasApplication, applicationResource) :: statements: _*)).map(b ⇒ Individual(applicationResource))
+      }
+
+    }
   }
 
   def delete(application: LabworkApplication): Future[LabworkApplication] = {

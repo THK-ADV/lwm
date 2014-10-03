@@ -1,0 +1,22 @@
+@(labworkApplicationLists: List[(Individual, String, String, Int)])
+@import utils.semantic.Individual
+
+<!DOCTYPE html>
+
+<html>
+    @head("Praktikumsanmeldungen")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    @labwork_application_lists(labworkApplicationLists)
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

@@ -30,6 +30,7 @@ DELETE        /administration/labworks                            controllers.La
 DELETE        /administration/labworks/:id                        controllers.GroupManagementController.studentRemoval(id)
 
 POST          /administration/labworkApplications                 controllers.LabworkApplicationController.labworkApplicationPost()
+GET           /administration/labworkApplications                 controllers.LabworkApplicationController.index()
 
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
