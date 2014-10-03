@@ -30,14 +30,60 @@ object StudentDashboardController extends Controller {
         }
       }
 
+      def pendingLabworkApplications(student: Resource) = {
+        val query =
+          s"""
+                   select ($student as ?s) (${LWM.hasPendingApplication} as ?p) ?o where {
+                     $student ${LWM.hasPendingApplication} ?application .
+                     ?application ${LWM.hasLabWork} ?o .
+                   }
+                 """.stripMargin
+
+        sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
+        }
+      }
+
+      def studentLabworks(student: Resource) = {
+        val query =
+          s"""
+                   select ($student as ?s) (${LWM.hasLabWork} as ?p) ?o where {
+                     $student ${LWM.memberOf} ?group .
+                     ?group ${LWM.hasLabWork} ?o .
+                   }
+                 """.stripMargin
+
+        sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
+        }
+      }
+
+      def studentLabworkGroup(student: Resource, labwork: Resource) = {
+        val query =
+          s"""
+                   select ($student as ?s) (${LWM.memberOf} as ?p) ?o where {
+                     $labwork ${LWM.hasGroup} ?group .
+                     ?group ${LWM.hasMember} $student .
+                     ?group ${RDFS.label} ?o .
+                   }
+                 """.stripMargin
+
+        sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o.asLiteral()).flatten
+        }
+      }
+
       for {
         student ← Students.get(session.user)
         availableLabworks ← availableLabworks(student)
         labworkList = availableLabworks.map(r ⇒ Individual(r)).toList
+        pendingLabworks ← pendingLabworkApplications(student)
+        pendingLabworkList = pendingLabworks.map(r ⇒ Individual(r)).toList
+        studentLabworks ← studentLabworks(student)
+        studentLabworkList = studentLabworks.map(r ⇒ Individual(r)).toList
+        labworkGroupAssocs ← Future.sequence(studentLabworks.map(r ⇒ studentLabworkGroup(student, r).map(l ⇒ Individual(r) -> l.map(_.decodedString))))
       } yield {
-        val si = Individual(student)
-        val pendingApplications = si.props.getOrElse(LWM.hasPendingApplication, Nil).map(r ⇒ Individual(Resource(r.value)))
-        Ok(views.html.dashboard_student(labworkList, pendingApplications, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+        Ok(views.html.dashboard_student((labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }
     }
   }

@@ -1,5 +1,5 @@
-@(openLabworks: List[Individual], pendingApplications: List[Individual], courseApplicationForm: Form[LabworkApplicationFormModel])
-    @import utils.semantic.Individual
+@(openLabworks: List[Individual], pendingApplications: List[Individual], studentLabworks: List[(Individual, Seq[String])], courseApplicationForm: Form[LabworkApplicationFormModel])
+        @import utils.semantic.Individual
 
 <!DOCTYPE html>
     <html>
@@ -12,12 +12,21 @@
             <div class="row">
                 @navigation_student()
             <div class="col-md-9">
-                <div class="row">
-                @dashboard_student_classEnrolement(openLabworks, courseApplicationForm)
-                </div>
-                <div class="row">
-                @pending_applications(pendingApplications)
-                </div>
+                @if(openLabworks.size > 0){
+                    <div class="row">
+                    @dashboard_student_classEnrolement(openLabworks, courseApplicationForm)
+                    </div>
+                }
+                @if(pendingApplications.size > 0){
+                    <div class="row">
+                    @pending_applications(pendingApplications)
+                    </div>
+                }
+                @if(studentLabworks.size > 0){
+                    <div class="row">
+                    @dashboard_student_labworks_list(studentLabworks)
+                    </div>
+                }
             </div>
             </div>
 
