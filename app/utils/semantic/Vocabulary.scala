@@ -133,6 +133,7 @@ object Vocabulary {
 
     val LabworkApplicationList = resource("LabworkApplicationList")
     val hasApplicationList = property("hasApplicationList")
+    val hasApplication = property("hasApplication")
 
   }
 

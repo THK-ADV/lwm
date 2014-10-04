@@ -1,10 +1,10 @@
 package controllers
 
-import models.{ LabworkApplication, LabworkApplications, Students }
+import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.LWM
-import utils.semantic.{ Individual, Resource, StringLiteral }
+import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -14,6 +14,72 @@ object LabworkApplicationController extends Controller with Authentication {
   import utils.Global._
 
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { request ⇒
+
+      val t = LabworkApplicationLists.all().flatMap { lists ⇒
+        Future.sequence(getApplicationListInfo(lists))
+      }
+
+      for (info ← t) yield Ok(views.html.labwork_application_management(info))
+    }
+  }
+
+  private def getApplicationListInfo(lists: List[Individual]) = {
+    def semester(list: Resource) = {
+      val query =
+        s"""
+             |select ($list as ?s) (${LWM.hasSemester} as ?p) ?o where {
+             | $list ${LWM.hasLabWork} ?labwork .
+             | ?labwork ${LWM.hasSemester} ?semester .
+             | ?semester ${RDFS.label} ?o .
+             |}
+           """.stripMargin
+
+      sparqlExecutionContext.executeQuery(query).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o.asLiteral()).flatten
+      }
+    }
+
+    def degree(list: Resource) = {
+      val query =
+        s"""
+             |select ($list as ?s) (${LWM.hasDegree} as ?p) ?o where {
+             | $list ${LWM.hasLabWork} ?labwork .
+             | ?labwork ${LWM.hasCourse} ?course .
+             | ?course ${LWM.hasDegree} ?degree .
+             | ?degree ${RDFS.label} ?o .
+             |}
+           """.stripMargin
+
+      sparqlExecutionContext.executeQuery(query).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o.asLiteral()).flatten
+      }
+    }
+
+    def applications(list: Resource) = {
+      val query =
+        s"""
+             |select ($list as ?s) (${LWM.hasApplication} as ?p) ?o where {
+             | $list ${LWM.hasApplication} ?o .
+             |}
+           """.stripMargin
+
+      sparqlExecutionContext.executeQuery(query).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
+      }
+    }
+
+    for (list ← lists) yield {
+      for {
+        ss ← semester(list.uri)
+        dd ← degree(list.uri)
+        aa ← applications(list.uri)
+      } yield (list, ss.head.toString, dd.head.toString, aa.size)
+    }
+
+  }
 
   def labworkApplicationPost() = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) {
     session ⇒
@@ -29,6 +95,8 @@ object LabworkApplicationController extends Controller with Authentication {
               val applicationsAllowed = labworkIndividual.props.getOrElse(LWM.allowsApplications, List(StringLiteral("false"))).head.value.toBoolean
               if (applicationsAllowed) {
                 val partnersFuture = s.partners.map(Students.get)
+
+                // Get resources for all known labwork partners
                 val partnerList = partnersFuture.foldLeft(Future.successful(List.empty[Resource])) { (partners, fut) ⇒
                   partners.flatMap { list ⇒
                     fut.map { res ⇒
