@@ -99,9 +99,8 @@ object LabWorks {
   * An assignment group.
   * @param id id of this group
   * @param labwork id of this associated labwork
-  * @param studentsURIs gmIds of the students
   */
-case class LabWorkGroup(id: String, labwork: Resource, studentsURIs: List[String])
+case class LabWorkGroup(id: String, labwork: Resource)
 
 object LabworkGroups {
 
@@ -116,7 +115,7 @@ object LabworkGroups {
       Statement(resource, RDF.typ, LWM.Group),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
       Statement(resource, LWM.hasGroupId, StringLiteral(group.id)),
-      Statement(resource, RDFS.label, StringLiteral(s"Gruppe ${group.id}")),
+      Statement(resource, RDFS.label, StringLiteral(group.id)),
       Statement(resource, LWM.hasLabWork, group.labwork),
       Statement(group.labwork, LWM.hasGroup, resource)
     )

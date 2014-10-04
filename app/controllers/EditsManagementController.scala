@@ -37,10 +37,10 @@ object EditsManagementController extends Controller with Authentication {
                 try {
                   val maybeGroup = individual.props(LWM.hasGroup)
                   val last = Individual(Resource(maybeGroup(maybeGroup.size - 1).value)).props.getOrElse(Vocabulary.LWM.hasGroupId, List(StringLiteral(""))).head.value
-                  LabworkGroups.create(LabWorkGroup(((last.charAt(0) + 1).asInstanceOf[Char]).toString, Resource(resource), Nil)).map(_ ⇒ Ok(uri))
+                  LabworkGroups.create(LabWorkGroup((last.charAt(0) + 1).asInstanceOf[Char].toString, Resource(resource))).map(_ ⇒ Ok(uri))
                 } catch {
                   case e: NoSuchElementException ⇒
-                    LabworkGroups.create(LabWorkGroup('A'.toString, Resource(resource), Nil)).map { p ⇒
+                    LabworkGroups.create(LabWorkGroup('A'.toString, Resource(resource))).map { p ⇒
                       individual.add(LWM.hasGroup, p.uri)
                     }.map { _ ⇒ Ok(uri) }
                 }

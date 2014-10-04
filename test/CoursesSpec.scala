@@ -2,7 +2,7 @@ import models.{ Courses, Course }
 import org.scalatest.concurrent.{ Futures, ScalaFutures }
 import org.scalatest.time.{ Millis, Seconds, Span }
 import utils.semantic.Vocabulary.{ RDFS, LWM }
-import utils.semantic.{Resource, StringLiteral, Statement, Individual}
+import utils.semantic.{ Resource, StringLiteral, Statement, Individual }
 
 class CoursesSpec extends LWMBaseSpec {
   import utils.Global._
@@ -24,7 +24,7 @@ class CoursesSpec extends LWMBaseSpec {
     "remove an existing Course" in {
       val course = Course("Test Course", "tc", Resource("TestResource"))
       Courses.delete(course)
-      whenReady(Courses.exists(course)){b => assert(!b)}
+      whenReady(Courses.exists(course)) { b ⇒ assert(!b) }
     }
 
   }

@@ -89,6 +89,11 @@ function edit(pred, obj, vals, stmts, res, oldvals, uri) {
     ajaxRequest("/administration/edits", "POST", "application/json", {predicate: pred, object: obj, values: vals, statements: stmts, resource: res, old: oldvals, redirect: uri}, reload);
 }
 
+function groupList(uri){
+    alert("Grouping list: " + uri);
+    ajaxRequest("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {}, reload);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

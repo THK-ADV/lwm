@@ -28,7 +28,7 @@
                             </tr>
                             @for(application <- applications){
                                 @defining(application.props){properties =>
-                                    @defining(properties.get(LWM.hasPartner)){applicant =>
+                                    @defining(properties.get(LWM.hasApplicant)){applicant =>
                                         @applicant.map{list =>
                                             @list.headOption.map { head =>
                                                 @head.asResource().map{resource =>
