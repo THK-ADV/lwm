@@ -17,10 +17,11 @@
         </tr>
         @for(applicationList <- labworkApplicationLists) {
             <tr>
-                <td>@applicationList._1.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.head.asLiteral().map(_.toString)))) </td>
+                <td>@applicationList._1.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))) </td>
                 <td>@applicationList._2</td>
                 <td>@applicationList._3</td>
                 <td>@applicationList._4</td>
+                <td><a href="@routes.LabworkApplicationController.applicationListEdit(applicationList._1.uri.value)" class="glyphicon glyphicon-pencil"></a></td>
             </tr>
         }
     </table>

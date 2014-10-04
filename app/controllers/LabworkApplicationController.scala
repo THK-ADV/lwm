@@ -126,4 +126,22 @@ object LabworkApplicationController extends Controller with Authentication {
         )
       }
   }
+
+  def applicationListEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { request ⇒
+      import utils.Global._
+
+      val applicationlist = Individual(Resource(id))
+
+      val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
+
+      applicationsFuture.map { applications ⇒
+        Ok(views.html.labwork_application_list_details(applicationlist, applications))
+      }.recover {
+        case NonFatal(t) ⇒
+          println(t)
+          Redirect(routes.LabworkApplicationController.index())
+      }
+    }
+  }
 }

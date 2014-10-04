@@ -1,0 +1,58 @@
+@(applicationList: Individual, applications: List[Individual])
+@import utils.semantic.StringLiteral
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.RDFS
+@import utils.Global._
+
+
+<!DOCTYPE html>
+
+<html>
+    @head(s"Anmeldungen: ${applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))).flatten.flatten.flatten.get}")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Anmeldungen für @{applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString))))}</div>
+
+                        <table class="table">
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                            </tr>
+                            @for(application <- applications){
+                                @defining(application.props){properties =>
+                                    @defining(properties.get(LWM.hasPartner)){applicant =>
+                                        @applicant.map{list =>
+                                            @list.headOption.map { head =>
+                                                @head.asResource().map{resource =>
+                                                    @defining(Individual(resource).props){applicantProps =>
+                                                        <tr>
+                                                            <td>@applicantProps.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
+                                                            <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

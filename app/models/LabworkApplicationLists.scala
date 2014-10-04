@@ -56,4 +56,17 @@ object LabworkApplicationLists {
       SPARQLTools.statementsFromString(stringResult).map(labworkApplicationList ⇒ Individual(labworkApplicationList.s)).toList
     }
   }
+
+  def getAllApplications(applicationList: Resource): Future[List[Individual]] = {
+    val query = s"""
+        |select ($applicationList as ?s) (${LWM.hasApplication} as ?p) ?o where{
+        |$applicationList ${LWM.hasApplication} ?o
+        |}
+      """.stripMargin
+
+    sparqlExecutionContext.executeQuery(query).map { result ⇒
+      SPARQLTools.statementsFromString(result).map(application ⇒ Individual(Resource(application.o.value))).toList
+    }
+
+  }
 }
