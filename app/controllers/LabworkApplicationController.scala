@@ -150,12 +150,10 @@ object LabworkApplicationController extends Controller with Authentication {
       import utils.Global._
 
       val applicationlist = Individual(Resource(id))
-      println("Init Grouping")
       val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
       applicationsFuture.map { applications ⇒
-        println(applications)
         applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
-          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 1, 1)
+          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 5, 16)
         }
       }
 
