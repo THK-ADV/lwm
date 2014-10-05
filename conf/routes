@@ -93,5 +93,9 @@ DELETE        /administration/labworks/:id/associations/:a        controllers.As
 POST          /administration/edits                               controllers.EditsManagementController.edit()
 
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
+
+# For test purposes only
+# GET           /administration/testdata                            controllers.TestDataController.generateTestData()
+
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                       controllers.Assets.at(path="/public", file)
