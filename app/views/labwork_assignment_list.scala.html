@@ -24,7 +24,7 @@
                     <td>
                     @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + index}
                     </td>
-                    <td><a href="javascript: edit('remove', 'assignmentAssociation', '@a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value , @a.props.getOrElse(LWM.hasPreparationTime, List(Resource("0"))).head.value', 'hasAssignment,hasPreparationTime', '@a.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
+                    <td><a href="javascript: if(confirmed()) applyEdit('DELETE assignmentAssocation HAVING @{a.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
                 </tr>
 
                 <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -45,4 +45,4 @@
             }
     </tbody>
 </table>
-<div class="panel-footer"><a href="javascript: edit('add new', 'assignmentAssociation', '@labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size','hasOrderId', '@labwork.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></div>
+<div class="panel-footer"><a href="javascript: applyEdit('CREATE assignmentAssociation HAVING @{LWM.hasOrderId}, @{LWM.hasLabWork} WITH @{labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size}, @{labwork.uri.value}', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></div>

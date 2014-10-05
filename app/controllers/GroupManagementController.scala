@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.LabworkManagementController._
-import models.{LabworkApplications, LabworkGroups, Students}
+import models.{ LabworkApplications, LabworkGroups, Students }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.{ SPARQLBuilder, SPARQLTools, Individual, Resource }
@@ -9,6 +9,7 @@ import utils.semantic.Vocabulary.{ LWM }
 import utils.Global._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
   * Created by root on 9/15/14.
   */
@@ -43,7 +44,6 @@ object GroupManagementController extends Controller with Authentication {
         } yield {
           if (isStudent && isGroup) {
             val ig = Individual(groupResource)
-            val labwork = ig.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.asResource().get
 
             ig.add(LWM.hasMember, studentResource)
             val is = Individual(studentResource)
@@ -62,7 +62,6 @@ object GroupManagementController extends Controller with Authentication {
                 is.add(LWM.hasScheduleAssociation, ass)
               }
             }
-            LabworkApplications.delete(appLabworkTuple.head._1.asResource().get).map(_=> Redirect(routes.LabworkManagementController.index()))
           }
           Redirect(routes.LabworkManagementController.index())
         }

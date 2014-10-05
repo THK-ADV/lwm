@@ -8,11 +8,11 @@
         <tbody>
             <tr><th>Gruppe</th><th>Anzahl</th></tr>
             @for(g <- groups; gId <- g.props(LWM.hasGroupId)) {
-                <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, g.uri.value)">@gId.value</a></td> <td>@g.props.getOrElse(LWM.hasMember, List.empty).size</td><td><a href="javascript: edit('remove', 'group', 'none', 'hasLabwork', '@g.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td></tr>
+                <tr><td><a href="@routes.GroupManagementController.index(labwork.uri.value, g.uri.value)">@gId.value</a></td> <td>@g.props.getOrElse(LWM.hasMember, List.empty).size</td><td><a href="javascript: if(confirmed()) applyEdit('DELETE group HAVING @{g.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td></tr>
             }
         </tbody>
     </table>
-    <div class="panel-footer"><a href="javascript: edit('add new', 'group', 'none','hasLabWork', '@labwork.uri.value', 'none', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a>
+    <div class="panel-footer"><a href="javascript: applyEdit('CREATE group HAVING @{LWM.hasLabWork} WITH @{labwork.uri.value}', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a>
     </div>
 </div>
 
