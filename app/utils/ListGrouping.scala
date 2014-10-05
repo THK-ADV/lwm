@@ -175,30 +175,28 @@ object ListGrouping {
         if (existingGroups.size > 0) {
           val minGroup = existingGroups.minBy(_.members.size)
           if (minGroup.members.size + partners.size + 1 < maxGroupSize * 1.1) {
-            println(s"Adding applicant and partners to group ${minGroup.groupResource}")
             minGroup.addMember(Resource(a.value), application.uri, partners)
           } else {
             val group = Group(labwork)
-            println(s"Adding applicant and partners to new group $group")
             additionalGroups = group +: additionalGroups
             group.addMember(Resource(a.value), application.uri, partners)
           }
         } else {
-          println("No existing groups")
           if (additionalGroups.size > 0) {
             val minGroup = additionalGroups.minBy(_.members.size)
             if (minGroup.members.size + partners.size + 1 < maxGroupSize * 1.1) {
-              println(s"Adding applicant and partners to additional group $minGroup")
               minGroup.addMember(Resource(a.value), application.uri, partners)
             } else {
-              val group = Group(labwork)
-              println(s"Adding applicant and partners to new group $group")
-              additionalGroups = group +: additionalGroups
-              group.addMember(Resource(a.value), application.uri, partners)
+              if (unprocessedApplications.size < minGroupSize) {
+                minGroup.addMember(Resource(a.value), application.uri, partners)
+              } else {
+                val group = Group(labwork)
+                additionalGroups = group +: additionalGroups
+                group.addMember(Resource(a.value), application.uri, partners)
+              }
             }
           } else {
             val group = Group(labwork)
-            println(s"Adding applicant and partners to new group $group")
             additionalGroups = group +: additionalGroups
             group.addMember(Resource(a.value), application.uri, partners)
           }
