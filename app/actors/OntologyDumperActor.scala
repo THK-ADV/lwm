@@ -32,7 +32,7 @@ class OntologyDumperActor(dataUrl: String) extends Actor {
       val os = new ByteArrayOutputStream()
       unionModel.write(os, "TTL")
 
-      val f = new File(folder, s"lwm_dump_${LocalDateTime.now()}.ttl")
+      val f = new File(folder, s"lwm_dump_${LocalDateTime.now().toString("yyyy-MM-dd-(HH-mm-ss)")}.ttl")
       if (!f.exists()) {
         Files.createFile(f.toPath)
       }
