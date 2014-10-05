@@ -24,7 +24,7 @@
                     <td>
                     @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + index}
                     </td>
-                    <td><a href="javascript: if(confirmed()) applyEdit('DELETE assignmentAssocation HAVING @{a.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
+                    <td><a href="javascript: if(confirmed()) applyEdit('DELETE assignmentAssociation HAVING @{a.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
                 </tr>
 
                 <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

@@ -89,6 +89,10 @@ function applyEdit(q, uri) {
     ajaxRequest("/administration/edits", "POST", "application/json", {query: q, redirect: uri}, reload);
 }
 
+function groupList(uri){
+    ajaxRequest("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {}, reload);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({
@@ -100,7 +104,6 @@ function ajaxRequest(url, type, cType, data, funct) {
             funct(message);
         },
         error: function (error) {
-            alert("Shit");
             console.log(error);
         }
     });

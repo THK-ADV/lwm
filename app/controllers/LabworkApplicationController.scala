@@ -2,6 +2,7 @@ package controllers
 
 import models._
 import play.api.mvc.{ Action, Controller }
+import utils.ListGrouping
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
@@ -126,4 +127,38 @@ object LabworkApplicationController extends Controller with Authentication {
         )
       }
   }
+
+  def applicationListEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { request ⇒
+      import utils.Global._
+
+      val applicationlist = Individual(Resource(id))
+
+      val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
+
+      applicationsFuture.map { applications ⇒
+        Ok(views.html.labwork_application_list_details(applicationlist, applications))
+      }.recover {
+        case NonFatal(t) ⇒
+          Redirect(routes.LabworkApplicationController.index())
+      }
+    }
+  }
+
+  def groupList(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { request ⇒
+      import utils.Global._
+
+      val applicationlist = Individual(Resource(id))
+      val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
+      applicationsFuture.map { applications ⇒
+        applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
+          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 5, 16)
+        }
+      }
+
+      Future.successful(Redirect(routes.LabworkApplicationController.index()))
+    }
+  }
+
 }
