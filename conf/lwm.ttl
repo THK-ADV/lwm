@@ -18,6 +18,24 @@
 #################################################################
 
 
+###  http://lwm.gm.fh-koeln.de/hasApplicant
+
+:hasApplicant rdf:type owl:ObjectProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasApplication
+
+:hasApplication rdf:type owl:ObjectProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasApplicationList
+
+:hasApplicationList rdf:type owl:ObjectProperty .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/hasApplicationToken
 
 :hasApplicationToken rdf:type owl:ObjectProperty ;
@@ -48,6 +66,18 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/hasAssignmentDateTimetableEntry
+
+:hasAssignmentDateTimetableEntry rdf:type owl:ObjectProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasBlacklist
+
+:hasBlacklist rdf:type owl:ObjectProperty .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/hasCourse
 
 :hasCourse rdf:type owl:ObjectProperty ;
@@ -61,6 +91,12 @@
 :hasDegree rdf:type owl:ObjectProperty ;
            
            rdfs:range :Degree .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasDueDateTimetableEntry
+
+:hasDueDateTimetableEntry rdf:type owl:ObjectProperty .
 
 
 
@@ -98,11 +134,29 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/hasPartner
+
+:hasPartner rdf:type owl:ObjectProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasPendingApplication
+
+:hasPendingApplication rdf:type owl:ObjectProperty .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/hasRoom
 
 :hasRoom rdf:type owl:ObjectProperty ;
          
          rdfs:range :Room .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasScheduleAssociation
+
+:hasScheduleAssociation rdf:type owl:ObjectProperty .
 
 
 
@@ -176,9 +230,33 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/hasAssignmentDate
+
+:hasAssignmentDate rdf:type owl:DatatypeProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasBlacklistDate
+
+:hasBlacklistDate rdf:type owl:DatatypeProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasDate
+
+:hasDate rdf:type owl:DatatypeProperty .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/hasDescription
 
 :hasDescription rdf:type owl:DatatypeProperty .
+
+
+
+###  http://lwm.gm.fh-koeln.de/hasDueDate
+
+:hasDueDate rdf:type owl:DatatypeProperty .
 
 
 
@@ -322,6 +400,18 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/Blacklist
+
+:Blacklist rdf:type owl:Class .
+
+
+
+###  http://lwm.gm.fh-koeln.de/BlacklistDate
+
+:BlacklistDate rdf:type owl:Class .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/Course
 
 :Course rdf:type owl:Class ;
@@ -362,6 +452,18 @@
 
 
 
+###  http://lwm.gm.fh-koeln.de/LabworkApplication
+
+:LabworkApplication rdf:type owl:Class .
+
+
+
+###  http://lwm.gm.fh-koeln.de/LabworkApplicationList
+
+:LabworkApplicationList rdf:type owl:Class .
+
+
+
 ###  http://lwm.gm.fh-koeln.de/Room
 
 :Room rdf:type owl:Class ;
@@ -369,6 +471,12 @@
       rdfs:label "Raum" ;
       
       rdfs:subClassOf owl:Thing .
+
+
+
+###  http://lwm.gm.fh-koeln.de/ScheduleAssociation
+
+:ScheduleAssociation rdf:type owl:Class .
 
 
 
