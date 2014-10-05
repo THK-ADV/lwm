@@ -1,6 +1,6 @@
 package utils
 
-import actors.{ EmailHandler, SessionHandler }
+import actors.{ OntologyDumperActor, EmailHandler, SessionHandler }
 import akka.util.Timeout
 import controllers.UserInfoManagement
 import models.{ Students, Student }
@@ -16,8 +16,11 @@ object Global extends GlobalSettings {
 
   import scala.concurrent.duration._
 
-  private val updateHost = "http://localhost:3030/lwm/update"
-  private val queryHost = "http://localhost:3030/lwm/query"
+  lazy val port = 3030
+  lazy val serviceName = "lwm"
+  lazy val updateHost = s"http://localhost:$port/$serviceName/update"
+  lazy val queryHost = s"http://localhost:$port/$serviceName/query"
+  lazy val dataInf = s"http://localhost:$port/$serviceName/data"
 
   implicit val timeout = Timeout(30.seconds)
   implicit val sparqlExecutionContext = SPARQLExecution(queryHost, updateHost)
@@ -27,6 +30,7 @@ object Global extends GlobalSettings {
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
     Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
+    Akka.system.actorOf(OntologyDumperActor.props(dataInf), "dumper")
     Logger.debug("Application has started")
   }
 
