@@ -90,7 +90,6 @@ function edit(pred, obj, vals, stmts, res, oldvals, uri) {
 }
 
 function groupList(uri){
-    alert("Grouping list: " + uri);
     ajaxRequest("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {}, reload);
 }
 
@@ -105,7 +104,6 @@ function ajaxRequest(url, type, cType, data, funct) {
             funct(message);
         },
         error: function (error) {
-            alert("Shit");
             console.log(error);
         }
     });
