@@ -56,4 +56,5 @@ data
 /store
 
 #db dump
+/dump
 *.ttl
