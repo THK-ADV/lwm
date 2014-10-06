@@ -7,21 +7,19 @@
     @head("First Time Setup")
         <body>
         @helper.form(action = routes.UserManagement.userFirstTimeSelf()) {
-
             <div class="panel panel-default">
                 <div class="panel-heading"><h3 class="panel-title">Registrierung</h3></div>
                 <div class="panel-body well">
-                    @helper.inputText(form("id"), 'readonly -> "readonly")
-                    @helper.inputText(form("firstname"))
-                    @helper.inputText(form("lastname"))
-                    @helper.inputText(form("email"))
-                    @helper.inputText(form("phone"))
-
+                    @helper.inputText(form("id"), '_class -> "dl-horizontal", '_label -> "ADV-Kennung:")
+                    @helper.inputText(form("firstname"), '_class -> "dl-horizontal", '_label -> "Vorname:")
+                    @helper.inputText(form("lastname"), '_class -> "dl-horizontal", '_label -> "Nachname:")
+                    @helper.inputText(form("email"), '_class -> "dl-horizontal", '_label -> "Email:")
+                    @helper.inputText(form("phone"), '_class -> "dl-horizontal", '_label -> "Telefon:")
                     <dl class="dl-horizontal">
                         <dd><button type="submit">Abschicken</button></dd>
                     </dl>
-                }
-</div>
-</div>
+                </div>
+            </div>
+        }
 </body>
 </html>
