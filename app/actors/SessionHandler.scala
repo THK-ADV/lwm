@@ -81,7 +81,7 @@ class SessionHandler(config: Configuration) extends Actor {
       val nameFuture = getName(user, bindHost, bindPort, DN)
 
       nameFuture.map {
-        case Left(e) ⇒ println("ERROR")
+        case Left(e) ⇒ println(e)
         case Right(maybeName) ⇒ maybeName map { name ⇒
           requester ! (name._1, name._2)
         }

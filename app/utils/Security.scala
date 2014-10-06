@@ -19,11 +19,11 @@ object Security {
     import scala.concurrent.ExecutionContext.Implicits.global
     import scala.concurrent.duration._
 
-    private implicit val timeout = Timeout(5.seconds)
+    private implicit val timeout = Timeout(15.seconds)
     private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
     def onUnauthorized(request: RequestHeader) = {
-      Results.Redirect(routes.Application.index)
+      Results.Redirect(routes.Application.index())
     }
 
     def hasSession(action: SessionHandler.Session ⇒ EssentialAction): EssentialAction = EssentialAction { requestHeader ⇒
