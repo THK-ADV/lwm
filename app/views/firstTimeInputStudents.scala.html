@@ -11,6 +11,7 @@
         <div class="panel panel-default">
             <div class="panel-heading"><h3 class="panel-title">Registrierung</h3></div>
             <div class="panel-body well">
+                @helper.form(action = routes.StudentsManagement.studentPost())) {
                 @helper.inputText(form("registrationNumber"), '_label -> "Matrikelnummer")
                 @helper.inputText(form("firstname"), '_label -> "Vorname")
                 @helper.inputText(form("lastname"), '_label -> "Nachname")
