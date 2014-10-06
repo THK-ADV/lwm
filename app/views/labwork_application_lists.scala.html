@@ -22,7 +22,7 @@
                 <td>@applicationList._3</td>
                 <td>@applicationList._4</td>
                 <td><a href="@routes.LabworkApplicationController.applicationListEdit(applicationList._1.uri.value)" class="glyphicon glyphicon-pencil"></a></td>
-                <td><a href="javascript: groupList('@applicationList._1.uri.value')" class="glyphicon glyphicon-th"></a></td>
+                <td><a href="javascript: if(confirmed()) groupList('@applicationList._1.uri.value')" class="glyphicon glyphicon-th"></a></td>
             </tr>
         }
     </table>

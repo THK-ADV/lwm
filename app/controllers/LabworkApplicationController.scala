@@ -161,4 +161,16 @@ object LabworkApplicationController extends Controller with Authentication {
     }
   }
 
+  def applicationRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+    session ⇒
+      Action.async(parse.json) {
+        request ⇒
+          val appId = (request.body \ "app").asOpt[String]
+          val listId = (request.body \ "list").asOpt[String]
+          if (appId.isDefined && listId.isDefined) {
+            LabworkApplications.delete(Resource(appId.get)).map(_ ⇒ Redirect(routes.LabworkApplicationController.applicationListEdit(listId.get))).recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.index() }
+          }
+          Future.successful(Redirect(routes.LabworkApplicationController.index()))
+      }
+  }
 }
