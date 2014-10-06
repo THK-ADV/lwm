@@ -12,7 +12,7 @@
                 <th>Name</th>
                 <th>ID</th>
             </tr>
-            @degrees.map(i => (i.props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value, i)).sortBy(_._1).map { degree =>
+            @degrees.map(i => (i.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value, i.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value, i)).sortBy(_._1).map { degree =>
                 <tr>
                     <td>@degree._1</td>
                     <td>@degree._2</td>
