@@ -12,9 +12,9 @@
         <div class="panel panel-default">
             <div class="panel-heading"><h3 class="panel-title">Registrierung</h3></div>
             <div class="panel-body well">
-                <input type="hidden" name="id" value="@form("id").value">
-                <input type="hidden" name="firstname" value="@form("firstname").value">
-                <input type="hidden" name="lastname" value="@form("lastname").value">
+                @helper.inputText(form("id"), '_class -> "dl-horizontal", '_label -> "ADV-Kennung:")
+                @helper.inputText(form("firstname"), '_class -> "dl-horizontal", '_label -> "Vorname:")
+                @helper.inputText(form("lastname"), '_class -> "dl-horizontal", '_label -> "Nachname:")
                 @helper.inputText(form("registrationNumber"), '_class -> "dl-horizontal", '_label -> "Matrikelnummer:")
                 @helper.inputText(form("email"), '_class -> "dl-horizontal", '_label -> "Email:")
                 @helper.inputText(form("phone"), '_class -> "dl-horizontal", '_label -> "Telefon:")
