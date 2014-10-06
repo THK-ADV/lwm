@@ -1,0 +1,27 @@
+@(student: Individual, degrees: List[Individual], form: Form[Student])
+
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS, FOAF, NCO}
+
+@defining(form.fill(Student(student.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(FOAF.mbox, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(NCO.phoneNumber, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))) { f =>
+
+    @helper.form(action = routes.StudentsManagement.studentEdit(student.uri.value)) {
+        @helper.inputText(f("id"), '_label -> "GmId:")
+        @helper.inputText(f("firstname"), '_label -> "Vorname:")
+        @helper.inputText(f("lastname"), '_label -> "Nachname:")
+        @helper.inputText(f("registrationNumber"), '_label -> "Matrikelnummer:")
+        @helper.inputText(f("email"), '_label -> "Email:")
+        @helper.inputText(f("phone"), '_label -> "Telefon:")
+        @helper.select(f("degree"), (for(d <- degrees) yield d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value).sortBy(_._2), '_label -> "Studiengang:")
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Ändern</button>
+        </div>
+    }
+}

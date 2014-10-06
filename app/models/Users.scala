@@ -22,7 +22,7 @@ object UserForms {
       "registrationNumber" -> text,
       "email" -> email,
       "phone" -> text,
-      "degree" -> text
+      "degree" -> nonEmptyText
     )(Student.apply)(Student.unapply)
   )
 

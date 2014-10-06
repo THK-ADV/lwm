@@ -1,0 +1,23 @@
+@(user: Individual, form: Form[User])
+
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS, FOAF, NCO}
+
+@defining(form.fill(User(user.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(FOAF.mbox, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(NCO.phoneNumber, List(StringLiteral(""))).head.value))) { f =>
+
+    @helper.form(action = routes.UserManagement.userEdit(user.uri.value)) {
+        @helper.inputText(f("id"), '_label -> "GmId:")
+        @helper.inputText(f("firstname"), '_label -> "Vorname:")
+        @helper.inputText(f("lastname"), '_label -> "Nachname:")
+        @helper.inputText(f("email"), '_label -> "Email:")
+        @helper.inputText(f("phone"), '_label -> "Telefon:")
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Ändern</button>
+        </div>
+    }
+}

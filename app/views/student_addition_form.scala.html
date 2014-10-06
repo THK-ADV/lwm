@@ -1,0 +1,20 @@
+@(degrees: List[Individual], form: Form[Student])
+@import utils.semantic.StringLiteral
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Individual
+
+@helper.form(action = routes.StudentsManagement.studentPost()) {
+    @helper.inputText(form("id"), '_label -> "GmId:")
+    @helper.inputText(form("firstname"), '_label -> "Vorname:")
+    @helper.inputText(form("lastname"), '_label -> "Nachname:")
+    @helper.inputText(form("registrationNumber"), '_label -> "Matrikelnummer:")
+    @helper.inputText(form("email"), '_label -> "Email:")
+    @helper.inputText(form("phone"), '_label -> "Telefon:")
+    @helper.select(form("degree"), (for(d <- degrees) yield {
+        d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
+    }).sortBy(_._2), '_label -> "Studiengang:")
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
+    </div>
+}

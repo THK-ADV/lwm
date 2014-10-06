@@ -36,6 +36,7 @@
                                                         <tr>
                                                             <td>@applicantProps.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
                                                             <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
+                                                            <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
                                                         </tr>
                                                     }
                                                 }

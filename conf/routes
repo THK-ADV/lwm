@@ -11,6 +11,7 @@ DELETE        /api/sessions                                       controllers.Se
 GET           /administration/users                               controllers.UserManagement.index()
 POST          /administration/users                               controllers.UserManagement.userPost()
 DELETE        /administration/users                               controllers.UserManagement.userRemoval()
+POST          /administration/users/:id                           controllers.UserManagement.userEdit(id)
 
 GET           /administration/dashboard                           controllers.AdministrationDashboardController.dashboard()
 
@@ -18,6 +19,7 @@ GET           /administration/students                            controllers.St
 POST          /administration/students                            controllers.StudentsManagement.studentPost()
 DELETE        /administration/students                            controllers.StudentsManagement.studentRemoval()
 GET           /administration/students/suggest                    controllers.StudentsManagement.studentSuggestions()
+POST          /administration/students/:id                        controllers.StudentsManagement.studentEdit(id)
 
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
@@ -33,7 +35,7 @@ POST          /administration/labworkApplications                 controllers.La
 POST          /administration/labworkApplications/:id             controllers.LabworkApplicationController.groupList(id)
 GET           /administration/labworkApplications                 controllers.LabworkApplicationController.index()
 GET           /administration/labworkApplications/:id             controllers.LabworkApplicationController.applicationListEdit(id)
-
+DELETE        /administration/labworkApplications                 controllers.LabworkApplicationController.applicationRemoval()
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()

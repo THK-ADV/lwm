@@ -1,10 +1,13 @@
 package controllers
 
-import models.{ Degrees, Students, UserForms }
+import models._
 import play.api.libs.json.{ JsArray, JsString, Json }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Resource
+import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
+import utils.semantic.Vocabulary.{ LWM, RDFS, NCO, FOAF }
+import utils.Global._
+import scala.concurrent.Future
 
 object StudentsManagement extends Controller with Authentication {
 
@@ -14,8 +17,9 @@ object StudentsManagement extends Controller with Authentication {
     Action.async { request ⇒
       for {
         students ← Students.all()
+        degrees ← Degrees.all()
       } yield {
-        Ok(views.html.studentManagement(students.toList, UserForms.studentForm))
+        Ok(views.html.studentManagement(students.toList, degrees, UserForms.studentForm))
       }
     }
   }
@@ -40,8 +44,11 @@ object StudentsManagement extends Controller with Authentication {
     Action.async { implicit request ⇒
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
-          for (all ← Students.all()) yield {
-            BadRequest(views.html.studentManagement(all.toList, formWithErrors))
+          for {
+            all ← Students.all()
+            degrees ← Degrees.all()
+          } yield {
+            BadRequest(views.html.studentManagement(all.toList, degrees, formWithErrors))
           }
         },
         student ⇒ {
@@ -54,10 +61,24 @@ object StudentsManagement extends Controller with Authentication {
   def studentRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val id = (request.body \ "id").as[String]
-      Students.delete(Resource(id)).flatMap { deleted ⇒
-        Students.all().map { all ⇒
-          Ok(views.html.studentManagement(all, UserForms.studentForm))
-        }
+
+      val applicationQuery =
+        s"""
+          |select ?s (${LWM.hasApplicant} as ?p) (<$id> as ?o) where {
+          | ?s ${LWM.hasApplicant} <$id>
+          |}
+        """.stripMargin
+
+      val applicationFuture = sparqlExecutionContext.executeQuery(applicationQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.s)
+      }
+
+      applicationFuture.flatMap { applications ⇒
+        Future.sequence(applications.map { application ⇒
+          LabworkApplications.delete(application)
+        })
+      }.flatMap { hui ⇒
+        Students.delete(Resource(id)).map(_ ⇒ Redirect(routes.StudentsManagement.index()))
       }
     }
   }
@@ -73,6 +94,42 @@ object StudentsManagement extends Controller with Authentication {
         ))).toString())
       }
 
+    }
+  }
+
+  def studentEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { implicit request ⇒
+      UserForms.studentForm.bindFromRequest.fold(
+        formWithErrors ⇒ {
+          for {
+            all ← Students.all()
+            degrees ← Degrees.all()
+          } yield {
+            BadRequest(views.html.studentManagement(all.toList, degrees, formWithErrors))
+          }
+        },
+        student ⇒ {
+          val s = Individual(Resource(id))
+          for {
+            id ← s.props.getOrElse(LWM.hasGmId, List(StringLiteral("")))
+            firstName ← s.props.getOrElse(FOAF.firstName, List(StringLiteral("")))
+            lastName ← s.props.getOrElse(FOAF.lastName, List(StringLiteral("")))
+            regId ← s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))
+            email ← s.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
+            phone ← s.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
+            degree ← s.props.getOrElse(LWM.hasEnrollment, List(Resource("")))
+          } yield {
+            s.update(LWM.hasGmId, id, StringLiteral(student.gmId))
+            s.update(FOAF.firstName, firstName, StringLiteral(student.firstname))
+            s.update(FOAF.lastName, lastName, StringLiteral(student.lastname))
+            s.update(LWM.hasRegistrationId, regId, StringLiteral(student.registrationNumber))
+            s.update(FOAF.mbox, email, StringLiteral(student.email))
+            s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
+            s.update(LWM.hasEnrollment, degree, Resource(student.degree))
+          }
+          Future.successful(Redirect(routes.StudentsManagement.index()))
+        }
+      )
     }
   }
 }
