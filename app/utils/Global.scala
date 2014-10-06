@@ -40,6 +40,11 @@ object Global extends GlobalSettings {
   }
 
   override def onRouteRequest(req: RequestHeader): Option[Handler] = {
+    println(req)
+    println(req.host)
+    println(req.uri)
+    println(req.headers)
+    println(Play.isProd)
     (req.method, req.headers.get("X-Forwarded-Proto")) match {
       case (_, _) ⇒
         Some(Action { request ⇒
