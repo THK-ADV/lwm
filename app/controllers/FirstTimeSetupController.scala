@@ -8,6 +8,7 @@ import play.libs.Akka
 import utils.Security.Authentication
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object FirstTimeSetupController extends Controller with Authentication {
 
@@ -21,21 +22,31 @@ object FirstTimeSetupController extends Controller with Authentication {
 
   def setupStudent() = hasSession { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         name ← (sessionsHandler ? SessionHandler.NameRequest(session.user)).mapTo[(String, String)]
         degrees ← Degrees.all()
       } yield {
         val filledForm = UserForms.studentForm.fill(Student(session.user, name._1, name._2, "", "", "", ""))
         Ok(views.html.firstTimeInputStudents(degrees, filledForm))
+      }).recoverWith {
+        case NonFatal(t) =>
+          for{
+            degrees <- Degrees.all()
+          } yield Ok(views.html.firstTimeInputStudents(degrees, UserForms.studentForm))
       }
     }
   }
 
   def setupUser() = hasSession { session ⇒
     Action.async { implicit request ⇒
-      for (name ← (sessionsHandler ? SessionHandler.NameRequest(session.user)).mapTo[(String, String)]) yield {
+      (for (name ← (sessionsHandler ? SessionHandler.NameRequest(session.user)).mapTo[(String, String)]) yield {
         val filledForm = UserForms.userForm.fill(User(session.user, name._1, name._2, "", ""))
         Ok(views.html.firstTimeInputUser(filledForm))
+      }).recoverWith {
+        case NonFatal(t) =>
+          for{
+            degrees <- Degrees.all()
+          } yield Ok(views.html.firstTimeInputUser(UserForms.userForm))
       }
     }
   }
