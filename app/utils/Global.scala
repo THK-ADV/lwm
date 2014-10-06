@@ -39,17 +39,17 @@ object Global extends GlobalSettings {
     Logger.debug("Application shutdown...")
   }
 
-//  override def onRouteRequest(req: RequestHeader): Option[Handler] = {
-//    println(req)
-//    println(req.host)
-//    println(req.uri)
-//    println(req.headers)
-//    println(Play.isProd)
-//    (req.method, req.headers.get("X-Forwarded-Proto")) match {
-//      case (_, _) ⇒
-//        Some(Action { request ⇒
-//          TemporaryRedirect("https://" + req.host + req.uri)
-//        })
-//    }
-//  }
+  override def onRouteRequest(req: RequestHeader): Option[Handler] = {
+    if (Play.isDev) {
+      super.onRouteRequest(req)
+    } else {
+      if (req.secure) {
+        super.onRouteRequest(req)
+      } else {
+        val secureHost = "https://lwivs18.gm.fh-koeln.de:9443"
+        val secureUrl = s"$secureHost${req.uri}"
+        Some(Action(_ ⇒ Redirect(secureUrl)))
+      }
+    }
+  }
 }
