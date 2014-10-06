@@ -1,33 +1,28 @@
 @(degrees: List[Individual], form: Form[Student])
-    @import utils.semantic.StringLiteral
-    @import utils.semantic.Vocabulary.RDFS
-    @import utils.semantic.Individual
+@import utils.semantic.StringLiteral
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Individual
 
 <!DOCTYPE html>
 
-    <html>
-        @head("First Time Setup")
+<html>
+    @head("First Time Setup")
     <body>
-    @helper.form(action = routes.StudentsManagement.studentFirstTimeSelf()) {
-        <div class="panel panel-default">
-            <div class="panel-heading"><h3 class="panel-title">Registrierung</h3></div>
-            <div class="panel-body well">
-                <input type="hidden" name="id" value="@form("id").value">
-                <input type="hidden" name="firstname" value="@form("firstname").value">
-                <input type="hidden" name="lastname" value="@form("lastname").value">
-                @helper.inputText(form("registrationNumber"), '_class -> "dl-horizontal", '_label -> "Matrikelnummer:")
-                @helper.inputText(form("email"), '_class -> "dl-horizontal", '_label -> "Email:")
-                @helper.inputText(form("phone"), '_class -> "dl-horizontal", '_label -> "Telefon:")
-                @helper.select(form("degree"), (for(d <- degrees) yield {
-                    d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
-                }).sortBy(_._2), '_class -> "dl-horizontal", '_label -> "Studiengang:")
-                <dl class="dl-horizontal">
-                    <dd><button type="submit">Abschicken</button></dd>
-                </dl>
-
+    <div class="container-fluid">
+        @helper.form(action = routes.StudentsManagement.studentFirstTimeSelf()) {
+            @helper.inputText(form("id"),'readonly -> "readonly", '_label -> "ADV Kennung")
+            @helper.inputText(form("registrationNumber"), '_label -> "Matrikelnummer")
+            @helper.inputText(form("firstname"), '_label -> "Vorname")
+            @helper.inputText(form("lastname"), '_label -> "Nachname")
+            @helper.inputText(form("email"), '_label -> "Email")
+            @helper.inputText(form("phone"), '_label -> "Telefon")
+            @helper.select(form("degree"), (for(d <- degrees) yield {
+                d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
+            }).sortBy(_._2), '_label -> "Studiengang")
+            <div class="form-actions">
+                <button type="submit">Abschicken</button>
             </div>
-        </div>
-    }
-
+        }
+    </div>
     </body>
-    </html>
+</html>
