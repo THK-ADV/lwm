@@ -1,0 +1,13 @@
+@(form: Form[User])
+
+@helper.form(action = routes.UserManagement.userPost()) {
+    @helper.inputText(form("id"), '_label -> "GmId:")
+    @helper.inputText(form("firstname"), '_label -> "Vorname:")
+    @helper.inputText(form("lastname"), '_label -> "Nachname:")
+    @helper.inputText(form("email"), '_label -> "Email:")
+    @helper.inputText(form("phone"), '_label -> "Telefon:")
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
+    </div>
+}

@@ -1,10 +1,10 @@
 package controllers
 
-import models.{ Degrees, Students, UserForms }
+import models._
 import play.api.libs.json.{ JsArray, JsString, Json }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.{ StringLiteral, Individual, Resource }
+import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
 import utils.semantic.Vocabulary.{ LWM, RDFS, NCO, FOAF }
 import utils.Global._
 import scala.concurrent.Future
@@ -61,13 +61,24 @@ object StudentsManagement extends Controller with Authentication {
   def studentRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val id = (request.body \ "id").as[String]
-      Students.delete(Resource(id)).flatMap { deleted ⇒
-        for {
-          students ← Students.all()
-          degrees ← Degrees.all()
-        } yield {
-          Ok(views.html.studentManagement(students, degrees, UserForms.studentForm))
-        }
+
+      val applicationQuery =
+        s"""
+          |select ?s (${LWM.hasApplicant} as ?p) (<$id> as ?o) where {
+          | ?s ${LWM.hasApplicant} <$id>
+          |}
+        """.stripMargin
+
+      val applicationFuture = sparqlExecutionContext.executeQuery(applicationQuery).map { result ⇒
+        SPARQLTools.statementsFromString(result).map(_.s)
+      }
+
+      applicationFuture.flatMap { applications ⇒
+        Future.sequence(applications.map { application ⇒
+          LabworkApplications.delete(application)
+        })
+      }.flatMap { hui ⇒
+        Students.delete(Resource(id)).map(_ ⇒ Redirect(routes.StudentsManagement.index()))
       }
     }
   }

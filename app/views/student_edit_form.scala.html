@@ -12,7 +12,7 @@
     student.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))) { f =>
 
     @helper.form(action = routes.StudentsManagement.studentEdit(student.uri.value)) {
-        @helper.inputText(f("id"), '_label -> "Matrikelnummer:")
+        @helper.inputText(f("id"), '_label -> "GmId:")
         @helper.inputText(f("firstname"), '_label -> "Vorname:")
         @helper.inputText(f("lastname"), '_label -> "Nachname:")
         @helper.inputText(f("registrationNumber"), '_label -> "Matrikelnummer:")
@@ -21,7 +21,7 @@
         @helper.select(f("degree"), (for(d <- degrees) yield d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value).sortBy(_._2), '_label -> "Studiengang:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+            <button type="submit" class="btn btn-primary">Ändern</button>
         </div>
     }
 }

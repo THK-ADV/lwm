@@ -2,12 +2,14 @@ package controllers
 
 import akka.util.Timeout
 import controllers.LabworkManagementController._
-import models.{ Students, UserForms, Users }
+import controllers.StudentsManagement._
+import models.{ Degrees, Students, UserForms, Users }
 import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
-import utils.semantic.Resource
-
+import utils.semantic.Vocabulary.{ NCO, FOAF, LWM }
+import utils.semantic.{ StringLiteral, Individual, Resource }
+import utils.Global._
 import scala.concurrent.Future
 
 object UserManagement extends Controller with Authentication {
@@ -18,7 +20,7 @@ object UserManagement extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { request ⇒
-      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList))
+      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList, UserForms.userForm))
     }
   }
 
@@ -41,7 +43,7 @@ object UserManagement extends Controller with Authentication {
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Users.all()) yield {
-            BadRequest(views.html.userManagement(all.toList))
+            BadRequest(views.html.userManagement(all.toList, UserForms.userForm))
           }
         },
         user ⇒ {
@@ -62,4 +64,34 @@ object UserManagement extends Controller with Authentication {
     }
   }
 
+  def userEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { implicit request ⇒
+      UserForms.userForm.bindFromRequest.fold(
+        formWithErrors ⇒ {
+          for {
+            all ← Users.all()
+          } yield {
+            BadRequest(views.html.userManagement(all, formWithErrors))
+          }
+        },
+        user ⇒ {
+          val u = Individual(Resource(id))
+          for {
+            id ← u.props.getOrElse(LWM.hasGmId, List(StringLiteral("")))
+            firstName ← u.props.getOrElse(FOAF.firstName, List(StringLiteral("")))
+            lastName ← u.props.getOrElse(FOAF.lastName, List(StringLiteral("")))
+            email ← u.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
+            phone ← u.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
+          } yield {
+            u.update(LWM.hasGmId, id, StringLiteral(user.id))
+            u.update(FOAF.firstName, firstName, StringLiteral(user.firstname))
+            u.update(FOAF.lastName, lastName, StringLiteral(user.lastname))
+            u.update(FOAF.mbox, email, StringLiteral(user.email))
+            u.update(NCO.phoneNumber, phone, StringLiteral(user.phone))
+          }
+          Future.successful(Redirect(routes.UserManagement.index()))
+        }
+      )
+    }
+  }
 }
