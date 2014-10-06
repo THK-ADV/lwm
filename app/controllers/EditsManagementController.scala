@@ -60,8 +60,7 @@ object EditsManagementController extends Controller with Authentication {
   private def parseQuery(q: String): Component = {
     val operation = Map("INSERT" -> 1, "REMOVE" -> 1, "UPDATE" -> 1, "CREATE" -> 2, "DELETE" -> 3).filter(e ⇒ q.contains(e._1))
 
-    if (operation.nonEmpty) {
-      val o = operation.head
+    operation.headOption.fold(Component("none", mutable.Map(), "")) { o ⇒
       o._2 match {
         case 1 ⇒
           val statements = q.split(s"${o._1}")(1).split("WITH")(0).trim.split(",")
@@ -84,10 +83,7 @@ object EditsManagementController extends Controller with Authentication {
           val mappedValues = sync(Map(s"$deletion" -> r))
           Component(o._1, mappedValues, t)
       }
-    } else {
-      Component("none", mutable.Map(), "")
     }
-
   }
 
   private def create(c: Component): Future[Boolean] = {
@@ -188,6 +184,7 @@ object EditsManagementController extends Controller with Authentication {
     val i = Individual(Resource(c.identifier))
     val oldValueMap = mutable.Map[Property, RDFNode]()
     c.mappedValues.foreach { v ⇒
+      // TODO i.props.get, nicht props und try catch
       try {
         val list = i.props(v._1)
         for (all ← list) yield oldValueMap += v._1 -> all
@@ -197,7 +194,7 @@ object EditsManagementController extends Controller with Authentication {
         }
       } catch {
         case nse: NoSuchElementException ⇒ println("Non existent key")
-        case _                           ⇒ println("Internal error")
+        case NonFatal(t)                 ⇒ println("Internal error")
       }
     }
     Future.successful(true)
@@ -214,7 +211,6 @@ case object Synchronize {
       val pattern = e._1.substring(1, e._1.size - 1)
       pattern match {
         case LWM.hasCourse.value                       ⇒ newMap += LWM.hasCourse -> Resource(e._2.toString)
-        case LWM.hasAssignment.value                   ⇒ newMap += LWM.hasAssignment -> StringLiteral(e._2.toString)
         case LWM.hasLabWork.value                      ⇒ newMap += LWM.hasLabWork -> Resource(e._2.toString)
         case LWM.hasGroup.value                        ⇒ newMap += LWM.hasGroup -> Resource(e._2.toString)
         case LWM.hasOrderId.value                      ⇒ newMap += LWM.hasOrderId -> StringLiteral(e._2.toString)
@@ -262,7 +258,7 @@ case object Synchronize {
         case FOAF.firstName.value                      ⇒ newMap += FOAF.firstName -> StringLiteral(e._2.toString)
         case FOAF.lastName.value                       ⇒ newMap += FOAF.lastName -> StringLiteral(e._2.toString)
         case deletion.value                            ⇒ newMap += deletion -> Resource(e._2.toString)
-        case _                                         ⇒ println("False match")
+        case _: String                                 ⇒ println("False match")
       }
     }
     newMap

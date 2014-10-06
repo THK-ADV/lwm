@@ -4,8 +4,9 @@ import actors.{ OntologyDumperActor, EmailHandler, SessionHandler }
 import akka.util.Timeout
 import controllers.UserInfoManagement
 import models.{ Students, Student }
-import org.apache.jena.fuseki.FusekiCmd
-import play.api._
+import play.api.mvc._
+import play.api.mvc.Results._
+import play.api.{ Play, Logger, Application, GlobalSettings }
 import play.api.libs.concurrent.Akka
 import play.api.Play.current
 import utils.semantic.{ Vocabulary, SPARQLExecution, Namespace, NamedGraph }
@@ -38,4 +39,12 @@ object Global extends GlobalSettings {
     Logger.debug("Application shutdown...")
   }
 
+  override def onRouteRequest(req: RequestHeader): Option[Handler] = {
+    (req.method, req.headers.get("X-Forwarded-Proto")) match {
+      case (_, _) ⇒
+        Some(Action { request ⇒
+          TemporaryRedirect("https://" + req.host + req.uri)
+        })
+    }
+  }
 }
