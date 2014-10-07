@@ -2,12 +2,13 @@ package controllers
 
 import controllers.AdministrationDashboardController._
 import models._
-import play.api.mvc.{ Action, Controller }
+import play.api.mvc.{ DiscardingCookie, Action, Controller }
 import utils.semantic.{ SPARQLTools, StringLiteral, Resource, Individual }
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object StudentDashboardController extends Controller {
   import utils.Global._
@@ -73,7 +74,7 @@ object StudentDashboardController extends Controller {
         }
       }
 
-      for {
+      (for {
         student ← Students.get(session.user)
         availableLabworks ← availableLabworks(student)
         labworkList = availableLabworks.map(r ⇒ Individual(r)).toList
@@ -84,6 +85,9 @@ object StudentDashboardController extends Controller {
         labworkGroupAssocs ← Future.sequence(studentLabworks.map(r ⇒ studentLabworkGroup(student, r).map(l ⇒ Individual(r) -> l.map(_.decodedString))))
       } yield {
         Ok(views.html.dashboard_student((labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+      }).recover {
+        case NonFatal(t) ⇒
+          Ok(views.html.login(UserForms.loginForm)).withNewSession
       }
     }
   }

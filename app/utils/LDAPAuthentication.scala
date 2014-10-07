@@ -1,5 +1,7 @@
 package utils
 
+import java.lang.ProcessBuilder.Redirect
+
 import com.unboundid.ldap.sdk._
 import com.unboundid.util.ssl.{ SSLUtil, TrustAllTrustManager }
 import org.slf4j.LoggerFactory
@@ -35,7 +37,7 @@ object LDAPAuthentication {
       bind[Boolean](bindHost, bindPort, dn, "", ssl = true) { connection ⇒
         try {
           val bindResult = connection.bind(bindRequest)
-          if (bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("Invalid credentials")
+          if (bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("invalid credentials")
         } catch {
           case e: LDAPException ⇒ Left(e.getMessage)
         } finally {

@@ -41,7 +41,7 @@ object SessionManagement extends Controller {
 
         Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
           case Left(message: String) ⇒
-            Unauthorized(message)
+            Unauthorized(views.html.invalid_login())
           case Right(session: SessionHandler.Session) ⇒
             val firstTime = Await.result(firstTimeCheck(session.user), atMost = 20.seconds)
             session.role match {

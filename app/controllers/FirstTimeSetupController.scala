@@ -26,12 +26,13 @@ object FirstTimeSetupController extends Controller with Authentication {
         name ← (sessionsHandler ? SessionHandler.NameRequest(session.user)).mapTo[(String, String)]
         degrees ← Degrees.all()
       } yield {
+        sessionsHandler
         val filledForm = UserForms.studentForm.fill(Student(session.user, name._1, name._2, "", "", "", ""))
         Ok(views.html.firstTimeInputStudents(degrees, filledForm))
       }).recoverWith {
-        case NonFatal(t) =>
-          for{
-            degrees <- Degrees.all()
+        case NonFatal(t) ⇒
+          for {
+            degrees ← Degrees.all()
           } yield Ok(views.html.firstTimeInputStudents(degrees, UserForms.studentForm))
       }
     }
@@ -43,9 +44,9 @@ object FirstTimeSetupController extends Controller with Authentication {
         val filledForm = UserForms.userForm.fill(User(session.user, name._1, name._2, "", ""))
         Ok(views.html.firstTimeInputUser(filledForm))
       }).recoverWith {
-        case NonFatal(t) =>
-          for{
-            degrees <- Degrees.all()
+        case NonFatal(t) ⇒
+          for {
+            degrees ← Degrees.all()
           } yield Ok(views.html.firstTimeInputUser(UserForms.userForm))
       }
     }
