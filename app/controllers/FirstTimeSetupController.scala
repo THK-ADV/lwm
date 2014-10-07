@@ -46,7 +46,10 @@ object FirstTimeSetupController extends Controller with Authentication {
         case NonFatal(t) ⇒
           for {
             degrees ← Degrees.all()
-          } yield Ok(views.html.firstTimeInputUser(UserForms.userForm))
+          } yield {
+            val filledForm = UserForms.userForm.fill(User(session.user, "", "", "", ""))
+            Ok(views.html.firstTimeInputUser(filledForm))
+          }
       }
     }
   }
