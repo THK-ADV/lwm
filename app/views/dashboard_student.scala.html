@@ -1,5 +1,5 @@
-@(openLabworks: List[Individual], pendingApplications: List[Individual], studentLabworks: List[(Individual, Seq[String])], courseApplicationForm: Form[LabworkApplicationFormModel])
-        @import utils.semantic.Individual
+@(student: Resource, openLabworks: List[Individual], pendingApplications: List[Individual], studentLabworks: List[(Individual, Seq[String])], courseApplicationForm: Form[LabworkApplicationFormModel])
+        @import utils.semantic.{Individual, Resource}
 
 <!DOCTYPE html>
     <html>
@@ -19,7 +19,7 @@
                 }
                 @if(pendingApplications.size > 0){
                     <div class="row">
-                    @pending_applications(pendingApplications)
+                    @pending_applications(student, pendingApplications)
                     </div>
                 }
                 @if(studentLabworks.size > 0){
