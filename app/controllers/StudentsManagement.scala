@@ -8,6 +8,7 @@ import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
 import utils.semantic.Vocabulary.{ LWM, RDFS, NCO, FOAF }
 import utils.Global._
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object StudentsManagement extends Controller with Authentication {
 
@@ -33,8 +34,10 @@ object StudentsManagement extends Controller with Authentication {
           } yield BadRequest(views.html.firstTimeInputStudents(degrees, formWithErrors))
         },
         student ⇒ {
-          Students.create(student).map(_ ⇒ Redirect(routes.StudentDashboardController.dashboard()))
+          val user = session.user
+          if (student.gmId != user) Degrees.all().map(d ⇒ BadRequest(views.html.firstTimeInputStudents(d, UserForms.studentForm)))
 
+          else Students.create(student).map(_ ⇒ Redirect(routes.StudentDashboardController.dashboard())).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
         }
       )
     }

@@ -97,7 +97,9 @@ function deleteApplication(applicationId, listId) {
     ajaxRequest("/administration/labworkApplications", "DELETE", "application/json", {app: applicationId, list: listId}, reload);
 }
 
-
+function sDeleteApplication(studentId, labworkid) {
+    ajaxRequest("/students/labworkApplications", "DELETE", "application/json", {s: studentId, lab: labworkid}, reload);
+}
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

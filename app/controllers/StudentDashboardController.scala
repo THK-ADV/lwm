@@ -84,11 +84,12 @@ object StudentDashboardController extends Controller {
         studentLabworkList = studentLabworks.map(r ⇒ Individual(r)).toList
         labworkGroupAssocs ← Future.sequence(studentLabworks.map(r ⇒ studentLabworkGroup(student, r).map(l ⇒ Individual(r) -> l.map(_.decodedString))))
       } yield {
-        Ok(views.html.dashboard_student((labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+        Ok(views.html.dashboard_student(student, (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }).recover {
         case NonFatal(t) ⇒
           Ok(views.html.login(UserForms.loginForm)).withNewSession
       }
+
     }
   }
 }

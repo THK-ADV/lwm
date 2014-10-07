@@ -1,4 +1,4 @@
-@(pending: List[Individual])
+@(student: Resource, pending: List[Individual])
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.Global._
@@ -8,12 +8,19 @@
     <tr>
         <th>Praktikum</th>
         <th>Status</th>
+        <th>Abmelden</th>
     </tr>
     <tbody>
         @for(a <- pending) {
             <tr>
                 <td>@a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
                 <td>Wird bearbeitet</td>
+                @defining(a.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value) { p =>
+                    @if(p == "true") {
+                        <td><a href="javascript: sDeleteApplication('@student.value','@a.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+                    }
+
+                }
             </tr>
         }
 

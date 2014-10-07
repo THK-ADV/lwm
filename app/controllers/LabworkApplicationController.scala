@@ -161,7 +161,7 @@ object LabworkApplicationController extends Controller with Authentication {
     }
   }
 
-  def applicationRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
+  def adminApplicationRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async(parse.json) {
         request ⇒
@@ -171,6 +171,40 @@ object LabworkApplicationController extends Controller with Authentication {
             LabworkApplications.delete(Resource(appId.get)).map(_ ⇒ Redirect(routes.LabworkApplicationController.applicationListEdit(listId.get))).recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.index() }
           }
           Future.successful(Redirect(routes.LabworkApplicationController.index()))
+      }
+  }
+
+  def studentApplicationRemoval = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) {
+    session ⇒
+      Action.async(parse.json) {
+        request ⇒
+          val lab = (request.body \ "lab").asOpt[String]
+          val s = (request.body \ "s").asOpt[String]
+
+          if (lab.isDefined && s.isDefined) {
+
+            def applications(labwork: Resource) = {
+              val query =
+                s"""
+             |select ?s (${LWM.hasLabWork} as ?p) ($labwork as ?o) where {
+             | ?s ${LWM.hasLabWork} $labwork .
+             | ?s ${LWM.hasApplicant} <${s.get}>
+             |}
+           """.stripMargin
+
+              sparqlExecutionContext.executeQuery(query).map { result ⇒
+                SPARQLTools.statementsFromString(result).map(_.s)
+              }
+            }
+
+            (for (application ← applications(Resource(lab.get))) yield {
+              if (application.nonEmpty) LabworkApplications.delete(application.head).map(_ ⇒ Redirect(routes.StudentDashboardController.dashboard())).recover { case NonFatal(t) ⇒ routes.StudentDashboardController.dashboard() }
+            }).recover {
+              case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard())
+            }
+          }
+          Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
+
       }
   }
 }
