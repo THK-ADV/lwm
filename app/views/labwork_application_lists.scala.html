@@ -1,0 +1,30 @@
+@(labworkApplicationLists: List[(Individual, String, String, Int)])
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Individual
+@import utils.Global._
+
+<div class="panel panel-default">
+    <div class="panel-heading">Übersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Veranstaltung</th>
+            <th>Semester</th>
+            <th>Studiengang</th>
+            <th>Anmeldungen</th>
+
+        </tr>
+        @for(applicationList <- labworkApplicationLists) {
+            <tr>
+                <td>@applicationList._1.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))) </td>
+                <td>@applicationList._2</td>
+                <td>@applicationList._3</td>
+                <td>@applicationList._4</td>
+                <td><a href="@routes.LabworkApplicationController.applicationListEdit(applicationList._1.uri.value)" class="glyphicon glyphicon-pencil"></a></td>
+                <td><a href="javascript: if(confirmed()) groupList('@applicationList._1.uri.value')" class="glyphicon glyphicon-th"></a></td>
+            </tr>
+        }
+    </table>
+
+</div>

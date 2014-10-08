@@ -11,6 +11,7 @@ DELETE        /api/sessions                                       controllers.Se
 GET           /administration/users                               controllers.UserManagement.index()
 POST          /administration/users                               controllers.UserManagement.userPost()
 DELETE        /administration/users                               controllers.UserManagement.userRemoval()
+POST          /administration/users/:id                           controllers.UserManagement.userEdit(id)
 
 GET           /administration/dashboard                           controllers.AdministrationDashboardController.dashboard()
 
@@ -18,11 +19,12 @@ GET           /administration/students                            controllers.St
 POST          /administration/students                            controllers.StudentsManagement.studentPost()
 DELETE        /administration/students                            controllers.StudentsManagement.studentRemoval()
 GET           /administration/students/suggest                    controllers.StudentsManagement.studentSuggestions()
+POST          /administration/students/:id                        controllers.StudentsManagement.studentEdit(id)
 
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks/:id                        controllers.GroupManagementController.studentAddition(id)
-GET           /administration/labwroks/:id/export                 controllers.LabworkManagementController.export(id)
+GET           /administration/labworks/:id/export                 controllers.LabworkManagementController.export(id)
 POST          /administration/labworks/edit/:id                   controllers.LabworkManagementController.metaEdit(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
 PUT           /administration/labworks                            controllers.LabworkManagementController.setVisibility()
@@ -30,7 +32,11 @@ DELETE        /administration/labworks                            controllers.La
 DELETE        /administration/labworks/:id                        controllers.GroupManagementController.studentRemoval(id)
 
 POST          /administration/labworkApplications                 controllers.LabworkApplicationController.labworkApplicationPost()
-
+POST          /administration/labworkApplications/:id             controllers.LabworkApplicationController.groupList(id)
+GET           /administration/labworkApplications                 controllers.LabworkApplicationController.index()
+GET           /administration/labworkApplications/:id             controllers.LabworkApplicationController.applicationListEdit(id)
+DELETE        /administration/labworkApplications                 controllers.LabworkApplicationController.adminApplicationRemoval()
+DELETE        /students/labworkApplications                       controllers.LabworkApplicationController.studentApplicationRemoval()
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()
@@ -87,8 +93,12 @@ DELETE        /administration/assignments                         controllers.As
 POST          /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindAssignment(id,a)
 DELETE        /administration/labworks/:id/associations/:a        controllers.AssignmentManagementController.bindRemoval(id, a)
 
-POST          /administration/edits                               controllers.EditsManagementController.edit()
+POST          /administration/edits                               controllers.EditsManagementController.applyEdit()
 
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
+
+# For test purposes only
+# GET           /administration/testdata                            controllers.TestDataController.generateTestData()
+
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                       controllers.Assets.at(path="/public", file)

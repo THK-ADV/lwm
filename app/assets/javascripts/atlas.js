@@ -85,10 +85,21 @@ function setVisible(uri, labid, visible) {
     ajaxRequest(uri, 'PUT', 'application/json', {id: labid, visibility: visible}, reload);
 }
 
-function edit(pred, obj, vals, stmts, res, oldvals, uri) {
-    ajaxRequest("/administration/edits", "POST", "application/json", {predicate: pred, object: obj, values: vals, statements: stmts, resource: res, old: oldvals, redirect: uri}, reload);
+function applyEdit(q, uri) {
+    ajaxRequest("/administration/edits", "POST", "application/json", {query: q, redirect: uri}, reload);
 }
 
+function groupList(uri){
+    ajaxRequest("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {}, reload);
+}
+
+function deleteApplication(applicationId, listId) {
+    ajaxRequest("/administration/labworkApplications", "DELETE", "application/json", {app: applicationId, list: listId}, reload);
+}
+
+function sDeleteApplication(studentId, labworkid) {
+    ajaxRequest("/students/labworkApplications", "DELETE", "application/json", {s: studentId, lab: labworkid}, reload);
+}
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({
@@ -100,7 +111,6 @@ function ajaxRequest(url, type, cType, data, funct) {
             funct(message);
         },
         error: function (error) {
-            alert("Shit");
             console.log(error);
         }
     });

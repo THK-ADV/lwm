@@ -1,14 +1,15 @@
 package controllers
 
 import controllers.LabworkManagementController._
-import models.{ LabworkGroups, Students }
+import models.{ LabworkApplications, LabworkGroups, Students }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.{ Individual, Resource }
+import utils.semantic.{ SPARQLBuilder, SPARQLTools, Individual, Resource }
 import utils.semantic.Vocabulary.{ LWM }
 import utils.Global._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
   * Created by root on 9/15/14.
   */
@@ -43,9 +44,19 @@ object GroupManagementController extends Controller with Authentication {
         } yield {
           if (isStudent && isGroup) {
             val ig = Individual(groupResource)
+
             ig.add(LWM.hasMember, studentResource)
             val is = Individual(studentResource)
             is.add(LWM.memberOf, groupResource)
+
+            val applicationsFuture = findApplication(groupResource, studentResource)
+
+            applicationsFuture.map { applications ⇒
+              applications.map { application ⇒
+                sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(application))
+              }
+            }
+
             ig.props.get(LWM.hasScheduleAssociation).map { assocs ⇒
               assocs.foreach { ass ⇒
                 is.add(LWM.hasScheduleAssociation, ass)
@@ -55,6 +66,21 @@ object GroupManagementController extends Controller with Authentication {
           Redirect(routes.LabworkManagementController.index())
         }
       }
+    }
+  }
+
+  def findApplication(group: Resource, student: Resource) = {
+    val query =
+      s"""
+         select ($student as ?s) (${LWM.hasApplication} as ?p) (?application as ?o) where {
+          $student ${LWM.hasPendingApplication} ?application .
+          ?application ${LWM.hasLabWork} ?labwork .
+          ?labwork ${LWM.hasGroup} $group .
+        }
+       """.stripMargin
+
+    sparqlExecutionContext.executeQuery(query).map { result ⇒
+      SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
     }
   }
 

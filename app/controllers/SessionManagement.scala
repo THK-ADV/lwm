@@ -37,11 +37,11 @@ object SessionManagement extends Controller {
       case None ⇒ Future.successful(Unauthorized)
       case Some(login) ⇒
         val timeoutFuture = Promise.timeout("Oops", 45.second)
-        val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user, login.password)).mapTo[Either[String, SessionHandler.Session]]
+        val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user.toLowerCase, login.password)).mapTo[Either[String, SessionHandler.Session]]
 
         Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
           case Left(message: String) ⇒
-            Unauthorized(message)
+            Unauthorized(views.html.invalid_login())
           case Right(session: SessionHandler.Session) ⇒
             val firstTime = Await.result(firstTimeCheck(session.user), atMost = 20.seconds)
             session.role match {

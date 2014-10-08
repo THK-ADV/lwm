@@ -23,7 +23,7 @@ object Students {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Student),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGmId, StringLiteral(student.gmId)),
+      Statement(resource, LWM.hasGmId, StringLiteral(student.gmId.toLowerCase)),
       Statement(resource, FOAF.firstName, StringLiteral(student.firstname)),
       Statement(resource, FOAF.lastName, StringLiteral(student.lastname)),
       Statement(resource, RDFS.label, StringLiteral(s"${student.firstname} ${student.lastname}")),
@@ -104,7 +104,7 @@ object Students {
 
   def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
+  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid.toLowerCase).toQueryString}}")
 
   def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Student}}")
 }

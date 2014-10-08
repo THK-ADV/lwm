@@ -226,4 +226,5 @@ object LabworkManagementController extends Controller with Authentication {
         }
     }
   }
+
 }

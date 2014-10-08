@@ -1,0 +1,27 @@
+@(labworks: List[(Individual, Seq[String])])
+@import utils.semantic.StringLiteral
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Individual
+
+<div class="panel panel-default">
+    <div class="panel-heading">Ihre Praktika in diesem Semester</div>
+    <table class="table">
+        <tr>
+            <th>Praktikum</th>
+            <th>Gruppe</th>
+            <th>nächster Termin</th>
+        </tr>
+        <tbody>
+        @for(a <- labworks) {
+            <tr>
+                <td>@a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
+                @a._2.map{group =>
+                    <td>@group</td>
+                }
+                <td>tbd</td>
+            </tr>
+        }
+
+        </tbody>
+    </table>
+</div>

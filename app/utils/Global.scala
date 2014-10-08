@@ -1,11 +1,12 @@
 package utils
 
-import actors.{ EmailHandler, SessionHandler }
+import actors.{ OntologyDumperActor, EmailHandler, SessionHandler }
 import akka.util.Timeout
 import controllers.UserInfoManagement
 import models.{ Students, Student }
-import org.apache.jena.fuseki.FusekiCmd
-import play.api._
+import play.api.mvc._
+import play.api.mvc.Results._
+import play.api.{ Play, Logger, Application, GlobalSettings }
 import play.api.libs.concurrent.Akka
 import play.api.Play.current
 import utils.semantic.{ Vocabulary, SPARQLExecution, Namespace, NamedGraph }
@@ -16,8 +17,11 @@ object Global extends GlobalSettings {
 
   import scala.concurrent.duration._
 
-  private val updateHost = "http://localhost:3030/lwm/update"
-  private val queryHost = "http://localhost:3030/lwm/query"
+  lazy val port = 3030
+  lazy val serviceName = "lwm"
+  lazy val updateHost = s"http://localhost:$port/$serviceName/update"
+  lazy val queryHost = s"http://localhost:$port/$serviceName/query"
+  lazy val dataInf = s"http://localhost:$port/$serviceName/data"
 
   implicit val timeout = Timeout(30.seconds)
   implicit val sparqlExecutionContext = SPARQLExecution(queryHost, updateHost)
@@ -27,6 +31,7 @@ object Global extends GlobalSettings {
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
     Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
+    Akka.system.actorOf(OntologyDumperActor.props(dataInf), "dumper")
     Logger.debug("Application has started")
   }
 
@@ -34,4 +39,17 @@ object Global extends GlobalSettings {
     Logger.debug("Application shutdown...")
   }
 
+  override def onRouteRequest(req: RequestHeader): Option[Handler] = {
+    if (Play.isDev) {
+      super.onRouteRequest(req)
+    } else {
+      if (req.secure) {
+        super.onRouteRequest(req)
+      } else {
+        val secureHost = "https://lwivs18.gm.fh-koeln.de:9443"
+        val secureUrl = s"$secureHost${req.uri}"
+        Some(Action(_ ⇒ Redirect(secureUrl)))
+      }
+    }
+  }
 }
