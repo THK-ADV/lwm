@@ -153,7 +153,7 @@ object LabworkApplicationController extends Controller with Authentication {
       val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
       applicationsFuture.map { applications ⇒
         applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
-          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 5, 16)
+          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 5, 11) // TODO -> has to be in application.conf
         }
       }
 
