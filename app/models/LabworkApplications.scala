@@ -10,9 +10,13 @@ import utils.semantic._
 import scala.concurrent.Future
 
 case class LabworkApplication(applicant: Resource, labwork: Resource, partners: List[Resource], id: UUID = UUID.randomUUID())
+
 case class LabworkApplicationFormModel(applicant: String, labwork: String, partners: List[String])
 
+case class LabworkApplicationListChangeForm(application: String, labwork: String)
+
 object LabworkApplications {
+
   object Forms {
     val labworkApplicationForm = Form(
       mapping(
@@ -20,6 +24,12 @@ object LabworkApplications {
         "labwork" -> nonEmptyText,
         "partners" -> list(text)
       )(LabworkApplicationFormModel.apply)(LabworkApplicationFormModel.unapply)
+    )
+    val labworkApplicationChangeForm = Form(
+      mapping(
+        "application" -> nonEmptyText,
+        "labwork" -> nonEmptyText
+      )(LabworkApplicationListChangeForm.apply)(LabworkApplicationListChangeForm.unapply)
     )
   }
 

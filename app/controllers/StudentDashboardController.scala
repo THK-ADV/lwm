@@ -11,6 +11,7 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 object StudentDashboardController extends Controller {
+
   import utils.Global._
 
   def dashboard = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
@@ -84,12 +85,19 @@ object StudentDashboardController extends Controller {
         studentLabworkList = studentLabworks.map(r ⇒ Individual(r)).toList
         labworkGroupAssocs ← Future.sequence(studentLabworks.map(r ⇒ studentLabworkGroup(student, r).map(l ⇒ Individual(r) -> l.map(_.decodedString))))
       } yield {
-        Ok(views.html.dashboard_student(student, (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+        Ok(views.html.dashboard_student(Individual(student), (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }).recover {
         case NonFatal(t) ⇒
           Ok(views.html.login(UserForms.loginForm)).withNewSession
       }
+    }
+  }
 
+  def informationPage(id: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
+    Action.async {
+      request ⇒
+        val student = Individual(Resource(id))
+        Degrees.all().map(d ⇒ Ok(views.html.dashboard_student_edit_details(student, d, UserForms.studentForm))).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
     }
   }
 }

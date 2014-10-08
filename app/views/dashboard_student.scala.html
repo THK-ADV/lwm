@@ -1,4 +1,4 @@
-@(student: Resource, openLabworks: List[Individual], pendingApplications: List[Individual], studentLabworks: List[(Individual, Seq[String])], courseApplicationForm: Form[LabworkApplicationFormModel])
+@(student: Individual, openLabworks: List[Individual], pendingApplications: List[Individual], studentLabworks: List[(Individual, Seq[String])], courseApplicationForm: Form[LabworkApplicationFormModel])
         @import utils.semantic.{Individual, Resource}
 
 <!DOCTYPE html>
@@ -10,7 +10,7 @@
             @header_loggedIn_student()
             </div>
             <div class="row">
-                @navigation_student()
+                @navigation_student(student)
             <div class="col-md-9">
                 @if(openLabworks.size > 0){
                     <div class="row">
