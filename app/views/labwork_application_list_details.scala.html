@@ -23,6 +23,7 @@
 
                         <table class="table">
                             <tr>
+                                <th>Kennung</th>
                                 <th>Name</th>
                                 <th>ID</th>
                             </tr>
@@ -34,6 +35,7 @@
                                                 @head.asResource().map{resource =>
                                                     @defining(Individual(resource).props){applicantProps =>
                                                         <tr>
+                                                            <td>@applicantProps.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.toString</td>
                                                             <td>@applicantProps.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
                                                             <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
                                                             <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
