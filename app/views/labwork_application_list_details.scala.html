@@ -3,6 +3,7 @@
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary.LWM
 @import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.FOAF
 @import utils.Global._
 
 
@@ -36,7 +37,7 @@
                                                     @defining(Individual(resource).props){applicantProps =>
                                                         <tr>
                                                             <td>@applicantProps.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.toString</td>
-                                                            <td>@applicantProps.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
+                                                            <td>@applicantProps.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value @applicantProps.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value</td>
                                                             <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
                                                             <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
                                                         </tr>
