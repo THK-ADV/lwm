@@ -37,7 +37,7 @@
                                                     @defining(Individual(resource).props){applicantProps =>
                                                         <tr>
                                                             <td>@applicantProps.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.toString</td>
-                                                            <td>@applicantProps.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value @applicantProps.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value</td>
+                                                            <td>@applicantProps.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value @applicantProps.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value</td>
                                                             <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
                                                             <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
                                                         </tr>
