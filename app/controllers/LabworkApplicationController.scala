@@ -4,7 +4,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import utils.ListGrouping
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.Vocabulary.{ RDF, RDFS, LWM }
 import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
 
 import scala.concurrent.Future
@@ -136,8 +136,23 @@ object LabworkApplicationController extends Controller with Authentication {
 
       val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
 
-      applicationsFuture.map { applications ⇒
-        Ok(views.html.labwork_application_list_details(applicationlist, applications))
+      def openLabs = {
+        val query =
+          s"""
+             |select ?s (${LWM.allowsApplications} as ?p) ?o where {
+             | ?s ${LWM.allowsApplications} "true" .
+             | ?s ${LWM.hasCourse} ?course .
+             | ?course ${LWM.hasDegree} ?degree .
+             | ?degree ${RDFS.label} ?o
+             |}
+           """.stripMargin
+
+        sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(t ⇒ (t.s, t.o))
+        }
+      }
+      applicationsFuture.flatMap { applications ⇒
+        openLabs.map(a ⇒ Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, applications)))
       }.recover {
         case NonFatal(t) ⇒
           Redirect(routes.LabworkApplicationController.index())
@@ -165,10 +180,10 @@ object LabworkApplicationController extends Controller with Authentication {
     session ⇒
       Action.async(parse.json) {
         request ⇒
-          val appId = (request.body \ "app").asOpt[String]
+          val applicationd = (request.body \ "app").asOpt[String]
           val listId = (request.body \ "list").asOpt[String]
-          if (appId.isDefined && listId.isDefined) {
-            LabworkApplications.delete(Resource(appId.get)).map(_ ⇒ Redirect(routes.LabworkApplicationController.applicationListEdit(listId.get))).recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.index() }
+          if (applicationd.isDefined && listId.isDefined) {
+            LabworkApplications.delete(Resource(applicationd.get)).map(_ ⇒ Redirect(routes.LabworkApplicationController.applicationListEdit(listId.get))).recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.index() }
           }
           Future.successful(Redirect(routes.LabworkApplicationController.index()))
       }
@@ -206,5 +221,66 @@ object LabworkApplicationController extends Controller with Authentication {
           Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
 
       }
+  }
+
+  def changeLists = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async {
+      implicit request ⇒
+        LabworkApplications.Forms.labworkApplicationChangeForm.bindFromRequest.fold(
+          formWithErrors ⇒ {
+            Future.successful(Redirect(routes.LabworkApplicationController.index()))
+          },
+          e ⇒ {
+            val labwork = Resource(e.labwork)
+            val application = Individual(Resource(e.application))
+            val oldLabwork = application.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.asResource().get
+            println(s"Lab: ${e.labwork}\nApp: ${e.application}")
+
+            def oldApplicationList(labwork: Resource) = {
+              val query =
+                s"""
+             |select ?s (${LWM.hasLabWork} as ?p) ($labwork as ?o) where {
+             | $labwork ${LWM.hasApplicationList} ?s .
+             |}
+           """.stripMargin
+
+              sparqlExecutionContext.executeQuery(query).map { result ⇒
+                SPARQLTools.statementsFromString(result).map(_.s)
+              }
+            }
+
+            def newApplicationList(labwork: Resource) = {
+              val query =
+                s"""
+             |select ?s (${LWM.hasLabWork} as ?p) ($labwork as ?o) where {
+             | ?s ${RDF.typ} ${LWM.LabworkApplicationList} .
+             | ?s ${LWM.hasLabWork} $labwork
+             |}
+           """.stripMargin
+
+              sparqlExecutionContext.executeQuery(query).map { result ⇒
+                SPARQLTools.statementsFromString(result).map(_.s)
+              }
+            }
+
+            (for {
+              oldList ← oldApplicationList(oldLabwork)
+              newList ← newApplicationList(labwork)
+            } yield {
+              for {
+                d1 ← oldList
+                d2 ← newList
+              } yield {
+                Individual(d1).remove(LWM.hasApplication, application.uri)
+                Individual(d2).add(LWM.hasApplication, application.uri)
+                application.update(LWM.hasLabWork, oldLabwork, labwork)
+              }
+              Redirect(routes.LabworkApplicationController.index())
+            }).recover {
+              case NonFatal(t) ⇒ Redirect(routes.LabworkApplicationController.index())
+            }
+          })
+        Future.successful(Redirect(routes.LabworkApplicationController.index()))
+    }
   }
 }

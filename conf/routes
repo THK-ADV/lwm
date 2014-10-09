@@ -36,7 +36,7 @@ POST          /administration/labworkApplications/:id             controllers.La
 GET           /administration/labworkApplications                 controllers.LabworkApplicationController.index()
 GET           /administration/labworkApplications/:id             controllers.LabworkApplicationController.applicationListEdit(id)
 DELETE        /administration/labworkApplications                 controllers.LabworkApplicationController.adminApplicationRemoval()
-DELETE        /students/labworkApplications                       controllers.LabworkApplicationController.studentApplicationRemoval()
+POST          /administration/labworkApplicationLists             controllers.LabworkApplicationController.changeLists()
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()
@@ -96,6 +96,10 @@ DELETE        /administration/labworks/:id/associations/:a        controllers.As
 POST          /administration/edits                               controllers.EditsManagementController.applyEdit()
 
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
+
+GET           /students/:id/information                           controllers.StudentDashboardController.informationPage(id)
+POST          /students/:id/information                           controllers.StudentsManagement.changeInformation(id)
+DELETE        /students/labworkApplications                       controllers.LabworkApplicationController.studentApplicationRemoval()
 
 # For test purposes only
 # GET           /administration/testdata                            controllers.TestDataController.generateTestData()

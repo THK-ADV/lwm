@@ -135,4 +135,59 @@ object StudentsManagement extends Controller with Authentication {
       )
     }
   }
+
+  def changeInformation(id: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) {
+    session ⇒
+      Action.async {
+        implicit request ⇒
+          val s = Individual(Resource(id))
+          UserForms.studentForm.bindFromRequest.fold(
+            formWithErrors ⇒ {
+              for {
+                degrees ← Degrees.all()
+              } yield {
+                BadRequest(views.html.dashboard_student_edit_details(s, degrees, formWithErrors))
+              }
+            },
+            student ⇒ {
+              val applicationQuery =
+                s"""
+                  |select ?s (${LWM.hasApplicant} as ?p) (<$id> as ?o) where {
+                  | ?s ${LWM.hasApplicant} <$id>
+                  |}
+                  """.stripMargin
+
+              val applicationFuture = sparqlExecutionContext.executeQuery(applicationQuery).map { result ⇒
+                SPARQLTools.statementsFromString(result).map(_.s)
+              }
+
+              val degree = s.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head
+              for {
+                id ← s.props.getOrElse(LWM.hasGmId, List(StringLiteral("")))
+                firstName ← s.props.getOrElse(FOAF.firstName, List(StringLiteral("")))
+                lastName ← s.props.getOrElse(FOAF.lastName, List(StringLiteral("")))
+                regId ← s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))
+                email ← s.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
+                phone ← s.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
+              } yield {
+                s.update(LWM.hasGmId, id, StringLiteral(student.gmId))
+                s.update(FOAF.firstName, firstName, StringLiteral(student.firstname))
+                s.update(FOAF.lastName, lastName, StringLiteral(student.lastname))
+                s.update(LWM.hasRegistrationId, regId, StringLiteral(student.registrationNumber))
+                s.update(FOAF.mbox, email, StringLiteral(student.email))
+                s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
+                s.update(LWM.hasEnrollment, degree, Resource(student.degree))
+              }
+              if (degree.value != student.degree) {
+                applicationFuture.flatMap { applications ⇒
+                  Future.sequence(applications.map { application ⇒
+                    LabworkApplications.delete(application)
+                  })
+                }.recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.informationPage(id)) }
+              }
+            }
+          )
+          Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
+      }
+  }
 }

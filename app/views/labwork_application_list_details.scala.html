@@ -1,4 +1,4 @@
-@(applicationList: Individual, applications: List[Individual])
+@(openLabworks: List[(Individual, String)], applicationList: Individual, applications: List[Individual])
 @import utils.semantic.StringLiteral
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary.LWM
@@ -28,7 +28,7 @@
                                 <th>Name</th>
                                 <th>ID</th>
                             </tr>
-                            @for(application <- applications){
+                            @for((application, index) <- applications.zipWithIndex){
                                 @defining(application.props){properties =>
                                     @defining(properties.get(LWM.hasApplicant)){applicant =>
                                         @applicant.map{list =>
@@ -39,7 +39,25 @@
                                                             <td>@applicantProps.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.toString</td>
                                                             <td>@applicantProps.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value @applicantProps.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value</td>
                                                             <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
+                                                            <td><a href="#" data-toggle="modal" data-target="#@index" class="glyphicon glyphicon-pencil"></a></td>
                                                             <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+
+
+                                                        <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                                                            Close</span></button>
+                                                                        <h4 class="modal-title" id="myModalLabel">Anmeldung bearbeiten</h4>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                    @labwork_applications_student_switch(application, openLabworks, LabworkApplications.Forms.labworkApplicationChangeForm)
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         </tr>
                                                     }
                                                 }

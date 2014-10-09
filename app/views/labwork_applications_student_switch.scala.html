@@ -1,0 +1,14 @@
+@(application: Individual, labworks: List[(Individual, String)], form: Form[LabworkApplicationListChangeForm])
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@defining(labworks.map(l => (l._1, l._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value, l._2))) { tuple =>
+
+    @helper.form(action = routes.LabworkApplicationController.changeLists()) {
+        <input type="hidden" name="application" value="@application.uri.value">
+        @helper.select(form("labwork"), for(a <- tuple) yield a._1.uri.value -> s"${a._2} ${a._3}", '_label -> "Praktikum:")
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Ändern</button>
+        </div>
+    }
+}

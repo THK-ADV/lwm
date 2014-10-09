@@ -1,0 +1,28 @@
+@(student: Individual, degrees: List[Individual], form: Form[Student])
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+
+<!DOCTYPE html>
+<html>
+    @head("Informationen Bearbeiten")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_student()
+            </div>
+            <div class="row">
+                @navigation_student(student)
+                <div class="col-md-9">
+                    <h5 class="alert-danger"><b>Hinweis: <br />
+                        Änderung des Studiengangs führt zu dem Löschen aller bestehenden, noch nicht bearbeiteten Anmeldungen.</b></h5>
+                    <div class="row">
+                    @student_personal_info_edit_form(student, degrees, form)
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">@footerAdmin()</div>
+        </div>
+
+    </body>
+</html>
