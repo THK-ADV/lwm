@@ -1,18 +1,18 @@
 package controllers
 
 import akka.util.Timeout
-import controllers.LabworkManagementController._
-import controllers.StudentsManagement._
-import models.{ Degrees, Students, UserForms, Users }
-import play.api.mvc.{ Action, Controller }
-import play.libs.Akka
-import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ NCO, FOAF, LWM }
-import utils.semantic.{ StringLiteral, Individual, Resource }
+import models.{ UserForms, Users }
+import play.api.mvc.{ Action, Controller, Result }
 import utils.Global._
-import scala.concurrent.Future
+import utils.Security.Authentication
+import utils.semantic.Vocabulary.{ FOAF, LWM, NCO }
+import utils.semantic.{ Individual, Resource, StringLiteral }
+
+import scala.concurrent.{ Future, Promise }
+import scala.util.control.NonFatal
 
 object UserManagement extends Controller with Authentication {
+
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
 
@@ -31,8 +31,23 @@ object UserManagement extends Controller with Authentication {
           Future.successful(BadRequest(views.html.firstTimeInputUser(formWithErrors)))
         },
         user ⇒ {
-          Users.create(user).map(_ ⇒ Redirect(routes.AdministrationDashboardController.dashboard()))
+          val promise = Promise[Result]()
 
+          Users.exists(session.user).map { exists ⇒
+            if (exists) {
+              promise.success(Redirect(routes.AdministrationDashboardController.dashboard()))
+            } else {
+              if (user.id != session.user) {
+                promise.success(Redirect(routes.FirstTimeSetupController.setupUser()))
+              } else {
+                Users.create(user).map(_ ⇒ promise.success(Redirect(routes.AdministrationDashboardController.dashboard())))
+              }
+            }
+          }.recover {
+            case NonFatal(e) ⇒ promise.success(Redirect(routes.Application.index()).withNewSession)
+          }
+
+          promise.future
         }
       )
     }
