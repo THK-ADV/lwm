@@ -101,6 +101,8 @@ object Vocabulary {
     val hasText = property("hasText")
     val hasTopic = property("hasTopic")
     val hasSolution = property("hasSolution")
+    val hasLearningGoals = property("hasLearningGoals")
+    val hasHints = property("hasHints")
 
     // Labwork -> Assignment
     val AssignmentAssociation = resource("AssignmentAssociation")
@@ -124,7 +126,6 @@ object Vocabulary {
     val BlacklistDate = resource("BlacklistDate")
     val hasBlacklistDate = property("hasBlacklistDate")
     val hasBlacklist = property("hasBlacklist")
-    val hasDate = property("hasDate")
 
     val LabworkApplication = resource("LabworkApplication")
     val hasPartner = property("hasPartner")
@@ -135,6 +136,11 @@ object Vocabulary {
     val hasApplicationList = property("hasApplicationList")
     val hasApplication = property("hasApplication")
 
+    val Substitution = resource("Substitution")
+    val hasSubstitute = property("hasSubstitute")
+    val hasSubstitution = property("hasSubstitution")
+
+    val hasDate = property("hasDate")
   }
 
   /**

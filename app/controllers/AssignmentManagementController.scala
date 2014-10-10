@@ -42,7 +42,7 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒
-              Assignments.create(Assignment(a.id, a.description, a.text, a.topics.split(",").toList, a.courses)).map { _ ⇒
+              Assignments.create(Assignment(a.id, a.description, a.text, a.goals, a.hints, a.topics.split(",").toList, a.courses)).map { _ ⇒
                 Redirect(routes.AssignmentManagementController.index())
               }
           )
