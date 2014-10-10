@@ -66,3 +66,5 @@ libraryDependencies += "joda-time" % "joda-time" % "2.4" withSources() withJavad
 libraryDependencies += "de.jollyday" % "jollyday" % "0.4.7" withSources() withJavadoc()
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.0" withSources() withJavadoc()
+
+libraryDependencies += "org.pegdown" % "pegdown" % "1.4.2" withSources() withJavadoc()
