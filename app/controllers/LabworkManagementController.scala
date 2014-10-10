@@ -191,11 +191,14 @@ object LabworkManagementController extends Controller with Authentication {
                 sD ← i.props(LWM.hasStartDate)
                 eD ← i.props(LWM.hasEndDate)
                 semester ← i.props(LWM.hasSemester)
+                oC = Individual(course.asResource().get)
+                nC = Individual(Resource(labwork.courseId))
               } yield {
                 i.update(LWM.hasCourse, course, Resource(labwork.courseId))
                 i.update(LWM.hasStartDate, sD, DateLiteral(new LocalDate(labwork.startDate)))
                 i.update(LWM.hasEndDate, eD, DateLiteral(new LocalDate(labwork.endDate)))
                 i.update(LWM.hasSemester, semester, Resource(labwork.semester))
+                i.update(RDFS.label, oC.props.getOrElse(RDFS.label, List(StringLiteral(""))).head, nC.props.getOrElse(RDFS.label, List(StringLiteral(""))).head)
               }
               Future.successful(Redirect(routes.LabworkManagementController.edit(id)))
             }

@@ -4,7 +4,7 @@ import controllers.LabworkManagementController._
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.Future
@@ -73,6 +73,7 @@ object RoomManagementController extends Controller with Authentication {
             } yield {
               i.update(LWM.hasRoomId, id, StringLiteral(room.roomId))
               i.update(LWM.hasName, name, StringLiteral(room.name))
+              i.update(RDFS.label, name, StringLiteral(room.name))
             }
             Future.successful(Redirect(routes.RoomManagementController.index()))
           }

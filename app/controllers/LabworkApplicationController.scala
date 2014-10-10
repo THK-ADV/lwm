@@ -168,7 +168,7 @@ object LabworkApplicationController extends Controller with Authentication {
       val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
       applicationsFuture.map { applications ⇒
         applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
-          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 5, 16)
+          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 5, 11) // TODO -> has to be in application.conf
         }
       }
 
@@ -287,7 +287,6 @@ object LabworkApplicationController extends Controller with Authentication {
   def addApplication(listId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val student = (request.body \ "student").asOpt[String]
-      println(s"Student: $student\nList: $listId")
       if (student.isDefined) {
         val listI = Individual(Resource(listId))
         val labwork = listI.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head

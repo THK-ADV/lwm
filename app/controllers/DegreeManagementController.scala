@@ -3,7 +3,7 @@ package controllers
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.{ Future, ExecutionContext }
@@ -68,6 +68,7 @@ object DegreeManagementController extends Controller with Authentication {
           } yield {
             i.update(LWM.hasId, id, StringLiteral(degree.id))
             i.update(LWM.hasName, name, StringLiteral(degree.name))
+            i.update(RDFS.label, name, StringLiteral(degree.name))
           }
           Future.successful(Redirect(routes.DegreeManagementController.index()))
         }

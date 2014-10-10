@@ -2,12 +2,12 @@ package controllers
 
 import models._
 import play.api.libs.json.{ JsArray, JsString, Json }
-import play.api.mvc.{ Action, Controller }
+import play.api.mvc.{ Result, Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
 import utils.semantic.Vocabulary.{ LWM, RDFS, NCO, FOAF }
 import utils.Global._
-import scala.concurrent.Future
+import scala.concurrent.{ Promise, Future }
 import scala.util.control.NonFatal
 
 object StudentsManagement extends Controller with Authentication {
@@ -35,9 +35,23 @@ object StudentsManagement extends Controller with Authentication {
         },
         student ⇒ {
           val user = session.user
-          if (student.gmId != user) Degrees.all().map(d ⇒ BadRequest(views.html.firstTimeInputStudents(d, UserForms.studentForm)))
+          val promise = Promise[Result]()
 
-          else Students.create(student).map(_ ⇒ Redirect(routes.StudentDashboardController.dashboard())).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
+          Students.exists(user).map { exists ⇒
+            if (exists) {
+              promise.success(Redirect(routes.StudentDashboardController.dashboard()))
+            } else {
+              if (student.gmId != user) {
+                promise.success(Redirect(routes.FirstTimeSetupController.setupStudent()))
+              } else {
+                Students.create(student).map(_ ⇒ promise.success(Redirect(routes.StudentDashboardController.dashboard())))
+              }
+            }
+          }.recover {
+            case NonFatal(e) ⇒ promise.success(Redirect(routes.Application.index()).withNewSession)
+          }
+
+          promise.future
         }
       )
     }
@@ -121,6 +135,7 @@ object StudentsManagement extends Controller with Authentication {
             email ← s.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
             phone ← s.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
             degree ← s.props.getOrElse(LWM.hasEnrollment, List(Resource("")))
+            label ← s.props.getOrElse(RDFS.label, List(StringLiteral("")))
           } yield {
             s.update(LWM.hasGmId, id, StringLiteral(student.gmId))
             s.update(FOAF.firstName, firstName, StringLiteral(student.firstname))
@@ -129,6 +144,7 @@ object StudentsManagement extends Controller with Authentication {
             s.update(FOAF.mbox, email, StringLiteral(student.email))
             s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
             s.update(LWM.hasEnrollment, degree, Resource(student.degree))
+            s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
           }
           Future.successful(Redirect(routes.StudentsManagement.index()))
         }
@@ -169,6 +185,7 @@ object StudentsManagement extends Controller with Authentication {
                 regId ← s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))
                 email ← s.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
                 phone ← s.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
+                label ← s.props.getOrElse(RDFS.label, List(StringLiteral("")))
               } yield {
                 s.update(LWM.hasGmId, id, StringLiteral(student.gmId))
                 s.update(FOAF.firstName, firstName, StringLiteral(student.firstname))
@@ -177,6 +194,7 @@ object StudentsManagement extends Controller with Authentication {
                 s.update(FOAF.mbox, email, StringLiteral(student.email))
                 s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
                 s.update(LWM.hasEnrollment, degree, Resource(student.degree))
+                s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
               }
               if (degree.value != student.degree) {
                 applicationFuture.flatMap { applications ⇒
