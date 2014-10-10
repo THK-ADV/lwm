@@ -1,0 +1,27 @@
+@(substitutions: List[Individual])
+@import utils.semantic.StringLiteral
+@import utils.semantic.Vocabulary
+@import utils.semantic.Individual
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">Vertretungsübersicht</div>
+
+    <table class="table">
+        <tr>
+            <th>Datum</th>
+            <th>Veranstaltung</th>
+            <th>Abwesend</th>
+            <th>Vertretung</th>
+        </tr>
+        @for(substitution <- substitutions) {
+            <tr>
+                <td>@helpers.scheduleDateFromSubstitution(substitution.uri)</td>
+                <td>@helpers.labworkNameFromSubstitution(substitution.uri)</td>
+                <td>@helpers.substitutedSupervisor(substitution.uri)</td>
+                <td>@helpers.substituteName(substitution.uri)</td>
+            </tr>
+        }
+    </table>
+
+</div>

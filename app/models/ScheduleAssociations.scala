@@ -125,5 +125,21 @@ object ScheduleAssociations {
       h2 = et(0).toInt
       m2 = et(1).toInt
     } yield (Time(h1, m1), Time(h2, m2))
+
+  }
+
+  def getSupervisorsFor(scheduleAssociation: Resource): List[Resource] = {
+    val query =
+      s"""
+         |select ($scheduleAssociation as ?s) (${LWM.hasSupervisor} as ?p) (?supervisor as ?o) where{
+         | $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
+         | ?entry ${LWM.hasSupervisor} ?supervisor .
+         |}
+       """.stripMargin
+
+    val result = sparqlExecutionContext.executeQueryBlocking(query)
+    SPARQLTools.statementsFromString(result).map { statement ⇒
+      Resource(statement.o.value)
+    }.toList
   }
 }

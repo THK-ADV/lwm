@@ -5,10 +5,12 @@
     @import utils.Global._
 
     @helper.form(action = routes.AssignmentManagementController.assignmentPost()) {
-        @helper.inputText(form("id"), '_label -> "Titel:")
-        @helper.textarea(form("description"), '_label -> "Beschreibung")
-        @helper.textarea(form("text"), 'rows -> 10, 'cols -> 50, '_label -> "Aufgabe:")
-        @helper.inputText(form("topics"), '_label -> "Themen:")
+        @helper.inputText(form("heading"), '_label -> "Titel:")
+        @helper.textarea(form("description"), 'rows -> 15, 'cols -> 40, '_label -> "Beschreibung (Plaintext oder Markdown)")
+        @helper.textarea(form("text"), 'rows -> 15, 'cols -> 40, '_label -> "Aufgabe (Plaintext oder Markdown)")
+        @helper.textarea(form("goals"), 'rows -> 15, 'cols -> 40, '_label -> "Lernziele (Plaintext oder Markdown)")
+        @helper.textarea(form("hints"), 'rows -> 15, 'cols -> 40, '_label -> "Lösungshinweise (Plaintext oder Markdown)")
+        @helper.inputText(form("topics"), '_label -> "Themen (Mehrfachangaben mit Komma trennen)):")
         <label>Veranstaltungen:</label> <br />
         @for((c, index) <- courses.zipWithIndex; l <- c.props(RDFS.label); d <- c.props(LWM.hasDegree); i = Individual(Resource(d.value))) {
             <input type="checkbox" name="courses[@index]" value="@c.uri.value"> @l - @i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value <br />

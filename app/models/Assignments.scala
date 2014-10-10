@@ -19,8 +19,10 @@ object Assignments {
       Statement(courseResource, RDF.typ, LWM.Assignment),
       Statement(courseResource, RDF.typ, OWL.NamedIndividual),
       Statement(courseResource, LWM.hasId, StringLiteral(id.toString)),
-      Statement(courseResource, RDFS.label, StringLiteral(assignment.id)),
+      Statement(courseResource, RDFS.label, StringLiteral(assignment.heading)),
       Statement(courseResource, LWM.hasText, StringLiteral(assignment.text)),
+      Statement(courseResource, LWM.hasHints, StringLiteral(assignment.hints)),
+      Statement(courseResource, LWM.hasLearningGoals, StringLiteral(assignment.goals)),
       Statement(courseResource, LWM.hasDescription, StringLiteral(assignment.description))
     ) ++ assignment.courses.map(c ⇒ Statement(courseResource, LWM.hasCourse, Resource(c))) ++ assignment.topics.map(t ⇒ Statement(courseResource, LWM.hasTopic, StringLiteral(t)))
 
@@ -45,9 +47,9 @@ object Assignments {
   }
 }
 
-case class Assignment(id: String, description: String, text: String, topics: List[String], courses: List[String])
+case class Assignment(heading: String, description: String, text: String, goals: String, hints: String, topics: List[String], courses: List[String])
 
-case class AssignmentFormModel(id: String, description: String, text: String, topics: String, courses: List[String])
+case class AssignmentFormModel(id: String, description: String, text: String, goals: String, hints: String, topics: String, courses: List[String])
 
 case class AssignmentAssociation(labwork: Resource, orderId: Int)
 
@@ -55,10 +57,12 @@ case class AssignmentAssociationFormModel(assignment: String, preparationTime: I
 
 object AssignmentForms {
   val assignmentForm = Form(mapping(
-    "id" -> nonEmptyText,
-    "description" -> nonEmptyText,
-    "text" -> nonEmptyText,
-    "topics" -> nonEmptyText,
+    "heading" -> text,
+    "description" -> text,
+    "text" -> text,
+    "goals" -> text,
+    "hints" -> text,
+    "topics" -> text,
     "courses" -> list(nonEmptyText)
   )(AssignmentFormModel.apply)(AssignmentFormModel.unapply))
 

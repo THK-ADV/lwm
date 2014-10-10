@@ -1,0 +1,21 @@
+@(substitution: Resource)
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic._
+@import utils.Global._
+
+@{
+    val query =
+        s"""
+          |select ($substitution as ?s) (${LWM.hasSubstitute} as ?p) (?name as ?o) where {
+          |  $substitution ${LWM.hasSubstitute} ?sub .
+          |  ?sub ${RDFS.label} ?name
+          |}
+        """.stripMargin
+
+    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).headOption match{
+        case Some(statement) =>
+            statement.o.toString
+        case None => ""
+    }
+}

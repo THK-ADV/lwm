@@ -1,0 +1,20 @@
+@(substitution: Resource)
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic._
+@import utils.Global._
+
+@{
+    val query =
+       s"""
+          |select ($substitution as ?s) (${LWM.hasAssignmentDate} as ?p) (?date as ?o) where {
+          |  $substitution ${LWM.hasScheduleAssociation} ?schedule .
+          |  ?schedule ${LWM.hasAssignmentDate} ?date
+          |}
+        """.stripMargin
+
+    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).headOption match{
+        case Some(statement) =>
+            statement.o.toString
+        case None => ""
+    }
+}
