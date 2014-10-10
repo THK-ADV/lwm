@@ -1,13 +1,11 @@
-
-
-@(students: List[Individual], degrees: List[Individual], studentInput: Form[Student])
+@(students: List[(Individual, String)], degrees: List[Individual], studentInput: Form[Student])
     @import utils.semantic.Individual
     @import utils.semantic.StringLiteral
     @import utils.semantic.Vocabulary
-@import utils.semantic.Vocabulary.RDFS
+    @import utils.semantic.Vocabulary.RDFS
 
-@import utils.semantic.Resource
-@import utils.Global._
+    @import utils.semantic.Resource
+    @import utils.Global._
 
 
 
@@ -21,7 +19,7 @@
                 <th>Vorname</th>
                 <th>Studiengang</th>
             </tr>
-            @for((student, index) <- students.zipWithIndex) {
+            @for((student, index) <- students.sortBy(_._2).map(_._1).zipWithIndex) {
                 <tr>
                     <td>@student.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value</td>
                     <td>@student.props.getOrElse(Vocabulary.FOAF.lastName, List(StringLiteral(""))).head.value</td>
@@ -35,7 +33,7 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">
                                     Close</span></button>
                                 <h4 class="modal-title" id="myModalLabel">Student bearbeiten</h4>
                             </div>

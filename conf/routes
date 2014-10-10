@@ -16,10 +16,12 @@ POST          /administration/users/:id                           controllers.Us
 GET           /administration/dashboard                           controllers.AdministrationDashboardController.dashboard()
 
 GET           /administration/students                            controllers.StudentsManagement.index()
+GET           /administration/students/page/:page                 controllers.StudentsManagement.pagedIndex(page)
 POST          /administration/students                            controllers.StudentsManagement.studentPost()
 DELETE        /administration/students                            controllers.StudentsManagement.studentRemoval()
 GET           /administration/students/suggest                    controllers.StudentsManagement.studentSuggestions()
 POST          /administration/students/:id                        controllers.StudentsManagement.studentEdit(id)
+GET           /administration/students/search/:id                 controllers.StudentsManagement.studentSearch(id)
 
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
@@ -103,7 +105,7 @@ POST          /students/:id/information                           controllers.St
 DELETE        /students/labworkApplications                       controllers.LabworkApplicationController.studentApplicationRemoval()
 
 # For test purposes only
-# GET           /administration/testdata                            controllers.TestDataController.generateTestData()
+GET           /administration/testdata                            controllers.TestDataController.generateTestData()
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                       controllers.Assets.at(path="/public", file)

@@ -1,0 +1,62 @@
+@(student: Individual, degrees: List[Individual])
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary
+@import utils.Global._
+
+<!DOCTYPE html>
+
+<html>
+    @head("Suchergebnis")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div id="studentsList" class="col-md-8">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Suchergebnis</div>
+
+                        <table class="table">
+                            <tr>
+                                <th>GM ID</th>
+                                <th>Nachname</th>
+                                <th>Vorname</th>
+                                <th>Studiengang</th>
+                            </tr>
+                            <tr>
+                                <td>@student.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value</td>
+                                <td>@student.props.getOrElse(Vocabulary.FOAF.lastName, List(StringLiteral(""))).head.value</td>
+                                <td>@student.props.getOrElse(Vocabulary.FOAF.firstName, List(StringLiteral(""))).head.value</td>
+                                <td>@Individual(student.props.getOrElse(Vocabulary.LWM.hasEnrollment, List(Resource(""))).head.asResource().get).props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
+                                <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#student"></a></td>
+                                <td><a href="javascript: if(confirmed()) deleteStudent('@student.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                            </tr>
+
+                            <div class="modal fade" id="student" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                                Close</span></button>
+                                            <h4 class="modal-title" id="myModalLabel">Student bearbeiten</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                        @student_edit_form(student, degrees, UserForms.studentForm)
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>
+
