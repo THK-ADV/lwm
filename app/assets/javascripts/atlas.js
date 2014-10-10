@@ -101,6 +101,12 @@ function sDeleteApplication(studentId, labworkid) {
     ajaxRequest("/students/labworkApplications", "DELETE", "application/json", {s: studentId, lab: labworkid}, reload);
 }
 
+function createStudentApplication(listId) {
+    var s = $("#autocomplete").val();
+    ajaxRequest('/administration/labworkApplicationLists/'+encodeURIComponent(listId), "POST", "application/json", {student: s}, reload);
+
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

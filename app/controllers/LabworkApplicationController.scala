@@ -283,4 +283,20 @@ object LabworkApplicationController extends Controller with Authentication {
         Future.successful(Redirect(routes.LabworkApplicationController.index()))
     }
   }
+
+  def addApplication(listId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async(parse.json) { implicit request ⇒
+      val student = (request.body \ "student").asOpt[String]
+      println(s"Student: $student\nList: $listId")
+      if (student.isDefined) {
+        val listI = Individual(Resource(listId))
+        val labwork = listI.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head
+        LabworkApplications.create(LabworkApplication(Resource(student.get), labwork.asResource().get, Nil)).map { e ⇒
+          listI.add(LWM.hasApplication, e.uri)
+          Redirect(routes.LabworkApplicationController.applicationListEdit(listId))
+        }.recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.applicationListEdit(listId) }
+      }
+      Future.successful(Redirect(routes.LabworkApplicationController.index()))
+    }
+  }
 }

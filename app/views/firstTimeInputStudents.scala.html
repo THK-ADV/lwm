@@ -17,14 +17,15 @@
                 @helper.inputText(form("lastname"), '_class -> "dl-horizontal", '_label -> "Nachname:")
                 @helper.inputText(form("registrationNumber"), '_class -> "dl-horizontal", '_label -> "Matrikelnummer:")
                 @helper.inputText(form("email"), '_class -> "dl-horizontal", '_label -> "Email:")
-                @helper.inputText(form("phone"), '_class -> "dl-horizontal", '_label -> "Telefon:")
+                @helper.inputText(form("phone"), '_class -> "dl-horizontal", '_label -> "*Telefon:")
                 @helper.select(form("degree"), (for(d <- degrees) yield {
                     d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
                 }).sortBy(_._2), '_class -> "dl-horizontal", '_label -> "Studiengang:")
                 <dl class="dl-horizontal">
                     <dd><button type="submit">Abschicken</button></dd>
+                    <dd></dd>
                 </dl>
-
+                <b>* = optional</b>
             </div>
         </div>
     }

@@ -7,7 +7,7 @@
     student.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value,
     student.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value,
     student.props.getOrElse(FOAF.mbox, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(NCO.hasPhoneNumber, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(NCO.phoneNumber, List(StringLiteral(""))).head.value,
     student.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))) { f =>
     @helper.form(action = routes.StudentsManagement.changeInformation(student.uri.value)) {
         <input type="hidden" name="id" value="@f("id").value">
@@ -15,10 +15,11 @@
         @helper.inputText(f("lastname"), '_class -> "dl-horizontal",'_label -> "Nachname:")
         @helper.inputText(f("registrationNumber"), '_class -> "dl-horizontal",'_label -> "Matrikelnummer:")
         @helper.inputText(f("email"), '_class -> "dl-horizontal",'_label -> "Email:")
-        @helper.inputText(f("phone"), '_class -> "dl-horizontal",'_label -> "Telefon:")
+        @helper.inputText(f("phone"), '_class -> "dl-horizontal",'_label -> "*Telefon:")
         @helper.select(form("degree"), (for(d <- degrees) yield {
             d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
         }).sortBy(_._2), '_class -> "dl-horizontal", '_label -> "Studiengang:")
+        <b>* = optional</b>
         <div class="modal-footer">
             <button type="submit" class="btn btn-primary">Ändern</button>
         </div>

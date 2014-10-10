@@ -37,6 +37,7 @@ GET           /administration/labworkApplications                 controllers.La
 GET           /administration/labworkApplications/:id             controllers.LabworkApplicationController.applicationListEdit(id)
 DELETE        /administration/labworkApplications                 controllers.LabworkApplicationController.adminApplicationRemoval()
 POST          /administration/labworkApplicationLists             controllers.LabworkApplicationController.changeLists()
+POST          /administration/labworkApplicationLists/:id         controllers.LabworkApplicationController.addApplication(id)
 
 GET           /administration/degrees                             controllers.DegreeManagementController.index()
 POST          /administration/degrees                             controllers.DegreeManagementController.degreePost()
