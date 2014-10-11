@@ -101,6 +101,7 @@ POST          /administration/edits                               controllers.Ed
 GET           /administration/labworks/:id/group/:gid             controllers.GroupManagementController.index(id, gid)
 
 GET           /administration/substitutions                       controllers.SubstitutionsManagementController.index()
+POST          /administration/substitutions                       controllers.SubstitutionsManagementController.substitutionPost()
 
 GET           /students/:id/information                           controllers.StudentDashboardController.informationPage(id)
 POST          /students/:id/information                           controllers.StudentsManagement.changeInformation(id)

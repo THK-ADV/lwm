@@ -1,1 +1,12 @@
-@(form: Form[SubstitutionFormModel])
+@(userId: String, form: Form[SubstitutionFormModel])
+<div>
+    @helper.form(action = routes.SubstitutionsManagementController.substitutionPost()) {
+        @helper.inputText(form("scheduleAssociation"), '_label -> "Praktikumstermin:")
+        @helper.select(form("substitute"), Users.substituteUserMapping(userId), '_label -> "Vertretung:")
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+        </div>
+    }
+</div>

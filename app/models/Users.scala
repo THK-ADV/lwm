@@ -97,4 +97,19 @@ object Users {
   }
 
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
+
+  def substituteUserMapping(userId: String) = {
+    val query =
+      s"""
+          |select (?user as ?s) (${RDFS.label} as ?p) (?name as ?o) where {
+          |  ?user ${RDF.typ} ${LWM.User} .
+          |  ?user ${RDFS.label} ?name .
+          |  filter not exists {?user ${LWM.hasGmId} "$userId"}
+          |}
+        """.stripMargin
+
+    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
+      statement.s.toString -> statement.o.toString
+    }
+  }
 }
