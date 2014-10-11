@@ -13,6 +13,7 @@ import utils.semantic.{ Vocabulary, SPARQLExecution, Namespace, NamedGraph }
 
 import scala.concurrent.ExecutionContext
 
+
 object Global extends GlobalSettings {
 
   import scala.concurrent.duration._
