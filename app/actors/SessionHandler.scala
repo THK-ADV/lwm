@@ -1,7 +1,7 @@
 package actors
 
 import actors.SessionHandler._
-import akka.actor.{ Actor, Props }
+import akka.actor.{ ActorLogging, Actor, Props }
 import controllers.Permissions
 import controllers.Permissions.Role
 import org.apache.commons.codec.digest.DigestUtils
@@ -31,7 +31,7 @@ object SessionHandler {
   def props(config: Configuration) = Props(new SessionHandler(config))
 }
 
-class SessionHandler(config: Configuration) extends Actor {
+class SessionHandler(config: Configuration) extends Actor with ActorLogging {
 
   import utils.LDAPAuthentication._
 
@@ -46,11 +46,13 @@ class SessionHandler(config: Configuration) extends Actor {
 
   def receive: Receive = {
     case AuthenticationRequest(user, password) ⇒
+      println("Asking LDAP")
       val authFuture = authenticate(user, password, bindHost, bindPort, DN)
 
       val requester = sender()
       authFuture.map {
         case l @ Left(error) ⇒
+          println(s"Received error in auth request: $error")
           requester ! l
         case Right(success) ⇒
           val sessionFuture = createSessionID(user)

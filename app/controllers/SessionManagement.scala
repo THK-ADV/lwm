@@ -19,7 +19,7 @@ object SessionManagement extends Controller {
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
 
-  private implicit val timeout = Timeout(15.seconds)
+  private implicit val timeout = Timeout(60.seconds)
   private val sessionsHandler = Akka.system.actorSelection("user/sessions")
 
   def login() = Action.async { implicit request ⇒
@@ -36,12 +36,12 @@ object SessionManagement extends Controller {
     loginData match {
       case None ⇒ Future.successful(Unauthorized)
       case Some(login) ⇒
-        val timeoutFuture = Promise.timeout("Oops", 45.second)
+        val timeoutFuture = Promise.timeout("No response from IDM", 45.second)
         val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user.toLowerCase, login.password)).mapTo[Either[String, SessionHandler.Session]]
 
         Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
           case Left(message: String) ⇒
-            Unauthorized(views.html.invalid_login())
+            Redirect(routes.Application.index()).withNewSession
           case Right(session: SessionHandler.Session) ⇒
             val firstTime = Await.result(firstTimeCheck(session.user), atMost = 20.seconds)
             session.role match {
@@ -74,7 +74,7 @@ object SessionManagement extends Controller {
                   )
                 }
             }
-          case t: String ⇒ InternalServerError(t)
+          case t: String ⇒ Ok(views.html.error(t))
         }
     }
 

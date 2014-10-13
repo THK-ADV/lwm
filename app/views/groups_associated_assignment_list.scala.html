@@ -11,20 +11,9 @@
     Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size</div>
         <table class="table table-bordered">
             <tbody>
-                <tr><th>Blatt</th> <th>Aufgabe</th> <th>Abgabetermin</th></tr>
-                @for((a, index) <- associations.zip(Stream from 1)) {
-                        <tr>
-                            <td>@{index + 1}</td>
-                            <td>
-                                @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value <br />
-                                @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._1)
-                            </td>
-                            <td>
-                                @ScheduleAssociations.dates(group.uri, a.uri).map(_._1) @ScheduleAssociations.times(group.uri, a.uri).map(_._2)
-                                @{a.props.getOrElse(LWM.hasPreparationTime, List(StringLiteral("0"))).head.value.toInt + index}
-                            </td>
-                        </tr>
-                }
+                <td> @helpers.groupSchedule(group.uri)</td>
             </tbody>
         </table>
     </div>
+
+

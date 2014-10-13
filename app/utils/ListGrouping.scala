@@ -154,6 +154,7 @@ object ListGrouping {
   }
 
   def group(labwork: Resource, applications: List[Resource], minGroupSize: Int = 3, maxGroupSize: Int = 15): Future[Boolean] = Future {
+    println(s"Grouping with: $minGroupSize, $maxGroupSize")
     var unprocessedApplications = applications
 
     val existingGroups = Individual(labwork).props.get(LWM.hasGroup).map { groups ⇒
@@ -175,11 +176,28 @@ object ListGrouping {
         if (existingGroups.size > 0) {
           val minGroup = existingGroups.minBy(_.members.size)
           if (minGroup.members.size + partners.size + 1 < maxGroupSize * 1.1) {
+            println("Enough slots in existing group")
+            println(s"Size: ${minGroup.members.size}")
             minGroup.addMember(Resource(a.value), application.uri, partners)
           } else {
-            val group = Group(labwork)
-            additionalGroups = group +: additionalGroups
-            group.addMember(Resource(a.value), application.uri, partners)
+            if (additionalGroups.size > 0) {
+              val minGroup = additionalGroups.minBy(_.members.size)
+              if (minGroup.members.size + partners.size + 1 < maxGroupSize * 1.1) {
+                minGroup.addMember(Resource(a.value), application.uri, partners)
+              } else {
+                if (unprocessedApplications.size < minGroupSize) {
+                  minGroup.addMember(Resource(a.value), application.uri, partners)
+                } else {
+                  val group = Group(labwork)
+                  additionalGroups = group +: additionalGroups
+                  group.addMember(Resource(a.value), application.uri, partners)
+                }
+              }
+            } else {
+              val group = Group(labwork)
+              additionalGroups = group +: additionalGroups
+              group.addMember(Resource(a.value), application.uri, partners)
+            }
           }
         } else {
           if (additionalGroups.size > 0) {
