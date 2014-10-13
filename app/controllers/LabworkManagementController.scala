@@ -210,7 +210,7 @@ object LabworkManagementController extends Controller with Authentication {
     Action.async {
       request ⇒
         val i = Individual(Resource(labworkid))
-        println(labworkid)
+
         val groupQuery =
           s"""
           |select ?s (${LWM.hasGroupId} as ?p) ?o where {
