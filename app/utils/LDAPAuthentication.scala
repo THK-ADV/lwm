@@ -79,7 +79,7 @@ object LDAPAuthentication {
       connection ⇒
         try {
           import scala.collection.JavaConverters._
-          val results = connection.search(dn, SearchScope.SUB, s"(uid=$user)", "sn", "givenName").getSearchEntries.asScala
+          val results = connection.search(s"uid=$user,$dn", SearchScope.SUB, s"(uid=$user)", "sn", "givenName").getSearchEntries.asScala
 
           if (results.size == 1) {
             val sn = results.head.getAttribute("sn").getValue
@@ -115,9 +115,7 @@ object LDAPAuthentication {
         val sslContext = sslUtil.createSSLContext("SSLv3")
         val connection = new LDAPConnection(sslContext.getSocketFactory)
         connection.setConnectionOptions(connectionOptions)
-        println(s"before connect: $connection")
         connection.connect(host, port)
-        println(s"after connect: $connection")
         f(connection)
       } else {
         val connection = new LDAPConnection(host, port)
