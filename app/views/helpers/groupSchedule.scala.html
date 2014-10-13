@@ -4,7 +4,6 @@
 @import utils.Global._
 
 
-
 @{
     val query =
         s"""
@@ -16,8 +15,7 @@
          | ?entry ${LWM.hasRoom} ?room .
          | ?room ${LWM.hasRoomId} ?roomId .
          | ?assignmentAssociation ${LWM.hasOrderId} ?id .
-         | order by ?id
-         |}
+         |} order by asc(?id)
        """.stripMargin
 
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement =>
@@ -25,4 +23,6 @@
         val date = ""
         val room = ""
     }
+
+    query
 }
