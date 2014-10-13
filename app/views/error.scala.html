@@ -1,0 +1,15 @@
+@(error: String)
+
+<!DOCTYPE html>
+
+<html>
+    @head("LWM Fehler")
+<body>
+    <div class="alert alert-danger" role="alert">
+        <p>Ein Fehler ist aufgetreten: @error</p>
+        <p>Bitte versuchen Sie es später erneut.</p>
+        <p>Zurück zum <a href="@routes.Application.index()">Login</a></p>
+    </div>
+    @footer()
+</body>
+</html>

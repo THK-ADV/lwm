@@ -74,7 +74,7 @@ object SessionManagement extends Controller {
                   )
                 }
             }
-          case t: String ⇒ InternalServerError(t)
+          case t: String ⇒ Ok(views.html.error(t))
         }
     }
 
