@@ -1,0 +1,31 @@
+@(labwork: Individual, groupsWithStudents: List[(Individual, List[Individual])])
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS, FOAF}
+<html>
+    @head("Zugewiesene Studenten")
+    <body>
+    @for(gws <- groupsWithStudents) {
+        <section>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Gruppe @gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</h3>
+                </div>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>@gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</th>
+                        <th>Kennung</th>
+                    </tr>
+                    <tbody>
+                    @for(s <- gws._2.sortBy(s => s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value)) {
+                        <tr>
+                            <td></td>
+                            <td>@s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value</td>
+                           </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+    </body>
+</html>

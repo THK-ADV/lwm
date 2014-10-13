@@ -29,7 +29,6 @@
                 <td>@labwork.props.getOrElse(Vocabulary.LWM.hasAssignmentAssociation, Nil).size</td>
                 <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.LWM.hasSemester, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
                 <td><a class="glyphicon glyphicon-pencil" href="@routes.LabworkManagementController.edit(labwork.uri.value)"></a></td>
-                <td><a class="glyphicon glyphicon-share-alt" href="@routes.LabworkManagementController.export(labwork.uri.value)"></a></td>
                 <td><a href="javascript: if(confirmed()) deleteLabwork('@labwork.uri.value')" class="glyphicon glyphicon-remove"></a></td>
             </tr>
         }

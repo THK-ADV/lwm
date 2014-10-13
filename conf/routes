@@ -26,12 +26,12 @@ GET           /administration/students/search/:id                 controllers.St
 GET           /administration/labworks                            controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                        controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks/:id                        controllers.GroupManagementController.studentAddition(id)
-GET           /administration/labworks/:id/export                 controllers.LabworkManagementController.export(id)
 POST          /administration/labworks/edit/:id                   controllers.LabworkManagementController.metaEdit(id)
 POST          /administration/labworks                            controllers.LabworkManagementController.labWorkPost()
 PUT           /administration/labworks                            controllers.LabworkManagementController.setVisibility()
 DELETE        /administration/labworks                            controllers.LabworkManagementController.labworkRemoval()
 DELETE        /administration/labworks/:id                        controllers.GroupManagementController.studentRemoval(id)
+GET           /administration/labworks/:id/export/:e              controllers.LabworkManagementController.export(id,e)
 
 POST          /administration/labworkApplications                 controllers.LabworkApplicationController.labworkApplicationPost()
 POST          /administration/labworkApplications/:id             controllers.LabworkApplicationController.groupList(id)
