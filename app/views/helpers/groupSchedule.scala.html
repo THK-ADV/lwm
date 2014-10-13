@@ -1,28 +1,38 @@
 @(group: Resource)
+@import java.net.URLDecoder
+@import utils.semantic.Vocabulary.RDFS
 @import utils.semantic._
 @import Vocabulary.LWM
 @import utils.Global._
+@import com.hp.hpl.jena.query.QueryExecutionFactory
 
 
 @{
     val query =
         s"""
          |select * where {
-         | ?group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | $group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
          | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
          | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
          | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
          | ?entry ${LWM.hasRoom} ?room .
          | ?room ${LWM.hasRoomId} ?roomId .
+         | ?entry ${LWM.hasSupervisor} ?supervisor .
+         | ?supervisor ${RDFS.label} ?supervisorName .
          | ?assignmentAssociation ${LWM.hasOrderId} ?id .
          |} order by asc(?id)
        """.stripMargin
 
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement =>
-        val supervisors = helpers.supervisorList(group)
-        val date = ""
-        val room = ""
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var lines = Vector("<table><tr><td>Datum</td><td>Raum</td><td>Mitarbeiter</td></tr>")
+    while(result.hasNext){
+        val solution = result.next()
+        val date = solution.getLiteral("assignmentDate").getString
+        val room = solution.getLiteral("roomId").getString
+        val supervisor = URLDecoder.decode(solution.getLiteral("supervisorName").getString, "UTF-8")
+        val row = s"<tr><td>$date</td><td>$room</td><td>$supervisor</td></tr>"
+        lines = lines :+ row
     }
-
-    query
+    lines = lines :+ "</table>"
+    Html(lines.mkString("\n"))
 }

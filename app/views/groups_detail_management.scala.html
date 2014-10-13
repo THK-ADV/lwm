@@ -14,7 +14,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    <h4>Gruppe @{group.props.getOrElse(LWM.hasId, List(StringLiteral(""))).head.value} Detailverwaltung</h4>
+                    <h4>Gruppe @{group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value} Detailverwaltung</h4>
                     <div class="row">
                     @groups_student_list(labwork, group, students)
                     </div>
