@@ -1,4 +1,4 @@
-@(labwork: Individual, groupsWithStudents: Map[Individual, List[Individual]])
+@(labwork: Individual, groupsWithStudents: List[(Individual, List[Individual])])
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.semantic.Vocabulary.{LWM, RDFS, FOAF}
 <html>
@@ -14,17 +14,17 @@
                 <tr>
                     <th>@gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</th>
                     <th>Kennung</th>
-                    <th>Vorname</th>
                     <th>Nachname</th>
+                    <th>Vorname</th>
                     <th>Matrikelnummer</th>
                 </tr>
                 <tbody>
-                    @for(s <- gws._2) {
+                    @for(s <- gws._2.sortBy(s => s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)) {
                         <tr>
                             <td></td>
                             <td>@s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value</td>
-                            <td>@s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value</td>
                             <td>@s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value</td>
+                            <td>@s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value</td>
                             <td>@s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value</td>
                         </tr>
                     }

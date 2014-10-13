@@ -29,6 +29,7 @@ object StudentsManagement extends Controller with Authentication {
         val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round
+        println(s"Sorted amount: ${sorted.size / 50}\nPaged amount:$nrPages")
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
       }
     }

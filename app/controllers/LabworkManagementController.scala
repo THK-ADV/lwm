@@ -210,22 +210,24 @@ object LabworkManagementController extends Controller with Authentication {
     Action.async {
       request ⇒
         val i = Individual(Resource(labworkid))
+        println(labworkid)
         val groupQuery =
           s"""
-          |select (<$labworkid> as ?s) (${LWM.hasGroup} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasGroup} ?o
-          |}
+          |select ?s (${LWM.hasGroupId} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasGroup} ?s .
+          | ?s ${LWM.hasGroupId} ?o }
+          | ORDER BY ASC(?o)
         """.stripMargin
 
         val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.o)
+          SPARQLTools.statementsFromString(result).map(_.s)
         }
 
         for {
           groups ← groupsFuture
         } yield {
-          val groupsWithStudents = groups.map(r ⇒ Individual(Resource(r.value))).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value))))).toMap
-          Ok(views.html.labwork_exported_groups(i, groupsWithStudents))
+          val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
+          Ok(views.html.labwork_exported_groups(i, groupsWithStudents.toList))
         }
     }
   }

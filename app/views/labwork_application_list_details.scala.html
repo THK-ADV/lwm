@@ -1,14 +1,15 @@
-@(openLabworks: List[(Individual, String)], applicationList: Individual, applications: List[Individual])
-    @import utils.semantic.StringLiteral
-    @import utils.semantic.Individual
-    @import utils.semantic.Vocabulary.LWM
-    @import utils.semantic.Vocabulary.RDFS
-    @import utils.Global._
+@(openLabworks: List[(Individual, String)], applicationList: Individual, appsAndApplicants: List[(Individual, Individual)])
+@import utils.semantic.Vocabulary.FOAF
+@import utils.semantic.StringLiteral
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.RDFS
+@import utils.Global._
 
 <!DOCTYPE html>
 
-    <html>
-        @head(s"Anmeldungen: ${applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))).flatten.flatten.flatten.get}")
+<html>
+    @head(s"Anmeldungen: ${applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))).flatten.flatten.flatten.get}")
     <body>
         <div class="container" id="everything">
             <div class="row">
@@ -16,65 +17,59 @@
             </div>
             <div class="row">
                 @navigation_admin()
-            <div class="col-md-9">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Anmeldungen für @{
-                        applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString))))
-                    }</div>
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Anmeldungen für @{
+                            applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString))))
+                        }</div>
 
-                    <table class="table">
-                        <tr>
-                            <th>Name</th>
-                            <th>ID</th>
-                        </tr>
-                        @for((application, index) <- applications.zipWithIndex) {
-                            @defining(application.props) { properties =>
-                                @defining(properties.get(LWM.hasApplicant)) { applicant =>
-                                    @applicant.map { list =>
-                                        @list.headOption.map { head =>
-                                            @head.asResource().map { resource =>
-                                                @defining(Individual(resource).props) { applicantProps =>
-                                                    <tr>
-                                                        <td>@applicantProps.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
-                                                        <td>@applicantProps.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
-                                                        <td><a href="#" data-toggle="modal" data-target="#@index" class="glyphicon glyphicon-pencil"></a></td>
-                                                        <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+                        <table class="table">
+                            <tr>
+                                <th>Nachname</th>
+                                <th>Vorname</th>
+                                <th>ID</th>
+                            </tr>
+                            @for((aa, index) <- appsAndApplicants.zipWithIndex) {
+                                @defining(aa._1) { application =>
+                                    @defining(aa._2) { applicant =>
+                                        <tr>
+                                            <td>@applicant.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.toString</td>
+                                            <td>@applicant.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.toString</td>
+                                            <td>@applicant.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
+                                            <td><a href="#" data-toggle="modal" data-target="#@index" class="glyphicon glyphicon-pencil"></a></td>
+                                            <td><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></td>
 
-                                                        <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                                            <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
-                                                                            Close</span></button>
-                                                                        <h4 class="modal-title" id="myModalLabel">
-                                                                            Anmeldung bearbeiten</h4>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                    @labwork_applications_student_switch(application, openLabworks, LabworkApplications.Forms.labworkApplicationChangeForm)
-                                                                    </div>
-
-                                                                </div>
-                                                            </div>
+                                            <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                                                Close</span></button>
+                                                            <h4 class="modal-title" id="myModalLabel">
+                                                                Anmeldung bearbeiten</h4>
                                                         </div>
-                                                    </tr>
-                                                }
-                                            }
-                                        }
+                                                        <div class="modal-body">
+                                                        @labwork_applications_student_switch(application, openLabworks, LabworkApplications.Forms.labworkApplicationChangeForm)
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </tr>
                                     }
                                 }
                             }
-                        }
 
-                    </table>
+                        </table>
+                    </div>
+                    @student_autocomplete_field()
+                    <a class="glyphicon glyphicon-plus" href="javascript: createStudentApplication('@applicationList.uri.value')"></a>
+
                 </div>
-                @student_autocomplete_field()
-                <a class="glyphicon glyphicon-plus" href="javascript: createStudentApplication('@applicationList.uri.value')"></a>
-
-            </div>
             </div>
 
 
             <div class="row">@footerAdmin()</div>
         </div>
     </body>
-    </html>
+</html>
