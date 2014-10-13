@@ -26,7 +26,7 @@ object StudentsManagement extends Controller with Authentication {
         students ← Students.all()
         degrees ← Degrees.all()
       } yield {
-        val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))
+        val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
@@ -128,7 +128,7 @@ object StudentsManagement extends Controller with Authentication {
   def studentSearch(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d))).recover {
-        case NonFatal(t) ⇒ Redirect(routes.StudentsManagement.index())
+        case NonFatal(t) ⇒ Redirect(routes.LabworkManagementController.index())
       }
 
     }

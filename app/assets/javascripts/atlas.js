@@ -104,7 +104,11 @@ function sDeleteApplication(studentId, labworkid) {
 function createStudentApplication(listId) {
     var s = $("#autocomplete").val();
     ajaxRequest('/administration/labworkApplicationLists/'+encodeURIComponent(listId), "POST", "application/json", {student: s}, reload);
+}
 
+function search() {
+    var uri = $("#autocomplete").val();
+    redirect({url: "/administration/students/search/"+encodeURIComponent(uri)});
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
