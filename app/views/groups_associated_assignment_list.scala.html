@@ -7,13 +7,8 @@
     @import scala.concurrent.ExecutionContext.Implicits.global
 
     <div class="panel panel-default">
-        <div class="panel-heading">
-    Anzahl der Aufgaben: @labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size</div>
-        <table class="table table-bordered">
-            <tbody>
-                <td> @helpers.groupSchedule(group.uri)</td>
-            </tbody>
-        </table>
+        <div class="panel-heading">Staffelplan der Gruppe @group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.toString </div>
+        @helpers.groupSchedule(group.uri)
     </div>
 
 

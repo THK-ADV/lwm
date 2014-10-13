@@ -1,12 +1,11 @@
 @()
 
+    <label for="autocomplete">Gm Id: </label>
+    <input id="autocomplete">
 
-<label for="autocomplete">Gm Id: </label>
-<input id="autocomplete">
 
-
-<script>
-$("#autocomplete").autocomplete({
-source: "@routes.StudentsManagement.studentSuggestions()"
-});
-</script>
+    <script>
+    $("#autocomplete").autocomplete({
+    source: "@routes.StudentsManagement.studentSuggestions()"
+    });
+    </script>
