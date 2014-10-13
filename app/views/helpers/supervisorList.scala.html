@@ -1,0 +1,43 @@
+@(group: Resource)
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic._
+@import Vocabulary.LWM
+@import utils.Global._
+
+
+
+@{
+    val query =
+        s"""
+         |select (?group as ?s) (${LWM.hasSupervisor} as ?p) (?name as ?o) where {
+         | ?group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?assignmentAssociation ${LWM.hasSupervisor} ?supervisor .
+         | ?supervisor ${RDFS.label} ?name
+         |}
+       """.stripMargin
+
+    val query2 =
+        s"""
+         |select (?group as ?s) (${LWM.hasSupervisor} as ?p) (?name as ?o) where {
+         | ?group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${LWM.hasSubstitution} ?substitution .
+         | ?substitution ${LWM.hasSubstitute} ?substitute .
+         | ?substitute ${RDFS.label} ?name
+         |}
+       """.stripMargin
+
+        val result2 = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query2))
+        if(result2.size > 0){
+            val middle = result2.map{statement =>
+                s"<li>${statement.o.toString}</li>"
+            }
+            s"<ul>$middle</ul>"
+        }else{
+            val result1 = SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query))
+            val middle = result1.map{statement =>
+                s"<li>${statement.o.toString}</li>"
+            }
+            s"<ul>$middle</ul>"
+        }
+}

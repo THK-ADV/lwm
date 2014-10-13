@@ -1,0 +1,28 @@
+@(group: Resource)
+@import utils.semantic._
+@import Vocabulary.LWM
+@import utils.Global._
+
+
+
+@{
+    val query =
+        s"""
+         |select * where {
+         | ?group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
+         | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
+         | ?entry ${LWM.hasRoom} ?room .
+         | ?room ${LWM.hasRoomId} ?roomId .
+         | ?assignmentAssociation ${LWM.hasOrderId} ?id .
+         | order by ?id
+         |}
+       """.stripMargin
+
+    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement =>
+        val supervisors = helpers.supervisorList(group)
+        val date = ""
+        val room = ""
+    }
+}

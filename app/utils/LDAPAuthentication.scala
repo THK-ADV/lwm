@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.control.NonFatal
 
 /**
   * The [[LDAPAuthentication]] object enables the user to communicate with an LDAP service.
@@ -32,9 +33,10 @@ object LDAPAuthentication {
   def authenticate(user: String, password: String, bindHost: String, bindPort: Int, dn: String): Future[Either[String, Boolean]] = {
     val bindDN = s"uid=$user, $dn"
     val bindRequest = new SimpleBindRequest(bindDN, password)
-
+    println("in authenticate")
     Future {
       bind[Boolean](bindHost, bindPort, dn, "", ssl = true) { connection ⇒
+        println(connection)
         try {
           val bindResult = connection.bind(bindRequest)
           if (bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("invalid credentials")
@@ -44,6 +46,8 @@ object LDAPAuthentication {
           connection.close()
         }
       }
+    }.recover {
+      case NonFatal(t) ⇒ Left("No response from LDAP.")
     }
   }
 
@@ -106,16 +110,23 @@ object LDAPAuthentication {
     * @return the result of the function f
     */
   def bind[A](host: String, port: Int, dn: String, password: String, ssl: Boolean = true)(f: LDAPConnection ⇒ Either[String, A]): Either[String, A] = {
-    if (ssl) {
-      val sslContext = sslUtil.createSSLContext("SSLv3")
-      val connection = new LDAPConnection(sslContext.getSocketFactory)
-      connection.setConnectionOptions(connectionOptions)
-      connection.connect(host, port)
+    try {
+      if (ssl) {
+        val sslContext = sslUtil.createSSLContext("SSLv3")
+        val connection = new LDAPConnection(sslContext.getSocketFactory)
+        connection.setConnectionOptions(connectionOptions)
+        println(s"before connect: $connection")
+        connection.connect(host, port)
+        println(s"after connect: $connection")
+        f(connection)
+      } else {
+        val connection = new LDAPConnection(host, port)
+        f(connection)
+      }
+    } catch {
+      case NonFatal(t) ⇒
+        Left(t.getMessage)
 
-      f(connection)
-    } else {
-      val connection = new LDAPConnection(host, port)
-      f(connection)
     }
   }
 }
