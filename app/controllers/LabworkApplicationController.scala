@@ -4,7 +4,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import utils.ListGrouping
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDF, RDFS, LWM }
+import utils.semantic.Vocabulary.{ FOAF, RDF, RDFS, LWM }
 import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
 
 import scala.concurrent.Future
@@ -151,8 +151,11 @@ object LabworkApplicationController extends Controller with Authentication {
           SPARQLTools.statementsFromString(result).map(t ⇒ (t.s, t.o))
         }
       }
+
       applicationsFuture.flatMap { applications ⇒
-        openLabs.map(a ⇒ Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, applications)))
+        val mapped = applications.map(e ⇒ (e, e.props.getOrElse(LWM.hasApplicant, List(Resource(""))).map(s ⇒ Individual(s.asResource().get)).head))
+        val sorted = mapped.sortBy(_._2.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)
+        openLabs.map(a ⇒ Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, sorted)))
       }.recover {
         case NonFatal(t) ⇒
           Redirect(routes.LabworkApplicationController.index())
