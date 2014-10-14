@@ -8,13 +8,16 @@ import scala.xml.XML._
 
 object ResourceUtils {
   def createResource(ns: Namespace) = Resource(s"$ns${AnonId.create()}")
+
   def createResource(ns: Namespace, id: UUID) = Resource(s"$ns${id.toString}")
 
 }
 
 trait RDFNode {
   val value: String
+
   def toQueryString: String
+
   def asResource(): Option[Resource]
 
   def asLiteral(): Option[Literal]
@@ -27,7 +30,7 @@ case class Namespace(uri: String) {
 case class Prefix(value: String)
 
 case class Resource(value: String) extends RDFNode {
-  override def toString = s"<$value>"
+  override def toString = s"<${value.replaceAll("<", "").replaceAll(">", "")}>"
 
   override def asResource(): Option[Resource] = Some(this)
 

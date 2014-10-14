@@ -2,6 +2,7 @@ package models
 
 import java.util.UUID
 
+import com.hp.hpl.jena.query.{ QuerySolution, QueryExecutionFactory }
 import org.joda.time.{ LocalTime, LocalDate }
 import play.api.data.Form
 import play.api.data.Forms._
@@ -149,5 +150,47 @@ object ScheduleAssociations {
     SPARQLTools.statementsFromString(result).map { statement ⇒
       Resource(statement.o.value)
     }.toList
+  }
+
+  def getForGroup(group: Resource): Future[List[ScheduleAssociation]] = Future {
+
+    def query2(scheduleAssociation: Resource) =
+      s"""
+         |select * where {
+         |  $scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
+         |  $scheduleAssociation ${LWM.hasDueDate} ?dueDate .
+         |  $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?assignmentDateEntry .
+         |  $scheduleAssociation ${LWM.hasDueDateTimetableEntry} ?dueDateEntry .
+         |  $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?assignmentEntry .
+         |  $scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         |  ?timetable ${RDF.typ} ${LWM.Timetable} .
+         |  ?timetable ${LWM.hasScheduleAssociation} $scheduleAssociation
+         |}
+       """.stripMargin
+
+    val t = Individual(group).props.get(LWM.hasScheduleAssociation).map { schedules ⇒
+      schedules.map { schedule ⇒
+        val q = query2(schedule.asResource().get)
+        val result = QueryExecutionFactory.sparqlService(queryHost, q).execSelect()
+        var sss = List.empty[ScheduleAssociation]
+        while (result.hasNext) {
+          val n = result.nextSolution()
+          val assignmentDate = LocalDate.parse(n.get("assignmentDate").toString)
+          val dueDate = LocalDate.parse(n.get("dueDate").toString)
+          val dueDateEntry = Resource(n.get("dueDateEntry").toString)
+          val assignmentEntry = Resource(n.get("assignmentEntry").toString)
+          val assignmentAssociation = Resource(n.get("assignmentAssociation").toString)
+          val timetable = Resource(n.get("timetable").toString)
+
+          sss = ScheduleAssociation(group, assignmentAssociation, assignmentDate, dueDate, assignmentEntry, dueDateEntry, timetable) :: sss
+        }
+        sss
+      }.flatten
+    }
+
+    t match {
+      case Some(list) ⇒ list
+      case None       ⇒ Nil
+    }
   }
 }

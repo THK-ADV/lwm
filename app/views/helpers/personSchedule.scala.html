@@ -1,4 +1,4 @@
-@(group: Resource)
+@(person: Resource, labwork: Resource)
 @import java.net.URLDecoder
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic._
@@ -11,8 +11,9 @@
     val query =
         s"""
          |select * where {
-         | $group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | $person ${LWM.hasScheduleAssociation} ?scheduleAssociation .
          | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?assignmentAssociation ${LWM.hasLabWork} $labwork .
          | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
          | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
          | ?entry ${LWM.hasRoom} ?room .

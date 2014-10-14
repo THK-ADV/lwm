@@ -1,4 +1,4 @@
-@(labworks: List[(Individual, Seq[String])])
+@(individual: Individual, labworks: List[(Individual, Seq[String])])
 @import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.Individual
@@ -9,7 +9,7 @@
         <tr>
             <th>Praktikum</th>
             <th>Gruppe</th>
-            <th>nächster Termin</th>
+            <th>Termine</th>
         </tr>
         <tbody>
         @for(a <- labworks) {
@@ -18,7 +18,7 @@
                 @a._2.map{group =>
                     <td>@group</td>
                 }
-                <td>tbd</td>
+                <td>@helpers.personSchedule(individual.uri, a._1.uri)</td>
             </tr>
         }
 

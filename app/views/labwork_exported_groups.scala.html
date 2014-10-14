@@ -4,21 +4,21 @@
 <html>
     @head("Zugewiesene Studenten")
     <body>
-        @for(gws <- groupsWithStudents) {
-            <section>
+    @for(gws <- groupsWithStudents) {
+        <section>
             <div class="panel panel-default">
                 <div class="panel-heading">
-                <h3 class="panel-title">Gruppe @gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</h3>
+                    <h3 class="panel-title">Gruppe @gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</h3>
                 </div>
-            <table class="table table-bordered">
-                <tr>
-                    <th>@gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</th>
-                    <th>Kennung</th>
-                    <th>Nachname</th>
-                    <th>Vorname</th>
-                    <th>Matrikelnummer</th>
-                </tr>
-                <tbody>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>@gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</th>
+                        <th>Kennung</th>
+                        <th>Nachname</th>
+                        <th>Vorname</th>
+                        <th>Matrikelnummer</th>
+                    </tr>
+                    <tbody>
                     @for(s <- gws._2.sortBy(s => s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)) {
                         <tr>
                             <td></td>
@@ -28,10 +28,20 @@
                             <td>@s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value</td>
                         </tr>
                     }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             </div>
-            </section>
-        }
+
+
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Staffelplan der Gruppe @gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</h3>
+                </div>
+                @helpers.groupSchedule(gws._1.uri)
+            </div>
+        </section>
+    }
     </body>
 </html>
