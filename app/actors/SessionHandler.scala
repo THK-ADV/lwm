@@ -106,23 +106,23 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   }
 
   private def getRoles(user: String): Future[Role] = {
-    val laborMemberFuture = isMemberOfGroup(user, "advlabor", bindHost, bindPort, GDN)
+    val laborMemberFuture = isMemberOfGroup(user, "labor", bindHost, bindPort, GDN)
 
-    val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
+    //val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
 
     val r = for {
       laborMember ← laborMemberFuture
-      hkMember ← hkMemberFuture
+      //hkMember ← hkMemberFuture
     } yield {
       var role = Permissions.DefaultRole
       laborMember match {
         case Right(member) ⇒
           if (member) role = Permissions.AdminRole
       }
-       hkMember match {
-         case Right(member) ⇒
+      /*hkMember match {
+        case Right(member) ⇒
           if (member) role = Permissions.AdminRole
-      }
+      }*/
       role
     }
     r.recover {

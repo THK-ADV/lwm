@@ -1,7 +1,7 @@
-@(labworks: List[(Individual, Seq[String])])
+@(student: Resource, labworks: List[(Individual, Seq[String])])
 @import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary.RDFS
-@import utils.semantic.Individual
+@import utils.semantic.{Individual, Resource}
 
 <div class="panel panel-default">
     <div class="panel-heading">Ihre Praktika in diesem Semester</div>
@@ -10,6 +10,7 @@
             <th>Praktikum</th>
             <th>Gruppe</th>
             <th>nächster Termin</th>
+            <th>Aufgaben</th>
         </tr>
         <tbody>
         @for(a <- labworks) {
@@ -19,6 +20,7 @@
                     <td>@group</td>
                 }
                 <td>tbd</td>
+                <td><a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="glyphicon glyphicon-arrow-right"></a></td>
             </tr>
         }
 

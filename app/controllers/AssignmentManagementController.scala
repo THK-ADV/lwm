@@ -8,7 +8,7 @@ import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ SPARQLTools, StringLiteral, Resource, Individual }
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
-
+import play.twirl.api.Html
 import scala.concurrent.Future
 
 /**
@@ -163,27 +163,14 @@ object AssignmentManagementController extends Controller with Authentication {
       request ⇒
         val i = Individual(Resource(assignment))
         val p = new PegDownProcessor()
-        println(assignment)
-        val query =
-          s"""
-          |select ?s (${LWM.hasSemester} as ?p) ?o where {
-          | ${i.uri} ${LWM.hasCourse} ?s .
-          | ?labwork ${LWM.hasCourse} ?s .
-          | ?labwork ${LWM.hasSemester} ?semester .
-          | ?semester ${RDFS.label} ?o
-          |}
-        """.stripMargin
 
-        val tupleFuture = sparqlExecutionContext.executeQuery(query).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.o.value))
-        }
         val text = p.markdownToHtml(i.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value)
         val hints = p.markdownToHtml(i.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value)
         val goals = p.markdownToHtml(i.props.getOrElse(LWM.hasLearningGoals, List(StringLiteral(""))).head.value)
         val description = p.markdownToHtml(i.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
-        val label = p.markdownToHtml(i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
-
-        tupleFuture.map(t ⇒ Ok(views.html.assignment_export(label, description, hints, goals, "", t.head)))
+        val label = i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+        val topics = i.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).head.value
+        Future.successful(Ok(views.html.assignment_export(label, Html.apply(description), Html.apply(text), Html.apply(hints), Html.apply(goals), topics)))
 
     }
   }

@@ -1,13 +1,17 @@
 package controllers
 
+import controllers.AssignmentManagementController._
 import controllers.StudentsManagement._
 import models._
 import org.joda.time.{ LocalDate, DateTime }
+import org.pegdown.PegDownProcessor
 import play.api.mvc.{ Action, Controller }
+import play.twirl.api.Html
 import utils.Security.Authentication
 import utils.semantic.Vocabulary._
 import utils.semantic._
 import utils.Global._
+import scala.collection.generic.SeqFactory
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 import java.io._
@@ -245,7 +249,7 @@ object LabworkManagementController extends Controller with Authentication {
       implicit request ⇒
 
         val i = Individual(Resource(labworkid))
-        val f = new File("students.csv")
+        val f = new File("./csv/students.csv")
         val writer = new PrintWriter(f)
         val builder = new StringBuilder
         val groupQuery =
@@ -274,4 +278,58 @@ object LabworkManagementController extends Controller with Authentication {
     }
   }
 
+  def exportAssignment(labwork: String, association: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
+    Action.async {
+      request ⇒
+        val assI = Individual(Resource(association))
+
+        val assignmentQuery =
+          s"""
+          |select (${assI.uri} as ?s) (${LWM.hasAssignment} as ?p) ?o where {
+          | ${assI.uri} ${LWM.hasAssignment} ?o
+          | }
+        """.stripMargin
+        val assignmentFuture = sparqlExecutionContext.executeQuery(assignmentQuery).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o)
+        }
+
+        val semesterQuery =
+          s"""
+          |select (<$labwork> as ?s) (${LWM.hasSemester} as ?p) ?o where {
+          | <$labwork> ${LWM.hasSemester} ?sem .
+          | ?sem ${RDFS.label} ?o
+          | }
+        """.stripMargin
+        val semesterFuture = sparqlExecutionContext.executeQuery(semesterQuery).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o)
+        }
+
+        val labQuery =
+          s"""
+          |select (<$labwork> as ?s) (${RDFS.label} as ?p) ?o where {
+          | <$labwork> ${RDFS.label} ?o
+          | }
+        """.stripMargin
+        val labFuture = sparqlExecutionContext.executeQuery(labQuery).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.o)
+        }
+
+        val p = new PegDownProcessor()
+        for {
+          labLabel ← labFuture
+          semLabel ← semesterFuture
+          assignment ← assignmentFuture
+          a = Individual(assignment.head.asResource().get)
+        } yield {
+          val orderId = assI.props.getOrElse(LWM.hasOrderId, List(StringLiteral(""))).head.value
+          val text = p.markdownToHtml(a.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value)
+          val hints = p.markdownToHtml(a.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value)
+          val goals = p.markdownToHtml(a.props.getOrElse(LWM.hasLearningGoals, List(StringLiteral(""))).head.value)
+          val description = p.markdownToHtml(a.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
+          val label = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+          val topics = a.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).head.value
+          Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html.apply(description), Html.apply(text), Html.apply(hints), Html.apply(goals), topics))
+        }
+    }
+  }
 }

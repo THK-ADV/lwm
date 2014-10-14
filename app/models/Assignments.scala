@@ -87,7 +87,8 @@ object AssignmentAssociations {
       Statement(associationResource, LWM.hasId, StringLiteral(id.toString)),
       Statement(associationResource, LWM.hasOrderId, StringLiteral(s"${association.orderId}")),
       Statement(association.labwork, LWM.hasAssignmentAssociation, associationResource),
-      Statement(associationResource, LWM.hasLabWork, association.labwork)
+      Statement(associationResource, LWM.hasLabWork, association.labwork),
+      Statement(associationResource, LWM.allowsApplications, StringLiteral("false"))
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(associationResource))

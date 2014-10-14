@@ -1,0 +1,81 @@
+@(lab: String, semester: String, order: String, description:Html, assignment: Html, hints: Html, goals: Html, topics: String)
+@import utils.semantic.{Individual, StringLiteral}
+@import utils.semantic.Vocabulary.{RDFS, LWM}
+<!DOCTYPE html>
+<html>
+    @head(s"Aufgabe ${order.toInt + 1}")
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-6 col-md-4">
+                    <div class="pull-left">
+                        <img src="@routes.Assets.at("images/fh_logorechts.gif")"></div>
+                </div>
+                <div class="col-xs-6 col-md-4"></div>
+                <div class="col-xs-6 col-md-4">
+                    <div class="pull-right">
+                        <h4>Campus Gummersbach</h4>
+                        <h4>Institut fuer Informatik <br />Labor für ADV</h4>
+                        <h4>@semester</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <h4><b>@lab</b></h4>
+            </div>
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4 class="text-center"><b>@{order.toInt + 1}. Praktikum</b></h4>
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Beschreibung:</b></h4>
+                @description
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Aufgabe:</b></h4>
+                @Assignment
+            </div>
+
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Hinweise:</b></h4>
+                @hints
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Lernziele:</b></h4>
+                @goals
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Themen:</b></h4>
+                <h5>@topics</h5>
+            </div>
+        </div>
+    </body>
+</html>

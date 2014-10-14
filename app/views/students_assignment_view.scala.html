@@ -1,0 +1,38 @@
+@(student: Resource, labwork: Individual, associations: List[Resource])
+    @import utils.semantic.{Resource, Individual, StringLiteral}
+    @import utils.semantic.Vocabulary.{LWM, RDFS}
+
+<!DOCTYPE html>
+    <html>
+        @head("Assignments")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_student()
+            </div>
+            <div class="row">
+                @navigation_student(student)
+            <div class="col-md-9">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                    @labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+                    </div>
+                    <table class="table table-bordered">
+                        <tr><th>Aufgabe</th>
+                            <th>Link</th></tr>
+                        @for((a, index) <- associations.zipWithIndex) {
+                            <tr><td>@{
+                                index + 1
+                            }</td>
+                                <td><a href="@routes.LabworkManagementController.exportAssignment(labwork.uri.value, a.value)" class="glyphicon glyphicon-export"></a></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+    </html>
