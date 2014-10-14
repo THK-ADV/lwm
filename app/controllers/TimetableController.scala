@@ -136,12 +136,16 @@ object TimetableController extends Controller with Authentication {
             },
             entry ⇒ {
               for {
-                s ← ei.props(LWM.hasSupervisor)
-                r ← ei.props(LWM.hasRoom)
+                ss ← ei.props.get(LWM.hasSupervisor)
+                rs ← ei.props.get(LWM.hasRoom)
               } yield {
-                ei.update(LWM.hasSupervisor, s, Resource(entry.supervisors))
-                ei.update(LWM.hasRoom, r, Resource(entry.room))
+                ss.map(s ⇒ ei.remove(LWM.hasSupervisor, s))
+                rs.map(r ⇒ ei.remove(LWM.hasRoom, r))
               }
+              println(entry)
+              ei.add(LWM.hasSupervisor, Resource(entry.supervisors))
+              ei.add(LWM.hasRoom, Resource(entry.room))
+
               Future.successful(Redirect(routes.TimetableController.index(ti.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value)))
             }
           )

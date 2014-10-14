@@ -74,6 +74,21 @@ object LDAPAuthentication {
     }
   }
 
+  def isMemberOfGroup(user: String, group: String, bindHost: String, bindPort: Int, dn: String) = Future {
+    bind(bindHost, bindPort, dn, "") {
+      connection ⇒
+        try {
+          import scala.collection.JavaConverters._
+          val results = connection.search(s"cn=$group,$dn", SearchScope.SUB, s"(memberUid=$user)", "*")
+          Right(results.getEntryCount > 0)
+        } catch {
+          case e: LDAPException ⇒ Left(e.getMessage)
+        } finally {
+          connection.close()
+        }
+    }
+  }
+
   def getName(user: String, bindHost: String, bindPort: Int, dn: String): Future[Either[String, Option[(String, String)]]] = Future {
     bind(bindHost, bindPort, dn, "") {
       connection ⇒

@@ -12,7 +12,7 @@ import utils.semantic._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise }
 
-case class ScheduleAssociation(group: Resource, assignmentAssoc: Resource, assignmentDate: LocalDate, dueDate: LocalDate, assignmentDateTimetableEntry: Resource, dueDateTimetableEntry: Resource)
+case class ScheduleAssociation(group: Resource, assignmentAssoc: Resource, assignmentDate: LocalDate, dueDate: LocalDate, assignmentDateTimetableEntry: Resource, dueDateTimetableEntry: Resource, timetable: Resource)
 
 object ScheduleAssociations {
   def create(assignment: ScheduleAssociation): Future[Individual] = {
@@ -23,6 +23,7 @@ object ScheduleAssociations {
       Statement(assocResource, RDF.typ, LWM.ScheduleAssociation),
       Statement(assocResource, RDF.typ, OWL.NamedIndividual),
       Statement(assocResource, LWM.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
+      Statement(assignment.timetable, LWM.hasScheduleAssociation, assocResource),
       Statement(assocResource, LWM.hasDueDate, DateLiteral(assignment.dueDate)),
       Statement(assocResource, LWM.hasGroup, assignment.group),
       Statement(assignment.group, LWM.hasScheduleAssociation, assocResource),

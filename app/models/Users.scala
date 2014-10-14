@@ -109,7 +109,21 @@ object Users {
         """.stripMargin
 
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
-      statement.s.toString -> statement.o.toString
+      statement.s.toString.replaceAll("<", "").replaceAll(">", "") -> statement.o.toString
+    }
+  }
+
+  def userFormMapping() = {
+    val query =
+      s"""
+          |select (?user as ?s) (${RDFS.label} as ?p) (?name as ?o) where {
+          |  ?user ${RDF.typ} ${LWM.User} .
+          |  ?user ${RDFS.label} ?name
+          |}
+        """.stripMargin
+
+    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
+      statement.s.toString.replaceAll("<", "").replaceAll(">", "") -> statement.o.toString
     }
   }
 }
