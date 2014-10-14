@@ -58,3 +58,7 @@ data
 #db dump
 /dump
 *.ttl
+
+#csv
+/csv
+*.csv
