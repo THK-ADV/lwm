@@ -24,7 +24,7 @@
        """.stripMargin
 
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
-    var lines = Vector("<table><tr><td>Datum</td><td>Raum</td><td>Mitarbeiter</td></tr>")
+    var lines = Vector("<table class=\"table\"><tr><th>Datum</th><th>Raum</th><th>Mitarbeiter</th></tr>")
     while(result.hasNext){
         val solution = result.next()
         val date = solution.getLiteral("assignmentDate").getString

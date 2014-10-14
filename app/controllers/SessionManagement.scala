@@ -49,28 +49,24 @@ object SessionManagement extends Controller {
                 if (firstTime) {
                   Redirect(routes.FirstTimeSetupController.setupUser()).withSession(
                     Security.username -> login.user,
-                    "session" -> session.id,
-                    "expires" -> session.expirationDate.toString
+                    "session" -> session.id
                   )
                 } else {
                   Redirect(routes.AdministrationDashboardController.dashboard()).withSession(
                     Security.username -> login.user,
-                    "session" -> session.id,
-                    "expires" -> session.expirationDate.toString
+                    "session" -> session.id
                   )
                 }
               case _ ⇒
                 if (firstTime) {
                   Redirect(routes.FirstTimeSetupController.setupStudent()).withSession(
                     Security.username -> login.user,
-                    "session" -> session.id,
-                    "expires" -> session.expirationDate.toString
+                    "session" -> session.id
                   )
                 } else {
                   Redirect(routes.StudentDashboardController.dashboard()).withSession(
                     Security.username -> login.user,
-                    "session" -> session.id,
-                    "expires" -> session.expirationDate.toString
+                    "session" -> session.id
                   )
                 }
             }
