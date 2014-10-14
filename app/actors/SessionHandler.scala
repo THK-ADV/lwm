@@ -1,12 +1,12 @@
 package actors
 
 import actors.SessionHandler._
-import akka.actor.{ ActorLogging, Actor, Props }
+import akka.actor.{ActorLogging, Actor, Props}
 import controllers.Permissions
 import controllers.Permissions.Role
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time
-import org.joda.time.{ Period, DateTime }
+import org.joda.time.{Period, DateTime}
 import play.api.Configuration
 
 import scala.concurrent.Future
@@ -63,7 +63,7 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
 
       val requester = sender()
       authFuture.map {
-        case l @ Left(error) ⇒
+        case l@Left(error) ⇒
           requester ! l
         case Right(success) ⇒
           val sessionFuture = createSessionID(user)
@@ -100,29 +100,29 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
       nameFuture.map {
         case Left(e) ⇒ println(e)
         case Right(maybeName) ⇒ maybeName map { name ⇒
-          requester ! (name._1, name._2)
+          requester !(name._1, name._2)
         }
       }
   }
 
   private def getRoles(user: String): Future[Role] = {
-    val laborMemberFuture = isMemberOfGroup(user, "labor", bindHost, bindPort, GDN)
+    val laborMemberFuture = isMemberOfGroup(user, "advlabor", bindHost, bindPort, GDN)
 
-    // val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
+    val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
 
     val r = for {
       laborMember ← laborMemberFuture
-      //hkMember ← hkMemberFuture
+      hkMember ← hkMemberFuture
     } yield {
       var role = Permissions.DefaultRole
       laborMember match {
         case Right(member) ⇒
           if (member) role = Permissions.AdminRole
       }
-      // hkMember match {
-      //   case Right(member) ⇒
-      //     if (member) role = Permissions.AdminRole
-      // }
+      hkMember match {
+        case Right(member) ⇒
+          if (member) role = Permissions.AdminRole
+      }
       role
     }
     r.recover {
