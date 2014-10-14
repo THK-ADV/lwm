@@ -132,7 +132,7 @@ object TimeSlots {
   )
 }
 
-case class Timetable(labwork: Resource, startDate: LocalDate, endDate: LocalDate, id: UUID = UUID.randomUUID())
+case class Timetable(labwork: Resource, id: UUID = UUID.randomUUID())
 
 case class TimetableEntry(day: Weekdays.Weekday, startTime: Time, endTime: Time, room: Resource, supervisors: List[Resource], timetable: Resource, id: UUID = UUID.randomUUID(), ownResource: Option[Resource] = None)
 
@@ -150,8 +150,6 @@ object Timetables {
     val statements = List(
       Statement(resource, RDF.typ, LWM.Timetable),
       Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasStartDate, DateLiteral(timetable.startDate)),
-      Statement(resource, LWM.hasEndDate, DateLiteral(timetable.endDate)),
       Statement(resource, LWM.hasId, StringLiteral(timetable.id.toString)),
       Statement(resource, LWM.hasLabWork, timetable.labwork),
       Statement(timetable.labwork, LWM.hasTimetable, resource)
@@ -162,21 +160,16 @@ object Timetables {
 
   def get(resource: Resource): Option[Timetable] = {
     val i = Individual(resource)
-    val maybeStartDate = i.props.get(LWM.hasStartDate)
-    val maybeEndDate = i.props.get(LWM.hasEndDate)
     val maybeLabwork = i.props.get(LWM.hasLabWork)
     val maybeId = i.props.get(LWM.hasId)
     for {
-      startDateList ← maybeStartDate
-      endDateList ← maybeEndDate
       labWorkList ← maybeLabwork
       idList ← maybeId
     } yield {
+      println(resource)
       val labwork = labWorkList.head.asResource().get
-      val startDate = LocalDate.parse(startDateList.head.asLiteral().get.decodedString)
-      val endDate = LocalDate.parse(endDateList.head.asLiteral().get.decodedString)
       val id = UUID.fromString(idList.head.asLiteral().get.decodedString)
-      Timetable(labwork, startDate, endDate, id)
+      Timetable(labwork, id)
     }
   }
 

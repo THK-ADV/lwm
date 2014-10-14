@@ -112,17 +112,16 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
 
     val r = for {
       laborMember ← laborMemberFuture
-      // hkMember ← hkMemberFuture
+      //hkMember ← hkMemberFuture
     } yield {
       var role = Permissions.DefaultRole
       laborMember match {
         case Right(member) ⇒
           if (member) role = Permissions.AdminRole
-        case Left(_) ⇒
       }
-      //hkMember match {
-      // case Right(member) ⇒
-      //   if (member) role = Permissions.AdminRole
+      // hkMember match {
+      //   case Right(member) ⇒
+      //     if (member) role = Permissions.AdminRole
       // }
       role
     }
