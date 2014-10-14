@@ -54,7 +54,7 @@ object LabWorks {
     val courseIndividual = Individual(labWork.course)
 
     val resource = ResourceUtils.createResource(lwmNamespace)
-    val timetable = Timetables.create(Timetable(resource, LocalDate.parse(startDate.value), LocalDate.parse(endDate.value)))
+    val timetable = Timetables.create(Timetable(resource))
     val labworkApplicationList = LabworkApplicationLists.create(LabworkApplicationList(resource))
 
     val label = courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.asLiteral().get
