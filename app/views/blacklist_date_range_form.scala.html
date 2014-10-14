@@ -8,8 +8,8 @@
     @helper.form(action = routes.BlacklistManagementController.blacklistDateRangePost()) {
         @helper.inputDate(f("startDate"), '_label -> "Startdatum")
         @helper.inputDate(f("endDate"), '_label -> "Enddatum")
-        @helper.inputText(f("blacklistResource"), '_label -> "Blacklist")
-        @helper.inputText(f("semesterResource"), '_label -> "Semester")
+        <input type="hidden" name="blacklistResource" value="@f("blacklistResource").value">
+        <input type="hidden" name="semesterResource" value="@f("semesterResource").value">
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             <button type="submit" class="btn btn-primary">Hinzufügen</button>

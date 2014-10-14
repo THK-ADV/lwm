@@ -1,10 +1,11 @@
 package controllers
 
 import models._
+import org.pegdown.PegDownProcessor
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDFS, LWM }
-import utils.semantic.{ StringLiteral, Resource, Individual }
+import utils.semantic.{ SPARQLTools, StringLiteral, Resource, Individual }
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
 
@@ -157,4 +158,33 @@ object AssignmentManagementController extends Controller with Authentication {
       }
   }
 
+  def export(assignment: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async {
+      request ⇒
+        val i = Individual(Resource(assignment))
+        val p = new PegDownProcessor()
+        println(assignment)
+        val query =
+          s"""
+          |select ?s (${LWM.hasSemester} as ?p) ?o where {
+          | ${i.uri} ${LWM.hasCourse} ?s .
+          | ?labwork ${LWM.hasCourse} ?s .
+          | ?labwork ${LWM.hasSemester} ?semester .
+          | ?semester ${RDFS.label} ?o
+          |}
+        """.stripMargin
+
+        val tupleFuture = sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.o.value))
+        }
+        val text = p.markdownToHtml(i.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value)
+        val hints = p.markdownToHtml(i.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value)
+        val goals = p.markdownToHtml(i.props.getOrElse(LWM.hasLearningGoals, List(StringLiteral(""))).head.value)
+        val description = p.markdownToHtml(i.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
+        val label = p.markdownToHtml(i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+
+        tupleFuture.map(t ⇒ Ok(views.html.assignment_export(label, description, hints, goals, "", t.head)))
+
+    }
+  }
 }

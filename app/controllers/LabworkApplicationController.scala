@@ -164,17 +164,19 @@ object LabworkApplicationController extends Controller with Authentication {
   }
 
   def groupList(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async(parse.json) { request ⇒
       import utils.Global._
-
-      val applicationlist = Individual(Resource(id))
-      val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
-      applicationsFuture.map { applications ⇒
-        applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
-          ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), 12, 16) // TODO -> has to be in application.conf
+      val min = (request.body \ "min").asOpt[String]
+      val max = (request.body \ "max").asOpt[String]
+      if (min.isDefined && max.isDefined) {
+        val applicationlist = Individual(Resource(id))
+        val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
+        applicationsFuture.map { applications ⇒
+          applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
+            ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), min.get.toInt, min.get.toInt) // TODO -> has to be in application.conf
+          }
         }
       }
-
       Future.successful(Redirect(routes.LabworkApplicationController.index()))
     }
   }

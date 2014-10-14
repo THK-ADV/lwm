@@ -16,15 +16,31 @@
             <th>Anmeldungen</th>
 
         </tr>
-        @for(applicationList <- labworkApplicationLists) {
+        @for((applicationList, index) <- labworkApplicationLists.zipWithIndex) {
             <tr>
                 <td>@applicationList._1.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))) </td>
                 <td>@applicationList._2</td>
                 <td>@applicationList._3</td>
                 <td>@applicationList._4</td>
                 <td><a href="@routes.LabworkApplicationController.applicationListEdit(applicationList._1.uri.value)" class="glyphicon glyphicon-pencil"></a></td>
-                <td><a href="javascript: if(confirmed()) groupList('@applicationList._1.uri.value')" class="glyphicon glyphicon-th"></a></td>
+                <td><a href="#" class="glyphicon glyphicon-th" data-toggle="modal" data-target="#@index"></a></td>
             </tr>
+
+
+            <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                        Close</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Neuer Student hinzufügen</h4>
+                        </div>
+                        <div class="modal-body">
+                        @group_range_input(applicationList._1)
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
     </table>
 </div>

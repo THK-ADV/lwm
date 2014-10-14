@@ -32,6 +32,7 @@ PUT           /administration/labworks                            controllers.La
 DELETE        /administration/labworks                            controllers.LabworkManagementController.labworkRemoval()
 DELETE        /administration/labworks/:id                        controllers.GroupManagementController.studentRemoval(id)
 GET           /administration/labworks/:id/export/:e              controllers.LabworkManagementController.export(id,e)
+GET           /administration/labworks/:id/exportCSV              controllers.LabworkManagementController.exportCSV(id)
 
 POST          /administration/labworkApplications                 controllers.LabworkApplicationController.labworkApplicationPost()
 POST          /administration/labworkApplications/:id             controllers.LabworkApplicationController.groupList(id)
@@ -88,6 +89,7 @@ POST          /administration/semesters                           controllers.Se
 DELETE        /administration/semesters                           controllers.SemesterManagementController.semesterRemoval()
 
 GET           /administration/assignments                         controllers.AssignmentManagementController.index()
+GET           /administration/assingmnets/:id/export              controllers.AssignmentManagementController.export(id)
 POST          /administration/assignments                         controllers.AssignmentManagementController.assignmentPost()
 POST          /administration/assignments/:id                     controllers.AssignmentManagementController.assignmentEdit(id)
 POST          /administration/assignments/:id/solutions           controllers.AssignmentManagementController.assignmentSolutionPost(id)

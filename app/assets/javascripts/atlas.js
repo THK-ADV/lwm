@@ -3,11 +3,11 @@ function logOut() {
 }
 
 function redirect(url) {
-window.location.href = url.url;
+    window.location.href = url.url;
 }
 
 function reload(data) {
-window.location.reload(true);
+    window.location.reload(true);
 }
 
 function deleteStudent(id) {
@@ -37,7 +37,7 @@ function deleteRoom(id) {
 
 function deleteTableEntry(entry, timetable, labwork) {
     var tu = encodeURIComponent(timetable);
-    ajaxRequest("/administration/timetable/"+tu+"/entries", "DELETE", "application/json", {eId: entry, lId: labwork}, reload);
+    ajaxRequest("/administration/timetable/" + tu + "/entries", "DELETE", "application/json", {eId: entry, lId: labwork}, reload);
 }
 
 function deleteSemester(id) {
@@ -53,24 +53,24 @@ function deleteBlacklist(id) {
 }
 
 function deleteBlacklistDate(listId, dateId) {
-    ajaxRequest("/administration/blacklist/dates", "DELETE", "application/json", {listId: listId, dateId : dateId}, reload);
+    ajaxRequest("/administration/blacklist/dates", "DELETE", "application/json", {listId: listId, dateId: dateId}, reload);
 }
 
 function deleteBinding(labid, aid) {
     var l = encodeURIComponent(labid);
     var a = encodeURIComponent(aid);
-    ajaxRequest("/administration/labworks/"+l+"/associations/"+a, "DELETE", "application/json", {lId: labid, aId: aid}, reload);
+    ajaxRequest("/administration/labworks/" + l + "/associations/" + a, "DELETE", "application/json", {lId: labid, aId: aid}, reload);
 }
 
 function addStudentToGroup(labid, groupid) {
     var student = $('#autocomplete').val();
     var e = encodeURIComponent(labid);
-    ajaxRequest("/administration/labworks/"+e, "POST", "application/json", {student: student,group: groupid}, reload);
+    ajaxRequest("/administration/labworks/" + e, "POST", "application/json", {student: student, group: groupid}, reload);
 }
 
 function removeStudentFromGroup(labid, student, groupid) {
     var e = encodeURIComponent(labid);
-    ajaxRequest("/administration/labworks/"+e, "DELETE", "application/json", {student: student, group: groupid}, reload);
+    ajaxRequest("/administration/labworks/" + e, "DELETE", "application/json", {student: student, group: groupid}, reload);
 }
 
 function createSchedule(uri, id) {
@@ -89,8 +89,12 @@ function applyEdit(q, uri) {
     ajaxRequest("/administration/edits", "POST", "application/json", {query: q, redirect: uri}, reload);
 }
 
-function groupList(uri){
-    ajaxRequest("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {}, reload);
+function groupList(uri) {
+    var min = $("#min").val();
+    var max = $("#max").val();
+    if(min !== '' && max !== '') {
+        ajaxRequest("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {min: min, max: max}, reload);
+    }
 }
 
 function deleteApplication(applicationId, listId) {
@@ -103,12 +107,12 @@ function sDeleteApplication(studentId, labworkid) {
 
 function createStudentApplication(listId) {
     var s = $("#autocomplete").val();
-    ajaxRequest('/administration/labworkApplicationLists/'+encodeURIComponent(listId), "POST", "application/json", {student: s}, reload);
+    ajaxRequest('/administration/labworkApplicationLists/' + encodeURIComponent(listId), "POST", "application/json", {student: s}, reload);
 }
 
 function search() {
     var uri = $("#autocomplete").val();
-    redirect({url: "/administration/students/search/"+encodeURIComponent(uri)});
+    redirect({url: "/administration/students/search/" + encodeURIComponent(uri)});
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
