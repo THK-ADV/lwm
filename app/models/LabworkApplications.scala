@@ -16,7 +16,6 @@ case class LabworkApplicationFormModel(applicant: String, labwork: String, partn
 case class LabworkApplicationListChangeForm(application: String, labwork: String)
 
 object LabworkApplications {
-
   object Forms {
     val labworkApplicationForm = Form(
       mapping(

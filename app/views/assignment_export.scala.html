@@ -1,0 +1,27 @@
+@(title: String, description: String, hints: String, goals: String, topics: String, courseSemester: (Resource, String))
+@import utils.semantic.Resource
+
+<!DOCTYPE html>
+<html>
+    @head("Aufgabe")
+    <body>
+            <div class="row">
+                <div class="col-xs-12 col-sm-4"><img src="@routes.Assets.at("images/fh_logorechts.gif")"></div>
+                <div class="pull-right">
+                    <h4>Campus Gummersbach</h4>
+                    <h4>Institut für Informatik <br />Labor für ADV</h4>
+                    <h5>@courseSemester._2</h5></div>
+                </div>
+
+        <div class="row">
+            <h2>title</h2>
+            <h4>Prof. Dr. Frank Victor</h4>
+        </div>
+        <div class="row">
+        description
+        </div>
+        <div class="row">hints</div>
+        <div class="row">goals</div>
+        <div class="row">topics</div>
+    </body>
+</html>

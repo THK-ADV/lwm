@@ -5,11 +5,12 @@ import models._
 import org.joda.time.{ LocalDate, DateTime }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDF, OWL, RDFS, LWM }
+import utils.semantic.Vocabulary._
 import utils.semantic._
 import utils.Global._
 import scala.concurrent.Future
 import scala.util.control.NonFatal
+import java.io._
 
 /**
   * Created by rgiacinto on 20/08/14.
@@ -236,6 +237,40 @@ object LabworkManagementController extends Controller with Authentication {
             Redirect(routes.LabworkManagementController.edit(labworkid))
         }
 
+    }
+  }
+
+  def exportCSV(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async {
+      implicit request ⇒
+
+        val i = Individual(Resource(labworkid))
+        val f = new File("students.csv")
+        val writer = new PrintWriter(f)
+        val builder = new StringBuilder
+        val groupQuery =
+          s"""
+          |select ?s (${LWM.hasGroupId} as ?p) ?o where {
+          | <$labworkid> ${LWM.hasGroup} ?s .
+          | ?s ${LWM.hasGroupId} ?o }
+          | ORDER BY ASC(?o)
+        """.stripMargin
+        val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(_.s)
+        }
+
+        for (groups ← groupsFuture) yield {
+          val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
+
+          for (g ← groupsWithStudents) {
+            for (s ← g._2) {
+              builder.append(s"${g._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value},${s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value},${s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value},${s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value},${s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value} \n")
+            }
+          }
+          writer.write(builder.toString())
+          writer.close()
+        }
+        Future.successful(Redirect(routes.LabworkManagementController.index()))
     }
   }
 

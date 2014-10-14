@@ -19,6 +19,7 @@
                 <td>@a.props(Vocabulary.LWM.hasTopic)</td>
                 <td><a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@index"></a></td>
                 <td><a class="glyphicon glyphicon-list" data-toggle="modal" data-target="#@id"></a></td>
+                <td><a class="glyphicon glyphicon-export" href="@routes.AssignmentManagementController.export(a.uri.value)"></a></td>
                 <td><a href="javascript: if(confirmed()) deleteAssignment('@a.uri.value')" class="glyphicon glyphicon-remove"></a></td></tr>
 
             <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
