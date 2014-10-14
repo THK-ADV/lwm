@@ -9,6 +9,7 @@ import utils.semantic.Vocabulary.{ RDF, OWL, RDFS, LWM }
 import utils.semantic._
 import utils.Global._
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 /**
   * Created by rgiacinto on 20/08/14.
@@ -206,11 +207,10 @@ object LabworkManagementController extends Controller with Authentication {
       }
   }
 
-  def export(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def export(labworkid: String, typ: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async {
       request ⇒
         val i = Individual(Resource(labworkid))
-        println(labworkid)
         val groupQuery =
           s"""
           |select ?s (${LWM.hasGroupId} as ?p) ?o where {
@@ -222,13 +222,20 @@ object LabworkManagementController extends Controller with Authentication {
         val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
           SPARQLTools.statementsFromString(result).map(_.s)
         }
-
-        for {
+        (for {
           groups ← groupsFuture
         } yield {
           val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
-          Ok(views.html.labwork_exported_groups(i, groupsWithStudents.toList))
+          typ match {
+            case "1" ⇒ Ok(views.html.labwork_exported_groups(i, groupsWithStudents.toList))
+            case _   ⇒ Ok(views.html.labwork_partial_exported_groups(i, groupsWithStudents.toList))
+          }
+
+        }).recover {
+          case NonFatal(e) ⇒
+            Redirect(routes.LabworkManagementController.edit(labworkid))
         }
+
     }
   }
 
