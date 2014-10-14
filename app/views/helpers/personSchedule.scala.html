@@ -1,4 +1,4 @@
-@(group: Resource)
+@(person: Resource, labwork: Resource)
 @import java.net.URLDecoder
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic._
@@ -11,8 +11,9 @@
     val query =
         s"""
          |select * where {
-         | $group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | $person ${LWM.hasScheduleAssociation} ?scheduleAssociation .
          | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?assignmentAssociation ${LWM.hasLabWork} $labwork .
          | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
          | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
          | ?entry ${LWM.hasRoom} ?room .
@@ -25,14 +26,14 @@
        """.stripMargin
 
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
-    var lines = Vector("<table class=\"table\"><tr><th>Datum</th><th>Raum</th><th>Mitarbeiter</th></tr>")
+    var lines = Vector("<table class=\"table\"><tr><th>Datum</th><th>Raum</th></tr>")
     while(result.hasNext){
         val solution = result.next()
         val date = solution.getLiteral("assignmentDate").getString
         val room = solution.getLiteral("roomId").getString
         val time = URLDecoder.decode(solution.getLiteral("startTime").getString, "UTF-8")
         val supervisor = URLDecoder.decode(solution.getLiteral("supervisorName").getString, "UTF-8")
-        val row = s"<tr><td>$date, $time Uhr</td><td>$room</td><td>$supervisor</td></tr>"
+        val row = s"<tr><td>$date, $time Uhr</td><td>$room</td></tr>"
         lines = lines :+ row
     }
     lines = lines :+ "</table>"

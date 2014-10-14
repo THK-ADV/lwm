@@ -119,10 +119,11 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
         case Right(member) ⇒
           if (member) role = Permissions.AdminRole
       }
-      /*hkMember match {
-        case Right(member) ⇒
-          if (member) role = Permissions.AdminRole
-      }*/
+      /*
+        hkMember match {
+          case Right(member) ⇒
+            if (member) role = Permissions.AdminRole
+        }*/
       role
     }
     r.recover {

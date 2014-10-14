@@ -2,6 +2,7 @@ package models
 
 import java.util.UUID
 
+import com.hp.hpl.jena.query.{ QuerySolution, QueryExecutionFactory }
 import org.joda.time.{ LocalTime, LocalDate }
 import play.api.data.Form
 import play.api.data.Forms._
@@ -32,18 +33,25 @@ object ScheduleAssociations {
       Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
     )
 
-    val query =
-      s"""
-        | select (${assignment.group} as ?s) (${LWM.hasMember} as ?p) ?o where {
-        |  ${assignment.group} ${LWM.hasMember} ?o
-        | }
-      """.stripMargin
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
+  }
 
-    sparqlExecutionContext.executeQuery(query).map { result ⇒
-      val stmnt = SPARQLTools.statementsFromString(result)
-      val students = stmnt.map(s ⇒ Statement(s.s, LWM.hasScheduleAssociation, assocResource))
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(students: _*))
-    }
+  def create(assignment: ScheduleAssociation, student: Resource): Future[Individual] = {
+    val id = UUID.randomUUID()
+    val assocResource = ResourceUtils.createResource(lwmNamespace, id)
+
+    val statements = List(
+      Statement(assocResource, RDF.typ, LWM.ScheduleAssociation),
+      Statement(assocResource, RDF.typ, OWL.NamedIndividual),
+      Statement(assocResource, LWM.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
+      Statement(assignment.timetable, LWM.hasScheduleAssociation, assocResource),
+      Statement(assocResource, LWM.hasDueDate, DateLiteral(assignment.dueDate)),
+      Statement(assocResource, LWM.hasGroup, assignment.group),
+      Statement(student, LWM.hasScheduleAssociation, assocResource),
+      Statement(assocResource, LWM.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
+      Statement(assocResource, LWM.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
+      Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
+    )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
   }
@@ -142,5 +150,47 @@ object ScheduleAssociations {
     SPARQLTools.statementsFromString(result).map { statement ⇒
       Resource(statement.o.value)
     }.toList
+  }
+
+  def getForGroup(group: Resource): Future[List[ScheduleAssociation]] = Future {
+
+    def query2(scheduleAssociation: Resource) =
+      s"""
+         |select * where {
+         |  $scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
+         |  $scheduleAssociation ${LWM.hasDueDate} ?dueDate .
+         |  $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?assignmentDateEntry .
+         |  $scheduleAssociation ${LWM.hasDueDateTimetableEntry} ?dueDateEntry .
+         |  $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?assignmentEntry .
+         |  $scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         |  ?timetable ${RDF.typ} ${LWM.Timetable} .
+         |  ?timetable ${LWM.hasScheduleAssociation} $scheduleAssociation
+         |}
+       """.stripMargin
+
+    val t = Individual(group).props.get(LWM.hasScheduleAssociation).map { schedules ⇒
+      schedules.map { schedule ⇒
+        val q = query2(schedule.asResource().get)
+        val result = QueryExecutionFactory.sparqlService(queryHost, q).execSelect()
+        var sss = List.empty[ScheduleAssociation]
+        while (result.hasNext) {
+          val n = result.nextSolution()
+          val assignmentDate = LocalDate.parse(n.get("assignmentDate").toString)
+          val dueDate = LocalDate.parse(n.get("dueDate").toString)
+          val dueDateEntry = Resource(n.get("dueDateEntry").toString)
+          val assignmentEntry = Resource(n.get("assignmentEntry").toString)
+          val assignmentAssociation = Resource(n.get("assignmentAssociation").toString)
+          val timetable = Resource(n.get("timetable").toString)
+
+          sss = ScheduleAssociation(group, assignmentAssociation, assignmentDate, dueDate, assignmentEntry, dueDateEntry, timetable) :: sss
+        }
+        sss
+      }.flatten
+    }
+
+    t match {
+      case Some(list) ⇒ list
+      case None       ⇒ Nil
+    }
   }
 }

@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.LabworkManagementController._
-import models.{ LabworkApplications, LabworkGroups, Students }
+import models.{ ScheduleAssociations, LabworkApplications, LabworkGroups, Students }
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.{ SPARQLBuilder, SPARQLTools, Individual, Resource }
@@ -10,9 +10,6 @@ import utils.Global._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
-  * Created by root on 9/15/14.
-  */
 object GroupManagementController extends Controller with Authentication {
 
   def index(labworkId: String, groupId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
@@ -43,6 +40,11 @@ object GroupManagementController extends Controller with Authentication {
           isGroup ← LabworkGroups.isLabWorkGroup(groupResource)
         } yield {
           if (isStudent && isGroup) {
+            ScheduleAssociations.getForGroup(groupResource).map { assocs ⇒
+              assocs.map { assoc ⇒
+                ScheduleAssociations.create(assoc, studentResource)
+              }
+            }
             val ig = Individual(groupResource)
 
             ig.add(LWM.hasMember, studentResource)
@@ -57,11 +59,6 @@ object GroupManagementController extends Controller with Authentication {
               }
             }
 
-            ig.props.get(LWM.hasScheduleAssociation).map { assocs ⇒
-              assocs.foreach { ass ⇒
-                is.add(LWM.hasScheduleAssociation, ass)
-              }
-            }
           }
           Redirect(routes.LabworkManagementController.index())
         }
@@ -100,6 +97,19 @@ object GroupManagementController extends Controller with Authentication {
             isGroup ← LabworkGroups.isLabWorkGroup(groupResource)
           } yield {
             if (isStudent && isGroup) {
+              val query =
+                s"""
+                   |select ($studentResource as ?s) (${LWM.hasScheduleAssociation} as ?p) (?ass as ?o) where {
+                   | $studentResource ${LWM.hasScheduleAssociation} ?ass .
+                   | ?ass ${LWM.hasGroup} $groupResource
+                   |}
+                 """.stripMargin
+
+              SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
+                val r = SPARQLBuilder.removeIndividual(statement.o.asResource().get)
+                sparqlExecutionContext.executeUpdate(r)
+              }
+
               val ig = Individual(groupResource)
               ig.remove(LWM.hasMember, studentResource)
               val is = Individual(studentResource)

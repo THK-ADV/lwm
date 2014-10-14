@@ -144,9 +144,7 @@ object EditsManagementController extends Controller with Authentication {
         Semesters.create(semester).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
       case "timetable" ⇒
         val labwork = c.mappedValues.get(LWM.hasLabWork).get.asResource().get
-        val sD = c.mappedValues.get(LWM.hasStartDate).get.asInstanceOf[LocalDate]
-        val eD = c.mappedValues.get(LWM.hasEndDate).get.asInstanceOf[LocalDate]
-        Timetables.create(Timetable(labwork, sD, eD))
+        Timetables.create(Timetable(labwork))
         Future.successful(true)
     }
   }

@@ -1,4 +1,4 @@
-@(student: Resource, labworks: List[(Individual, Seq[String])])
+@(individual: Individual, labworks: List[(Individual, Seq[String])])
 @import utils.semantic.StringLiteral
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic.{Individual, Resource}
@@ -9,7 +9,7 @@
         <tr>
             <th>Praktikum</th>
             <th>Gruppe</th>
-            <th>nächster Termin</th>
+            <th>Termine</th>
             <th>Aufgaben</th>
         </tr>
         <tbody>
@@ -18,9 +18,9 @@
                 <td>@a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</td>
                 @a._2.map{group =>
                     <td>@group</td>
+                    <td>@helpers.personSchedule(individual.uri, a._1.uri)</td>
+                    <td><a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="glyphicon glyphicon-arrow-right"></a></td>
                 }
-                <td>tbd</td>
-                <td><a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="glyphicon glyphicon-arrow-right"></a></td>
             </tr>
         }
 

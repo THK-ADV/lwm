@@ -1,11 +1,11 @@
-@(student: Resource)
-@import utils.semantic.Resource
+@(student: Individual)
+@import utils.semantic.Individual
 
 <div class="col-md-3">
     <nav>
         <ul class="nav nav-pills nav-stacked">
             <li><a href="@routes.StudentDashboardController.dashboard()">Dashboard</a></li>
-            <li><a href="@routes.StudentDashboardController.informationPage(student.value)">Informationen bearbeiten</a></li>
+            <li><a href="@routes.StudentDashboardController.informationPage(student.uri.value)">Informationen bearbeiten</a></li>
 
         </ul>
     </nav>
