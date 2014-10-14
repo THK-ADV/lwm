@@ -141,6 +141,8 @@ object Vocabulary {
     val hasSubstitution = property("hasSubstitution")
 
     val hasDate = property("hasDate")
+
+    val hasAlternateScheduleAssociation = property("hasAlternateScheduleAssociation")
   }
 
   /**

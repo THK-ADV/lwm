@@ -32,18 +32,25 @@ object ScheduleAssociations {
       Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
     )
 
-    val query =
-      s"""
-        | select (${assignment.group} as ?s) (${LWM.hasMember} as ?p) ?o where {
-        |  ${assignment.group} ${LWM.hasMember} ?o
-        | }
-      """.stripMargin
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
+  }
 
-    sparqlExecutionContext.executeQuery(query).map { result ⇒
-      val stmnt = SPARQLTools.statementsFromString(result)
-      val students = stmnt.map(s ⇒ Statement(s.s, LWM.hasScheduleAssociation, assocResource))
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(students: _*))
-    }
+  def create(assignment: ScheduleAssociation, student: Resource): Future[Individual] = {
+    val id = UUID.randomUUID()
+    val assocResource = ResourceUtils.createResource(lwmNamespace, id)
+
+    val statements = List(
+      Statement(assocResource, RDF.typ, LWM.ScheduleAssociation),
+      Statement(assocResource, RDF.typ, OWL.NamedIndividual),
+      Statement(assocResource, LWM.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
+      Statement(assignment.timetable, LWM.hasScheduleAssociation, assocResource),
+      Statement(assocResource, LWM.hasDueDate, DateLiteral(assignment.dueDate)),
+      Statement(assocResource, LWM.hasGroup, assignment.group),
+      Statement(student, LWM.hasScheduleAssociation, assocResource),
+      Statement(assocResource, LWM.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
+      Statement(assocResource, LWM.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
+      Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
+    )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
   }

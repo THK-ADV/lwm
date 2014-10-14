@@ -115,6 +115,13 @@ object SemesterDatesGenerator {
             }
 
             schedule.map { s ⇒
+              val groupI = Individual(s.group)
+              groupI.props.get(LWM.hasMember).map { students ⇒
+                students.map { student ⇒
+                  val studentResource = student.asResource().get
+                  ScheduleAssociations.create(s, studentResource)
+                }
+              }
               ScheduleAssociations.create(s)
             }
             p.success(true)
