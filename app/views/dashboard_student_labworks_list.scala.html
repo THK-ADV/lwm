@@ -19,7 +19,7 @@
                 @a._2.map{group =>
                     <td>@group</td>
                     <td>@helpers.personSchedule(individual.uri, a._1.uri)</td>
-                    <td><a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="glyphicon glyphicon-arrow-right"></a></td>
+                    <td><a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="btn btn-primary">Weiter</a></td>
                 }
             </tr>
         }

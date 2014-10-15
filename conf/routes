@@ -91,7 +91,9 @@ POST          /administration/semesters                               controller
 DELETE        /administration/semesters                               controllers.SemesterManagementController.semesterRemoval()
 
 GET           /administration/assignments                             controllers.AssignmentManagementController.index()
-GET           /administration/assingmnets/:id/export                  controllers.AssignmentManagementController.export(id)
+GET           /administration/assignments/:id                         controllers.AssignmentManagementController.detailed(id)
+GET           /administration/assingmnets/:id/export                  controllers.AssignmentManagementController.exportAssignment(id)
+GET           /administration/assignments/:id/exportSolution          controllers.AssignmentManagementController.exportSolution(id)
 POST          /administration/assignments                             controllers.AssignmentManagementController.assignmentPost()
 POST          /administration/assignments/:id                         controllers.AssignmentManagementController.assignmentEdit(id)
 POST          /administration/assignments/:id/solutions               controllers.AssignmentManagementController.assignmentSolutionPost(id)

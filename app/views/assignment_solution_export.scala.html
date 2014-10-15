@@ -1,0 +1,52 @@
+@(assignmentLabel: String, name: Html, text: Html)
+
+<!DOCTYPE html>
+<html>
+    @head(s"Musterlösung $assignmentLabel")
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-6 col-md-4">
+                    <div class="pull-left">
+                        <img src="@routes.Assets.at("images/fh_logorechts.gif")"></div>
+                </div>
+                <div class="col-xs-6 col-md-4"></div>
+                <div class="col-xs-6 col-md-4">
+                    <div class="pull-right">
+                        <h4>Campus Gummersbach</h4>
+                        <h4>Institut fuer Informatik <br />Labor für ADV</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4 class="text-center"><b>@assignmentLabel Musterlösung</b></h4>
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Datei:</b> @name</h4>
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Lösung:</b></h4>
+                @text
+            </div>
+
+
+            <div class="row">
+                <br />
+            </div>
+        </div>
+    </body>
+</html>

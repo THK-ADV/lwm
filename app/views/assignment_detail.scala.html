@@ -1,0 +1,87 @@
+@(assignment: Individual, courses: List[Individual], aForm: Form[AssignmentFormModel], sForm: Form[AssignmentSolutionFormModel])
+
+@import utils.semantic.Resource
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary.LWM
+@import utils.Global._
+<!DOCTYPE html>
+<html>
+    @head("Aufgabe")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Aufgabe bearbeiten</div>
+
+                        <table class="table table-bordered">
+                            <tr><th>#</th><th>Bearbeiten</th><th>Export</th></tr>
+                            @defining(assignment.props) { p =>
+                                @defining(p.getOrElse(LWM.hasSolution, List(Resource("")))) { maybeSolution =>
+                                    @defining(Individual(maybeSolution.head.asResource().get)) { solution =>
+                                        <tr><td><label>Aufgabe</label></td>
+                                            <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#editAssignment"></a></td>
+                                            <td><a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>Musterlösung</label></td>
+                                            <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#editSolution"></a></td>
+
+                                            @p.get(LWM.hasSolution).headOption match {
+                                                case Some(s) => {
+                                                    <td><a href="@routes.AssignmentManagementController.exportSolution(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
+                                                }
+                                                case None => {
+                                                    <td><a href="@routes.AssignmentManagementController.detailed(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
+                                                }
+                                            }
+                                        </tr>
+
+
+                                        <div class="modal fade" id="editAssignment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                                            Schließen</span></button>
+                                                        <h4 class="modal-title" id="myModalLabel">Musterlösung</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                    @assignment_edit_form(assignment, courses, AssignmentForms.assignmentForm)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="modal fade" id="editSolution" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                                                            Schließen</span></button>
+                                                        <h4 class="modal-title" id="myModalLabel">Musterlösung</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                    @assignment_solution(assignment, solution, sForm)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    }
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

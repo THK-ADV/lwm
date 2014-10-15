@@ -239,7 +239,6 @@ object LabworkApplicationController extends Controller with Authentication {
             val labwork = Resource(e.labwork)
             val application = Individual(Resource(e.application))
             val oldLabwork = application.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.asResource().get
-            println(s"Lab: ${e.labwork}\nApp: ${e.application}")
 
             def oldApplicationList(labwork: Resource) = {
               val query =
