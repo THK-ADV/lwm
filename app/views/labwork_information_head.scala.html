@@ -4,39 +4,50 @@
 @import utils.semantic.{Resource, StringLiteral}
 @import utils.semantic.Individual
 @import utils.Global._
-<table class="table">
-    <tr>
-        <th>Sichtbarkeit</th><th>Veranstaltung</th> <th>Studiengang</th> <th>Gruppenanzahl</th><th>Aufgabenanzahl</th> <th>Startdatum</th> <th>
-        Enddatum</th> <th>Semester</th> <th></th>
-    </tr>
-    <tbody>
-    @for(course <- labwork.props.get(LWM.hasCourse); courseIndividual = Individual(Resource(course.head.value)); degree <- courseIndividual.props.get(LWM.hasDegree); degreeIndividual = Individual(Resource(degree.head.value)); startDates <- labwork.props.get(LWM.hasStartDate); endDates <- labwork.props.get(LWM.hasEndDate); assignmentCount = labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size; groupCount = labwork.props.getOrElse(LWM.hasGroup, Nil).size; sem <- labwork.props.get(LWM.hasSemester)) {
-        <tr>
-            <td>@if(labwork.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
-            <td>@courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
-            <td>@degreeIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
-            <td>@groupCount</td>
-            <td>@assignmentCount</td>
-            <td>@startDates.head.value</td>
-            <td>@endDates.head.value</td>
-            <td>@Individual(Resource(sem.head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
-            <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#myModal"></a></td>
-        </tr>
-        <tr><td>Anmeldungen: @applications</td></tr>
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
-                            Close</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
-                    </div>
-                    <div class="modal-body">
-                    @labworkAssignment_edit_form(labwork, course.head.value, sem.head.value, semesters, courses, form)
-                    </div>
-                </div>
+
+
+<div class="panel panel-default top-buffer">
+    <div class="panel-heading">Praktikumsdetails</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <tr>
+                        <th>Offen</th><th>Veranstaltung</th> <th>Studiengang</th> <th>Gruppen</th><th>Aufgaben</th> <th>Start</th> <th>
+                        Ende</th> <th>Semester</th> <th></th>
+                    </tr>
+                    <tbody>
+                    @for(course <- labwork.props.get(LWM.hasCourse); courseIndividual = Individual(Resource(course.head.value)); degree <- courseIndividual.props.get(LWM.hasDegree); degreeIndividual = Individual(Resource(degree.head.value)); startDates <- labwork.props.get(LWM.hasStartDate); endDates <- labwork.props.get(LWM.hasEndDate); assignmentCount = labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size; groupCount = labwork.props.getOrElse(LWM.hasGroup, Nil).size; sem <- labwork.props.get(LWM.hasSemester)) {
+                        <tr>
+                            <td>@if(labwork.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
+                            <td>@courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+                            <td>@degreeIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+                            <td>@groupCount</td>
+                            <td>@assignmentCount</td>
+                            <td>@startDates.head.value</td>
+                            <td>@endDates.head.value</td>
+                            <td>@Individual(Resource(sem.head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+                            <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#myModal"></a></td>
+                        </tr>
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">
+                    Close</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">Neue Aufgabe hinzufügen</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                    @labworkAssignment_edit_form(labwork, course.head.value, sem.head.value, semesters, courses, form)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    </tbody>
+                </table>
             </div>
         </div>
-        }
-    </tbody>
-</table>
+    </div>
+</div>
+

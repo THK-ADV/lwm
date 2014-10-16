@@ -1,0 +1,37 @@
+@(group: Resource)
+@import java.net.URLDecoder
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic._
+@import Vocabulary.LWM
+@import utils.Global._
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+
+
+@{
+    val query =
+        s"""
+         |select * where {
+         | $group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
+         | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
+         | ?entry ${LWM.hasRoom} ?room .
+         | ?entry ${LWM.hasStartTime} ?startTime .
+         | ?room ${LWM.hasRoomId} ?roomId .
+         | ?assignmentAssociation ${LWM.hasOrderId} ?id .
+         |} order by asc(?id)
+       """.stripMargin
+
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var lines = Vector("<table class=\"table\"><tr><th>Datum</th><th>Uhrzeit</th><th>Raum</th></tr>")
+    while (result.hasNext) {
+        val solution = result.next()
+        val date = solution.getLiteral("assignmentDate").getString
+        val room = solution.getLiteral("roomId").getString
+        val time = URLDecoder.decode(solution.getLiteral("startTime").getString, "UTF-8")
+        val row = s"<tr><td>$date</td><td>$time Uhr</td><td>$room</td></tr>"
+        lines = lines :+ row
+    }
+    lines = lines :+ "</table>"
+    Html(lines.mkString("\n"))
+}

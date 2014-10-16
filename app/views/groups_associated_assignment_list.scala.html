@@ -8,7 +8,9 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">Staffelplan der Gruppe @group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.toString </div>
-        @helpers.groupSchedule(group.uri)
+        <div class="panel-body">
+          @helpers.groupSchedule(group.uri)
+        </div>
     </div>
 
 

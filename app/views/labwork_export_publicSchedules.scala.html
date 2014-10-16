@@ -1,0 +1,26 @@
+@(labwork: Resource)
+@import utils.semantic._
+@import utils.Global._
+
+
+<!DOCTYPE html>
+<html>
+    @head("Öffentliche Staffelpläne")
+    <body>
+        <div class="container" id="everything">
+            @defining(LabWorks.orderedGroups(labwork)){groups =>
+               @groups.map{group =>
+                   <div class="row">
+                       <div class="panel panel-default">
+                           <div class="panel-heading">Praktikumstermine Gruppe <strong>@group._2</strong></div>
+                           <div class="panel-body">
+                               @helpers.groupSchedulePublic(group._1)
+                           </div>
+
+                       </div>
+                   </div>
+               }
+            }
+        </div>
+    </body>
+</html>

@@ -2,6 +2,7 @@ package models
 
 import java.util.Date
 
+import com.hp.hpl.jena.query.QueryExecutionFactory
 import org.joda.time.{ LocalDate, DateTime }
 import utils.semantic._
 
@@ -11,7 +12,11 @@ case class LabWork(course: Resource, semester: Resource)
 case class LabWorkFormModel(courseId: String, semester: String)
 case class LabworkUpdateModel(courseId: String, semester: String, startDate: Date, endDate: Date)
 
-// TODO course id should be courseResourceURI
+object LabworkExportModes {
+  val PublicSchedule = "publicSchedule"
+  val PublicGroupMembersTable = "publicMembers"
+  val InternalSchedule = "internalSchedule"
+}
 
 object LabWorkForms {
 
@@ -92,6 +97,26 @@ object LabWorks {
     sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(labwork ⇒ Individual(labwork.s)).toList
     }
+  }
+
+  def orderedGroups(labwork: Resource) = {
+    val query =
+      s"""
+         |select * where {
+         |$labwork ${Vocabulary.LWM.hasGroup} ?group .
+         |?group ${Vocabulary.LWM.hasGroupId} ?id .
+         |} order by desc(?id)
+       """.stripMargin
+
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var groups = List.empty[(Resource, String)]
+    while (result.hasNext) {
+      val n = result.nextSolution()
+      val group = Resource(n.getResource("group").toString)
+      val id = n.getLiteral("id").getString
+      groups = (group, id) :: groups
+    }
+    groups
   }
 }
 

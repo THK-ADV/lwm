@@ -232,8 +232,9 @@ object LabworkManagementController extends Controller with Authentication {
         } yield {
           val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
           typ match {
-            case "1" ⇒ Ok(views.html.labwork_exported_groups(i, groupsWithStudents.toList))
-            case _   ⇒ Ok(views.html.labwork_partial_exported_groups(i, groupsWithStudents.toList))
+            case LabworkExportModes.InternalSchedule        ⇒ Ok(views.html.labwork_exported_groups(i, groupsWithStudents.toList))
+            case LabworkExportModes.PublicGroupMembersTable ⇒ Ok(views.html.labwork_partial_exported_groups(i, groupsWithStudents.toList))
+            case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(Resource(labworkid)))
           }
 
         }).recover {
@@ -328,7 +329,7 @@ object LabworkManagementController extends Controller with Authentication {
           val description = p.markdownToHtml(a.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
           val label = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
           val topics = a.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).head.value
-          Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html.apply(description), Html.apply(text), Html.apply(hints), Html.apply(goals), topics))
+          Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html(description), Html(text), Html(hints), Html(goals), topics))
         }
     }
   }

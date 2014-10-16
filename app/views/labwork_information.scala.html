@@ -17,9 +17,11 @@
                     <div class = "row">
                     @labwork_information_head(labwork, semesters, courses, labworkApplications.size, lform)
                     </div>
+                    <div class="row">@helpers.labworks.labworkExportButtons(labwork.uri)</div>
                     <div class="row">
                     @labwork_individual_group_population(labwork, groups)
                     </div>
+
                     <div class="row">
                         <div class="panel panel-default">
                         @labwork_assignment_list(labwork, labworkAssociations, labworkAssignments, form)
