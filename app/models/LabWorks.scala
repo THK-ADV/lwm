@@ -125,7 +125,7 @@ object LabWorks {
   def labworksForDate(date: LocalDate) = {
     val query =
       s"""
-        select ?course ?groupId ?startTime ?endTime ?name ?courseName ?roomId ?degreeName where {
+        select ?course ?group ?groupId ?startTime ?endTime ?name ?courseName ?roomId ?degreeName where {
           ?group ${RDF.typ} ${LWM.Group} .
           ?group ${LWM.hasGroupId} ?groupId .
           ?group ${LWM.hasScheduleAssociation} ?schedule .
@@ -144,6 +144,7 @@ object LabWorks {
           ?schedule ${LWM.hasAssignmentDate} "${date.toString("yyyy-MM-dd")}" .
         }
       """.stripMargin
+
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
     var dates = List.empty[(Time, (Resource, String, String, String, String, String, Time, Time))]
     while (result.hasNext) {
@@ -157,8 +158,8 @@ object LabWorks {
       val course = URLDecoder.decode(n.getLiteral("courseName").toString, "UTF-8")
       val degree = URLDecoder.decode(n.getLiteral("degreeName").toString, "UTF-8")
       val roomId = URLDecoder.decode(n.getLiteral("roomId").toString, "UTF-8")
-      val courseResource = Resource(n.getResource("course").toString)
-      dates = (startTime, (courseResource, course, degree, groupId, roomId, name, startTime, endTime)) :: dates
+      val groupResource = Resource(n.getResource("group").toString)
+      dates = (startTime, (groupResource, course, degree, groupId, roomId, name, startTime, endTime)) :: dates
     }
     dates.sortBy(_._1)
   }

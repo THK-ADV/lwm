@@ -2,27 +2,9 @@
 @import org.joda.time.LocalDate
 @import utils.semantic._
 
-<div class="panel panel-default top-buffer">
-    <div class="panel-heading">Studentenliste</div>
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table">
-                    <tr>
-                        <td>Nachname</td>
-                        <td>Vorname</td>
-                        <td>Anwesend</td>
-                        <td>Bestanden</td>
-                    </tr>
-                    <tbody>
 
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
 
+@helpers.labworks.labworkAttendees(group, date)
 
 <div class="panel panel-default top-buffer">
     <div class="panel-heading">Entschuldigte Studenten</div>
@@ -33,14 +15,13 @@
                     <tr>
                         <td>Nachname</td>
                         <td>Vorname</td>
+                        <td>Kennung</td>
                         <td>Anwesend</td>
                         <td>Bestanden</td>
                     </tr>
                     <tbody>
                         <tr>
-                            @helpers.labworks.labworkAttendees(group, date){
-                                <td>Nope</td> <td>Nope</td>
-                            }
+
                         </tr>
                     </tbody>
                 </table>
@@ -50,24 +31,5 @@
 </div>
 
 
-<div class="panel panel-default top-buffer">
-    <div class="panel-heading">Studenten aus anderen Gruppen</div>
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table">
-                    <tr>
-                        <td>Nachname</td>
-                        <td>Vorname</td>
-                        <td>Anwesend</td>
-                        <td>Bestanden</td>
-                    </tr>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+@helpers.labworks.labworkAlternateAttendees(group, date)
 

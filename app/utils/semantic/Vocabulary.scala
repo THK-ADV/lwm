@@ -143,6 +143,8 @@ object Vocabulary {
     val hasDate = property("hasDate")
 
     val hasAlternateScheduleAssociation = property("hasAlternateScheduleAssociation")
+    val hasAttended = property("hasAttended")
+    val hasPassed = property("hasPassed")
   }
 
   /**

@@ -115,6 +115,10 @@ function search() {
     redirect({url: "/administration/students/search/" + encodeURIComponent(uri)});
 }
 
+function postAttendance(association) {
+    alert(association);
+}
+
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";
     $.ajax({

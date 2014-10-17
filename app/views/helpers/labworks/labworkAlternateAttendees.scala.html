@@ -16,16 +16,18 @@
 
         select * where{
           ?student lwm:hasScheduleAssociation ?association .
+          ?association lwm:hasGroup ?origGroup .
+          ?origGroup lwm:hasGroupId ?origGroupId .
           ?student rdf:type lwm:Student .
           ?student foaf:firstName ?firstName .
           ?student foaf:lastName ?lastName .
           ?student lwm:hasGmId ?gmId .
-          ?association lwm:hasGroup ${group.toQueryString} .
-          ?association lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
+          ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          ?alternate lwm:hasGroup ${group.toQueryString} .
+          ?alternate lwm:hasAssignmentDate "${date.toString("yyyy.MM.dd")}" .
           optional {?association lwm:hasPassed ?passed } .
-          optional {?association lwm:hasAttended ?attended} .
-        } order by desc(?lastName)
-
+          optional {?association lwm:hasAttended ?attended }
+        }
        """.stripMargin
 
     var lines = List.empty[String]
@@ -36,38 +38,39 @@
         val firstName = URLDecoder.decode(solution.getLiteral("firstName").getString, "UTF-8")
         val lastName = URLDecoder.decode(solution.getLiteral("lastName").getString, "UTF-8")
         val association = solution.getResource("association")
+        val groupId = solution.getLiteral("origGroupId").getString
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
-        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td><input onchange="postAttendance('${URLEncoder.encode(association.toString, "UTF-8")}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input onchange="postPassed('${URLEncoder.encode(association.toString, "UTF-8")}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>""" :: lines
+        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td>$groupId</td><td><input onchange="postAttendance('${URLEncoder.encode(association.toString, "UTF-8")}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input onchange="postPassed('${URLEncoder.encode(association.toString, "UTF-8")}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>""" :: lines
     }
 
     if(lines.size > 0){
-            Html{
-                s"""
+        Html{
+            s"""
                     <div class="panel panel-default top-buffer">
                         <div class="panel-heading">Studentenliste</div>
                         <div class="panel-body">
                             <div class="row">
-                    <div class="col-md-12">
-                    <table class="table">
-                    <tr>
-                    <td>Nachname</td>
-                    <td>Vorname</td>
-                    <td>Kennung</td>
-                    <td>Anwesend</td>
-                    <td>Bestanden</td>
-                    </tr>
-                    <tbody>
-                    ${lines.mkString("\n")}
-                      </tbody>
-                </table>
-            </div>
-            </div>
-            </div>
-            </div>
+                                <div class="col-md-12">
+                                    <table class="table">
+                                        <tr>
+                                            <td>Nachname</td>
+                                            <td>Vorname</td>
+                                            <td>Kennung</td>
+                                            <td>Gruppe</td>
+                                            <td>Anwesend</td>
+                                            <td>Bestanden</td>
+                                        </tr>
+                                        <tbody>
+                                            ${lines.mkString("\n")}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 """.stripMargin
-            }
+        }
 
     }
-
 }
