@@ -9,26 +9,26 @@
 @{
     val query =
       s"""
-        prefix lwm: <http://lwm.gm.fh-koeln.de/>
-        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        prefix foaf: <http://xmlns.com/foaf/0.1/>
+            prefix lwm: <http://lwm.gm.fh-koeln.de/>
+            prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            prefix foaf: <http://xmlns.com/foaf/0.1/>
 
-        select * where{
-          ?student lwm:hasScheduleAssociation ?association .
-          ?association lwm:hasGroup ?origGroup .
-          ?origGroup lwm:hasGroupId ?origGroupId .
-          ?student rdf:type lwm:Student .
-          ?student foaf:firstName ?firstName .
-          ?student foaf:lastName ?lastName .
-          ?student lwm:hasGmId ?gmId .
-          ?association lwm:hasAlternateScheduleAssociation ?alternate .
-          ?alternate lwm:hasGroup ${group.toQueryString} .
-          ?alternate lwm:hasAssignmentDate "${date.toString("yyyy.MM.dd")}" .
-          optional {?association lwm:hasPassed ?passed } .
-          optional {?association lwm:hasAttended ?attended }
-        }
-       """.stripMargin
+            select * where{
+              ?student lwm:hasScheduleAssociation ?association .
+              ?student rdf:type lwm:Student .
+              ?student foaf:firstName ?firstName .
+              ?student foaf:lastName ?lastName .
+              ?student lwm:hasGmId ?gmId .
+              ?association lwm:hasGroup ?origGroup .
+              ?origGroup lwm:hasGroupId ?origGroupId .
+              ?association lwm:hasAlternateScheduleAssociation ?alternate .
+              ?alternate lwm:hasGroup $group .
+              ?alternate lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
+              optional {?association lwm:hasPassed ?passed } .
+              optional {?association lwm:hasAttended ?attended }
+            }
+       """
 
     var lines = List.empty[String]
     val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
@@ -48,7 +48,7 @@
         Html{
             s"""
                     <div class="panel panel-default top-buffer">
-                        <div class="panel-heading">Studentenliste</div>
+                        <div class="panel-heading">Studenten aus anderen Gruppen</div>
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-12">

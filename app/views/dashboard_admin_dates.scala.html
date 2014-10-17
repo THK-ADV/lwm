@@ -2,15 +2,20 @@
 @import org.joda.time.LocalDate
 @import utils.semantic._
 
-    <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">Termine heute, <strong>@today.toString("dd.MM.yyyy")</strong></div>
-            <div class="panel-body">
-                <div class="list-group">
-                    @LabWorks.labworksForDate(today).map{scheduleDate =>
-                        <a href="@routes.SupervisionController.supervise(scheduleDate._2._1.toString, today.toString("yyyy-MM-dd"))" class="list-group-item">@scheduleDate._2._2, @scheduleDate._2._3 Gruppe @scheduleDate._2._4, Raum @scheduleDate._2._5, @scheduleDate._2._6, @scheduleDate._2._7 - @scheduleDate._2._8 </a>
-                    }
+    @defining(LabWorks.labworksForDate(today)){scheduleDates =>
+        @if(scheduleDates.size > 0){
+            <div class="row">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Termine am @helpers.dayOfWeekName(today.getDayOfWeek), den <strong>@today.toString("dd.MM.yyyy")</strong></div>
+                    <div class="panel-body">
+                        <div class="list-group">
+                        @scheduleDates.map{scheduleDate =>
+                            <a href="@routes.SupervisionController.supervise(scheduleDate._2._1.toString, today.toString("yyyy-MM-dd"))" class="list-group-item">@scheduleDate._2._2, @scheduleDate._2._3 Gruppe @scheduleDate._2._4, Raum @scheduleDate._2._5, @scheduleDate._2._6, @scheduleDate._2._7 - @scheduleDate._2._8 </a>
+                        }
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        }
+    }
+

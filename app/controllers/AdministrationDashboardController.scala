@@ -18,7 +18,7 @@ object AdministrationDashboardController extends Controller with Authentication 
   def dashboard = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
 
-      Future.successful(Ok(views.html.dashboard_admin(LocalDate.parse("2014-10-21"))))
+      Future.successful(Ok(views.html.dashboard_admin(LocalDate.now())))
     }
   }
 }

@@ -1,0 +1,38 @@
+@(group: Resource, date: LocalDate)
+@import java.net.URLEncoder
+@import java.net.URLDecoder
+@import org.joda.time.LocalDate
+@import utils.semantic._
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+@import utils.Global._
+
+@{
+
+    val query =
+      s"""
+            prefix lwm: <http://lwm.gm.fh-koeln.de/>
+            prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+            select * where {
+              $group lwm:hasGroupId ?groupId .
+              $group lwm:hasLabWork ?labwork .
+              ?labwork lwm:hasCourse ?course .
+              ?course rdfs:label ?courseName .
+              ?course lwm:hasDegree ?degree .
+              ?degree rdfs:label ?degreeName .
+            }
+       """.stripMargin
+
+    var lines = List.empty[String]
+    val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    while(results.hasNext){
+        val solution = results.nextSolution()
+        val courseName = URLDecoder.decode(solution.getLiteral("courseName").getString, "UTF-8")
+        val degreeName = URLDecoder.decode(solution.getLiteral("degreeName").getString, "UTF-8")
+        val groupId = solution.getLiteral("groupId").getString
+
+        lines = s"<h3>Praktikum Gruppe $groupId <br /> $courseName <br /> $degreeName <br />${date.toString("dd.MM.yyyy")}</h3>" :: lines
+    }
+    Html(lines.mkString("\n"))
+}

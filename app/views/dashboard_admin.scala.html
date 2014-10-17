@@ -14,10 +14,12 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @dashboard_admin_dates(today)
+                   @for(i <- 0 until 7){
+                       @dashboard_admin_dates(today.plusDays(i))
+                   }
                 </div>
             </div>
-            <div class="row">@footerAdmin()</div>
+                <div class="row">@footerAdmin()</div>
         </div>
     </body>
 </html>
