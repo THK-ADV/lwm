@@ -1,13 +1,14 @@
 package actors
 
 import actors.SessionHandler._
-import akka.actor.{ActorLogging, Actor, Props}
+import akka.actor.{ ActorLogging, Actor, Props }
 import controllers.Permissions
 import controllers.Permissions.Role
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time
-import org.joda.time.{Period, DateTime}
-import play.api.Configuration
+import org.joda.time.{ Period, DateTime }
+import play.api.Play.current
+import play.api.{ Play, Configuration }
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -63,7 +64,7 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
 
       val requester = sender()
       authFuture.map {
-        case l@Left(error) ⇒
+        case l @ Left(error) ⇒
           requester ! l
         case Right(success) ⇒
           val sessionFuture = createSessionID(user)
@@ -100,35 +101,54 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
       nameFuture.map {
         case Left(e) ⇒ println(e)
         case Right(maybeName) ⇒ maybeName map { name ⇒
-          requester !(name._1, name._2)
+          requester ! (name._1, name._2)
         }
       }
   }
 
   private def getRoles(user: String): Future[Role] = {
-    val laborMemberFuture = isMemberOfGroup(user, "advlabor", bindHost, bindPort, GDN)
 
-    val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
-
-    val r = for {
-      laborMember ← laborMemberFuture
-      hkMember ← hkMemberFuture
-    } yield {
-      var role = Permissions.DefaultRole
-      laborMember match {
-        case Right(member) ⇒
-          if (member) role = Permissions.AdminRole
-        case Left(error) ⇒ role = Permissions.DefaultRole
+    if (Play.isDev) {
+      val laborMemberFuture = isMemberOfGroup(user, "labor", bindHost, bindPort, GDN)
+      val r = for {
+        laborMember ← laborMemberFuture
+      } yield {
+        var role = Permissions.DefaultRole
+        laborMember match {
+          case Right(member) ⇒
+            if (member) role = Permissions.AdminRole
+          case Left(error) ⇒ role = Permissions.DefaultRole
+        }
+        role
       }
 
-      hkMember match {
-        case Right(member) ⇒
-          if (member) role = Permissions.AdminRole
+      r.recover {
+        case NonFatal(t) ⇒ Permissions.DefaultRole
       }
-      role
-    }
-    r.recover {
-      case NonFatal(t) ⇒ Permissions.DefaultRole
+    } else {
+      val laborMemberFuture = isMemberOfGroup(user, "advlabor", bindHost, bindPort, GDN)
+      val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
+
+      val r = for {
+        laborMember ← laborMemberFuture
+        hkMember ← hkMemberFuture
+      } yield {
+        var role = Permissions.DefaultRole
+        laborMember match {
+          case Right(member) ⇒
+            if (member) role = Permissions.AdminRole
+          case Left(error) ⇒ role = Permissions.DefaultRole
+        }
+        hkMember match {
+          case Right(member) ⇒
+            if (member) role = Permissions.AdminRole
+        }
+        role
+      }
+
+      r.recover {
+        case NonFatal(t) ⇒ Permissions.DefaultRole
+      }
     }
   }
 

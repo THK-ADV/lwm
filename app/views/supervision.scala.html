@@ -1,25 +1,22 @@
-@(today: LocalDate)
+@(group: Resource, date: LocalDate)
 @import org.joda.time.LocalDate
-@import org.joda.time.DateTime
-@import utils.semantic.Individual
+@import utils.semantic._
 
 <!DOCTYPE html>
 <html>
-    @head("Administration Dashboard")
+    @head("Supervising")
     <body>
         <div class="container" id="everything">
-           <div class="row">
+            <div class="row">
             @header_loggedIn_admin()
-           </div>
+            </div>
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @dashboard_admin_dates(today)
+                    @helpers.labworks.labworkAttendanceTable(group, date)
                 </div>
             </div>
             <div class="row">@footerAdmin()</div>
         </div>
     </body>
 </html>
-
-

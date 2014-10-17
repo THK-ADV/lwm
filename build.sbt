@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
 
 TwirlKeys.templateImports += "utils.semantic._"
 
-TwirlKeys.templateImports += "org.joda.time.DateTime"
+TwirlKeys.templateImports += "org.joda.time._"
 
 TwirlKeys.templateImports += "javax.mail.Message"
 

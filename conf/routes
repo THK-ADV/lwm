@@ -109,6 +109,8 @@ GET           /administration/labworks/:id/group/:gid                 controller
 GET           /administration/substitutions                           controllers.SubstitutionsManagementController.index()
 POST          /administration/substitutions                           controllers.SubstitutionsManagementController.substitutionPost()
 
+GET           /administration/supervision/:id/:date                         controllers.SupervisionController.supervise(id, date)
+
 GET           /students/:id/information                               controllers.StudentDashboardController.informationPage(id)
 POST          /students/:id/information                               controllers.StudentsManagement.changeInformation(id)
 DELETE        /students/labworkApplications                           controllers.LabworkApplicationController.studentApplicationRemoval()

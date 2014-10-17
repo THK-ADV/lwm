@@ -1,68 +1,16 @@
-@(datesToday: List[Individual], datesTomorrow: List[Individual], today: DateTime)
-    @import org.joda.time.DateTime
-    @import utils.semantic.Vocabulary
-    @import utils.semantic.Individual
+@(today: LocalDate)
+@import org.joda.time.LocalDate
+@import utils.semantic._
 
-    <div>
-        <div class="col-md-4">
-            <h3>Heute, @today.toString("dd.MM.yyyy")</h3>
-            <div class="well">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <div>
-                        AP1, AI, Gruppe A, 9:15-11:30, 2110, Münster
-                        </div>
-                    </li>
-
-                    <li class="list-group-item">
-                        <div>
-                        AP1, AI, Gruppe B, 9:15-11:30, 2109, Giacinto
-                        </div>
-                    </li>
-
-                    <li class="list-group-item">
-                        <div>
-                        AP1, AI, Gruppe C, 11:45-13:30, 2110, Münster
-                        </div>
-                    </li>
-
-                    <li class="list-group-item">
-                        <div>
-                        AP1, AI, Gruppe D, 11:45-13:30, 2109, Krischer
-                        </div>
-                    </li>
-                    @for(individual <- datesToday) {
-                        <li class="list-group-item">
-                            <div>
-
-                    </div>
-                        </li>
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">Termine heute, <strong>@today.toString("dd.MM.yyyy")</strong></div>
+            <div class="panel-body">
+                <div class="list-group">
+                    @LabWorks.labworksForDate(today).map{scheduleDate =>
+                        <a href="@routes.SupervisionController.supervise(scheduleDate._2._1.toString, today.toString("yyyy-MM-dd"))" class="list-group-item">@scheduleDate._2._2, @scheduleDate._2._3 Gruppe @scheduleDate._2._4, Raum @scheduleDate._2._5, @scheduleDate._2._6, @scheduleDate._2._7 - @scheduleDate._2._8 </a>
                     }
-                </ul>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <h3>Morgen, @today.plusDays(1).toString("dd.MM.yyyy")</h3>
-            <div class="well">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <div>
-                        AP1, MI, Gruppe A, 9:15-11:30, 2109, Münster
-                        </div>
-                    </li>
-                    <li class="list-group-item">
-                        <div>
-                        AP1, MI, Gruppe B, 9:15-11:30, 2110, Dobrynin
-                        </div>
-                    </li>
-                    @for(individual <- datesTomorrow) {
-                        <li class="list-group-item">
-                            <div>
-
-                    </div>
-                        </li>
-                    }
-                </ul>
+                </div>
             </div>
         </div>
     </div>

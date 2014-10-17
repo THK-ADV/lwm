@@ -125,7 +125,15 @@ object SemesterDatesGenerator {
 
               val schedule = assignmentDates.map { date ⇒
                 val due = dues((date.association._2._1, date.group._2)).head
-                ScheduleAssociation(date.group._2, date.association._2._1, date.date.date, due.date.date, date.date.entry.ownResource.get, due.date.entry.ownResource.get, timetable)
+                val scheduleAssociation = ScheduleAssociation(date.group._2, date.association._2._1, date.date.date, due.date.date, date.date.entry.ownResource.get, due.date.entry.ownResource.get, timetable)
+
+                Individual(date.group._2).props.get(LWM.hasMember).map { studentNodes ⇒
+                  studentNodes.map { studentNode ⇒
+                    val studentSchedule = ScheduleAssociations.create(scheduleAssociation, studentNode.asResource().get)
+                  }
+                }
+
+                scheduleAssociation
               }
 
               schedule.map { s ⇒

@@ -1,5 +1,6 @@
 package models
 
+import java.net.URLDecoder
 import java.util.Date
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
@@ -9,7 +10,9 @@ import utils.semantic._
 import scala.concurrent.{ Promise, Future }
 
 case class LabWork(course: Resource, semester: Resource)
+
 case class LabWorkFormModel(courseId: String, semester: String)
+
 case class LabworkUpdateModel(courseId: String, semester: String, startDate: Date, endDate: Date)
 
 object LabworkExportModes {
@@ -117,6 +120,47 @@ object LabWorks {
       groups = (group, id) :: groups
     }
     groups
+  }
+
+  def labworksForDate(date: LocalDate) = {
+    val query =
+      s"""
+        select ?course ?groupId ?startTime ?endTime ?name ?courseName ?roomId ?degreeName where {
+          ?group ${RDF.typ} ${LWM.Group} .
+          ?group ${LWM.hasGroupId} ?groupId .
+          ?group ${LWM.hasScheduleAssociation} ?schedule .
+          ?schedule ${LWM.hasAssignmentDateTimetableEntry} ?entry .
+          ?entry ${LWM.hasRoom} ?room .
+          ?entry ${LWM.hasStartTime} ?startTime .
+          ?entry ${LWM.hasEndTime} ?endTime .
+          ?entry ${LWM.hasSupervisor} ?supervisor .
+          ?group ${LWM.hasLabWork} ?labwork .
+          ?labwork ${LWM.hasCourse} ?course .
+          ?course ${LWM.hasId} ?courseName .
+          ?course ${LWM.hasDegree} ?degree .
+          ?degree ${LWM.hasId} ?degreeName .
+          ?supervisor ${RDFS.label} ?name .
+          ?room ${LWM.hasRoomId} ?roomId .
+          ?schedule ${LWM.hasAssignmentDate} "${date.toString("yyyy-MM-dd")}" .
+        }
+      """.stripMargin
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var dates = List.empty[(Time, (Resource, String, String, String, String, String, Time, Time))]
+    while (result.hasNext) {
+      val n = result.nextSolution()
+      val groupId = n.getLiteral("groupId").toString
+      val startTimeString = URLDecoder.decode(n.getLiteral("startTime").toString, "UTF-8").split(":")
+      val startTime = Time(startTimeString(0).toInt, startTimeString(1).toInt)
+      val endTimeString = URLDecoder.decode(n.getLiteral("endTime").toString, "UTF-8").split(":")
+      val endTime = Time(endTimeString(0).toInt, endTimeString(1).toInt)
+      val name = URLDecoder.decode(n.getLiteral("name").toString, "UTF-8")
+      val course = URLDecoder.decode(n.getLiteral("courseName").toString, "UTF-8")
+      val degree = URLDecoder.decode(n.getLiteral("degreeName").toString, "UTF-8")
+      val roomId = URLDecoder.decode(n.getLiteral("roomId").toString, "UTF-8")
+      val courseResource = Resource(n.getResource("course").toString)
+      dates = (startTime, (courseResource, course, degree, groupId, roomId, name, startTime, endTime)) :: dates
+    }
+    dates.sortBy(_._1)
   }
 }
 
