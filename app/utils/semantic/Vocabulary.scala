@@ -1312,7 +1312,7 @@ object Vocabulary {
       *
       * The logo property is used to indicate a graphical logo of some kind. It is probably underspecified...
       *
-      * [#] [wiki] [back to top]
+      * [#] [wiki] [navigate to top]
       *
       */
     val logo = property("logo")

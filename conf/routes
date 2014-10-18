@@ -5,6 +5,7 @@
 # Home page
 GET           /                                                       controllers.Application.index
 GET           /login                                                  controllers.Application.loginScreen
+POST          /currentUser                                            controllers.Application.currentUser()
 POST          /api/sessions                                           controllers.SessionManagement.login
 DELETE        /api/sessions                                           controllers.SessionManagement.logout
 
@@ -12,6 +13,7 @@ GET           /administration/users                                   controller
 POST          /administration/users                                   controllers.UserManagement.userPost()
 DELETE        /administration/users                                   controllers.UserManagement.userRemoval()
 POST          /administration/users/:id                               controllers.UserManagement.userEdit(id)
+
 
 GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard()
 
