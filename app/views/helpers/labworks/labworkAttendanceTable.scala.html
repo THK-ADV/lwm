@@ -1,8 +1,12 @@
-@(group: Resource, date: LocalDate)
+@(group: Resource, date: LocalDate)(implicit request: RequestHeader)
 @import org.joda.time.LocalDate
 @import utils.semantic._
 
-
+<script>
+    $(function(){
+        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL()");
+    });
+</script>
 
 @helpers.labworks.labworkAttendees(group, date)
 
