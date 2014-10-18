@@ -1,8 +1,13 @@
-@(group: Resource, date: LocalDate)
+@(group: Resource, date: LocalDate)(implicit request: RequestHeader)
+@import play.api.Play
 @import org.joda.time.LocalDate
 @import utils.semantic._
 
-
+<script>
+    $(function(){
+        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+    });
+</script>
 
 @helpers.labworks.labworkAttendees(group, date)
 

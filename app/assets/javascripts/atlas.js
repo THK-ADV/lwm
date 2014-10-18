@@ -115,9 +115,33 @@ function search() {
     redirect({url: "/administration/students/search/" + encodeURIComponent(uri)});
 }
 
-function postAttendance(association) {
-    alert(association);
+var socket;
+function createSocket(url) {
+    socket = new WebSocket(url);
+    socket.onmessage = function(event){
+        var json = JSON.parse(event.data);
+        var id = json.id;
+        var status = json.status;
+        $(id).prop("checked", status);
+    };
 }
+
+function attendanceSwitch(association) {
+    var data = {
+        "type" : "attendance-change",
+        "association" : association
+    };
+    socket.send(JSON.stringify(data));
+}
+
+function passedSwitch(association) {
+    var data = {
+        "type" : "passed-change",
+        "association" : association
+    };
+    socket.send(JSON.stringify(data));
+}
+
 
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";

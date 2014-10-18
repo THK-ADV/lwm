@@ -129,7 +129,7 @@ object SemesterDatesGenerator {
 
                 Individual(date.group._2).props.get(LWM.hasMember).map { studentNodes ⇒
                   studentNodes.map { studentNode ⇒
-                    val studentSchedule = ScheduleAssociations.create(scheduleAssociation, studentNode.asResource().get)
+                    ScheduleAssociations.create(scheduleAssociation, studentNode.asResource().get)
                   }
                 }
 

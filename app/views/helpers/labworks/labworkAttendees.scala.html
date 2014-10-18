@@ -38,7 +38,7 @@
         val association = solution.getResource("association")
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
-        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td><input onchange="postAttendance('${URLEncoder.encode(association.toString, "UTF-8")}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input onchange="postPassed('${URLEncoder.encode(association.toString, "UTF-8")}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>""" :: lines
+        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td><input id="attendance-${association.toString.hashCode}" onchange="attendanceSwitch('${association.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${association.toString.hashCode}" onchange="passedSwitch('${association.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>""" :: lines
     }
 
     if(lines.size > 0){
@@ -50,16 +50,16 @@
                             <div class="row">
                     <div class="col-md-12">
                     <table class="table">
-                    <tr>
-                    <td>Nachname</td>
-                    <td>Vorname</td>
-                    <td>Kennung</td>
-                    <td>Anwesend</td>
-                    <td>Bestanden</td>
-                    </tr>
+                        <tr>
+                            <td>Nachname</td>
+                            <td>Vorname</td>
+                            <td>Kennung</td>
+                            <td>Anwesend</td>
+                            <td>Bestanden</td>
+                        </tr>
                     <tbody>
-                    ${lines.mkString("\n")}
-                      </tbody>
+                        ${lines.mkString("\n")}
+                    </tbody>
                 </table>
             </div>
             </div>
