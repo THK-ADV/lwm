@@ -4,7 +4,7 @@
 
 <script>
     $(function(){
-        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL()");
+        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = true)");
     });
 </script>
 
