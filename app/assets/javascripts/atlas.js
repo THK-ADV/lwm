@@ -120,6 +120,9 @@ function createSocket(url) {
     socket = new WebSocket(url);
     socket.onmessage = function(event){
         var json = JSON.parse(event.data);
+        var id = json.id;
+        var status = json.status;
+        $(id).prop("checked", status);
     };
 }
 

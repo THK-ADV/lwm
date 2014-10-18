@@ -51,7 +51,7 @@
 
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
-        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td>$aDate $aTime Uhr, Gruppe $groupId</td><td><input id="attendance-${URLEncoder.encode(association.toString, "UTF-8")}" onchange="attendanceSwitch('${association.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${URLEncoder.encode(association.toString, "UTF-8")}" onchange="passedSwitch('${association.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>"""  :: lines
+        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td>$aDate $aTime Uhr, Gruppe $groupId</td><td><input id="attendance-${association.toString.hashCode}" onchange="attendanceSwitch('${association.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${association.toString.hashCode}" onchange="passedSwitch('${association.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>"""  :: lines
     }
 
     if(lines.size > 0){
