@@ -28,12 +28,14 @@ class OntologyDumperActor(dataUrl: String) extends Actor {
   context.system.scheduler.schedule(3.seconds, 5.minutes, self, DumpRequest)
   override def receive: Receive = {
     case DumpRequest ⇒
+      println("dumping")
       val unionModel = dataAccess.getModel
       val os = new ByteArrayOutputStream()
       unionModel.write(os, "TTL")
 
       val f = new File(folder, s"lwm_dump_${LocalDateTime.now().toString("yyyy-MM-dd-(HH-mm-ss)")}.ttl")
       if (!f.exists()) {
+        println(s"Writing $f")
         Files.createFile(f.toPath)
       }
 
