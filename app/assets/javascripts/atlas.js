@@ -117,7 +117,7 @@ function search() {
 
 var socket;
 function createSocket(url) {
-    socket = new WebSocket(url, "ws");
+    socket = new WebSocket(url);
     socket.onmessage = function(event){
         var json = JSON.parse(event.data);
     };
