@@ -4,7 +4,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">Studenten</div>
-        <table class="table table-bordered">
+        <div class="panel-body"><table class="table table-bordered">
             <tbody>
                 <tr><th>Vorname</th> <th>Nachname</th> <th>Kennung</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehltermine</th></tr>
 
@@ -22,8 +22,10 @@
 
             </tbody>
         </table>
-    </div>
-    <div class="row">
-        @student_autocomplete_field()
+        </div>
+        <div class="panel-footer">
+            @student_autocomplete_field()
         <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
+
+        </div>
     </div>

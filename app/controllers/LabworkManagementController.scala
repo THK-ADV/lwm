@@ -13,6 +13,7 @@ import utils.semantic._
 import utils.Global._
 import scala.collection.generic.SeqFactory
 import scala.concurrent.Future
+import scala.reflect.io.Path
 import scala.util.control.NonFatal
 import java.io._
 
@@ -249,22 +250,60 @@ object LabworkManagementController extends Controller with Authentication {
     Action.async {
       implicit request ⇒
 
-        val i = Individual(Resource(labworkid))
-        val f = new File("./csv/students.csv")
-        val writer = new PrintWriter(f)
+        val labwork = Resource(labworkid)
+
         val builder = new StringBuilder
-        val groupQuery =
-          s"""
+
+        def courselabelFuture(labwork: Resource) = {
+          val query = s"""
+          |select ($labwork as ?s) (${LWM.hasCourse} as ?p) ?o where {
+          | $labwork ${LWM.hasCourse} ?course .
+          | ?course ${LWM.hasId} ?o }
+        """.stripMargin
+          sparqlExecutionContext.executeQuery(query).map { result ⇒
+            SPARQLTools.statementsFromString(result).map(_.o)
+          }
+        }
+
+        def degreelabelFuture(labwork: Resource) = {
+          val query = s"""
+          |select ($labwork as ?s) (${LWM.hasDegree} as ?p) ?o where {
+          | $labwork ${LWM.hasCourse} ?course .
+          | ?course ${LWM.hasDegree} ?degree .
+          | ?degree ${LWM.hasId} ?o
+          | }
+        """.stripMargin
+          sparqlExecutionContext.executeQuery(query).map { result ⇒
+            SPARQLTools.statementsFromString(result).map(_.o)
+          }
+        }
+
+        def groupsFuture(labwork: Resource) = {
+          val groupQuery = s"""
           |select ?s (${LWM.hasGroupId} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasGroup} ?s .
+          | $labwork ${LWM.hasGroup} ?s .
           | ?s ${LWM.hasGroupId} ?o }
           | ORDER BY ASC(?o)
         """.stripMargin
-        val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.s)
+
+          sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
+            SPARQLTools.statementsFromString(result).map(_.s)
+          }
         }
 
-        for (groups ← groupsFuture) yield {
+        for {
+          groups ← groupsFuture(labwork)
+          courseLabel ← courselabelFuture(labwork)
+          degreeLabel ← degreelabelFuture(labwork)
+        } yield {
+          val writer = {
+            val f = new File("./csv")
+            if (f.exists()) new PrintWriter(new File(s"./csv/${courseLabel.head}_${degreeLabel.head}.csv"))
+            else {
+              f.mkdir()
+              new PrintWriter(new File(s"./csv/${courseLabel.head}_${degreeLabel.head}.csv"))
+            }
+          }
           val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
 
           for (g ← groupsWithStudents) {
@@ -274,8 +313,8 @@ object LabworkManagementController extends Controller with Authentication {
           }
           writer.write(builder.toString())
           writer.close()
+          Redirect(routes.LabworkManagementController.edit(labworkid))
         }
-        Future.successful(Redirect(routes.LabworkManagementController.index()))
     }
   }
 
