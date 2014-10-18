@@ -59,15 +59,17 @@ object LabworkManagementController extends Controller with Authentication {
       val groupQuery =
         s"""
           |select (<$labworkid> as ?s) (${LWM.hasGroup} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasGroup} ?o
-          |}
+          | <$labworkid> ${LWM.hasGroup} ?o .
+          | ?o ${LWM.hasGroupId} ?id
+          |} order by asc(?id)
         """.stripMargin
 
       val associationsQuery =
         s"""
           |select (<$labworkid> as ?s) (${LWM.hasAssignmentAssociation} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasAssignmentAssociation} ?o
-          |}
+          | <$labworkid> ${LWM.hasAssignmentAssociation} ?o .
+          | ?o ${LWM.hasOrderId} ?id .
+          |} order by asc(?id)
         """.stripMargin
 
       def allowedAssociationsQuery(course: Resource) =

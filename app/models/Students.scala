@@ -63,7 +63,14 @@ object Students {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Student)).map { stringResult ⇒
+    val query =
+      s"""
+         |select ?s (${RDF.typ} as ?p) (${LWM.Student} as ?o) where {
+         | ?s ${RDF.typ} ${LWM.Student} .
+         | optional {?s ${FOAF.lastName} ?lastname}
+         |}order by asc(?lastname)
+       """.stripMargin
+    sparqlExecutionContext.executeQuery(query).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(student ⇒ Individual(student.s)).toList
     }
   }
