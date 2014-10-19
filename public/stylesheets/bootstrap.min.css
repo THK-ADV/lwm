@@ -275,7 +275,7 @@ td, th {
         border: 1px solid #ddd !important
     }
 
-    section {page-break-after: always;}
+    section.pagebreak {page-break-after: always;}
 }
 
 @font-face {
