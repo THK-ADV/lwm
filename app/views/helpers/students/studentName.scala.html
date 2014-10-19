@@ -1,0 +1,18 @@
+@(student: Resource)
+@import java.net.URLDecoder
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic._
+@import utils.Global._
+
+@{
+    val query =
+      s"""
+         |select * where {
+         | $student ${RDFS.label} ?name
+         |}
+       """.stripMargin
+
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect().nextSolution()
+    if(result.getLiteral("name") == null) "" else Html(s"<strong>${URLDecoder.decode(result.getLiteral("name").getString, "UTF-8")}</strong>")
+}

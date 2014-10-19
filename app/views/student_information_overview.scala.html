@@ -1,0 +1,31 @@
+@(student: Resource, form: Form[AlternateAssociationFormModel])(implicit request: RequestHeader)
+@import utils.semantic.Resource
+@import play.api.Play
+
+<!DOCTYPE html>
+<html>
+    @head("Informationen zu ...")
+    <body>
+        <script>
+        $(function(){
+        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+        });
+        </script>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin()
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    <h2>Übersicht für @helpers.students.studentName(student)</h2>
+                    @Students.labworksForStudent(student).map{labwork =>
+                        <h3>@helpers.labworks.labworkName(labwork._1)</h3>
+                        @helpers.students.detailedStudentSchedule(student, labwork._1, form)
+                    }
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

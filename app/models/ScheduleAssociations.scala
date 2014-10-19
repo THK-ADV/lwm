@@ -1,5 +1,6 @@
 package models
 
+import java.net.URLDecoder
 import java.util.UUID
 
 import com.hp.hpl.jena.query.{ QuerySolution, QueryExecutionFactory }
@@ -15,7 +16,19 @@ import scala.concurrent.{ Future, Promise }
 
 case class ScheduleAssociation(group: Resource, assignmentAssoc: Resource, assignmentDate: LocalDate, dueDate: LocalDate, assignmentDateTimetableEntry: Resource, dueDateTimetableEntry: Resource, timetable: Resource)
 
+case class AlternateAssociationFormModel(oldSchedule: String, newSchedule: String)
+
 object ScheduleAssociations {
+  object Forms {
+    import play.api.data.Forms._
+    import play.api.data._
+
+    val alternateForm = Form(mapping(
+      "oldSchedule" -> nonEmptyText,
+      "newSchedule" -> nonEmptyText
+    )(AlternateAssociationFormModel.apply)(AlternateAssociationFormModel.unapply))
+  }
+
   def create(assignment: ScheduleAssociation): Future[Individual] = {
     val id = UUID.randomUUID()
     val assocResource = ResourceUtils.createResource(lwmNamespace, id)
@@ -192,5 +205,39 @@ object ScheduleAssociations {
       case Some(list) ⇒ list
       case None       ⇒ Nil
     }
+  }
+
+  def getAlternateDates(oldSchedule: Resource, group: Resource, groupId: String, orderId: String) = {
+    val query =
+      s"""
+         prefix lwm: <http://lwm.gm.fh-koeln.de/>
+        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        select * where {
+          ?labwork lwm:hasGroup $group .
+          ?labwork lwm:hasGroup ?group .
+          ?group lwm:hasScheduleAssociation ?association .
+          ?group lwm:hasGroupId ?groupId .
+          ?association lwm:hasAssignmentAssociation ?assignmentAssociation .
+          ?association lwm:hasAssignmentDate ?date .
+          ?association lwm:hasAssignmentDateTimetableEntry ?entry .
+          ?entry lwm:hasStartTime ?time .
+          ?assignmentAssociation lwm:hasOrderId "$orderId" .
+          filter not exists {?group lwm:hasGroupId "$groupId"}
+        }order by desc(?date) desc(?time)
+       """.stripMargin
+    println(query)
+    val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var alternates = List.empty[(String, String)]
+    while (results.hasNext) {
+      val solution = results.nextSolution()
+      val altSchedule = solution.getResource("association").getURI
+      val altGroupId = solution.getLiteral("groupId").getString
+      val altDate = solution.getLiteral("date").getString
+      val altTime = URLDecoder.decode(solution.getLiteral("time").getString, "UTF-8")
+      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId") :: alternates
+    }
+    alternates
   }
 }

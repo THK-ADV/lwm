@@ -118,6 +118,9 @@ GET           /students/:id/information                               controller
 POST          /students/:id/information                               controllers.StudentsManagement.changeInformation(id)
 DELETE        /students/labworkApplications                           controllers.LabworkApplicationController.studentApplicationRemoval()
 
+GET           /students/overview/:id                                  controllers.StudentInformationController.showInformation(id)
+POST           /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
+
 # For test purposes only
 GET           /administration/testdata                                controllers.TestDataController.generateTestData()
 
