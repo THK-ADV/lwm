@@ -1,6 +1,6 @@
 @(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student])
-    @import utils.semantic.Individual
-    @import utils.semantic.Vocabulary
+@import utils.semantic.Individual
+@import utils.semantic.Vocabulary
 
 <!DOCTYPE html>
 
@@ -13,29 +13,46 @@
             </div>
             <div class="row">
                 @navigation_admin()
-            <div id="studentsList" class="col-md-8">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Suche</div>
-                    <div class="panel-body">
-                        @student_autocomplete_field()
-                    <a href="javascript: search()" class="glyphicon glyphicon-magnet"></a>
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Suche</div>
+                        <div class="panel-body">
+                            @student_autocomplete_field()
+                            <a href="javascript: search()" class="glyphicon glyphicon-search"></a>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button></div>
+                    </div>
+
+
+                    @studentList(students, degrees, studentInput)
+
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">
+                                        Close</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">Neuer Student hinzufügen</h4>
+                                </div>
+                                <div class="modal-body">
+                                @student_addition_form(degrees, studentInput)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br/> <br/>
+                    <div class="row">
+                        Seite:
+                        @for(n <- 1 until nrPages) {
+                            <a href="@routes.StudentsManagement.pagedIndex(n.toString)">@n</a>
+                        }
                     </div>
                 </div>
-
-
-                @studentList(students, degrees, studentInput)
-
-                <br/> <br/>
-                <div class="row">
-                Seite:
-                    @for(n <- 1 until nrPages) {
-                        <a href="@routes.StudentsManagement.pagedIndex(n.toString)">@n</a>
-                    }
-                </div>
-            </div>
             </div>
             <div class="row">@footerAdmin()</div>
         </div>
     </body>
-    </html>
+</html>
 

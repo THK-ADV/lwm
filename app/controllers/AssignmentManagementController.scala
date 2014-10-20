@@ -100,7 +100,7 @@ object AssignmentManagementController extends Controller with Authentication {
                 i.update(LWM.hasDescription, description, StringLiteral(a.description))
                 i.update(LWM.hasText, text, StringLiteral(a.text))
                 i.remove(LWM.hasTopic, topics)
-                i.remove(LWM.hasCourse, courses)
+                if (a.courses.nonEmpty) i.remove(LWM.hasCourse, courses)
               }
               a.topics.split(",").map(t ⇒ i.add(LWM.hasTopic, StringLiteral(t)))
               a.courses.map(c ⇒ i.add(LWM.hasCourse, Resource(c)))

@@ -20,17 +20,16 @@
                         <div class="panel-heading">Aufgabe bearbeiten</div>
 
                         <table class="table table-bordered">
-                            <tr><th>#</th><th>Bearbeiten</th><th>Export</th></tr>
+                            <tr><th>Datei</th><th>Export</th></tr>
                             @defining(assignment.props) { p =>
                                 @defining(p.getOrElse(LWM.hasSolution, List(Resource("")))) { maybeSolution =>
                                     @defining(Individual(maybeSolution.head.asResource().get)) { solution =>
-                                        <tr><td><label>Aufgabe</label></td>
-                                            <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#editAssignment"></a></td>
+                                        <tr>
+                                            <td><a href="#" data-toggle="modal" data-target="#editAssignment">Aufgabe</a></td>
                                             <td><a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
                                         </tr>
                                         <tr>
-                                            <td><label>Musterlösung</label></td>
-                                            <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#editSolution"></a></td>
+                                            <td><a href="#"data-toggle="modal" data-target="#editSolution">Musterlösung</a></td>
 
                                             @p.get(LWM.hasSolution).headOption match {
                                                 case Some(s) => {

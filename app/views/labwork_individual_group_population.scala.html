@@ -7,12 +7,15 @@
     <table class="table table-bordered">
         <tbody>
             <tr><th>Gruppe</th><th>Anzahl</th></tr>
-            @for(g <- groups; gId <- g.props(LWM.hasGroupId)) {
-                <tr>
-                    <td> <a href="@routes.GroupManagementController.index(labwork.uri.value, g.uri.value)">@gId.value</a></td>
-                    <td>@g.props.getOrElse(LWM.hasMember, List.empty).size</td>
-                    <td><a href="javascript: if(confirmed()) applyEdit('DELETE group HAVING @{g.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a></td>
-                </tr>
+            @defining(groups.map(g => (g, g.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value))) { mapped =>
+                @for(g <- mapped.sortBy(_._2); gId <- g._2) {
+                    <tr>
+                        <td><a href="@routes.GroupManagementController.index(labwork.uri.value, g._1.uri.value)">@gId</a></td>
+                        <td>@g._1.props.getOrElse(LWM.hasMember, List.empty).size</td>
+                        <td><a href="javascript: if(confirmed()) applyEdit('DELETE group HAVING @{g._1.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

@@ -115,6 +115,17 @@ function search() {
     redirect({url: "/administration/students/search/" + encodeURIComponent(uri)});
 }
 
+
+function displayUserData(data) {
+    $('#userData').html(data);
+}
+
+function currentUser() {
+    $(document).ready(function() {
+        ajaxRequest("/currentUser", "POST", "application/json", {}  , displayUserData);
+    });
+}
+
 var socket;
 function createSocket(url) {
     socket = new WebSocket(url);

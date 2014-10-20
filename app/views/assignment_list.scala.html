@@ -6,7 +6,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">Aufgabenübersicht</div>
 
-    <table class="table">
+    <table class="table table-bordered">
         <tr>
             <th>Titel</th>
             <th>Beschreibung</th>
@@ -14,10 +14,9 @@
         </tr>
         @for(a <- assignments) {
             <tr>
-                <td>@a.props(Vocabulary.RDFS.label)</td>
+                <td><a href="@routes.AssignmentManagementController.detailed(a.uri.value)">@a.props(Vocabulary.RDFS.label)</a></td>
                 <td>@a.props(Vocabulary.LWM.hasDescription)</td>
                 <td>@a.props(Vocabulary.LWM.hasTopic)</td>
-                <td><a href="@routes.AssignmentManagementController.detailed(a.uri.value)" class="glyphicon glyphicon-pencil"></a></td>
                 <td><a href="javascript: if(confirmed()) deleteAssignment('@a.uri.value')" class="glyphicon glyphicon-remove"></a></td></tr>
         }
     </table>

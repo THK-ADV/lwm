@@ -4,11 +4,15 @@ package controllers
 import actors.SessionHandler
 import actors.SessionHandler.{ Invalid, Valid }
 import akka.util.Timeout
+import controllers.UserManagement._
 import models.UserForms
 import play.api._
 import play.api.mvc._
 import play.libs.Akka
+import utils.Global._
 import utils.Security.Authentication
+import utils.semantic.SPARQLTools
+import utils.semantic.Vocabulary.{ LWM, FOAF }
 
 import scala.concurrent.Future
 
@@ -52,4 +56,43 @@ object Application extends Controller with Authentication {
 
   }
 
+  def currentUser = hasSession {
+    session ⇒
+      Action.async(parse.json) {
+        implicit request ⇒
+          val user = session.user
+
+          def firstNameFuture = {
+            val query = s"""
+          |select ?s (${FOAF.firstName} as ?p) ?o where {
+          | ?s ${LWM.hasGmId} "$user" .
+          | ?s ${FOAF.firstName} ?o
+          | }
+        """.stripMargin
+
+            sparqlExecutionContext.executeQuery(query).map { result ⇒
+              SPARQLTools.statementsFromString(result).map(_.o)
+            }
+          }
+
+          def lastNameFuture = {
+            val query = s"""
+          |select ?s (${FOAF.lastName} as ?p) ?o where {
+          | ?s ${LWM.hasGmId} "$user" .
+          | ?s ${FOAF.lastName} ?o
+          | }
+        """.stripMargin
+
+            sparqlExecutionContext.executeQuery(query).map { result ⇒
+              SPARQLTools.statementsFromString(result).map(_.o)
+            }
+          }
+          for {
+            firstName ← firstNameFuture
+            lastName ← lastNameFuture
+          } yield {
+            Ok(s"${firstName.head} ${lastName.head} ($user)")
+          }
+      }
+  }
 }

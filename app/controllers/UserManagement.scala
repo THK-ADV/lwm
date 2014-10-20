@@ -6,7 +6,7 @@ import play.api.mvc.{ Action, Controller, Result }
 import utils.Global._
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDFS, FOAF, LWM, NCO }
-import utils.semantic.{ Individual, Resource, StringLiteral }
+import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
 
 import scala.concurrent.{ Future, Promise }
 import scala.util.control.NonFatal
@@ -58,7 +58,7 @@ object UserManagement extends Controller with Authentication {
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Users.all()) yield {
-            BadRequest(views.html.userManagement(all.toList, UserForms.userForm))
+            BadRequest(views.html.userManagement(all.toList, formWithErrors))
           }
         },
         user ⇒ {
