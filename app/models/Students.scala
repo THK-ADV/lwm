@@ -1,5 +1,8 @@
 package models
 
+import java.net.URLDecoder
+
+import com.hp.hpl.jena.query.QueryExecutionFactory
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
@@ -114,6 +117,28 @@ object Students {
   def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid.toLowerCase).toQueryString}}")
 
   def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Student}}")
+
+  def labworksForStudent(student: Resource) = {
+    val query1 =
+      s"""
+         |select * where {
+         | $student ${LWM.memberOf} ?group .
+         | ?group ${LWM.hasLabWork} ?labwork.
+         | ?labwork ${RDFS.label} ?labworkName .
+         |}order by desc(?labworkName)
+       """.stripMargin
+    val results = QueryExecutionFactory.sparqlService(queryHost, query1).execSelect()
+    var mapping = List.empty[(Resource, String)]
+    while (results.hasNext) {
+      val solution = results.nextSolution()
+      val labworkResource = solution.getResource("labwork")
+      val name = if (solution.getLiteral("labworkName") == null) "" else URLDecoder.decode(solution.getLiteral("labworkName").getString, "UTF-8")
+      if (labworkResource != null) {
+        mapping = (Resource(labworkResource.getURI), name) :: mapping
+      }
+    }
+    mapping
+  }
 }
 
 object StudentForms {

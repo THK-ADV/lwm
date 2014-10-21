@@ -1,0 +1,31 @@
+@(labwork: Resource, orderId: Int, studentGroupId: String)
+@import java.net.URLDecoder
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic._
+@import Vocabulary.LWM
+@import utils.Global._
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+
+@{
+    val query =
+      s"""
+        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        select ?association ?date ?time ?groupId where {
+          $labwork lwm:hasGroup ?group .
+          ?group lwm:hasScheduleAssociation ?association .
+          ?group lwm:hasGroupId ?groupId .
+          ?association lwm:hasAssignmentAssociation ?assignmentAssociation .
+          ?association lwm:hasAssignmentDate ?date .
+          ?association lwm:hasAssignmentDateTimetableEntry ?entry .
+          ?entry lwm:hasStartTime ?time .
+          ?assignmentAssociation lwm:hasOrderId "$orderId" .
+          filter not exists {?group lwm:hasGroupId "$studentGroupId"}
+        }order by asc(?date) asc(?time)
+       """.stripMargin
+
+    val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+
+}

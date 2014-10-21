@@ -1,0 +1,90 @@
+@(student: Resource, labwork: Resource, form: Form[AlternateAssociationFormModel])
+@import java.net.URLDecoder
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic._
+@import Vocabulary.LWM
+@import utils.Global._
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+
+
+@{
+    val query =
+        s"""
+         select * where {
+          $student ${LWM.hasScheduleAssociation} ?scheduleAssociation .
+          ?scheduleAssociation ${LWM.hasGroup} ?group .
+          ?group ${LWM.hasGroupId} ?groupId .
+          ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
+          ?assignmentAssociation ${LWM.hasLabWork} $labwork .
+          ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
+          ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
+          ?entry ${LWM.hasRoom} ?room .
+          ?entry ${LWM.hasStartTime} ?startTime .
+          ?room ${LWM.hasRoomId} ?roomId .
+          ?entry ${LWM.hasSupervisor} ?supervisor .
+          ?supervisor ${RDFS.label} ?supervisorName .
+          ?assignmentAssociation ${LWM.hasOrderId} ?id .
+          optional {?scheduleAssociation ${LWM.hasPassed} ?passed } .
+          optional {?scheduleAssociation ${LWM.hasAttended} ?attended } .
+          optional {
+            ?scheduleAssociation ${LWM.hasAlternateScheduleAssociation} ?alternate .
+            ?alternate ${LWM.hasGroup} ?alternateGroup .
+            ?alternate ${LWM.hasAssignmentDate} ?alternateDate .
+            ?alternate ${LWM.hasAssignmentDateTimetableEntry} ?alternateEntry .
+            ?alternateEntry ${LWM.hasStartTime} ?alternateTime .
+            ?alternateGroup ${LWM.hasGroupId} ?alternateGroupId .
+          }
+         } order by asc(?id)
+       """.stripMargin
+
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var lines = Vector("<table class=\"table\"><tr><th>Datum</th><th>Ersatz</th><th>Raum</th><th>Anwesend</th><th>Bestanden</th><th>Optionen</th></tr>")
+    while(result.hasNext){
+        val solution = result.next()
+        val date = solution.getLiteral("assignmentDate").getString
+        val room = solution.getLiteral("roomId").getString
+        val scheduleRes = solution.getResource("scheduleAssociation").getURI
+        val groupRes = solution.getResource("group").getURI
+        val time = URLDecoder.decode(solution.getLiteral("startTime").getString, "UTF-8")
+        val groupId = URLDecoder.decode(solution.getLiteral("groupId").getString, "UTF-8")
+        val orderId = URLDecoder.decode(solution.getLiteral("id").getString, "UTF-8")
+        val supervisor = URLDecoder.decode(solution.getLiteral("supervisorName").getString, "UTF-8")
+
+
+        val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
+        val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
+
+        val row =  if(solution.getLiteral("alternateGroupId") != null){
+            val id = URLDecoder.decode(solution.getLiteral("alternateGroupId").getString, "UTF-8")
+            val aDate = if(solution.getLiteral("alternateDate") == null) "" else solution.getLiteral("alternateDate").getString
+            val aTime = if(solution.getLiteral("alternateTime") == null) "" else URLDecoder.decode(solution.getLiteral("alternateTime").getString, "UTF-8")
+
+            s"""<tr><td>$date, $time Uhr</td><td>$aDate $aTime Uhr, Gruppe $id</td> <td>$room</td> <td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
+        }else{
+            s"""<tr><td>$date, $time Uhr</td><td></td><td>$room</td><td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
+        }
+
+
+        val modal =
+          s"""
+             <div class="modal fade" id="${scheduleRes.hashCode}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">
+                                    Schließen</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Ersatztermin angeben</h4>
+                            </div>
+                            <div class="modal-body">
+                            ${helpers.labworks.alternateDateForm(student,Resource(scheduleRes),Resource(groupRes) ,groupId, orderId, form).toString()}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+           """.stripMargin
+        lines = lines :+ row :+ modal
+    }
+    lines = lines :+ "</table>"
+    Html(lines.mkString("\n"))
+}

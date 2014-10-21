@@ -51,7 +51,7 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   val bindPort = config.getInt("lwm.bindPort").get
   val lifetime = config.getInt("lwm.sessions.lifetime").getOrElse(8)
 
-  context.system.scheduler.schedule(15.minutes, 15.minutes, self, SessionHandler.SessionTick)
+  context.system.scheduler.schedule(lifetime.minutes, lifetime.minutes, self, SessionHandler.SessionTick)
 
   def receive: Receive = {
     case SessionTick ⇒
