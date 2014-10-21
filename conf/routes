@@ -14,7 +14,6 @@ POST          /administration/users                                   controller
 DELETE        /administration/users                                   controllers.UserManagement.userRemoval()
 POST          /administration/users/:id                               controllers.UserManagement.userEdit(id)
 
-
 GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard()
 
 GET           /administration/students                                controllers.StudentsManagement.index()
@@ -34,8 +33,8 @@ PUT           /administration/labworks                                controller
 DELETE        /administration/labworks                                controllers.LabworkManagementController.labworkRemoval()
 DELETE        /administration/labworks/:id                            controllers.GroupManagementController.studentRemoval(id)
 GET           /administration/labworks/:id/export/:e                  controllers.LabworkManagementController.export(id,e)
-GET           /administration/labworks/:id/exportCSV                  controllers.LabworkManagementController.exportCSV(id)
 GET           /administration/labworks/:id/exportAssignment/:a        controllers.LabworkManagementController.exportAssignment(id, a)
+#GET           /administration/labworks/:id/exportCSV                  controllers.LabworkManagementController.exportCSV(id)
 
 POST          /administration/labworkApplications                     controllers.LabworkApplicationController.labworkApplicationPost()
 POST          /administration/labworkApplications/:id                 controllers.LabworkApplicationController.groupList(id)
@@ -114,7 +113,6 @@ POST          /administration/substitutions                           controller
 GET           /administration/supervision-socket                      controllers.SupervisionController.superviseSocket
 
 GET           /administration/supervision/:id/:date                   controllers.SupervisionController.supervise(id, date)
-
 
 GET           /students/:id/information                               controllers.StudentDashboardController.informationPage(id)
 POST          /students/:id/information                               controllers.StudentsManagement.changeInformation(id)
