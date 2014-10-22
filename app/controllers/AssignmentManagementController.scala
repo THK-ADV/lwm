@@ -17,7 +17,7 @@ object AssignmentManagementController extends Controller with Authentication {
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async {
-        request ⇒
+        implicit request ⇒
           for {
             assignments ← Assignments.all()
             courses ← Courses.all()
@@ -30,7 +30,7 @@ object AssignmentManagementController extends Controller with Authentication {
   def detailed(assignment: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async {
-        request ⇒
+        implicit request ⇒
           Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm)))
       }
   }
@@ -188,7 +188,11 @@ object AssignmentManagementController extends Controller with Authentication {
           val labworkid = (request.body \ "lId").as[String]
           val associationid = (request.body \ "aId").as[String]
           val i = Individual(Resource(associationid))
-          i.remove(LWM.hasAssignment, i.props.getOrElse(LWM.hasAssignment, List.empty[Resource]).head)
+          i.props.get(LWM.hasAssignment).map { rList ⇒
+            rList.map { a ⇒
+              i.remove(LWM.hasAssignment, a)
+            }
+          }
           Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
       }
   }

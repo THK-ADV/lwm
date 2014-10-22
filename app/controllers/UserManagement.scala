@@ -19,7 +19,7 @@ object UserManagement extends Controller with Authentication {
   private implicit val timeout = Timeout(5.seconds)
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList, UserForms.userForm))
     }
   }

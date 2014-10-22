@@ -227,7 +227,6 @@ object ScheduleAssociations {
           filter not exists {?group lwm:hasGroupId "$groupId"}
         }order by desc(?date) desc(?time)
        """.stripMargin
-    println(query)
     val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
     var alternates = List.empty[(String, String)]
     while (results.hasNext) {

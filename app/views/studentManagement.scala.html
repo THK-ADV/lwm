@@ -1,4 +1,4 @@
-@(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student])
+@(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student])(implicit request: RequestHeader)
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary
 
@@ -25,8 +25,9 @@
                             <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button></div>
                     </div>
 
-
                     @studentList(students, degrees, studentInput)
+
+                    <br/> <br/>
 
                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -42,7 +43,6 @@
                             </div>
                         </div>
                     </div>
-                    <br/> <br/>
                     <div class="row">
                         Seite:
                         @for(n <- 1 until nrPages) {

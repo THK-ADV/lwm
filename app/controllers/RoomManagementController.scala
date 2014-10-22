@@ -19,7 +19,7 @@ object RoomManagementController extends Controller with Authentication {
   import scala.concurrent.duration._
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       for {
         rooms ← Rooms.all()
       } yield {

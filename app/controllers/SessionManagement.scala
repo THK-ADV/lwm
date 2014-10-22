@@ -1,13 +1,15 @@
 package controllers
 
-import actors.SessionHandler
+import actors.{ UserCountSocketActor, SessionHandler }
 import akka.util.Timeout
 import models.{ Students, UserForms }
-import play.api.libs.concurrent.Promise
-import play.api.mvc.{ Action, Controller, Security }
+import play.api.libs.concurrent.{ Promise ⇒ PlayPromise }
+import play.api.libs.json.JsValue
+import play.api.mvc._
 import play.libs.Akka
+import play.api.Play.current
 
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{ Promise, Await, Future }
 
 /**
   * Session Management.
@@ -36,7 +38,7 @@ object SessionManagement extends Controller {
     loginData match {
       case None ⇒ Future.successful(Unauthorized)
       case Some(login) ⇒
-        val timeoutFuture = Promise.timeout("No response from IDM", 45.second)
+        val timeoutFuture = PlayPromise.timeout("No response from IDM", 45.second)
         val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user.toLowerCase, login.password)).mapTo[Either[String, SessionHandler.Session]]
 
         Future.firstCompletedOf(Seq(authFuture, timeoutFuture)).map {
@@ -87,27 +89,47 @@ object SessionManagement extends Controller {
 
     Ok(json)
   }
+
+  def userCountSocket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request ⇒
+    val p = Promise[Either[Result, WebSocket.HandlerProps]]()
+    request.session.get("session").map { token ⇒
+      (sessionsHandler ? SessionHandler.SessionValidationRequest(token)).map {
+        case SessionHandler.Valid(session) ⇒
+          if (session.role.contains(Permissions.ScheduleAssociationModification)) {
+            p.success(Right(UserCountSocketActor.props))
+          } else {
+            p.success(Left(Unauthorized("Insufficient Access Rights")))
+          }
+        case SessionHandler.Invalid ⇒
+          p.success(Left(Unauthorized("Invalid Session")))
+      }
+    }
+
+    p.future
+  }
 }
 
 object Permissions {
 
   sealed trait Permission
 
-  object UserCreation extends Permission
+  case object UserCreation extends Permission
 
-  object UserDeletion extends Permission
+  case object UserDeletion extends Permission
 
-  object UserModification extends Permission
+  case object UserModification extends Permission
 
-  object UserInfoRead extends Permission
+  case object UserInfoRead extends Permission
 
-  object ScheduleRead extends Permission
+  case object ScheduleRead extends Permission
 
-  object ScheduleCreation extends Permission
+  case object ScheduleCreation extends Permission
 
-  object ScheduleModification extends Permission
+  case object ScheduleModification extends Permission
 
-  object RoleModification extends Permission
+  case object RoleModification extends Permission
+
+  case object ScheduleAssociationModification extends Permission
 
   case class Role(permissions: Set[Permission]) {
     def +=(permission: Permission) = if (permissions.contains(Permissions.RoleModification)) Role(permissions + permission) else this
@@ -123,6 +145,7 @@ object Permissions {
     UserCreation, UserDeletion, UserModification,
     UserInfoRead,
     ScheduleRead, ScheduleCreation, ScheduleModification,
+    ScheduleAssociationModification,
     RoleModification))
 
 }

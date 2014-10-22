@@ -126,26 +126,109 @@ function currentUser() {
     });
 }
 
+
+
+var timer = 5;
+
 var socket;
+var socketUrl = "";
+var interval = null;
+
 function createSocket(url) {
+    socketUrl = url;
     socket = new WebSocket(url);
     socket.onmessage = function(event){
         var json = JSON.parse(event.data);
-        var id = json.id;
-        var status = json.status;
-        $(id).prop("checked", status);
+        if(json.type != "ping"){
+            var id = json.id;
+            var status = json.status;
+            $(id).prop("checked", status);
+        }else{
+            $( "#connectionWarning" ).hide();
+            timer = 5;
+            if(interval === null){
+                startTimer();
+            }
+        }
+    };
+}
+
+function createUserCountSocket(url) {
+    socketUrl = url;
+    socket = new WebSocket(url);
+    socket.onmessage = function(event){
+        var json = JSON.parse(event.data);
+
+        if(json.type == "studentCount"){
+
+            if(json.count === 0){
+                $("#studentCount").html("");
+                $("#studentenText").html("Kein Student");
+            }else if(json.count === 1){
+                $("#studentCount").html("");
+                $("#studentenText").html("Ein Student");
+            }else{
+                $("#studentCount").html(json.count);
+                $("#studentenText").html("Studenten");
+            }
+        }else if(json.type == "userCount"){
+            if(json.count === 0){
+                $("#userCount").html("");
+                $("#userText").html("Kein Mitarbeiter");
+            }else if(json.count === 1){
+                $("#userCount").html("");
+                $("#userText").html("Ein Mitarbeiter");
+            }else{
+                $("#userCount").html(json.count);
+                $("#userText").html("Mitarbeiter");
+            }
+        }
+    };
+}
+
+function connectionTimer() {
+    timer = timer -1;
+    if(timer < 1){
+        clearInterval(interval);
+        $( "#connectionWarning" ).show( "highlight", {}, 500, {});
+        $( "#saveButton" ).show( "highlight", {}, 500, {});
+    }
+}
+
+function startTimer(){
+    interval = setInterval(connectionTimer, 2000);
+}
+
+
+var localState = {};
+var keys = [];
+var dirty = false;
+
+function initLocalState(association, attended, passed) {
+    keys.push(association);
+    localState[association] = {
+        "association" : association,
+        "attended" : attended,
+        "passed" : passed
     };
 }
 
 function attendanceSwitch(association) {
+    localState[association].attended = !localState[association].attended;
+    dirty = true;
+
     var data = {
         "type" : "attendance-change",
         "association" : association
     };
+
     socket.send(JSON.stringify(data));
 }
 
 function passedSwitch(association) {
+    localState[association].passed = !localState[association].passed;
+    dirty = true;
+
     var data = {
         "type" : "passed-change",
         "association" : association
@@ -153,6 +236,20 @@ function passedSwitch(association) {
     socket.send(JSON.stringify(data));
 }
 
+function postSupervisionChanges(url){
+    dirty = false;
+    var temp = [];
+
+    keys.forEach(function(entry) {
+        temp.push(localState[entry]);
+    });
+
+    var postData = {
+        "keys" : keys,
+        "data" : temp
+    };
+    ajaxRequest(url, "POST", "application/json",postData, reload);
+}
 
 function ajaxRequest(url, type, cType, data, funct) {
     var contentType = (cType !== null) ? cType : "application/x-www-login-urlencoded";

@@ -15,7 +15,7 @@ object CourseManagementController extends Controller with Authentication {
   import ExecutionContext.Implicits.global
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       for {
         courses ← Courses.all()
         degrees ← Degrees.all()

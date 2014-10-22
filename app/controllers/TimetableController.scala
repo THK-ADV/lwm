@@ -14,7 +14,7 @@ object TimetableController extends Controller with Authentication {
   import utils.Global._
 
   def index(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
 
       for {
         supervisors ← Users.all()

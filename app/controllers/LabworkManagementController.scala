@@ -26,7 +26,7 @@ object LabworkManagementController extends Controller with Authentication {
   import scala.concurrent.duration._
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       for {
         courses ← Courses.all()
         labworks ← LabWorks.all()
@@ -38,7 +38,7 @@ object LabworkManagementController extends Controller with Authentication {
   }
 
   def edit(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
 
       val labworkIndividual = Individual(Resource(labworkid))
 
@@ -171,12 +171,21 @@ object LabworkManagementController extends Controller with Authentication {
           val id = (request.body \ "id").as[String]
           val li = Individual(Resource(id))
 
-          li.props(LWM.allowsApplications).map { e ⇒
-            e.value match {
-              case "true"  ⇒ li.update(LWM.allowsApplications, e, StringLiteral("false"))
-              case "false" ⇒ li.update(LWM.allowsApplications, e, StringLiteral("true"))
-            }
+          li.props.get(LWM.isVisibleToStudents) match {
+            case None ⇒ li.add(LWM.isVisibleToStudents, StringLiteral("true"))
+            case Some(list) ⇒
+              list.headOption match {
+                case None ⇒ li.add(LWM.isVisibleToStudents, StringLiteral("true"))
+                case Some(head) ⇒
+                  head.value match {
+                    case "true" ⇒
+                      li.update(LWM.isVisibleToStudents, head, StringLiteral("false"))
+                    case "false" ⇒
+                      li.update(LWM.isVisibleToStudents, head, StringLiteral("true"))
+                  }
+              }
           }
+
           Future.successful(Redirect(routes.LabworkManagementController.index()))
       }
   }
@@ -217,7 +226,7 @@ object LabworkManagementController extends Controller with Authentication {
 
   def export(labworkid: String, typ: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async {
-      request ⇒
+      implicit request ⇒
         val i = Individual(Resource(labworkid))
         val groupQuery =
           s"""
@@ -322,7 +331,7 @@ object LabworkManagementController extends Controller with Authentication {
 
   def exportAssignment(labwork: String, association: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
     Action.async {
-      request ⇒
+      implicit request ⇒
         val assI = Individual(Resource(association))
 
         val assignmentQuery =

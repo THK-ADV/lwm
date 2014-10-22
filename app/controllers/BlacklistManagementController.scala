@@ -15,7 +15,7 @@ object BlacklistManagementController extends Controller with Authentication {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       for {
         blacklists ← Blacklists.all()
         semesters ← Semesters.all()
@@ -26,7 +26,7 @@ object BlacklistManagementController extends Controller with Authentication {
   }
 
   def blacklistEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       import utils.Global._
       val query =
         s"""
@@ -156,7 +156,7 @@ object BlacklistManagementController extends Controller with Authentication {
   }
 
   def blacklistDateDelete = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async(parse.json) { request ⇒
+    Action.async(parse.json) { implicit request ⇒
       val listId = (request.body \ "listId").asOpt[String]
       val dateId = (request.body \ "dateId").asOpt[String]
 

@@ -3,15 +3,40 @@
 @import org.joda.time.LocalDate
 @import utils.semantic._
 
-<script>
-    $(function(){
-        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
-    });
-</script>
+
+
+<div class="row">
+    <div id="connectionWarning" class="col-md-12 bg-danger">
+        <strong>Achtung!</strong> Es besteht keine Verbindung zum Server. Lokale Änderungen werden beim Schließen der Seite verloren gehen!
+    </div>
+</div>
+<div class="row bg-danger">
+    <div id="saveButton" class="col-md-1">
+        <a href="javascript:postSupervisionChanges('@routes.SupervisionController.supervisionPost()')">Änderungen übernehmen</a>
+    </div>
+</div>
+
 
 @helpers.labworks.labworkAttendees(group, date)
 
 @helpers.labworks.labworkAttendeesExcused(group, date)
 
 @helpers.labworks.labworkAlternateAttendees(group, date)
+
+<script>
+$(function(){
+    $(window).bind('beforeunload', function(){
+        if(dirty){
+            $("#saveButton").show();
+            return 'Es wurden Daten auf dieser Seite geändert. Sind Sie sicher, dass Sie die Seite verlassen wollen?';
+        }
+    });
+
+    createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+
+    $("#connectionWarning").hide();
+    $("#saveButton").hide();
+});
+
+</script>
 

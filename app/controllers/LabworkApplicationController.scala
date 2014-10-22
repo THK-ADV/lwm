@@ -17,7 +17,7 @@ object LabworkApplicationController extends Controller with Authentication {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
 
       val t = LabworkApplicationLists.all().flatMap { lists ⇒
         Future.sequence(getApplicationListInfo(lists))
@@ -129,7 +129,7 @@ object LabworkApplicationController extends Controller with Authentication {
   }
 
   def applicationListEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       import utils.Global._
 
       val applicationlist = Individual(Resource(id))
@@ -164,7 +164,7 @@ object LabworkApplicationController extends Controller with Authentication {
   }
 
   def groupList(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async(parse.json) { request ⇒
+    Action.async(parse.json) { implicit request ⇒
       import utils.Global._
       val min = (request.body \ "min").asOpt[String]
       val max = (request.body \ "max").asOpt[String]
@@ -184,7 +184,7 @@ object LabworkApplicationController extends Controller with Authentication {
   def adminApplicationRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async(parse.json) {
-        request ⇒
+        implicit request ⇒
           val applicationd = (request.body \ "app").asOpt[String]
           val listId = (request.body \ "list").asOpt[String]
           if (applicationd.isDefined && listId.isDefined) {
@@ -197,7 +197,7 @@ object LabworkApplicationController extends Controller with Authentication {
   def studentApplicationRemoval = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) {
     session ⇒
       Action.async(parse.json) {
-        request ⇒
+        implicit request ⇒
           val lab = (request.body \ "lab").asOpt[String]
           val s = (request.body \ "s").asOpt[String]
 

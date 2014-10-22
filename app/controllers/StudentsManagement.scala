@@ -15,13 +15,13 @@ object StudentsManagement extends Controller with Authentication {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       Future.successful(Redirect(routes.StudentsManagement.pagedIndex("1")))
     }
   }
 
   def pagedIndex(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { request ⇒
+    Action.async { implicit request ⇒
       for {
         students ← Students.all()
         degrees ← Degrees.all()

@@ -1,33 +1,31 @@
 @(labwork: Individual, group: Individual, students: List[Individual])
-    @import utils.semantic.Vocabulary.{LWM, FOAF}
-    @import utils.semantic.{Individual, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, FOAF}
+@import utils.semantic.{Individual, StringLiteral}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">Studenten</div>
-        <div class="panel-body"><table class="table table-bordered">
-            <tbody>
-                <tr><th>Vorname</th> <th>Nachname</th> <th>Kennung</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehltermine</th></tr>
+<div class="panel panel-default">
+    <div class="panel-heading">Studenten</div>
+    <div class="panel-body"><table class="table table-bordered">
+        <tbody>
+            <tr><th>Kennung</th> <th>Nachname</th><th>Vorname</th>   <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehltermine</th></tr>
 
-                @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
-                    <tr>
+            @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
+                <tr>
+                    <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)">@gm.value</a> </td>
+                    <td>@ln.value</td>
+                    <td>@fn.value</td>
 
+                    <td>@m.value</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td><a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+                </tr>
+            }
 
-                            <td>@fn.value</td>
-                            <td>@ln.value</td>
-                            <td>@gm.value</td>
-                            <td>@m.value</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)" class="glyphicon glyphicon-exclamation-sign"></a> <a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></td>
-                    </tr>
-                }
-
-            </tbody>
-        </table>
-        </div>
-        <div class="panel-footer">
-            @student_autocomplete_field()
-        <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
-
-        </div>
+        </tbody>
+    </table>
     </div>
+    <div class="panel-footer">
+        @student_autocomplete_field()
+        <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
+    </div>
+</div>

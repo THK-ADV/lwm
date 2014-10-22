@@ -15,7 +15,7 @@ object GroupManagementController extends Controller with Authentication {
   def index(labworkId: String, groupId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async {
-        request ⇒
+        implicit request ⇒
           val lI = Individual(Resource(labworkId))
           val gI = Individual(Resource(groupId))
           val s = gI.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))

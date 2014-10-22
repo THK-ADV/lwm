@@ -11,7 +11,13 @@
             <tr><th>Sichtbar</th><th>Termin</th> <th>Aufgabe</th> <th>Abgabetermin</th></tr>
             @for((a, index) <- labworkAssociations.zip(Stream from 1); assignments = a.props.getOrElse(LWM.hasAssignment, Nil)) {
                 <tr>
-                    <td>@if(a.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@a.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@a.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
+                    <td>
+                        @if(a.props.getOrElse(LWM.isVisibleToStudents, List(StringLiteral("false"))).head.value == "false") {
+                            <a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@a.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>
+                        }else{
+                            <a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@a.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>
+                        }
+                    </td>
                     <td>@index</td>
                     <td>
                         @Individual(Resource(a.props.getOrElse(LWM.hasAssignment, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value

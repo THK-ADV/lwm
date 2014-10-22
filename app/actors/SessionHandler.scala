@@ -31,6 +31,14 @@ object SessionHandler {
 
   case object Invalid
 
+  case object OnlineUserCountRequest
+
+  case object OnlineStudentCountRequest
+
+  case class OnlineUserCountChange(count: Int)
+
+  case class OnlineStudentCountChange(count: Int)
+
   private[SessionHandler] case object SessionTick
 
   def props(config: Configuration) = Props(new SessionHandler(config))
@@ -43,7 +51,9 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
 
-  private var sessions: Map[Session, DateTime] = Map.empty
+  var sessions: Map[Session, DateTime] = Map.empty
+  var userCount = 0
+  var studentCount = 0
 
   val DN = config.getString("lwm.bindDN").get
   val GDN = config.getString("lwm.groupDN").get
@@ -54,6 +64,9 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   context.system.scheduler.schedule(lifetime.minutes, lifetime.minutes, self, SessionHandler.SessionTick)
 
   def receive: Receive = {
+    case OnlineStudentCountRequest ⇒ sender() ! OnlineStudentCountChange(studentCount)
+    case OnlineUserCountRequest    ⇒ sender() ! OnlineUserCountChange(userCount)
+
     case SessionTick ⇒
       sessions = sessions.filterNot { session ⇒
         new Period(DateTime.now(), session._2).getHours > lifetime
@@ -66,6 +79,8 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
         val sessionFuture = createSessionID(user)
         sessionFuture map { session ⇒
           sessions += (session -> DateTime.now())
+          userCount = userCount + 1
+          context.system.eventStream.publish(OnlineUserCountChange(userCount))
           requester ! Right(session)
         }
       } else {
@@ -78,11 +93,29 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
             val sessionFuture = createSessionID(user)
             sessionFuture map { session ⇒
               sessions += (session -> DateTime.now())
+
+              if (session.role.contains(Permissions.ScheduleAssociationModification)) {
+                userCount = userCount + 1
+                context.system.eventStream.publish(OnlineUserCountChange(userCount))
+              } else {
+                studentCount = studentCount + 1
+                context.system.eventStream.publish(OnlineStudentCountChange(userCount))
+              }
+
               requester ! Right(session)
             }
         }
       }
     case LogoutRequest(sessionID) ⇒
+      sessions.filter(_._1.id == sessionID).map { session ⇒
+        if (session._1.role.contains(Permissions.ScheduleAssociationModification)) {
+          userCount = userCount - 1
+          context.system.eventStream.publish(OnlineUserCountChange(userCount))
+        } else {
+          studentCount = studentCount - 1
+          context.system.eventStream.publish(OnlineStudentCountChange(userCount))
+        }
+      }
       sessions = sessions.filterNot(_._1.id == sessionID)
 
     case SessionRequest(id) ⇒

@@ -10,7 +10,7 @@ object SubstitutionsManagementController extends Controller with Authentication 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async {
-        request ⇒
+        implicit request ⇒
           for {
             substitutions ← Substitutions.all()
           } yield {

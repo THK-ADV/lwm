@@ -13,9 +13,10 @@ trait LWMFakeApplication { self: OneAppPerSuite ⇒
 
     override def onStart(app: Application) {
       import play.api.Play.current
+
       Akka.system.actorOf(Props(new Actor {
-        val fakeAdminSession = Session("fakeAdmin", DateTime.now, "fakeAdmin", List(), Permissions.AdminRole)
-        val fakeStudentSession = Session("fakeStudent", DateTime.now, "fakeStudent", List(), Permissions.DefaultRole)
+        val fakeAdminSession = Session("fakeAdmin", "fakeAdmin", Permissions.AdminRole)
+        val fakeStudentSession = Session("fakeStudent", "fakeStudent", Permissions.DefaultRole)
 
         override def receive: Receive = {
           case SessionHandler.AuthenticationRequest(user, password) ⇒

@@ -1,4 +1,4 @@
-@(student: Individual, degrees: List[Individual])
+@(student: Individual, degrees: List[Individual])(implicit request: RequestHeader)
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.semantic.Vocabulary
 @import utils.Global._
