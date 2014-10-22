@@ -193,6 +193,11 @@ object AssignmentManagementController extends Controller with Authentication {
               i.remove(LWM.hasAssignment, a)
             }
           }
+          i.props.get(LWM.hasPreparationTime).map { rList ⇒
+            rList.map { a ⇒
+              i.remove(LWM.hasPreparationTime, a)
+            }
+          }
           Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
       }
   }
