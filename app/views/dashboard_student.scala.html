@@ -12,24 +12,24 @@
             </div>
             <div class="row">
                 @navigation_student(student)
-            <div class="col-md-9">
-                @if(openLabworks.size > 0){
-                    <div class="row">
-                    @dashboard_student_classEnrolement(openLabworks, courseApplicationForm)
-                    </div>
-                }
-                @if(pendingApplications.size > 0){
-                    <div class="row">
-                    @pending_applications(student, pendingApplications)
-                    </div>
-                }
-                @if(studentLabworks.size > 0){
-                    <div class="row">
-                    @dashboard_student_labworks_list(student, studentLabworks)
-                    </div>
-                }
+                <div class="col-md-9">
+                    @if(openLabworks.size > 0) {
+                        <div class="row">
+                        @dashboard_student_classEnrolement(openLabworks, courseApplicationForm)
+                        </div>
+                    }
+                    @if(pendingApplications.size > 0) {
+                        <div class="row">
+                        @pending_applications(student, pendingApplications)
+                        </div>
+                    }
+                    @if(studentLabworks.size > 0) {
+                        <div class="row">
+                        @dashboard_student_labworks_list(student, studentLabworks)
+                        </div>
+                    }
+                </div>
             </div>
-   </div>
 
             <div class="row">@footer_student()</div>
         </div>
