@@ -1,3 +1,6 @@
+@()(implicit request: RequestHeader)
+@import play.api.Play
+
 <div class="col-md-3">
     <nav>
         <ul class="nav nav-pills nav-stacked">
@@ -12,6 +15,11 @@
             <li><a href="@routes.LabworkManagementController.index()">Praktikumsverwaltung</a></li>
             <li><a href="@routes.LabworkApplicationController.index()">Praktikumsanmeldungen</a></li>
             <li><a href="@routes.AssignmentManagementController.index()">Aufgabenverwaltung</a></li>
+            <li><span id="userCount" class="badge"></span> <span id="userText"></span> online</li>
+            <li><span id="studentCount" class="badge"></span> <span id="studentenText"></span> online</li>
         </ul>
     </nav>
+    <script>
+        createUserCountSocket("@routes.SessionManagement.userCountSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+    </script>
 </div>

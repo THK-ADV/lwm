@@ -27,7 +27,7 @@ object Application extends Controller with Authentication {
   override def onUnauthorized(request: RequestHeader): Result = Redirect(routes.Application.loginScreen())
 
   def index() = hasSession { session ⇒
-    Action { request ⇒
+    Action { implicit request ⇒
       session.role match {
         case Permissions.AdminRole ⇒
           Redirect(routes.AdministrationDashboardController.dashboard())
@@ -36,7 +36,7 @@ object Application extends Controller with Authentication {
     }
   }
 
-  def loginScreen() = Action.async { request ⇒
+  def loginScreen() = Action.async { implicit request ⇒
     val maybeToken = request.session.get("session")
     maybeToken match {
       case None ⇒

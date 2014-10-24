@@ -35,20 +35,15 @@
                                 <h4 class="modal-title" id="myModalLabel">Gruppe ändern</h4>
                             </div>
                             <div class="modal-body">
-                                @change_group_form(s, group, groups)
+                            @change_group_form(s, group, groups)
                             </div>
 
                         </div>
                     </div>
                 </div>
             }
-
-        </tbody>
-    </table>
-    </div>
     <div class="panel-footer">
         @student_autocomplete_field()
         <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
-
     </div>
 </div>

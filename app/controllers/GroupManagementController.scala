@@ -15,9 +15,7 @@ object GroupManagementController extends Controller with Authentication {
 
   def index(labworkId: String, groupId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
-      Action.async {
-        request ⇒
-
+      Action.async {implicit request ⇒
           val query =
             s"""
          select ?s (${LWM.hasGroupId} as ?p) ?o where {

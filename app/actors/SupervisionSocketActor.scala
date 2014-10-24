@@ -16,8 +16,13 @@ object SupervisionSocketActor {
 
 class SupervisionSocketActor(out: ActorRef) extends Actor {
   import utils.Global._
+  import scala.concurrent.duration._
+  import context.dispatcher
 
   context.system.eventStream.subscribe(self, classOf[SupervisionChange])
+  context.system.scheduler.schedule(1.second, 1.second, out, JsObject(Seq(
+    "type" -> JsString("ping")
+  )))
 
   override def receive: Receive = {
     case s: JsValue ⇒

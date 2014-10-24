@@ -15,7 +15,7 @@ object StudentDashboardController extends Controller {
   import utils.Global._
 
   def dashboard = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
-    Action.async {
+    Action.async { implicit request ⇒
       def availableLabworks(student: Resource) = {
         val query =
           s"""
@@ -95,7 +95,7 @@ object StudentDashboardController extends Controller {
 
   def informationPage(id: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
     Action.async {
-      request ⇒
+      implicit request ⇒
         val student = Individual(Resource(id))
         Degrees.all().map(d ⇒ Ok(views.html.dashboard_student_edit_details(student, d, UserForms.studentForm))).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
     }
@@ -103,7 +103,7 @@ object StudentDashboardController extends Controller {
 
   def assignmentsPage(labid: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
     Action.async {
-      request ⇒
+      implicit request ⇒
         val studentFuture = for (s ← Students.get(session.user)) yield s
 
         val query =
@@ -111,7 +111,7 @@ object StudentDashboardController extends Controller {
          |select ?s (${LWM.hasLabWork} as ?p) (<$labid> as ?o) where {
          | ?s ${RDF.typ} ${LWM.AssignmentAssociation} .
          | ?s ${LWM.hasLabWork} <$labid> .
-         | ?s ${LWM.allowsApplications} "true"
+         | ?s ${LWM.isVisibleToStudents} "true"
          | }
        """.stripMargin
 

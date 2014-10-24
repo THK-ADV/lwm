@@ -109,6 +109,7 @@ object Vocabulary {
     val hasAssignment = property("hasAssignment")
     val hasPreparationTime = property("hasPreparationTime")
     val hasOrderId = property("hasOrderId")
+    val isVisibleToStudents = property("isVisibleToStudents")
 
     val ScheduleAssociation = resource("ScheduleAssociation")
     val hasAssignmentDateTimetableEntry = property("hasAssignmentDateTimetableEntry")

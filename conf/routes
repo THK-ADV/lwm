@@ -13,6 +13,7 @@ GET           /administration/users                                   controller
 POST          /administration/users                                   controllers.UserManagement.userPost()
 DELETE        /administration/users                                   controllers.UserManagement.userRemoval()
 POST          /administration/users/:id                               controllers.UserManagement.userEdit(id)
+GET           /administration/users/socket                            controllers.SessionManagement.userCountSocket
 
 GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard()
 
@@ -113,6 +114,7 @@ GET           /administration/substitutions                           controller
 POST          /administration/substitutions                           controllers.SubstitutionsManagementController.substitutionPost()
 
 GET           /administration/supervision-socket                      controllers.SupervisionController.superviseSocket
+POST          /administration/supervision                             controllers.SupervisionController.supervisionPost
 
 GET           /administration/supervision/:id/:date                   controllers.SupervisionController.supervise(id, date)
 
@@ -121,7 +123,7 @@ POST          /students/:id/information                               controller
 DELETE        /students/labworkApplications                           controllers.LabworkApplicationController.studentApplicationRemoval()
 
 GET           /students/overview/:id                                  controllers.StudentInformationController.showInformation(id)
-POST           /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
+POST          /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
 
 # For test purposes only
 GET           /administration/testdata                                controllers.TestDataController.generateTestData()

@@ -2,3 +2,4 @@
 .bottom-buffer { margin-bottom:10px; }
 .left-buffer { margin-left:10px; }
 .right-buffer { margin-right:10px; }
+#connectionWarning{z-index: 1000;}

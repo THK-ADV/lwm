@@ -24,6 +24,7 @@
           ?association lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
           optional {?association lwm:hasPassed ?passed } .
           optional {?association lwm:hasAttended ?attended} .
+          filter not exists {?association lwm:hasAlternateScheduleAssociation ?alternate}
         } order by desc(?lastName)
 
        """.stripMargin
@@ -39,6 +40,12 @@
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
         lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td><input id="attendance-${association.toString.hashCode}" onchange="attendanceSwitch('${association.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${association.toString.hashCode}" onchange="passedSwitch('${association.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>""" :: lines
+        lines =
+          s"""
+             |<script>
+             |  initLocalState("$association", $attended, $passed);
+             |</script>
+           """.stripMargin :: lines
     }
 
     if(lines.size > 0){
