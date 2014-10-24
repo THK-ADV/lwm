@@ -6,7 +6,6 @@
 @import utils.Global._
 @import com.hp.hpl.jena.query.QueryExecutionFactory
 
-
 @{
     val query =
         s"""
@@ -53,6 +52,12 @@
 
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
+        val script =
+                s"""
+             |<script>
+             |  initLocalState("$scheduleRes", $attended, $passed);
+             |</script>
+           """.stripMargin
 
         val row =  if(solution.getLiteral("alternateGroupId") != null){
             val id = URLDecoder.decode(solution.getLiteral("alternateGroupId").getString, "UTF-8")
@@ -83,7 +88,7 @@
                     </div>
                 </div>
            """.stripMargin
-        lines = lines :+ row :+ modal
+        lines = lines :+ row :+ modal :+ script
     }
     lines = lines :+ "</table>"
     Html(lines.mkString("\n"))
