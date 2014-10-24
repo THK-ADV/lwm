@@ -68,6 +68,14 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
     case OnlineUserCountRequest    ⇒ sender() ! OnlineUserCountChange(userCount)
 
     case SessionTick ⇒
+      sessions.filter { session ⇒
+        if(session._1.role.contains(Permissions.ScheduleAssociationModification)){
+          userCount = userCount - 1
+        }else{
+          studentCount = studentCount -1
+        }
+        new Period(DateTime.now(), session._2).getHours > lifetime
+      }
       sessions = sessions.filterNot { session ⇒
         new Period(DateTime.now(), session._2).getHours > lifetime
       }
