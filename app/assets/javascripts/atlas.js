@@ -126,6 +126,13 @@ function currentUser() {
     });
 }
 
+function swapGroups(student, current) {
+    ///var next = $("#groupSwap").val();
+    var next = 'http://lwm.gm.fh-koeln.de/3769951a:149097bc676:-7e3f';
+    //alert("Current:"+ current + "\nNext:"+next);
+    ajaxRequest("/administration/labworks/groups/swap", "POST", "application/json", {student: student, ogroup: current, ngroup: next}, reload);
+}
+
 var socket;
 function createSocket(url) {
     socket = new WebSocket(url);

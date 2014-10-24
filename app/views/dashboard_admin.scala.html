@@ -13,6 +13,7 @@
            </div>
             <div class="row">
                 @navigation_admin()
+                <a href="javascript: swapGroups('http://lwm.gm.fh-koeln.de/-7ee4eecd:148e4e96a88:-7ff9', 'http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ffb')" class="glyphicon glyphicon-refresh"></a>
                 <div class="col-md-9">
                    @for(i <- 0 until 7){
                        @dashboard_admin_dates(today.plusDays(i))

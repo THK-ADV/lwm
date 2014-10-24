@@ -1,32 +1,54 @@
-@(labwork: Individual, group: Individual, students: List[Individual])
-    @import utils.semantic.Vocabulary.{LWM, FOAF}
-    @import utils.semantic.{Individual, StringLiteral}
+@(labwork: Individual, group: Individual, students: List[Individual], groups: List[Individual])
+@import utils.semantic.Resource
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.{LWM, FOAF}
+@import utils.semantic.{Individual, StringLiteral}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">Studenten</div>
-        <table class="table table-bordered">
-            <tbody class="table-hover">
-                <tr><th>Vorname</th> <th>Nachname</th> <th>Kennung</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehltermine</th></tr>
-                @defining(students.sortBy(s => s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)) { sortedStudents =>
-                    @for(s <- sortedStudents; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
-                        <tr>
+<div class="panel panel-default">
+    <div class="panel-heading">Studenten</div>
 
-                            <td>@fn.value</td>
-                            <td>@ln.value</td>
-                            <td>@gm.value</td>
-                            <td>@m.value</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)" class="glyphicon glyphicon-exclamation-sign"></a> <a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+    <div class="panel-body"><table class="table table-bordered">
+        <tbody>
+            <tr><th>Vorname</th> <th>Nachname</th> <th>Kennung</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>
+                Fehltermine</th></tr>
+
+            @for((s, index) <- students.zipWithIndex; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
+                <tr>
+
+                    <td>@fn.value</td>
+                    <td>@ln.value</td>
+                    <td>@gm.value</td>
+                    <td>@m.value</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td><a class="glyphicon glyphicon-refresh" data-toggle="modal" data-target="#@index"></a></td>
+                    <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)" class="glyphicon glyphicon-exclamation-sign"></a> <a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+                </tr>
+
+
+                <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span> <span class="sr-only">
+                                    Close</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Gruppe ändern</h4>
+                            </div>
+                            <div class="modal-body">
+                                @change_group_form(s, group, groups)
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </tbody>
+    </table>
     </div>
     <div class="panel-footer">
         @student_autocomplete_field()
-    <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
+        <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
 
     </div>
-
+</div>

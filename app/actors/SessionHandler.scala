@@ -60,18 +60,27 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
       }
 
     case AuthenticationRequest(user, password) ⇒
-      val authFuture = authenticate(user, password, bindHost, bindPort, DN)
-
       val requester = sender()
-      authFuture.map {
-        case l @ Left(error) ⇒
-          requester ! l
-        case Right(success) ⇒
-          val sessionFuture = createSessionID(user)
-          sessionFuture map { session ⇒
-            sessions += (session -> DateTime.now())
-            requester ! Right(session)
-          }
+
+      if (Play.isDev) {
+        val sessionFuture = createSessionID(user)
+        sessionFuture map { session ⇒
+          sessions += (session -> DateTime.now())
+          requester ! Right(session)
+        }
+      } else {
+        val authFuture = authenticate(user, password, bindHost, bindPort, DN)
+
+        authFuture.map {
+          case l @ Left(error) ⇒
+            requester ! l
+          case Right(success) ⇒
+            val sessionFuture = createSessionID(user)
+            sessionFuture map { session ⇒
+              sessions += (session -> DateTime.now())
+              requester ! Right(session)
+            }
+        }
       }
     case LogoutRequest(sessionID) ⇒
       sessions = sessions.filterNot(_._1.id == sessionID)
@@ -155,8 +164,12 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   private def createSessionID(user: String): Future[Session] = {
     val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
 
-    getRoles(user) map { role ⇒
-      Session(sessionID, user, role)
+    if (Play.isDev) {
+      Future.successful(Session(sessionID, user, Permissions.AdminRole))
+    } else {
+      getRoles(user) map { role ⇒
+        Session(sessionID, user, role)
+      }
     }
   }
 }

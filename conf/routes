@@ -24,6 +24,8 @@ GET           /administration/students/suggest                        controller
 POST          /administration/students/:id                            controllers.StudentsManagement.studentEdit(id)
 GET           /administration/students/search/:id                     controllers.StudentsManagement.studentSearch(id)
 
+POST          /administration/labworks/groups/swap                    controllers.GroupManagementController.swapGroup()
+
 GET           /administration/labworks                                controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                            controllers.LabworkManagementController.edit(id)
 POST          /administration/labworks/:id                            controllers.GroupManagementController.studentAddition(id)
