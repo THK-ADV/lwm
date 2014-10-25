@@ -8,11 +8,19 @@
 <html>
     @head("Informationen zu ...")
     <body>
-        <script>
-        $(function(){
-        createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
-        });
-        </script>
+
+        <div class="row">
+            <div id="connectionWarning" class="col-md-12 bg-danger">
+                <strong>Achtung!</strong> Es besteht keine Verbindung zum Server. Lokale Änderungen werden beim Schließen der Seite verloren gehen!
+            </div>
+        </div>
+        <div class="row bg-danger">
+            <div id="saveButton" class="col-md-1">
+                <a href="javascript:postSupervisionChanges('@routes.SupervisionController.supervisionPost()')">Änderungen übernehmen</a>
+            </div>
+        </div>
+
+
         <div class="container" id="everything">
             <div class="row">
             @header_loggedIn_admin(UrlReference(Individual(student).props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value, request.uri), session)
@@ -29,5 +37,21 @@
             </div>
             <div class="row">@footerAdmin()</div>
         </div>
+
+        <script>
+            $(function(){
+                $(window).bind('beforeunload', function(){
+                if(dirty){
+                $("#saveButton").show();
+                return 'Es wurden Daten auf dieser Seite geändert. Sind Sie sicher, dass Sie die Seite verlassen wollen?';
+                }
+                });
+
+                createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+
+                $("#connectionWarning").hide();
+                $("#saveButton").hide();
+            });
+        </script>
     </body>
 </html>
