@@ -1,15 +1,15 @@
-@(labwork: Individual, group: Individual, students: List[Individual], associations: List[Individual])(implicit request: RequestHeader)
+@(labwork: Individual, group: Individual, students: List[Individual], groups: List[Individual], associations: List[Individual], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.{Individual, StringLiteral}
 @import utils.semantic.Vocabulary.LWM
 @import utils.Global._
-
+@import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 <html>
     @head("Gruppe Detailverwaltung")
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference(group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value, request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

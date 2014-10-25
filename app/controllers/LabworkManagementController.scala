@@ -32,7 +32,7 @@ object LabworkManagementController extends Controller with Authentication {
         labworks ← LabWorks.all()
         semesters ← Semesters.all()
       } yield {
-        Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
+        Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm, session))
       }
     }
   }
@@ -129,8 +129,8 @@ object LabworkManagementController extends Controller with Authentication {
           allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
           semesters, courses,
           AssignmentForms.assignmentAssociationForm,
-          LabWorkForms.labworkUpdateForm
-        ))
+          LabWorkForms.labworkUpdateForm,
+          session))
       }
     }
   }
@@ -143,7 +143,7 @@ object LabworkManagementController extends Controller with Authentication {
             labworks ← LabWorks.all()
             courses ← Courses.all()
             semesters ← Semesters.all()
-          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
+          } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors, session))
         },
         labwork ⇒ {
           LabWorks.create(
@@ -200,7 +200,7 @@ object LabworkManagementController extends Controller with Authentication {
                 labworks ← LabWorks.all()
                 courses ← Courses.all()
                 semesters ← Semesters.all()
-              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
+              } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm, session))
             },
             labwork ⇒ {
               val i = Individual(Resource(id))

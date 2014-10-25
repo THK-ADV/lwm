@@ -1,4 +1,5 @@
-@(today: LocalDate)(implicit request: RequestHeader)
+@(today: LocalDate, session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@import utils.BreadCrumbKeeper.UrlReference
 @import org.joda.time.LocalDate
 @import org.joda.time.DateTime
 @import utils.semantic.Individual
@@ -9,7 +10,7 @@
     <body>
         <div class="container" id="everything">
            <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference("Home", request.uri), session)
            </div>
             <div class="row">
                 @navigation_admin()

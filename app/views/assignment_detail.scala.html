@@ -1,8 +1,7 @@
-@(assignment: Individual, courses: List[Individual], aForm: Form[AssignmentFormModel], sForm: Form[AssignmentSolutionFormModel])(implicit request: RequestHeader)
-
-@import utils.semantic.Resource
-@import utils.semantic.Individual
-@import utils.semantic.Vocabulary.LWM
+@(assignment: Individual, courses: List[Individual], aForm: Form[AssignmentFormModel], sForm: Form[AssignmentSolutionFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@import utils.BreadCrumbKeeper.UrlReference
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.Global._
 <!DOCTYPE html>
 <html>
@@ -10,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference(assignment.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value, request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

@@ -1,6 +1,7 @@
-@(student: Individual, degrees: List[Individual])(implicit request: RequestHeader)
+@(student: Individual, degrees: List[Individual], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.semantic.Vocabulary
+@import utils.BreadCrumbKeeper.UrlReference
 @import utils.Global._
 
 <!DOCTYPE html>
@@ -10,7 +11,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference(s"Suche: ${student.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value}", request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

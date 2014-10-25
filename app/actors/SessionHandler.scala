@@ -9,6 +9,7 @@ import org.joda.time
 import org.joda.time.{ Period, DateTime }
 import play.api.Play.current
 import play.api.{ Play, Configuration }
+import utils.BreadCrumbKeeper
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -23,7 +24,7 @@ object SessionHandler {
 
   case class SessionRequest(id: String)
 
-  case class Session(id: String, user: String, role: Role)
+  case class Session(id: String, user: String, role: Role, breadcrumbKeeper: BreadCrumbKeeper)
 
   case class SessionValidationRequest(id: String)
 
@@ -196,12 +197,13 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
 
   private def createSessionID(user: String): Future[Session] = {
     val sessionID = DigestUtils.sha1Hex(s"$user::${System.nanoTime()}")
+    val breadcrumbs = new utils.BreadCrumbKeeper
 
     if (Play.isDev) {
-      Future.successful(Session(sessionID, user, Permissions.AdminRole))
+      Future.successful(Session(sessionID, user, Permissions.AdminRole, breadcrumbs))
     } else {
       getRoles(user) map { role ⇒
-        Session(sessionID, user, role)
+        Session(sessionID, user, role, breadcrumbs)
       }
     }
   }

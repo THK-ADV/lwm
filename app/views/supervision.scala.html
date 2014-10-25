@@ -1,6 +1,9 @@
-@(group: Resource, date: LocalDate)(implicit request: RequestHeader)
+@(group: Resource, date: LocalDate, session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import org.joda.time.LocalDate
-@import utils.semantic._
+@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.BreadCrumbKeeper.UrlReference
+@import utils.Global._
 
 <!DOCTYPE html>
 <html>
@@ -8,7 +11,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference(Individual(group).props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value, request.uri),session)
             </div>
             <div class="row">
                 @navigation_admin()

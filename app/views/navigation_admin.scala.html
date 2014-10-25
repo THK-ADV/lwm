@@ -1,9 +1,9 @@
 @()(implicit request: RequestHeader)
 @import play.api.Play
 
-<div class="col-md-3">
+<div class="col-md-3 no-print">
     <nav>
-        <ul class="nav nav-pills nav-stacked">
+        <ul class="nav nav-pills nav-stacked no-print">
             <li><a href="@routes.StudentsManagement.index()">Studentenverwaltung</a></li>
             <li><a href="@routes.UserManagement.index()">Nutzerverwaltung</a></li>
             <li><a href="@routes.SubstitutionsManagementController.index()">Vertretungsplanung</a></li>

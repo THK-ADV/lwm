@@ -1,12 +1,13 @@
-@(semesters: List[Individual], labWorks: List[Individual], courses: List[Individual], form: Form[LabWorkFormModel])(implicit request: RequestHeader)
+@(semesters: List[Individual], labWorks: List[Individual], courses: List[Individual], form: Form[LabWorkFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.Individual
+@import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 <html>
     @head("Praktikumsverwaltung")
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference("Praktika", request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()
@@ -15,6 +16,7 @@
                     <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal">
 
                     </button>
+
 
                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">

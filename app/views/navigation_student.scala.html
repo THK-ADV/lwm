@@ -1,9 +1,9 @@
 @(student: Individual)
 @import utils.semantic.Individual
 
-<div class="col-md-3">
+<div class="col-md-3 no-print">
     <nav>
-        <ul class="nav nav-pills nav-stacked">
+        <ul class="nav nav-pills nav-stacked no-print">
             <li><a href="@routes.StudentDashboardController.dashboard()">Dashboard</a></li>
             <li><a href="@routes.StudentDashboardController.informationPage(student.uri.value)">Informationen bearbeiten</a></li>
 

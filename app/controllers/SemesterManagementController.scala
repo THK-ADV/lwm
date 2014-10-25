@@ -16,7 +16,7 @@ object SemesterManagementController extends Controller with Authentication {
       Action.async {
         implicit request ⇒
           for (semesters ← Semesters.all()) yield {
-            Ok(views.html.semesterManagement(semesters, Semesters.options, SemesterForm.semesterForm))
+            Ok(views.html.semesterManagement(semesters, Semesters.options, SemesterForm.semesterForm, session))
           }
       }
   }
@@ -27,7 +27,7 @@ object SemesterManagementController extends Controller with Authentication {
         SemesterForm.semesterForm.bindFromRequest.fold(
           formWithErrors ⇒ {
             for (semester ← Semesters.all()) yield {
-              BadRequest(views.html.semesterManagement(semester, Semesters.options, formWithErrors))
+              BadRequest(views.html.semesterManagement(semester, Semesters.options, formWithErrors, session))
             }
           },
           s ⇒ {

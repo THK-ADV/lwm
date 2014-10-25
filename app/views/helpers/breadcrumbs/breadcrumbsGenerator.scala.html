@@ -1,0 +1,5 @@
+@(reference: utils.BreadCrumbKeeper.UrlReference, session: actors.SessionHandler.Session)
+    @{
+        session.breadcrumbKeeper.add(reference)
+        session.breadcrumbKeeper.generate()
+    }

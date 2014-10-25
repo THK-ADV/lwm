@@ -15,9 +15,9 @@ object GroupManagementController extends Controller with Authentication {
 
   def index(labworkId: String, groupId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
-      Action.async {implicit request ⇒
-          val query =
-            s"""
+      Action.async { implicit request ⇒
+        val query =
+          s"""
          select ?s (${LWM.hasGroupId} as ?p) ?o where {
           ?s ${RDF.typ} ${LWM.Group} .
           ?s ${LWM.hasLabWork} <$labworkId> .
@@ -26,17 +26,17 @@ object GroupManagementController extends Controller with Authentication {
           ORDER BY ASC(?o)
             """.stripMargin
 
-          val futureGroups = sparqlExecutionContext.executeQuery(query).map { result ⇒
-            SPARQLTools.statementsFromString(result).map(r ⇒ Individual(r.s))
-          }
+        val futureGroups = sparqlExecutionContext.executeQuery(query).map { result ⇒
+          SPARQLTools.statementsFromString(result).map(r ⇒ Individual(r.s))
+        }
 
-          futureGroups.map { g ⇒
-            val lI = Individual(Resource(labworkId))
-            val gI = Individual(Resource(groupId))
-            val s = gI.props.getOrElse(LWM.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-            val a = lI.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-            Ok(views.html.groups_detail_management(lI, gI, s, g.toList, a))
-          }
+        futureGroups.map { g ⇒
+          val lI = Individual(Resource(labworkId))
+          val gI = Individual(Resource(groupId))
+          val s = gI.props.getOrElse(LWM.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+          val a = lI.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+          Ok(views.html.groups_detail_management(lI, gI, s, g.toList, a, session))
+        }
       }
   }
 

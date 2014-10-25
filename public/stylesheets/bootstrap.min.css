@@ -275,7 +275,12 @@ td, th {
         border: 1px solid #ddd !important
     }
 
-    section.pagebreak {page-break-after: always;}
+    .pagebreak {page-break-after: always;}
+
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
 }
 
 @font-face {

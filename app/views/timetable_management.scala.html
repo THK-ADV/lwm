@@ -1,7 +1,7 @@
-@(labwork: Individual, allSupervisors: List[Individual], timeslots: List[Time], table_entries: List[Individual], rooms: List[Individual], form: Form[TimetableEntryFormEntry])(implicit request: RequestHeader)
+@(labwork: Individual, allSupervisors: List[Individual], timeslots: List[Time], table_entries: List[Individual], rooms: List[Individual], form: Form[TimetableEntryFormEntry], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.Resource
 @import utils.semantic.Individual
-
+@import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 
 <html>
@@ -9,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference("Stundenplan", request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

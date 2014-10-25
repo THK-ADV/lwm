@@ -23,7 +23,7 @@ object LabworkApplicationController extends Controller with Authentication {
         Future.sequence(getApplicationListInfo(lists))
       }
 
-      for (info ← t) yield Ok(views.html.labwork_application_management(info))
+      for (info ← t) yield Ok(views.html.labwork_application_management(info, session))
     }
   }
 
@@ -155,7 +155,7 @@ object LabworkApplicationController extends Controller with Authentication {
       applicationsFuture.flatMap { applications ⇒
         val mapped = applications.map(e ⇒ (e, e.props.getOrElse(LWM.hasApplicant, List(Resource(""))).map(s ⇒ Individual(s.asResource().get)).head))
         val sorted = mapped.sortBy(_._2.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)
-        openLabs.map(a ⇒ Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, sorted)))
+        openLabs.map(a ⇒ Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, sorted, session)))
       }.recover {
         case NonFatal(t) ⇒
           Redirect(routes.LabworkApplicationController.index())

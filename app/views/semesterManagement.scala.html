@@ -1,13 +1,13 @@
-@(semesters: List[Individual], options: List[String], form: Form[SemesterModelForm])(implicit request: RequestHeader)
+@(semesters: List[Individual], options: List[String], form: Form[SemesterModelForm], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.Individual
-
+@import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 <html>
     @head("Praktikumsverwaltung")
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference("Semester", request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

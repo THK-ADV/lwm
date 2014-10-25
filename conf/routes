@@ -39,10 +39,10 @@ GET           /administration/labworks/:id/export/:e                  controller
 GET           /administration/labworks/:id/exportAssignment/:a        controllers.LabworkManagementController.exportAssignment(id, a)
 #GET           /administration/labworks/:id/exportCSV                  controllers.LabworkManagementController.exportCSV(id)
 
-POST          /administration/labworkApplications                     controllers.LabworkApplicationController.labworkApplicationPost()
-POST          /administration/labworkApplications/:id                 controllers.LabworkApplicationController.groupList(id)
 GET           /administration/labworkApplications                     controllers.LabworkApplicationController.index()
 GET           /administration/labworkApplications/:id                 controllers.LabworkApplicationController.applicationListEdit(id)
+POST          /administration/labworkApplications                     controllers.LabworkApplicationController.labworkApplicationPost()
+POST          /administration/labworkApplications/:id                 controllers.LabworkApplicationController.groupList(id)
 DELETE        /administration/labworkApplications                     controllers.LabworkApplicationController.adminApplicationRemoval()
 POST          /administration/labworkApplicationLists                 controllers.LabworkApplicationController.changeLists()
 POST          /administration/labworkApplicationLists/:id             controllers.LabworkApplicationController.addApplication(id)

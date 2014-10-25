@@ -1,6 +1,7 @@
-@(semester: String, semesterIndividual: Individual, dates: List[Individual], blacklist: Individual, dateForm: Form[BlacklistDateFormModel], rangeForm: Form[BlacklistDateRangeFormModel])(implicit request: RequestHeader)
-    @import utils.semantic.Individual
-
+@(semester: String, semesterIndividual: Individual, dates: List[Individual], blacklist: Individual, dateForm: Form[BlacklistDateFormModel], rangeForm: Form[BlacklistDateRangeFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+    @import utils.semantic.{Individual, StringLiteral}
+    @import utils.semantic.Vocabulary.RDFS
+    @import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 
     <html>
@@ -8,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference(semesterIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value, request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

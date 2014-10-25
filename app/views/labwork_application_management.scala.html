@@ -1,6 +1,6 @@
-@(labworkApplicationLists: List[(Individual, String, String, Int)])(implicit request: RequestHeader)
+@(labworkApplicationLists: List[(Individual, String, String, Int)], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.Individual
-
+@import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 
 <html>
@@ -8,7 +8,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference("Anmeldungen", request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

@@ -1,7 +1,9 @@
-@(student: Resource, form: Form[AlternateAssociationFormModel])(implicit request: RequestHeader)
-@import utils.semantic.Resource
+@(student: Resource, form: Form[AlternateAssociationFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import play.api.Play
-
+@import utils.BreadCrumbKeeper.UrlReference
+@import utils.semantic.{Individual, StringLiteral, Resource}
+@import utils.Global._
+@import utils.semantic.Vocabulary.LWM
 <!DOCTYPE html>
 <html>
     @head("Informationen zu ...")
@@ -13,7 +15,7 @@
         </script>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference(Individual(student).props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value, request.uri), session)
             </div>
             <div class="row">
                 @navigation_admin()

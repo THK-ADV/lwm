@@ -30,7 +30,7 @@ object StudentsManagement extends Controller with Authentication {
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round + 1
 
-        Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
+        Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm, session))
       }
     }
   }
@@ -77,7 +77,7 @@ object StudentsManagement extends Controller with Authentication {
           } yield {
             val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
-            BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
+            BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors, session))
           }
         },
         student ⇒ {
@@ -128,7 +128,7 @@ object StudentsManagement extends Controller with Authentication {
 
   def studentSearch(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d))).recover {
+      Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d, session))).recover {
         case NonFatal(t) ⇒ Redirect(routes.LabworkManagementController.index())
       }
 
@@ -145,7 +145,7 @@ object StudentsManagement extends Controller with Authentication {
           } yield {
             val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
-            BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
+            BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors, session))
           }
         },
         student ⇒ {

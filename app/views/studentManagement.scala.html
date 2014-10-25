@@ -1,7 +1,7 @@
-@(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student])(implicit request: RequestHeader)
+@(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary
-
+@import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 
     <html>
@@ -9,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin()
+            @header_loggedIn_admin(UrlReference("Studenten", ""), session)
             </div>
             <div class="row">
                 @navigation_admin()
@@ -23,7 +23,7 @@
                     <div class="panel-footer">
                         <button class="btn btn-primary btn-sm glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal"></button></div>
                 </div>
-
+                @studentList(students, degrees, studentInput)
                 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
