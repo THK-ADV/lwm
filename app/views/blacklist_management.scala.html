@@ -1,4 +1,4 @@
-@(blacklists: List[Individual], semesters: List[Individual], form: Form[BlacklistFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(blacklists: List[Individual], semesters: List[Individual], form: Form[BlacklistFormModel])(implicit request: RequestHeader)
 @import utils.semantic.Individual
 @import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference("Blacklists", request.uri), session)
+            @header_loggedIn_admin("Blacklists")
             </div>
             <div class="row">
                 @navigation_admin()

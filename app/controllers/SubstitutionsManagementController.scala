@@ -14,7 +14,7 @@ object SubstitutionsManagementController extends Controller with Authentication 
           for {
             substitutions ← Substitutions.all()
           } yield {
-            Ok(views.html.substitution_management(session.user, substitutions, Substitutions.Forms.subsitutionForm, session))
+            Ok(views.html.substitution_management(session.user, substitutions, Substitutions.Forms.subsitutionForm))
           }
       }
   }
@@ -24,7 +24,7 @@ object SubstitutionsManagementController extends Controller with Authentication 
       Substitutions.Forms.subsitutionForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Substitutions.all()) yield {
-            BadRequest(views.html.substitution_management(session.user, all.toList, formWithErrors, session))
+            BadRequest(views.html.substitution_management(session.user, all.toList, formWithErrors))
           }
         },
         substitution ⇒ {

@@ -20,7 +20,7 @@ object BlacklistManagementController extends Controller with Authentication {
         blacklists ← Blacklists.all()
         semesters ← Semesters.all()
       } yield {
-        Ok(views.html.blacklist_management(blacklists, semesters, Blacklists.Forms.blacklistForm, session))
+        Ok(views.html.blacklist_management(blacklists, semesters, Blacklists.Forms.blacklistForm))
       }
     }
   }
@@ -43,7 +43,7 @@ object BlacklistManagementController extends Controller with Authentication {
           val semester = Individual(SPARQLTools.statementsFromString(result).head.s.asResource().get)
           val blacklist = Individual(Resource(id))
 
-          Ok(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm, session))
+          Ok(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm))
         }
       }
     }
@@ -57,7 +57,7 @@ object BlacklistManagementController extends Controller with Authentication {
             all ← Blacklists.all()
             semesters ← Semesters.all()
           } yield {
-            BadRequest(views.html.blacklist_management(all, semesters, formWithErrors, session))
+            BadRequest(views.html.blacklist_management(all, semesters, formWithErrors))
           }
         },
         blacklist ⇒ {
@@ -103,7 +103,7 @@ object BlacklistManagementController extends Controller with Authentication {
             val result = sparqlExecutionContext.executeQueryBlocking(query)
             val title = SPARQLTools.statementsFromString(result).head.o.asLiteral().get.decodedString
 
-            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, formWithErrors, Blacklists.Forms.blacklistDateRangeForm, session))
+            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, formWithErrors, Blacklists.Forms.blacklistDateRangeForm))
 
           }
         },
@@ -138,7 +138,7 @@ object BlacklistManagementController extends Controller with Authentication {
             val result = sparqlExecutionContext.executeQueryBlocking(query)
             val title = SPARQLTools.statementsFromString(result).head.o.asLiteral().get.decodedString
 
-            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm, session))
+            BadRequest(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm))
 
           }
         },

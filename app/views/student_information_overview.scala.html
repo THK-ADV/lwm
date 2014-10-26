@@ -1,4 +1,4 @@
-@(student: Resource, form: Form[AlternateAssociationFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(student: Resource, form: Form[AlternateAssociationFormModel])(implicit request: RequestHeader)
 @import play.api.Play
 @import utils.BreadCrumbKeeper.UrlReference
 @import utils.semantic.{Individual, StringLiteral, Resource}
@@ -23,7 +23,7 @@
 
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference(Individual(student).props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value, request.uri), session)
+            @header_loggedIn_admin(Individual(student).props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()

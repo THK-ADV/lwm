@@ -20,7 +20,7 @@ object UserManagement extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList, UserForms.userForm, session))
+      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList, UserForms.userForm))
     }
   }
 
@@ -58,7 +58,7 @@ object UserManagement extends Controller with Authentication {
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Users.all()) yield {
-            BadRequest(views.html.userManagement(all.toList, formWithErrors, session))
+            BadRequest(views.html.userManagement(all.toList, formWithErrors))
           }
         },
         user ⇒ {
@@ -86,7 +86,7 @@ object UserManagement extends Controller with Authentication {
           for {
             all ← Users.all()
           } yield {
-            BadRequest(views.html.userManagement(all, formWithErrors, session))
+            BadRequest(views.html.userManagement(all, formWithErrors))
           }
         },
         user ⇒ {

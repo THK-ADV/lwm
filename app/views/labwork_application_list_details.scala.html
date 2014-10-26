@@ -1,4 +1,4 @@
-@(openLabworks: List[(Individual, String)], applicationList: Individual, appsAndApplicants: List[(Individual, Individual)], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(openLabworks: List[(Individual, String)], applicationList: Individual, appsAndApplicants: List[(Individual, Individual)])(implicit request: RequestHeader)
 @import utils.semantic.Vocabulary.FOAF
 @import utils.semantic.StringLiteral
 @import utils.semantic.Individual
@@ -14,7 +14,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference(applicationList.props.get(LWM.hasLabWork).head.map(s => Individual(s.asResource().get)).head.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value, request.uri), session)
+            @header_loggedIn_admin(applicationList.props.get(LWM.hasLabWork).head.map(s => Individual(s.asResource().get)).head.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()

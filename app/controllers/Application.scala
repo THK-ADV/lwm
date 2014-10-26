@@ -9,6 +9,7 @@ import models.UserForms
 import play.api._
 import play.api.mvc._
 import play.libs.Akka
+import utils.BreadCrumbKeeper.UrlReference
 import utils.Global._
 import utils.Security.Authentication
 import utils.semantic.SPARQLTools
@@ -17,6 +18,7 @@ import utils.semantic.Vocabulary.{ LWM, FOAF }
 import scala.concurrent.Future
 
 object Application extends Controller with Authentication {
+
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
   import akka.pattern.ask
@@ -94,5 +96,16 @@ object Application extends Controller with Authentication {
             Ok(s"${firstName.head} ${lastName.head} ($user)")
           }
       }
+  }
+
+  def refreshCrumbs = hasSession { session ⇒
+    Action.async(parse.json) { implicit request ⇒
+      val label = (request.body \ "label").asOpt[String]
+      val url = (request.body \ "url").asOpt[String]
+      if (url.isDefined && label.isDefined) {
+        session.breadcrumbKeeper.add(UrlReference(label.get, url.get))
+      }
+      Future.successful(Ok(session.breadcrumbKeeper.generate()))
+    }
   }
 }

@@ -1,4 +1,4 @@
-@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkApplications: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabworkUpdateModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(labwork: Individual, groups: List[Individual], labworkAssociations: List[Individual], labworkApplications: List[Individual], labworkAssignments: List[Individual], semesters: List[Individual], courses: List[Individual], form: Form[AssignmentAssociationFormModel], lform: Form[LabworkUpdateModel])(implicit request: RequestHeader)
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.semantic.Vocabulary.{LWM, RDFS}
 @import utils.BreadCrumbKeeper.UrlReference
@@ -10,7 +10,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference(labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value, request.uri), session)
+            @header_loggedIn_admin(labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()

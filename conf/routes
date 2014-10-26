@@ -5,7 +5,6 @@
 # Home page
 GET           /                                                       controllers.Application.index
 GET           /login                                                  controllers.Application.loginScreen
-POST          /currentUser                                            controllers.Application.currentUser()
 POST          /api/sessions                                           controllers.SessionManagement.login
 DELETE        /api/sessions                                           controllers.SessionManagement.logout
 
@@ -25,7 +24,7 @@ GET           /administration/students/suggest                        controller
 POST          /administration/students/:id                            controllers.StudentsManagement.studentEdit(id)
 GET           /administration/students/search/:id                     controllers.StudentsManagement.studentSearch(id)
 
-POST          /administration/labworks/groups/swap                    controllers.GroupManagementController.swapGroup()
+POST          /administration/groups/swap                             controllers.GroupManagementController.swapGroups()
 
 GET           /administration/labworks                                controllers.LabworkManagementController.index()
 GET           /administration/labworks/:id                            controllers.LabworkManagementController.edit(id)
@@ -125,8 +124,10 @@ DELETE        /students/labworkApplications                           controller
 GET           /students/overview/:id                                  controllers.StudentInformationController.showInformation(id)
 POST          /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
 
+POST          /breadcrumbs                                            controllers.Application.refreshCrumbs()
+POST          /currentUser                                            controllers.Application.currentUser()
 # For test purposes only
-GET           /administration/testdata                                controllers.TestDataController.generateTestData()
+#GET           /administration/testdata                                controllers.TestDataController.generateTestData()
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                           controllers.Assets.at(path="/public", file)

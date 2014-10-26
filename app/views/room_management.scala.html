@@ -1,4 +1,4 @@
-@(rooms: List[Individual], form: Form[RoomFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(rooms: List[Individual], form: Form[RoomFormModel])(implicit request: RequestHeader)
 @import utils.semantic.Individual
 @import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference("Räume", request.uri), session)
+            @header_loggedIn_admin("Räume")
             </div>
             <div class="row">
                 @navigation_admin()

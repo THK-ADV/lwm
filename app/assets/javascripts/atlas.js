@@ -126,13 +126,20 @@ function currentUser() {
     });
 }
 
-function swapGroups(student, current) {
-    ///var next = $("#groupSwap").val();
-    var next = 'http://lwm.gm.fh-koeln.de/3769951a:149097bc676:-7e3f';
-    //alert("Current:"+ current + "\nNext:"+next);
-    ajaxRequest("/administration/labworks/groups/swap", "POST", "application/json", {student: student, ogroup: current, ngroup: next}, reload);
+function displayBreadCrumbs(data) {
+    $("#breadcrumbs").html(data);
 }
 
+function breadCrumbs(label) {
+    var path = window.location.pathname;
+    if(path.indexOf("/administration/students/page") > -1) path = "";
+    ajaxRequest("/breadcrumbs", "POST", "application/json", {label: label, url: path}, displayBreadCrumbs);
+}
+
+function swapGroups(index, student, oldGroup) {
+    var newGroup = $("#groupSwap"+index).val();
+    ajaxRequest("/administration/groups/swap", "POST", "application/json", {student: student, old: oldGroup, new: newGroup}, reload);
+}
 var timer = 5;
 
 var socket;

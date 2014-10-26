@@ -23,7 +23,7 @@ object RoomManagementController extends Controller with Authentication {
       for {
         rooms ← Rooms.all()
       } yield {
-        Ok(views.html.room_management(rooms, Rooms.Forms.roomForm, session))
+        Ok(views.html.room_management(rooms, Rooms.Forms.roomForm))
       }
     }
   }
@@ -33,7 +33,7 @@ object RoomManagementController extends Controller with Authentication {
       Rooms.Forms.roomForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Rooms.all()) yield {
-            BadRequest(views.html.room_management(all.toList, formWithErrors, session))
+            BadRequest(views.html.room_management(all.toList, formWithErrors))
           }
         },
         room ⇒ {
@@ -63,7 +63,7 @@ object RoomManagementController extends Controller with Authentication {
         Rooms.Forms.roomForm.bindFromRequest.fold(
           formWithErrors ⇒ {
             for (all ← Rooms.all()) yield {
-              BadRequest(views.html.room_management(all.toList, formWithErrors, session))
+              BadRequest(views.html.room_management(all.toList, formWithErrors))
             }
           },
           room ⇒ {

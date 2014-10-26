@@ -16,22 +16,22 @@ class BreadCrumbKeeper {
   private lazy val builder = new StringBuilder
   private val blacklist =
     List("/administration/substitutions",
-    "/administration/students",
-    "/administration/users",
-    "/administration/labworks",
-    "/administration/labworkApplications",
-    "/administration/degrees",
-    "/administration/courses",
-    "/student/dashboard",
-    "/administration/blacklist",
-    "/administration/rooms",
-    "/administration/semesters",
-    "/administration/assignments",
-    "/administration/substitutions",
-    "")
+      "/administration/students",
+      "/administration/users",
+      "/administration/labworks",
+      "/administration/labworkApplications",
+      "/administration/degrees",
+      "/administration/courses",
+      "/administration/dashboard",
+      "/student/dashboard",
+      "/administration/blacklist",
+      "/administration/rooms",
+      "/administration/semesters",
+      "/administration/assignments",
+      "/administration/substitutions",
+      "", "/")
 
   def add(reference: UrlReference): Unit = {
-
     if (blacklist.contains(reference.uri)) {
       breadcrumbs.clear()
       breadcrumbs += reference

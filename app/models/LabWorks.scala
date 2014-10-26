@@ -41,7 +41,6 @@ object LabWorkForms {
       "endDate" -> date
     )(LabworkUpdateModel.apply)(LabworkUpdateModel.unapply)
   )
-
 }
 
 /**

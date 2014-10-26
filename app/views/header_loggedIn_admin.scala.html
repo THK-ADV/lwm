@@ -1,4 +1,5 @@
-@(reference: utils.BreadCrumbKeeper.UrlReference, session: actors.SessionHandler.Session)
+@(pathDescription: String)
+
 <header class="page-header no-print">
         <div class="row">
             <div>
@@ -9,8 +10,10 @@
             </div>
             <a href="@routes.AdministrationDashboardController.dashboard()" class="right-buffer">Home</a>
             <a href="javascript: logOut()">Log Out</a>
-            <div class="bg-info">
-            @helpers.breadcrumbs.breadcrumbsGenerator(reference, session)
+            <div id="breadcrumbs" class="bg-info">
+                <script type="text/javascript">
+                    breadCrumbs('@pathDescription');
+                </script>
             </div>
         </div>
 </header>

@@ -20,7 +20,7 @@ object CourseManagementController extends Controller with Authentication {
         courses ← Courses.all()
         degrees ← Degrees.all()
       } yield {
-        Ok(views.html.courseManagement(degrees.toList, courses.toList, CourseForms.courseForm, session))
+        Ok(views.html.courseManagement(degrees.toList, courses.toList, CourseForms.courseForm))
       }
     }
   }
@@ -33,7 +33,7 @@ object CourseManagementController extends Controller with Authentication {
             courses ← Courses.all()
             degrees ← Degrees.all()
           } yield {
-            BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors, session))
+            BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors))
           }
         },
         course ⇒ {
@@ -63,7 +63,7 @@ object CourseManagementController extends Controller with Authentication {
             courses ← Courses.all()
             degrees ← Degrees.all()
           } yield {
-            BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors, session))
+            BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors))
           }
         },
         course ⇒ {

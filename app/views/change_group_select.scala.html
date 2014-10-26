@@ -1,0 +1,13 @@
+@(index: Int, student: Individual, group: Individual, groups: List[Individual])
+@import utils.semantic.Vocabulary._
+@import utils.semantic.{Individual, Resource, StringLiteral}
+<label>Gruppe:</label>
+    <select id="groupSwap@index">
+    @for(g <- groups) {
+        <option value="@g.uri.value">@g.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value (@g.props.getOrElse(LWM.hasMember, List(Resource(""))).size)</option>
+    }
+    </select>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+        <a href="javascript: swapGroups('@index', '@student.uri.value', '@group.uri.value')" class="btn btn-primary">Ändern</a>
+    </div>

@@ -30,8 +30,7 @@ object TimetableController extends Controller with Authentication {
           TimeSlots.slotTimeMap.values.toList.sorted,
           entries,
           rooms,
-          TimeTableForm.timetableForm,
-          session))
+          TimeTableForm.timetableForm))
       }
     }
   }
@@ -77,8 +76,7 @@ object TimetableController extends Controller with Authentication {
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   Individual(e.timetable).props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
-                  formWithErrors,
-                  session))
+                  formWithErrors))
               }
             },
             entry ⇒ {
@@ -133,8 +131,7 @@ object TimetableController extends Controller with Authentication {
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   ti.props.getOrElse(LWM.hasTimetableEntry, List(Resource(""))).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
-                  TimeTableForm.timetableForm,
-                  session))
+                  TimeTableForm.timetableForm))
               }
             },
             entry ⇒ {
@@ -145,7 +142,6 @@ object TimetableController extends Controller with Authentication {
                 ss.map(s ⇒ ei.remove(LWM.hasSupervisor, s))
                 rs.map(r ⇒ ei.remove(LWM.hasRoom, r))
               }
-              println(entry)
               ei.add(LWM.hasSupervisor, Resource(entry.supervisors))
               ei.add(LWM.hasRoom, Resource(entry.room))
 

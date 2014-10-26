@@ -17,7 +17,7 @@ object DegreeManagementController extends Controller with Authentication {
       for {
         degrees ← Degrees.all()
       } yield {
-        Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm, session))
+        Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm))
       }
     }
   }
@@ -29,7 +29,7 @@ object DegreeManagementController extends Controller with Authentication {
           for {
             degrees ← Degrees.all()
           } yield {
-            BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors, session))
+            BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors))
           }
         },
         degree ⇒ {
@@ -44,7 +44,7 @@ object DegreeManagementController extends Controller with Authentication {
       val id = (request.body \ "id").as[String]
       Degrees.delete(Resource(id)).flatMap { deleted ⇒
         Degrees.all().map { all ⇒
-          Ok(views.html.degreeManagement(all, DegreeForms.degreeForm, session))
+          Ok(views.html.degreeManagement(all, DegreeForms.degreeForm))
         }
       }
     }
@@ -58,7 +58,7 @@ object DegreeManagementController extends Controller with Authentication {
           for {
             degrees ← Degrees.all()
           } yield {
-            BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors, session))
+            BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors))
           }
         },
         degree ⇒ {

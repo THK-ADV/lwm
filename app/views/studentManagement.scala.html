@@ -1,4 +1,4 @@
-@(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(students: List[(Individual, String)], degrees: List[Individual], nrPages: Int, studentInput: Form[Student])(implicit request: RequestHeader)
 @import utils.semantic.Individual
 @import utils.semantic.Vocabulary
 @import utils.BreadCrumbKeeper.UrlReference
@@ -9,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference("Studenten", ""), session)
+            @header_loggedIn_admin("Studenten")
             </div>
             <div class="row">
                 @navigation_admin()

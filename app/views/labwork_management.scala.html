@@ -1,4 +1,4 @@
-@(semesters: List[Individual], labWorks: List[Individual], courses: List[Individual], form: Form[LabWorkFormModel], session: actors.SessionHandler.Session)(implicit request: RequestHeader)
+@(semesters: List[Individual], labWorks: List[Individual], courses: List[Individual], form: Form[LabWorkFormModel])(implicit request: RequestHeader)
 @import utils.semantic.Individual
 @import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
@@ -7,7 +7,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(UrlReference("Praktika", request.uri), session)
+            @header_loggedIn_admin("Praktika")
             </div>
             <div class="row">
                 @navigation_admin()

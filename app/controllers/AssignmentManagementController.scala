@@ -22,7 +22,7 @@ object AssignmentManagementController extends Controller with Authentication {
             assignments ← Assignments.all()
             courses ← Courses.all()
           } yield {
-            Ok(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm, session))
+            Ok(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm))
           }
       }
   }
@@ -31,7 +31,7 @@ object AssignmentManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         implicit request ⇒
-          Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm, session)))
+          Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm)))
       }
   }
 
@@ -45,7 +45,7 @@ object AssignmentManagementController extends Controller with Authentication {
                 assignments ← Assignments.all()
                 courses ← Courses.all()
               } yield {
-                BadRequest(views.html.assignmentManagement(assignments, courses, formWithErrors, session))
+                BadRequest(views.html.assignmentManagement(assignments, courses, formWithErrors))
               }
             },
             a ⇒
@@ -80,7 +80,7 @@ object AssignmentManagementController extends Controller with Authentication {
                 assignments ← Assignments.all()
                 courses ← Courses.all()
               } yield {
-                BadRequest(views.html.assignmentManagement(assignments, courses, formWithErrors, session))
+                BadRequest(views.html.assignmentManagement(assignments, courses, formWithErrors))
               }
             },
             a ⇒ {
@@ -120,7 +120,7 @@ object AssignmentManagementController extends Controller with Authentication {
                 assignments ← Assignments.all()
                 courses ← Courses.all()
               } yield {
-                BadRequest(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm, session))
+                BadRequest(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm))
               }
             },
             a ⇒ {
