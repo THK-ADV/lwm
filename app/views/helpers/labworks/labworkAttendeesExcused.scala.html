@@ -56,7 +56,7 @@
         lines =
                 s"""
              |<script>
-             |  initLocalState("$association", $attended, $passed);
+             |  initLocalState("${routes.SupervisionController.supervisionPost()}", "$association", $attended, $passed);
              |</script>
            """.stripMargin :: lines
     }

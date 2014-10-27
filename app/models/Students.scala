@@ -139,6 +139,9 @@ object Students {
     }
     mapping
   }
+
+  def missedDates(student: Resource) = ???
+  def passedDates(student: Resource) = ???
 }
 
 object StudentForms {

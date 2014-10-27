@@ -260,7 +260,7 @@ function postSupervisionChanges(url){
         "keys" : keys,
         "data" : temp
     };
-    ajaxRequest(url, "POST", "application/json",postData, reload);
+    ajaxRequest(url, "POST", "application/json",postData, {});
 }
 
 function ajaxRequest(url, type, cType, data, funct) {

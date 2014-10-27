@@ -17,6 +17,10 @@
             select * where {
               $group lwm:hasGroupId ?groupId .
               $group lwm:hasLabWork ?labwork .
+              $group lwm:hasScheduleAssociation ?scheduleAssociation .
+              ?scheduleAssociation lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
+              ?scheduleAssociation lwm:hasAssignmentAssociation ?assignmentAssociation .
+              ?assignmentAssociation lwm:hasOrderId ?orderId .
               ?labwork lwm:hasCourse ?course .
               ?course rdfs:label ?courseName .
               ?course lwm:hasDegree ?degree .
@@ -31,8 +35,9 @@
         val courseName = URLDecoder.decode(solution.getLiteral("courseName").getString, "UTF-8")
         val degreeName = URLDecoder.decode(solution.getLiteral("degreeName").getString, "UTF-8")
         val groupId = solution.getLiteral("groupId").getString
+        val orderId = solution.getLiteral("orderId").getString.toInt + 1
 
-        lines = s"<h3>Praktikum Gruppe $groupId <br /> $courseName <br /> $degreeName <br />${date.toString("dd.MM.yyyy")}</h3>" :: lines
+        lines = s"<h3>Praktikum $orderId, Gruppe $groupId <br /> $courseName <br /> $degreeName <br />${date.toString("dd.MM.yyyy")}</h3>" :: lines
     }
     Html(lines.mkString("\n"))
 }
