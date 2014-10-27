@@ -53,8 +53,6 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   import scala.concurrent.duration._
 
   var sessions: Map[Session, DateTime] = Map.empty
-  var userCount = 0
-  var studentCount = 0
 
   val DN = config.getString("lwm.bindDN").get
   val GDN = config.getString("lwm.groupDN").get
@@ -65,21 +63,26 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   context.system.scheduler.schedule(lifetime.minutes, lifetime.minutes, self, SessionHandler.SessionTick)
 
   def receive: Receive = {
-    case OnlineStudentCountRequest ⇒ sender() ! OnlineStudentCountChange(studentCount)
-    case OnlineUserCountRequest    ⇒ sender() ! OnlineUserCountChange(userCount)
+
+    case OnlineUserCountRequest ⇒
+      val users = sessions.keys.count(_.role.permissions.contains(Permissions.ScheduleAssociationModification))
+      sender() ! OnlineUserCountChange(users)
+
+    case OnlineStudentCountRequest ⇒
+      val users = sessions.keys.count(_.role.permissions.contains(Permissions.ScheduleAssociationModification))
+      val students = sessions.keys.size - users
+      sender() ! OnlineStudentCountChange(students)
 
     case SessionTick ⇒
-      sessions.filter { session ⇒
-        if (session._1.role.contains(Permissions.ScheduleAssociationModification)) {
-          userCount = userCount - 1
-        } else {
-          studentCount = studentCount - 1
-        }
-        new Period(DateTime.now(), session._2).getHours > lifetime
-      }
       sessions = sessions.filterNot { session ⇒
         new Period(DateTime.now(), session._2).getHours > lifetime
       }
+
+      val users = sessions.keys.count(_.role.permissions.contains(Permissions.ScheduleAssociationModification))
+      val students = sessions.keys.size - users
+
+      context.system.eventStream.publish(OnlineStudentCountChange(students))
+      context.system.eventStream.publish(OnlineUserCountChange(users))
 
     case AuthenticationRequest(user, password) ⇒
       val requester = sender()
@@ -88,8 +91,6 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
         val sessionFuture = createSessionID(user)
         sessionFuture map { session ⇒
           sessions += (session -> DateTime.now())
-          userCount = userCount + 1
-          context.system.eventStream.publish(OnlineUserCountChange(userCount))
           requester ! Right(session)
         }
       } else {
@@ -102,30 +103,23 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
             val sessionFuture = createSessionID(user)
             sessionFuture map { session ⇒
               sessions += (session -> DateTime.now())
-
-              if (session.role.contains(Permissions.ScheduleAssociationModification)) {
-                userCount = userCount + 1
-                context.system.eventStream.publish(OnlineUserCountChange(userCount))
-              } else {
-                studentCount = studentCount + 1
-                context.system.eventStream.publish(OnlineStudentCountChange(userCount))
-              }
-
               requester ! Right(session)
             }
         }
       }
+      val users = sessions.keys.count(_.role.permissions.contains(Permissions.ScheduleAssociationModification))
+      val students = sessions.keys.size - users
+
+      context.system.eventStream.publish(OnlineStudentCountChange(students))
+      context.system.eventStream.publish(OnlineUserCountChange(users))
+
     case LogoutRequest(sessionID) ⇒
-      sessions.filter(_._1.id == sessionID).map { session ⇒
-        if (session._1.role.contains(Permissions.ScheduleAssociationModification)) {
-          userCount = userCount - 1
-          context.system.eventStream.publish(OnlineUserCountChange(userCount))
-        } else {
-          studentCount = studentCount - 1
-          context.system.eventStream.publish(OnlineStudentCountChange(userCount))
-        }
-      }
       sessions = sessions.filterNot(_._1.id == sessionID)
+      val users = sessions.keys.count(_.role.permissions.contains(Permissions.ScheduleAssociationModification))
+      val students = sessions.keys.size - users
+
+      context.system.eventStream.publish(OnlineStudentCountChange(students))
+      context.system.eventStream.publish(OnlineUserCountChange(users))
 
     case SessionRequest(id) ⇒
       sessions.find(_._1.id == id) map { session ⇒
