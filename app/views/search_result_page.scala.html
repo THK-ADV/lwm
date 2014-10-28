@@ -28,7 +28,7 @@
                                 <th>Studiengang</th>
                             </tr>
                             <tr>
-                                <td>@student.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value</td>
+                                <td><a href="@routes.StudentInformationController.showInformation(student.uri.value)">@student.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value</a></td>
                                 <td>@student.props.getOrElse(Vocabulary.FOAF.lastName, List(StringLiteral(""))).head.value</td>
                                 <td>@student.props.getOrElse(Vocabulary.FOAF.firstName, List(StringLiteral(""))).head.value</td>
                                 <td>@Individual(student.props.getOrElse(Vocabulary.LWM.hasEnrollment, List(Resource(""))).head.asResource().get).props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
