@@ -49,7 +49,7 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒
-              Assignments.create(Assignment(a.id, a.description, a.text, a.goals, a.hints, a.topics.split(",").toList, a.courses)).map {
+              Assignments.create(Assignment(a.heading, a.description, a.text, a.goals, a.hints, a.topics.split(",").toList, a.courses)).map {
                 _ ⇒
                   Redirect(routes.AssignmentManagementController.index())
               }
@@ -84,23 +84,29 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒ {
-              val maybeId = i.props(RDFS.label)
-              val maybeDesc = i.props(LWM.hasDescription)
-              val maybeText = i.props(LWM.hasText)
-              val maybeTopics = i.props(LWM.hasTopic)
-              val maybeCourses = i.props(LWM.hasCourse)
+              val maybeId = i.props.get(RDFS.label)
+              val maybeDesc = i.props.get(LWM.hasDescription)
+              val maybeText = i.props.get(LWM.hasText)
+              val maybeGoals = i.props.get(LWM.hasLearningGoals)
+              val maybeHints = i.props.get(LWM.hasHints)
+              val maybeTopics = i.props.get(LWM.hasTopic)
+              val maybeCourses = i.props.get(LWM.hasCourse)
               for {
                 label ← maybeId
                 description ← maybeDesc
                 text ← maybeText
                 topics ← maybeTopics
                 courses ← maybeCourses
+                hints ← maybeHints
+                goals ← maybeGoals
               } yield {
-                i.update(RDFS.label, label, StringLiteral(a.id))
-                i.update(LWM.hasDescription, description, StringLiteral(a.description))
-                i.update(LWM.hasText, text, StringLiteral(a.text))
-                i.remove(LWM.hasTopic, topics)
-                if (a.courses.nonEmpty) i.remove(LWM.hasCourse, courses)
+                label.headOption.map(head ⇒ i.update(RDFS.label, head, StringLiteral(a.heading)))
+                description.headOption.map(head ⇒ i.update(LWM.hasDescription, head, StringLiteral(a.description)))
+                text.headOption.map(head ⇒ i.update(LWM.hasText, head, StringLiteral(a.text)))
+                hints.headOption.map(head ⇒ i.update(LWM.hasHints, head, StringLiteral(a.hints)))
+                goals.headOption.map(head ⇒ i.update(LWM.hasLearningGoals, head, StringLiteral(a.goals)))
+                topics.map(topic ⇒ i.remove(LWM.hasTopic, topic))
+                if (a.courses.nonEmpty) courses.map(course ⇒ i.remove(LWM.hasCourse, course))
               }
               a.topics.split(",").map(t ⇒ i.add(LWM.hasTopic, StringLiteral(t)))
               a.courses.map(c ⇒ i.add(LWM.hasCourse, Resource(c)))
