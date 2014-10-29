@@ -1,4 +1,4 @@
-@(lab: String, semester: String, order: String, description:Html, assignment: Html, hints: Html, goals: Html, topics: String)
+@(lab: String, semester: String, order: String, heading: Html,  description:Html, assignment: Html, hints: Html, goals: Html, topics: String)
 @import utils.semantic.{Individual, StringLiteral}
 @import utils.semantic.Vocabulary.{RDFS, LWM}
 <!DOCTYPE html>
@@ -28,7 +28,7 @@
             </div>
 
             <div class="row">
-                <h4 class="text-center"><b>@{order.toInt + 1}. Praktikum</b></h4>
+                <h4 class="text-center"><b>@{order.toInt + 1}. Praktikum: @heading</b></h4>
             </div>
 
             <div class="row">

@@ -378,7 +378,7 @@ object LabworkManagementController extends Controller with Authentication {
           val description = p.markdownToHtml(a.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
           val label = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
           val topics = a.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).head.value
-          Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html(description), Html(text), Html(hints), Html(goals), topics))
+          Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html(label), Html(description), Html(text), Html(hints), Html(goals), topics))
         }
     }
   }
