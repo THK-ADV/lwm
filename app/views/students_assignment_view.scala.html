@@ -1,6 +1,8 @@
 @(student: Individual, labwork: Individual, associations: List[Resource])
-    @import utils.semantic.{Resource, Individual, StringLiteral}
+@import utils.semantic.Vocabulary.RDF
+@import utils.semantic.{Resource, Individual, StringLiteral}
     @import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.Global._
 
 <!DOCTYPE html>
     <html>
@@ -18,13 +20,14 @@
                     @labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
                     </div>
                     <table class="table table-bordered">
-                        <tr><th>Aufgabe</th>
-                            <th>Link</th></tr>
+                        <tr>
+                            <th>Aufgabe</th>
+                        </tr>
                         @for((a, index) <- associations.zipWithIndex) {
-                            <tr><td>@{
-                                index + 1
-                            }</td>
-                                <td><a href="@routes.LabworkManagementController.exportAssignment(labwork.uri.value, a.value)" class="glyphicon glyphicon-export"></a></td>
+                            <tr>
+                                <td>
+                                    <a href="@routes.LabworkManagementController.exportAssignment(labwork.uri.value, a.value)">@{index + 1} Aufgabe: @Individual(a).props.getOrElse(RDFS.label, Nil).headOption.map(_.toString)  </a>
+                                </td>
                             </tr>
                         }
                     </table>

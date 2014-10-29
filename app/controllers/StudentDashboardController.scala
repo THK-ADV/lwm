@@ -110,9 +110,10 @@ object StudentDashboardController extends Controller {
           s"""
          |select ?s (${LWM.hasLabWork} as ?p) (<$labid> as ?o) where {
          | ?s ${RDF.typ} ${LWM.AssignmentAssociation} .
+         | ?s ${LWM.hasOrderId} ?orderId .
          | ?s ${LWM.hasLabWork} <$labid> .
          | ?s ${LWM.isVisibleToStudents} "true"
-         | }
+         | } order by asc(?orderId)
        """.stripMargin
 
         val assocFuture = sparqlExecutionContext.executeQuery(query).map { result ⇒
