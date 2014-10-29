@@ -233,7 +233,7 @@ function attendanceSwitch(association) {
         "type" : "attendance-change",
         "association" : association
     };
-
+    $( "#saveButton" ).show( "highlight", {}, 500, {});
     socket.send(JSON.stringify(data));
 }
 
@@ -245,6 +245,7 @@ function passedSwitch(association) {
         "type" : "passed-change",
         "association" : association
     };
+    $( "#saveButton" ).show( "highlight", {}, 500, {});
     socket.send(JSON.stringify(data));
 }
 
@@ -260,6 +261,10 @@ function postSupervisionChanges(url){
         "keys" : keys,
         "data" : temp
     };
+
+    $("#connectionWarning").hide();
+    $("#saveButton").hide();
+
     ajaxRequest(url, "POST", "application/json",postData, {});
 }
 
