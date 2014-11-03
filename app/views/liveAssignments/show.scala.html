@@ -1,0 +1,58 @@
+@(title: Html, description:Html, example: Html)
+
+<!DOCTYPE html>
+<html>
+    @head(s"Aufgabe $title")
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-6 col-md-4">
+                    <div class="pull-left">
+                        <img src="@routes.Assets.at("images/fh_logorechts.gif")"></div>
+                </div>
+                <div class="col-xs-6 col-md-4"></div>
+                <div class="col-xs-6 col-md-4">
+                    <div class="pull-right">
+                        <h4>Campus Gummersbach</h4>
+                        <h4>Institut fuer Informatik <br />Labor für ADV</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4 class="text-center"><b>@title</b></h4>
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Aufgabe:</b></h4>
+                @description
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+
+            <div class="row">
+                <br />
+            </div>
+
+            <div class="row">
+                <h4><b>Beispiel:</b></h4>
+                @example
+            </div>
+
+            <div class="row">
+                <br />
+            </div>
+
+        </div>
+    </body>
+</html>

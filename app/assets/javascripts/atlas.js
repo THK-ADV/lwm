@@ -56,6 +56,11 @@ function deleteBlacklistDate(listId, dateId) {
     ajaxRequest("/administration/blacklist/dates", "DELETE", "application/json", {listId: listId, dateId: dateId}, reload);
 }
 
+
+function deleteLiveAssignment(assignmentId) {
+    ajaxRequest("/administration/live", "DELETE", "application/json", {id: assignmentId}, reload);
+}
+
 function deleteBinding(labid, aid) {
     var l = encodeURIComponent(labid);
     var a = encodeURIComponent(aid);

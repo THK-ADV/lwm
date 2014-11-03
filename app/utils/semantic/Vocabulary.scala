@@ -96,6 +96,7 @@ object Vocabulary {
     val hasYear = property("hasYear")
 
     val Assignment = resource("Assignment")
+    val LiveAssignment = resource("LiveAssignment")
     val AssignmentSolution = resource("AssignmentSolution")
     val hasDescription = property("hasDescription")
     val hasText = property("hasText")

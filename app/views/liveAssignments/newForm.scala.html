@@ -1,0 +1,13 @@
+@(form: Form[LiveAssignmentFormModel])
+<div>
+    @helper.form(action = routes.LiveAssignmentManagementController.assignmentAddition()) {
+        @helper.inputText(form("title"), '_label -> "Überschrift:")
+        @helper.textarea(form("assignment"), 'rows -> 10, 'cols -> 60, '_label -> "Aufgabe (Plaintext oder Markdown)")
+        @helper.textarea(form("example"), 'rows -> 10, 'cols -> 60, '_label -> "Beispiel (Plaintext oder Markdown)")
+        @helper.inputText(form("topics"), '_label -> "Themen:")
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Hinzufügen</button>
+        </div>
+    }
+</div>

@@ -1,0 +1,18 @@
+@(existing: List[Individual])
+@import utils.semantic.Individual
+
+<div class="panel panel-default">
+    <div class="panel-heading">Liveaufgaben</div>
+
+    <table class="table">
+        <tr>
+            <th>Titel</th>
+            <th>Thema</th>
+            <th>Optionen</th>
+        </tr>
+        @for(assignment <- existing) {
+            @liveAssignments.helpers.listing_row(assignment)
+        }
+    </table>
+
+</div>

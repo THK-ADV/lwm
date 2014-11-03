@@ -56,6 +56,11 @@ POST          /administration/courses                                 controller
 DELETE        /administration/courses                                 controllers.CourseManagementController.courseRemoval()
 POST          /administration/courses/:id                             controllers.CourseManagementController.courseEdit(id)
 
+GET           /administration/live                                    controllers.LiveAssignmentManagementController.index()
+POST          /administration/live                                    controllers.LiveAssignmentManagementController.assignmentAddition()
+DELETE        /administration/live                                    controllers.LiveAssignmentManagementController.assignmentRemoval()
+GET           /administration/live/:id/show                           controllers.LiveAssignmentManagementController.show(id)
+
 GET           /administration/firstTimeSetupStudent                   controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser                      controllers.FirstTimeSetupController.setupUser()
 
