@@ -172,10 +172,10 @@ object GroupManagementController extends Controller with Authentication {
             val query =
               s"""
           select ?s ?p ?o where {
-          $entryWithSchedule ${LWM.hasScheduleAssociation} ?s .
-          ?s ${LWM.hasGroup} $group .
-          ?s ?p ?o .
-          filter(?p != ${RDF.typ} && ?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual} && ?p != ${LWM.hasPassed} && ?p != ${LWM.hasAttended})
+            $entryWithSchedule ${LWM.hasScheduleAssociation} ?s .
+            ?s ${LWM.hasGroup} $group .
+            ?s ?p ?o .
+            filter(?p != ${RDF.typ} && ?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual} && ?p != ${LWM.hasPassed} && ?p != ${LWM.hasAttended})
           }
           """.stripMargin
 
@@ -198,6 +198,7 @@ object GroupManagementController extends Controller with Authentication {
             builder.append("}")
             builder.toString()
           }
+
           for {
             deleteStage1 ← statementRemoval(studentIndividual.uri, oldGroupIndividual.uri)
             deleteStage2 ← deleteStage1

@@ -15,7 +15,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                   @for(i <- 0 until 7){
+                   @for(i <- -1 until 7){
                        @dashboard_admin_dates(today.plusDays(i))
                    }
                 </div>
