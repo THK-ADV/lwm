@@ -25,7 +25,7 @@ object LiveAssignments {
       Statement(courseResource, LWM.hasHints, StringLiteral(liveAssignment.example))
     )
 
-    val topicStatements = liveAssignment.topics.map(t ⇒ Statement(courseResource, LWM.hasTopic, StringLiteral(t)))
+    val topicStatements = liveAssignment.topics.map(t ⇒ Statement(courseResource, LWM.hasTopic, StringLiteral(t.toLowerCase.trim)))
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(topicStatements ::: statements: _*)).map(b ⇒ Individual(courseResource))
   }
@@ -34,6 +34,25 @@ object LiveAssignments {
     sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LiveAssignment)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(course ⇒ Individual(course.s)).toList
     }
+  }
+
+  def all(tag: String): Future[List[Individual]] = {
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.LiveAssignment, LWM.hasTopic, StringLiteral(tag))).map { stringResult ⇒
+      SPARQLTools.statementsFromString(stringResult).map(course ⇒ Individual(course.s)).toList
+    }
+  }
+
+  def tags(): Future[List[String]] = Future {
+    import utils.Implicits._
+
+    s"""
+         |select distinct ?topic where {
+         | ?live ${RDF.typ} ${LWM.LiveAssignment} .
+         | ?live ${LWM.hasTopic} ?topic
+         |} order by asc(?topic)
+       """.stripMargin.execSelect().map { solution ⇒
+      solution.data.get("topic").map(_.asLiteral().getString)
+    }.flatten
   }
 
   def delete(resource: Resource): Future[Resource] = {
@@ -55,8 +74,11 @@ object LiveAssignments {
       "topics" -> text
     )(LiveAssignmentFormModel.apply)(LiveAssignmentFormModel.unapply))
   }
+
 }
+
 case class LiveAssignment(title: String, assignment: String, example: String, topics: List[String])
+
 case class LiveAssignmentFormModel(title: String, assignment: String, example: String, topics: String)
 
 object Assignments {

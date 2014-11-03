@@ -60,6 +60,9 @@ GET           /administration/live                                    controller
 POST          /administration/live                                    controllers.LiveAssignmentManagementController.assignmentAddition()
 DELETE        /administration/live                                    controllers.LiveAssignmentManagementController.assignmentRemoval()
 GET           /administration/live/:id/show                           controllers.LiveAssignmentManagementController.show(id)
+GET           /administration/live/tag/:tag/random                    controllers.LiveAssignmentManagementController.showRandom(tag)
+GET           /administration/live/tag/:tag                           controllers.LiveAssignmentManagementController.tagIndex(tag)
+
 
 GET           /administration/firstTimeSetupStudent                   controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser                      controllers.FirstTimeSetupController.setupUser()
