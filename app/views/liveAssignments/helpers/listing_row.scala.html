@@ -7,7 +7,7 @@
 @import utils.Global._
 <tr>
     <td>@assignment.props.getOrElse(RDFS.label, List(StringLiteral(""))).map(_.toString)</td>
-    <td>@assignment.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).map(_.toString)</td>
+    <td>@assignment.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).map(t => s"${t.toString} ")</td>
     <td>
         <a href="@routes.LiveAssignmentManagementController.show(assignment.uri.value)" class="glyphicon glyphicon-open" ></a>
         <a href="javascript: if(confirmed()) deleteLiveAssignment('@assignment.uri.value')" class="glyphicon glyphicon-remove" ></a>
