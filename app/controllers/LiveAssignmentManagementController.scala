@@ -28,15 +28,6 @@ object LiveAssignmentManagementController extends Controller with Authentication
     session ⇒
       Action.async { implicit request ⇒
         LiveAssignments.all(tag).map { las ⇒
-          las.foreach{l =>
-            l.props.get(LWM.hasTopic).map{topics =>
-              topics.foreach{t =>
-                if(t.value.contains("+")){
-                  l.update(LWM.hasTopic, t, StringLiteral(t.toString.replaceAll("+", "").trim))
-                }
-              }
-            }
-          }
           Ok(views.html.liveAssignments.index(las, LiveAssignments.Forms.addForm))
         }
       }
@@ -78,7 +69,7 @@ object LiveAssignmentManagementController extends Controller with Authentication
 
   def show(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
-      Action.async { implicit request ⇒
+      Action { implicit request ⇒
         import utils.Global._
         val a = Individual(Resource(id))
         val p = new PegDownProcessor()
@@ -86,7 +77,7 @@ object LiveAssignmentManagementController extends Controller with Authentication
         val text = a.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.toString
         val title = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString
         val example = a.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.toString
-        Future.successful(Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example)))))
+        Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example))))
       }
   }
 

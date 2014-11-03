@@ -3,6 +3,7 @@ package models
 import java.net.URLDecoder
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
+import org.joda.time.LocalDate
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
@@ -140,8 +141,45 @@ object Students {
     mapping
   }
 
-  def missedDates(student: Resource) = ???
-  def passedDates(student: Resource) = ???
+  def dateCountMissed(student: Resource): Int = {
+    import utils.Implicits._
+    val q = s"""
+        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+
+        select (count(?attended) as ?count) where {
+          $student lwm:hasScheduleAssociation ?association .
+          ?association lwm:hasAssignmentDate ?date .
+          optional{?association lwm:hasAttended ?attended} .
+          optional{
+              ?association lwm:hasAlternateScheduleAssociation ?alternate .
+              ?alternate lwm:hasAssignmentDate ?alternateDate .
+            } .
+          filter(?date < "${LocalDate.now().plusDays(1).toString("yyyy-MM-dd")}")
+          filter(?attended = "false")
+          filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")
+        }
+     """.stripMargin
+
+    q.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
+  def dateCountNotPassed(student: Resource): Int = {
+    import utils.Implicits._
+    s"""
+        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+
+        select (count(?passed) as ?count) where {
+          $student lwm:hasScheduleAssociation ?association .
+          ?association lwm:hasAssignmentDate ?date .
+          optional{?association lwm:hasPassed ?passed} .
+          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
+          filter(?passed = "false")
+        }
+     """.stripMargin.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
 }
 
 object StudentForms {
