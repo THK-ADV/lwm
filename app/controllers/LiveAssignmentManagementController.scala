@@ -1,5 +1,7 @@
 package controllers
 
+import java.net.URLDecoder
+
 import models.{ LiveAssignment, LiveAssignments }
 import org.pegdown.PegDownProcessor
 import play.api.mvc.{ Action, Controller, Result }
@@ -26,6 +28,15 @@ object LiveAssignmentManagementController extends Controller with Authentication
     session ⇒
       Action.async { implicit request ⇒
         LiveAssignments.all(tag).map { las ⇒
+          las.foreach{l =>
+            l.props.get(LWM.hasTopic).map{topics =>
+              topics.foreach{t =>
+                if(t.value.contains("+")){
+                  l.update(LWM.hasTopic, t, StringLiteral(URLDecoder.decode(t.toString, "UTF-8").trim))
+                }
+              }
+            }
+          }
           Ok(views.html.liveAssignments.index(las, LiveAssignments.Forms.addForm))
         }
       }
