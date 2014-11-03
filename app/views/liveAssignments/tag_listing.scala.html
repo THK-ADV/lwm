@@ -1,0 +1,16 @@
+@(tags: List[String])
+
+<div class="panel panel-default">
+    <div class="panel-heading">Liveaufgaben</div>
+
+    <table class="table">
+        <tr>
+            <th>Thema</th>
+            <th>Optionen</th>
+        </tr>
+        @for(tag <- tags) {
+            @liveAssignments.helpers.tag_listing_row(tag)
+        }
+    </table>
+
+</div>
