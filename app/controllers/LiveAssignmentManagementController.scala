@@ -32,7 +32,7 @@ object LiveAssignmentManagementController extends Controller with Authentication
             l.props.get(LWM.hasTopic).map{topics =>
               topics.foreach{t =>
                 if(t.value.contains("+")){
-                  l.update(LWM.hasTopic, t, StringLiteral(URLDecoder.decode(t.toString, "UTF-8").trim))
+                  l.update(LWM.hasTopic, t, StringLiteral(t.toString.replaceAll("+", "").trim))
                 }
               }
             }
