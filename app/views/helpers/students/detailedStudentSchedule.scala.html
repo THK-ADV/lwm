@@ -60,11 +60,12 @@
            """.stripMargin
 
         val row =  if(solution.getLiteral("alternateGroupId") != null){
+            val alternateUri = URLDecoder.decode(solution.getResource("alternate").getURI, "UTF-8")
             val id = URLDecoder.decode(solution.getLiteral("alternateGroupId").getString, "UTF-8")
             val aDate = if(solution.getLiteral("alternateDate") == null) "" else solution.getLiteral("alternateDate").getString
             val aTime = if(solution.getLiteral("alternateTime") == null) "" else URLDecoder.decode(solution.getLiteral("alternateTime").getString, "UTF-8")
 
-            s"""<tr><td>$date, $time Uhr</td><td>$aDate $aTime Uhr, Gruppe $id</td> <td>$room</td> <td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
+            s"""<tr><td>$date, $time Uhr</td><td>$aDate $aTime Uhr, Gruppe $id  <a href='javascript: removeAlternateDate("${student.value}", "$alternateUri")' class='glyphicon glyphicon-remove'></a></td> <td>$room</td> <td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
         }else{
             s"""<tr><td>$date, $time Uhr</td><td></td><td>$room</td><td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
         }

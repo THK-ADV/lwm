@@ -1,0 +1,20 @@
+@(student: Resource, labwork: Resource)
+@import utils.semantic.Resource
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.Global._
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+@import java.net.URLDecoder
+@{ val query =
+    s"""
+         |select ?group ?id where {
+         | $student ${LWM.memberOf} ?group .
+         | ?group ${LWM.hasLabWork} $labwork .
+         | ?group ${LWM.hasGroupId} ?id
+         |}
+       """.stripMargin
+
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect().nextSolution()
+    if(result.getResource("group") == null || result.getLiteral("id") == null) "" else Html(s"<a href='${routes.GroupManagementController.index(labwork.value, URLDecoder.decode(result.getResource("group").getURI, "UTF-8"))}>'<strong> - Gruppe ${URLDecoder.decode(result.getLiteral("id").getString, "UTF-8")}</strong></a>")
+
+
+}

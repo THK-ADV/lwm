@@ -131,6 +131,7 @@ DELETE        /students/labworkApplications                           controller
 
 GET           /students/overview/:id                                  controllers.StudentInformationController.showInformation(id)
 POST          /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
+DELETE        /students/overview/:id                                  controllers.StudentInformationController.removeAlternateDate(id)
 
 POST          /breadcrumbs                                            controllers.Application.refreshCrumbs()
 POST          /currentUser                                            controllers.Application.currentUser()

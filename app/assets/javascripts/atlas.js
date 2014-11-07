@@ -145,6 +145,11 @@ function swapGroups(index, student, oldGroup) {
     var newGroup = $("#groupSwap"+index).val();
     ajaxRequest("/administration/groups/swap", "POST", "application/json", {student: student, old: oldGroup, new: newGroup}, reload);
 }
+
+function removeAlternateDate(student, schedule) {
+    ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student}, reload);
+}
+
 var timer = 5;
 
 var socket;
