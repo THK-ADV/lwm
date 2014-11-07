@@ -15,7 +15,17 @@
                     <td>@fn.value</td>
 
                     <td>@m.value</td>
-                    <td>0</td>
+                    @defining(Students.dateCountAlternate(s.uri, group.uri)){alternate =>
+                        @if(alternate == 2) {
+                            <td class="bg-warning">@alternate</td>
+                        }else {
+                            @if(alternate > 2){
+                                <td class="bg-danger">@alternate</td>
+                            }else{
+                                <td>@alternate</td>
+                            }
+                        }
+                    }
                     @defining(Students.dateCountMissed(s.uri, group.uri)){missed =>
                         @if(missed == 1) {
                             <td class="bg-warning">@missed</td>

@@ -165,6 +165,7 @@ object Students {
       solution.data.get("count").map(_.asLiteral().getInt)
     }.flatten.getOrElse(0)
   }
+
   def dateCountNotPassed(student: Resource, group: Resource): Int = {
     import utils.Implicits._
     s"""
@@ -182,6 +183,24 @@ object Students {
       solution.data.get("count").map(_.asLiteral().getInt)
     }.flatten.getOrElse(0)
   }
+
+  def dateCountAlternate(student: Resource, group: Resource): Int = {
+    import utils.Implicits._
+    s"""
+        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+
+        select (count(?alternate) as ?count) where {
+          $student lwm:hasScheduleAssociation ?association .
+          ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          ?association lwm:hasGroup $group .
+          ?association lwm:hasAssignmentDate ?date .
+          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
+        }
+     """.stripMargin.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
+
 }
 
 object StudentForms {
