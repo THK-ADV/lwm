@@ -28,10 +28,10 @@ object LiveAssignmentManagementController extends Controller with Authentication
     session ⇒
       Action.async { implicit request ⇒
         LiveAssignments.all(tag).map { las ⇒
-          las.foreach{l =>
-            l.props.get(LWM.hasTopic).map{topics =>
-              topics.foreach{t =>
-                if(t.value.contains("+")){
+          las.foreach { l ⇒
+            l.props.get(LWM.hasTopic).map { topics ⇒
+              topics.foreach { t ⇒
+                if (t.value.contains("+")) {
                   l.update(LWM.hasTopic, t, StringLiteral(t.toString.replaceAll("+", "").trim))
                 }
               }
