@@ -6,7 +6,7 @@
     <div class="panel-heading">Studenten</div>
     <div class="panel-body"><table class="table table-bordered">
         <tbody>
-            <tr><th>Kennung</th> <th>Nachname</th><th>Vorname</th>   <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehl</th><th>Nicht best.</th></tr>
+            <tr><th>Kennung</th> <th>Nachname</th><th>Vorname</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehl</th><th>Nicht best.</th></tr>
 
             @for((s, index) <- students.zipWithIndex; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
                 <tr>
@@ -16,7 +16,7 @@
 
                     <td>@m.value</td>
                     <td>0</td>
-                    @defining(Students.dateCountMissed(s.uri)){missed =>
+                    @defining(Students.dateCountMissed(s.uri, group.uri)){missed =>
                         @if(missed == 1) {
                             <td class="bg-warning">@missed</td>
                         }else {
@@ -28,7 +28,7 @@
                         }
                     }
 
-                    @defining(Students.dateCountNotPassed(s.uri)){notPassed =>
+                    @defining(Students.dateCountNotPassed(s.uri, group.uri)){notPassed =>
                         @if(notPassed == 1) {
                             <td class="bg-warning">@notPassed</td>
                         }else {
