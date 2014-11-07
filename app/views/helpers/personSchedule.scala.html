@@ -16,7 +16,7 @@
           ?group ${LWM.hasGroupId} ?groupId .
           ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
           ?assignmentAssociation ${LWM.hasAssignment} ?assignment .
-          ?assignment ${RDFS.label} ?assignmentLabel
+          ?assignment ${RDFS.label} ?assignmentLabel .
           ?assignmentAssociation ${LWM.hasLabWork} $labwork .
           ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
           ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
