@@ -93,7 +93,6 @@ object StudentInformationController extends Controller with Authentication {
           }).recover {
             case NonFatal(t) ⇒ Redirect(routes.StudentInformationController.showInformation(student.get))
           }
-          //Future.successful(Redirect(routes.StudentInformationController.showInformation(student.get)))
         } else {
           Future.successful(Redirect(routes.StudentInformationController.showInformation(student.get)))
         }

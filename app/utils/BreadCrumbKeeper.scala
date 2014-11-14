@@ -13,7 +13,7 @@ object BreadCrumbKeeper {
 class BreadCrumbKeeper {
 
   private lazy val breadcrumbs: ListBuffer[UrlReference] = ListBuffer[UrlReference]()
-  private lazy val builder = new StringBuilder
+  private lazy val builder = StringBuilder.newBuilder
   private val blacklist =
     List("/administration/substitutions",
       "/administration/students",
