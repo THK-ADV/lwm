@@ -88,7 +88,6 @@ object StudentDashboardController extends Controller {
         Ok(views.html.dashboard_student(Individual(student), (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }).recover {
         case NonFatal(t) ⇒
-          println(t)
           Ok(views.html.login(UserForms.loginForm)).withNewSession
       }
     }
