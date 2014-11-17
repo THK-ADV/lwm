@@ -1,0 +1,24 @@
+@(assignment: Individual, form: Form[LiveAssignmentFormModel])
+
+@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.{Individual, Resource, StringLiteral}
+
+@defining(form.fill(LiveAssignmentFormModel(assignment.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value,
+                    assignment.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value,
+                    assignment.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value,
+                    assignment.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).mkString(",")))) {f=>
+
+    @helper.form(action = routes.LiveAssignmentManagementController.assignmentEdit(
+        assignment.uri.value)) {
+        @helper.inputText(f("title"), '_label -> "Überschrift:")
+        @helper.textarea(f("assignment"), 'rows -> 10, 'cols -> 60, '_label -> "Aufgabe (Plaintext oder Markdown)")
+        @helper.textarea(f("example"), 'rows -> 10, 'cols -> 60, '_label -> "Beispiel (Plaintext oder Markdown)")
+        @helper.inputText(f("topics"), '_label -> "Themen:")
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button type="submit" class="btn btn-primary">Ändern</button>
+        </div>
+    }
+
+}

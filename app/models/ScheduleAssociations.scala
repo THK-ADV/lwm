@@ -235,7 +235,7 @@ object ScheduleAssociations {
       val altGroupId = solution.getLiteral("groupId").getString
       val altDate = solution.getLiteral("date").getString
       val altTime = URLDecoder.decode(solution.getLiteral("time").getString, "UTF-8")
-      val groupMembers = Individual(Resource(solution.getResource("group").getURI)).props.getOrElse(LWM.hasMember, List(StringLiteral("0")))
+      val groupMembers = Individual(Resource(solution.getResource("group").getURI)).props.getOrElse(LWM.hasMember, List(StringLiteral("")))
       alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId (${groupMembers.size})") :: alternates
     }
     alternates

@@ -1,11 +1,14 @@
-@(today: LocalDate)
+@(index: Int, today: LocalDate)
 @import org.joda.time.LocalDate
 @import utils.semantic._
 
     @defining(LabWorks.labworksForDate(today)){scheduleDates =>
         @if(scheduleDates.size > 0){
             <div class="row">
-                <div class="panel panel-default">
+                @if(index > 0 ) {
+                <div class="panel panel-default"> }else {
+                    <div class="panel panel-default panel-previous">
+                }
                     <div class="panel-heading">Termine am @helpers.dayOfWeekName(today.getDayOfWeek), den <strong>@today.toString("dd.MM.yyyy")</strong></div>
                     <div class="panel-body">
                         <div class="list-group">

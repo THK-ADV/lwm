@@ -14,7 +14,7 @@ DELETE        /administration/users                                   controller
 POST          /administration/users/:id                               controllers.UserManagement.userEdit(id)
 GET           /administration/users/socket                            controllers.SessionManagement.userCountSocket
 
-GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard()
+GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard(count: String)
 
 GET           /administration/students                                controllers.StudentsManagement.index()
 GET           /administration/students/page/:page                     controllers.StudentsManagement.pagedIndex(page)
@@ -62,7 +62,7 @@ DELETE        /administration/live                                    controller
 GET           /administration/live/:id/show                           controllers.LiveAssignmentManagementController.show(id)
 GET           /administration/live/tag/:tag/random                    controllers.LiveAssignmentManagementController.showRandom(tag)
 GET           /administration/live/tag/:tag                           controllers.LiveAssignmentManagementController.tagIndex(tag)
-
+POST          /administration/live/:id                                controllers.LiveAssignmentManagementController.assignmentEdit(id)
 
 GET           /administration/firstTimeSetupStudent                   controllers.FirstTimeSetupController.setupStudent()
 GET           /administration/firstTimeSetupUser                      controllers.FirstTimeSetupController.setupUser()

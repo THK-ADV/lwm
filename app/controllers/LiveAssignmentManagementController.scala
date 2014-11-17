@@ -9,7 +9,7 @@ import play.twirl.api.Html
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ StringLiteral, Individual, Resource }
-
+import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise }
 import scala.util.Random
@@ -96,5 +96,35 @@ object LiveAssignmentManagementController extends Controller with Authentication
         }
       }
   }
+  def assignmentEdit(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async { implicit request ⇒
+
+      LiveAssignments.Forms.addForm.bindFromRequest.fold(
+        formWithErrors ⇒ {
+          Future.successful(Redirect(routes.LiveAssignmentManagementController.index()))
+        },
+        liveAssignment ⇒ {
+          val ass = Individual(Resource(id))
+
+          val title = ass.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+          val text = ass.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value
+          val hints = ass.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value
+          val topics = ass.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).map {
+            topic ⇒
+              ass.remove(LWM.hasTopic, topic)
+          }
+
+          ass.update(RDFS.label, StringLiteral(title), StringLiteral(liveAssignment.title))
+          ass.update(LWM.hasText, StringLiteral(text), StringLiteral(liveAssignment.assignment))
+          ass.update(LWM.hasHints, StringLiteral(hints), StringLiteral(liveAssignment.example))
+          liveAssignment.topics.split(",").map { topic ⇒
+            ass.add(LWM.hasTopic, StringLiteral(topic.trim))
+          }
+          Future.successful(Redirect(routes.LiveAssignmentManagementController.index()))
+        }
+      )
+    }
+  }
+
 }
 

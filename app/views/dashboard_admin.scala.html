@@ -1,4 +1,4 @@
-@(today: LocalDate)(implicit request: RequestHeader)
+@(today: LocalDate, upperBound: Int)(implicit request: RequestHeader)
 @import utils.BreadCrumbKeeper.UrlReference
 @import org.joda.time.LocalDate
 @import org.joda.time.DateTime
@@ -15,9 +15,17 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                   @for(i <- -1 until 7){
-                       @dashboard_admin_dates(today.plusDays(i))
-                   }
+                    <h4 class="text-center">
+                        <a class="glyphicon glyphicon-arrow-up" href="@routes.AdministrationDashboardController.dashboard(s"${upperBound - 1}")"></a>
+                    </h4>
+
+                    @for(i <- -1 until upperBound){
+                       @dashboard_admin_dates(i, today.plusDays(i))
+                    }
+
+                    <h4 class="text-center">
+                        <a class="glyphicon glyphicon-arrow-down" href="@routes.AdministrationDashboardController.dashboard(s"${upperBound + 1}")"></a>
+                    </h4>
                 </div>
             </div>
                 <div class="row">@footerAdmin()</div>
