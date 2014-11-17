@@ -187,7 +187,7 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
     val breadcrumbs = new utils.BreadCrumbKeeper
 
     if (Play.isDev) {
-      Future.successful(Session(sessionID, user, Permissions.AdminRole, breadcrumbs))
+      Future.successful(Session(sessionID, user, Permissions.DefaultRole, breadcrumbs))
     } else {
       getRoles(user) map { role ⇒
         Session(sessionID, user, role, breadcrumbs)

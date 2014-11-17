@@ -1,0 +1,19 @@
+@(labwork: Resource)
+@{
+    import utils.Implicits._
+    import utils.Global._
+    s"""
+        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+        prefix foaf: <http://xmlns.com/foaf/0.1/>
+        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        select ?name where{
+          $labwork lwm:hasCourse ?course .
+          ?course lwm:hasDegree ?degree .
+          ?degree rdfs:label ?name
+        }
+    """.stripMargin.execSelect().headOption.fold(""){head =>
+        head.data("name").asLiteral().getString
+    }
+}

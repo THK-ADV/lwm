@@ -12,7 +12,11 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-md-10">
-                        @a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString, Gruppe @group
+                        <div class="row">
+                            <div class="col-md-4">@a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</div>
+                            <div class="col-md-2">Gruppe @group</div>
+                            <div class="col-md-6">@helpers.labworks.labworkDegree(a._1.uri)</div>
+                        </div>
                     </div>
                     <div class="col-md-2 pull-right">
                         <a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="btn btn-primary">Aufgaben</a>
