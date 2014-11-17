@@ -150,6 +150,7 @@ function removeAlternateDate(student, schedule) {
     ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student}, reload);
 }
 
+
 var timer = 5;
 
 var socket;

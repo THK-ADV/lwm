@@ -27,7 +27,8 @@
             </div>
             <div class="row">
                 @navigation_admin()
-                <div class="col-md-9">
+                <div class="col-md-9">ven11
+
                     <h2>Übersicht für @helpers.students.studentName(student)</h2>
                     @Students.labworksForStudent(student).map{labwork =>
                         <h3><a href="@routes.LabworkManagementController.edit(labwork._1.value)">@helpers.labworks.labworkName(labwork._1)</a>
