@@ -20,7 +20,7 @@
                     </h4>
 
                     @for(i <- -1 until upperBound){
-                       @dashboard_admin_dates(today.plusDays(i))
+                       @dashboard_admin_dates(i, today.plusDays(i))
                     }
 
                     <h4 class="text-center">
