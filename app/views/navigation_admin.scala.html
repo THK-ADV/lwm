@@ -21,6 +21,8 @@
         </ul>
     </nav>
     <script>
-        createUserCountSocket("@routes.SessionManagement.userCountSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+        $(document).ready(function() {
+            createUserCountSocket("@routes.SessionManagement.userCountSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+        });
     </script>
 </div>
