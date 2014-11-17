@@ -1,19 +1,19 @@
 @(pathDescription: String)
 
 <header class="page-header no-print">
-        <div class="row">
-            <div>
-                <label>User:</label> <span id="userData"></span>
-                <script type="text/javascript">
-                currentUser ( ) ;
-                </script>
-            </div>
-            <a href="@routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max)" class="right-buffer">Home</a>
-            <a href="javascript: logOut()">Log Out</a>
-            <div id="breadcrumbs" class="bg-info">
-                <script type="text/javascript">
-                    breadCrumbs('@pathDescription');
-                </script>
-            </div>
+    <div class="row">
+        <div>
+            <label>User:</label> <span id="userData"></span>
+            <script type="text/javascript">
+            currentUser ( ) ;
+            </script>
         </div>
+        <a href="@routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max)" class="right-buffer">Home</a>
+        <a href="javascript: logOut()">Log Out</a>
+        <div id="breadcrumbs" class="bg-info">
+            <script type="text/javascript">
+            breadCrumbs ( ' @pathDescription ');
+            </script>
+        </div>
+    </div>
 </header>
