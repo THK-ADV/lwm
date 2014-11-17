@@ -35,12 +35,12 @@ object UserManagement extends Controller with Authentication {
 
           Users.exists(session.user).map { exists ⇒
             if (exists) {
-              promise.success(Redirect(routes.AdministrationDashboardController.dashboard("7")))
+              promise.success(Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max)))
             } else {
               if (user.id != session.user) {
                 promise.success(Redirect(routes.FirstTimeSetupController.setupUser()))
               } else {
-                Users.create(user).map(_ ⇒ promise.success(Redirect(routes.AdministrationDashboardController.dashboard("7"))))
+                Users.create(user).map(_ ⇒ promise.success(Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max))))
               }
             }
           }.recover {

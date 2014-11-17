@@ -32,7 +32,7 @@ object Application extends Controller with Authentication {
     Action { implicit request ⇒
       session.role match {
         case Permissions.AdminRole ⇒
-          Redirect(routes.AdministrationDashboardController.dashboard("7"))
+          Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max))
         case Permissions.DefaultRole ⇒
           println("routing to dashboard")
           Redirect(routes.StudentDashboardController.dashboard())

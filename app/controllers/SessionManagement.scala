@@ -55,7 +55,7 @@ object SessionManagement extends Controller {
                     "session" -> session.id
                   )
                 } else {
-                  Redirect(routes.AdministrationDashboardController.dashboard("7")).withSession(
+                  Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max)).withSession(
                     Security.username -> login.user,
                     "session" -> session.id
                   )

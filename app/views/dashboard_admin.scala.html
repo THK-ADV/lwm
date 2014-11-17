@@ -1,4 +1,4 @@
-@(today: LocalDate, upperBound: Int)(implicit request: RequestHeader)
+@(today: LocalDate, lowerBound: Int, upperBound: Int)(implicit request: RequestHeader)
 @import utils.BreadCrumbKeeper.UrlReference
 @import org.joda.time.LocalDate
 @import org.joda.time.DateTime
@@ -16,15 +16,17 @@
                 @navigation_admin()
                 <div class="col-md-9">
                     <h4 class="text-center">
-                        <a class="glyphicon glyphicon-arrow-up" href="@routes.AdministrationDashboardController.dashboard(s"${upperBound - 1}")"></a>
+                        <a class="glyphicon glyphicon-arrow-up" href="@routes.AdministrationDashboardController.dashboard(s"${lowerBound - 1}", s"$upperBound")"></a>
+                        <a class="glyphicon glyphicon-arrow-down" href="@routes.AdministrationDashboardController.dashboard(s"${lowerBound + 1}", s"$upperBound")"></a>
                     </h4>
 
-                    @for(i <- -1 until upperBound){
+                    @for(i <- lowerBound until upperBound){
                        @dashboard_admin_dates(i, today.plusDays(i))
                     }
 
                     <h4 class="text-center">
-                        <a class="glyphicon glyphicon-arrow-down" href="@routes.AdministrationDashboardController.dashboard(s"${upperBound + 1}")"></a>
+                        <a class="glyphicon glyphicon-arrow-up" href="@routes.AdministrationDashboardController.dashboard(s"$lowerBound",s"${upperBound - 1}")"></a>
+                        <a class="glyphicon glyphicon-arrow-down" href="@routes.AdministrationDashboardController.dashboard(s"$lowerBound", s"${upperBound + 1}")"></a>
                     </h4>
                 </div>
             </div>

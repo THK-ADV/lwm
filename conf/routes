@@ -14,7 +14,7 @@ DELETE        /administration/users                                   controller
 POST          /administration/users/:id                               controllers.UserManagement.userEdit(id)
 GET           /administration/users/socket                            controllers.SessionManagement.userCountSocket
 
-GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard(count: String)
+GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard(lowerBound: String, upperBound: String)
 
 GET           /administration/students                                controllers.StudentsManagement.index()
 GET           /administration/students/page/:page                     controllers.StudentsManagement.pagedIndex(page)
