@@ -3,8 +3,6 @@ package utils
 import com.hp.hpl.jena.query.QueryExecutionFactory
 import com.hp.hpl.jena.rdf.model.RDFNode
 
-import scala.collection.JavaConverters
-
 case class QueryHost(host: String)
 
 case class QuerySolution(data: Map[String, RDFNode])

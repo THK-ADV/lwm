@@ -28,6 +28,7 @@ object SessionManagement extends Controller {
 
     val loginData = UserForms.loginForm.bindFromRequest.fold(
       formWithErrors ⇒ {
+        println(formWithErrors)
         None
       },
       login ⇒ {

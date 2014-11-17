@@ -141,7 +141,7 @@ object Students {
     mapping
   }
 
-  def dateCountMissed(student: Resource): Int = {
+  def dateCountMissed(student: Resource, group: Resource): Int = {
     import utils.Implicits._
     val q = s"""
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
@@ -149,6 +149,7 @@ object Students {
         select (count(?attended) as ?count) where {
           $student lwm:hasScheduleAssociation ?association .
           ?association lwm:hasAssignmentDate ?date .
+          ?association lwm:hasGroup $group .
           optional{?association lwm:hasAttended ?attended} .
           optional{
               ?association lwm:hasAlternateScheduleAssociation ?alternate .
@@ -164,13 +165,15 @@ object Students {
       solution.data.get("count").map(_.asLiteral().getInt)
     }.flatten.getOrElse(0)
   }
-  def dateCountNotPassed(student: Resource): Int = {
+
+  def dateCountNotPassed(student: Resource, group: Resource): Int = {
     import utils.Implicits._
     s"""
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
 
         select (count(?passed) as ?count) where {
           $student lwm:hasScheduleAssociation ?association .
+          ?association lwm:hasGroup $group .
           ?association lwm:hasAssignmentDate ?date .
           optional{?association lwm:hasPassed ?passed} .
           filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
@@ -180,6 +183,24 @@ object Students {
       solution.data.get("count").map(_.asLiteral().getInt)
     }.flatten.getOrElse(0)
   }
+
+  def dateCountAlternate(student: Resource, group: Resource): Int = {
+    import utils.Implicits._
+    s"""
+        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+
+        select (count(?alternate) as ?count) where {
+          $student lwm:hasScheduleAssociation ?association .
+          ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          ?association lwm:hasGroup $group .
+          ?association lwm:hasAssignmentDate ?date .
+          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
+        }
+     """.stripMargin.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
+
 }
 
 object StudentForms {
