@@ -154,22 +154,7 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
   private def getRoles(user: String): Future[Role] = {
 
     if (Play.isDev) {
-      val laborMemberFuture = isMemberOfGroup(user, "labor", bindHost, bindPort, GDN)
-      val r = for {
-        laborMember ← laborMemberFuture
-      } yield {
-        var role = Permissions.DefaultRole
-        laborMember match {
-          case Right(member) ⇒
-            if (member) role = Permissions.AdminRole
-          case Left(error) ⇒ role = Permissions.DefaultRole
-        }
-        role
-      }
-
-      r.recover {
-        case NonFatal(t) ⇒ Permissions.DefaultRole
-      }
+      Future.successful(Permissions.DefaultRole)
     } else {
       val laborMemberFuture = isMemberOfGroup(user, "advlabor", bindHost, bindPort, GDN)
       val hkMemberFuture = isMemberOfGroup(user, "advhk", bindHost, bindPort, GDN)
@@ -202,7 +187,7 @@ class SessionHandler(config: Configuration) extends Actor with ActorLogging {
     val breadcrumbs = new utils.BreadCrumbKeeper
 
     if (Play.isDev) {
-      Future.successful(Session(sessionID, user, Permissions.DefaultRole, breadcrumbs))
+      Future.successful(Session(sessionID, user, Permissions.AdminRole, breadcrumbs))
     } else {
       getRoles(user) map { role ⇒
         Session(sessionID, user, role, breadcrumbs)

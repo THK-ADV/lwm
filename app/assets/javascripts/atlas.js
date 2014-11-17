@@ -235,7 +235,7 @@ function initLocalState(association, attended, passed) {
     };
 }
 
-function attendanceSwitch(association) {
+function attendanceSwitch(association, id) {
     localState[association].attended = !localState[association].attended;
     dirty = true;
 
@@ -244,10 +244,17 @@ function attendanceSwitch(association) {
         "association" : association
     };
     $( "#saveButton" ).show( "highlight", {}, 500, {});
+
+    if(localState[association].attended){
+        $("#" + id).removeClass("text-danger").addClass("text-success");
+    }else{
+        $("#" + id).removeClass("text-success").addClass("text-danger");
+    }
+
     socket.send(JSON.stringify(data));
 }
 
-function passedSwitch(association) {
+function passedSwitch(association, id) {
     localState[association].passed = !localState[association].passed;
     dirty = true;
 
@@ -256,6 +263,12 @@ function passedSwitch(association) {
         "association" : association
     };
     $( "#saveButton" ).show( "highlight", {}, 500, {});
+
+    if(localState[association].passed){
+        $("#" + id).removeClass("glyphicon glyphicon-ban-circle text-danger").addClass("glyphicon glyphicon-ok text-success");
+    }else{
+        $("#" + id).removeClass("glyphicon glyphicon-ok text-success").addClass("glyphicon glyphicon-ban-circle text-danger");
+    }
     socket.send(JSON.stringify(data));
 }
 

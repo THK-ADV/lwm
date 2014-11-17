@@ -32,12 +32,14 @@
             ?alternate ${LWM.hasAssignmentDateTimetableEntry} ?alternateEntry .
             ?alternateEntry ${LWM.hasStartTime} ?alternateTime .
             ?alternateGroup ${LWM.hasGroupId} ?alternateGroupId .
+            ?alternateEntry ${LWM.hasRoom} ?alternateRoom .
+            ?alternateRoom ${LWM.hasRoomId} ?alternateRoomId
           }
          } order by asc(?id)
        """.stripMargin
 
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
-    var lines = Vector("<table class=\"table\"><tr><th>Datum</th><th>Ersatz</th><th>Raum</th><th>Anwesend</th><th>Bestanden</th><th>Optionen</th></tr>")
+    var lines = Vector("<table class=\"table\"><tr><th>Termin</th><th>Anwesend</th><th>Bestanden</th><th>Optionen</th></tr>")
     while(result.hasNext){
         val solution = result.next()
         val date = solution.getLiteral("assignmentDate").getString
@@ -63,11 +65,22 @@
             val alternateUri = URLDecoder.decode(solution.getResource("alternate").getURI, "UTF-8")
             val id = URLDecoder.decode(solution.getLiteral("alternateGroupId").getString, "UTF-8")
             val aDate = if(solution.getLiteral("alternateDate") == null) "" else solution.getLiteral("alternateDate").getString
+            val aRoom = if(solution.getLiteral("alternateRoomId") == null) "" else solution.getLiteral("alternateRoomId").getString
             val aTime = if(solution.getLiteral("alternateTime") == null) "" else URLDecoder.decode(solution.getLiteral("alternateTime").getString, "UTF-8")
 
-            s"""<tr><td>$date, $time Uhr</td><td>$aDate $aTime Uhr, Gruppe $id  <a href='javascript: removeAlternateDate("${student.value}", "$alternateUri")' class='glyphicon glyphicon-remove'></a></td> <td>$room</td> <td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
+            s"""<tr>
+               |<td><span class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoom</span><a href="javascript:removeAlternateDate('${student.value}','$alternateUri');" class="glyphicon glyphicon-remove"></a></td>
+               |<td><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></td>
+               |<td><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></td>
+               |<td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td>
+               |</tr>""".stripMargin
         }else{
-            s"""<tr><td>$date, $time Uhr</td><td></td><td>$room</td><td><input id="attendance-${scheduleRes.toString.hashCode}" onchange="attendanceSwitch('${scheduleRes.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" onchange="passedSwitch('${scheduleRes.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td><td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td></tr>"""
+            s"""<tr>
+               |<td><span class="text-success">$date, $time Uhr, Raum $room</span></td>
+               |<td><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></td>
+               |<td><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></td>
+               |<td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td>
+               |</tr>""".stripMargin
         }
 
 

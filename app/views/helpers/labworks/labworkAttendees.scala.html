@@ -37,9 +37,18 @@
         val firstName = URLDecoder.decode(solution.getLiteral("firstName").getString, "UTF-8")
         val lastName = URLDecoder.decode(solution.getLiteral("lastName").getString, "UTF-8")
         val association = solution.getResource("association")
+        val student = solution.getResource("student")
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
-        lines = s"""<tr><td>$lastName</td><td>$firstName</td><td>$gmId</td> <td><input id="attendance-${association.toString.hashCode}" onchange="attendanceSwitch('${association.toString}')" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${association.toString.hashCode}" onchange="passedSwitch('${association.toString}')"  type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td> </tr>""" :: lines
+        lines =
+          s"""
+             |<tr>
+             |<td><a href="${routes.StudentInformationController.showInformation(student.getURI)}">$lastName</a></td>
+             |<td>$firstName</td>
+             |<td>$gmId</td>
+             |<td><a href="javascript:attendanceSwitch('${association.toString}', 'attendance-${association.toString.hashCode}');"><span id="attendance-${association.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></td>
+             |<td><a href="javascript:passedSwitch('${association.toString}', 'passed-${association.toString.hashCode}');"><span id="passed-${association.toString.hashCode}"  class="${if(attended){if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}else{if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-minus text-muted"}}}"></td>
+             |</tr>""".stripMargin :: lines
         lines =
           s"""
              |<script>

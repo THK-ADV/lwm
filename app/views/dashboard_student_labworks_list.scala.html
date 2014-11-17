@@ -9,21 +9,21 @@
         @for(a <- labworks) {
             @a._2.map{group =>
         <div class="panel panel-default">
-            <div class="panel-heading">@a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString, Gruppe @group</div>
-            <table class="table">
-                <tr>
-                    <th>Termine</th>
-                    <th>Aufgaben</th>
-                </tr>
-                <tbody>
-                    <tr>
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-10">
+                        @a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString, Gruppe @group
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="btn btn-primary">Aufgaben</a>
+                    </div>
+                </div>
 
-                        <td>@helpers.personSchedule(individual.uri, a._1.uri)</td>
-                        <td><a href="@routes.StudentDashboardController.assignmentsPage(a._1.uri.value)" class="btn btn-primary">Aufgaben</a></td>
+            </div>
+            <div class="panel-body">
+                @helpers.personSchedule(individual.uri, a._1.uri)
+            </div>
 
-                    </tr>
-                </tbody>
-            </table>
         </div>
             }
         }

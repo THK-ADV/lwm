@@ -35,12 +35,14 @@
             ?alternate ${LWM.hasAssignmentDateTimetableEntry} ?alternateEntry .
             ?alternateEntry ${LWM.hasStartTime} ?alternateTime .
             ?alternateGroup ${LWM.hasGroupId} ?alternateGroupId .
+            ?alternateEntry ${LWM.hasRoom} ?alternateRoom .
+            ?alternateRoom ${LWM.hasRoomId} ?alternateRoomId
           }
          } order by asc(?id)
        """.stripMargin
 
         val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
-        var lines = Vector("<table class=\"table\"><tr><th>Thema</th><th>Datum</th><th>Ersatz</th><th>Raum</th><th>Anwesend</th><th>Bestanden</th></tr>")
+        var lines = Vector("<table class=\"table\"><tr><th>Thema</th><th>Termin</th><th>Anwesend</th><th>Bestanden</th></tr>")
         while(result.hasNext){
             val solution = result.next()
             val date = solution.getLiteral("assignmentDate").getString
@@ -54,6 +56,7 @@
             val assignmentLabel = URLDecoder.decode(solution.getLiteral("assignmentLabel").getString, "UTF-8")
 
 
+
             val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
             val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
 
@@ -61,10 +64,15 @@
                 val id = URLDecoder.decode(solution.getLiteral("alternateGroupId").getString, "UTF-8")
                 val aDate = if(solution.getLiteral("alternateDate") == null) "" else solution.getLiteral("alternateDate").getString
                 val aTime = if(solution.getLiteral("alternateTime") == null) "" else URLDecoder.decode(solution.getLiteral("alternateTime").getString, "UTF-8")
+                val aRoomId = URLDecoder.decode(solution.getLiteral("alternateRoomId").getString, "UTF-8")
 
-                s"""<tr><td>$assignmentLabel</td><td>$date, $time Uhr</td><td>$aDate $aTime Uhr, Gruppe $id</td> <td>$room</td> <td><input id="attendance-${scheduleRes.toString.hashCode}" type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td></tr>"""
+                s"""<tr>
+                   |<td>$assignmentLabel</td>
+                   |<td><span class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoomId</span></td>
+                   |<td><span id="attendance-${scheduleRes.toString.hashCode}"  class="${if(attended){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></td>
+                   |<td><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></tr>""".stripMargin
             }else{
-                s"""<tr><td>$assignmentLabel</td><td>$date, $time Uhr</td><td></td><td>$room</td><td><input id="attendance-${scheduleRes.toString.hashCode}"  type="checkbox" name="attending" value="attending" ${if(attended) "checked"}></td> <td><input id="passed-${scheduleRes.toString.hashCode}" type="checkbox" name="passed" value="passed" ${if(passed) "checked"}></td></tr>"""
+                s"""<tr><td>$assignmentLabel</td><td><span class="text-success">$date, $time Uhr, Raum $room</span> <br /></td><td><span id="attendance-${scheduleRes.toString.hashCode}"  class="${if(attended){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></td> <td><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></tr>"""
             }
 
             lines = lines :+ row
