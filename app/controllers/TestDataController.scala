@@ -140,7 +140,7 @@ object TestDataController extends Controller with Authentication {
             LabworkApplications.create(LabworkApplication(s6.uri, lw.uri, List(s6.uri)))
           }
 
-          Future.successful(Redirect(routes.StudentsManagement.index()))
+          Future.successful(Redirect(routes.StudentsManagement.index("1")))
       }
   }
 }

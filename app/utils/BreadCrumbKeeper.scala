@@ -30,6 +30,7 @@ class BreadCrumbKeeper {
       "/administration/assignments",
       "/administration/substitutions",
       "/administration/live",
+      "/superuser",
       "", "/")
 
   def add(reference: UrlReference): Unit = {

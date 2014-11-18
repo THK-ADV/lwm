@@ -1,0 +1,23 @@
+@(resource: Resource, statements: List[(Resource, Property, RDFNode)])(implicit header: RequestHeader)
+
+@import utils.semantic.{Resource, Property, RDFNode}
+<!DOCTYPE html>
+<html>
+    @head("Details")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin(s"Details: $resource")
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+
+                @helpers.sudo.distributeResourceList(statements)
+
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,29 @@
+@(typ: Resource, res: List[(Resource, RDFNode)])(implicit header: RequestHeader)
+
+@import utils.semantic.{Resource, Property, RDFNode}
+@import utils.BreadCrumbKeeper.UrlReference
+<!DOCTYPE html>
+<html>
+    @head(s"Overview: $typ")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin(s"$typ")
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    <table class="table table-bordered">
+                        <tr><th>Resource</th><th>Label</th></tr>
+                         <tbody>
+                        @for(r <- res) {
+                            <tr><td><a href="@routes.SuperUser.resourceDetails(typ.value, r._1.value)">@r._1</a></td> <td>@r._2</td></tr>
+                        }
+                         </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

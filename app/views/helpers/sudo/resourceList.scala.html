@@ -1,0 +1,28 @@
+@()
+@import utils.semantic.Vocabulary.{RDFS, RDF, LWM}
+@import utils.semantic.Resource
+@import utils.Global._
+@import utils.Implicits._
+
+ @{
+    val builder = StringBuilder.newBuilder
+    builder.append(
+      """
+        <table class="table table-bordered">
+        <tr> <th>Resource</th></tr>
+        </tbody>
+      """.stripMargin)
+    s"""
+      Select distinct ?o where {
+       ?s ${RDF.typ} ?o
+       filter regex(str(?o) ,"^((?!http://www.w3.org/2002/07/owl#).)*$$", "i")
+        }
+    """.stripMargin.execSelect().map {
+        solution =>
+
+            solution.data.get("o").map(e => builder.append(s"<tr><td><a href='${routes.SuperUser.resourceOverview(e.asResource().getURI)}'>$e</a></td></tr>"))
+        }
+        builder.append("</tbody> </table>")
+        Html(builder.toString())
+    }
+

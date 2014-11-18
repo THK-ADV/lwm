@@ -1,0 +1,24 @@
+@()(implicit header: RequestHeader)
+@import utils.semantic.Resource
+@import utils.semantic.Individual
+@import utils.BreadCrumbKeeper.UrlReference
+<!DOCTYPE html>
+<html>
+    @head("SuperUser")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin("SuperUser")
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+
+                    @helpers.sudo.resourceList()
+
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

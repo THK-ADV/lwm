@@ -16,8 +16,7 @@ GET           /administration/users/socket                            controller
 
 GET           /administration/dashboard                               controllers.AdministrationDashboardController.dashboard(lowerBound: String, upperBound: String)
 
-GET           /administration/students                                controllers.StudentsManagement.index()
-GET           /administration/students/page/:page                     controllers.StudentsManagement.pagedIndex(page)
+GET           /administration/students                                controllers.StudentsManagement.index(page: String)
 POST          /administration/students                                controllers.StudentsManagement.studentPost()
 DELETE        /administration/students                                controllers.StudentsManagement.studentRemoval()
 GET           /administration/students/suggest                        controllers.StudentsManagement.studentSuggestions()
@@ -132,6 +131,12 @@ DELETE        /students/labworkApplications                           controller
 GET           /students/overview/:id                                  controllers.StudentInformationController.showInformation(id)
 POST          /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
 DELETE        /students/overview/:id                                  controllers.StudentInformationController.removeAlternateDate(id)
+
+GET           /superuser                                              controllers.SuperUser.index()
+GET           /superuser/:id                                          controllers.SuperUser.resourceOverview(id)
+GET           /superuser/:typ/:id                                     controllers.SuperUser.resourceDetails(typ, id)
+DELETE        /superuser                                              controllers.SuperUser.removeStatement()
+
 
 POST          /breadcrumbs                                            controllers.Application.refreshCrumbs()
 POST          /currentUser                                            controllers.Application.currentUser()

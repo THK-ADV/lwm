@@ -1,0 +1,31 @@
+@(statements: List[(Resource, Property, RDFNode)])
+@import utils.semantic.{Resource, Property, RDFNode, Individual}
+@import utils.Global._
+
+    <table class="table table-bordered">
+
+        <tr><th>Resource</th><th>Property</th><th>RDFNode</th><th>Operation</th></tr>
+        <tbody>
+            @for(statement <- statements) {
+                <tr>
+                <td>
+                    @statement._1
+                </td>
+                <td>
+                    @statement._2
+                </td>
+                <td>
+                    @{
+                        if(statement._3.value.contains("http")) {
+                            views.html.helpers.sudo.getInnerResources(Individual(statement._3.asResource().get))
+                        }
+                        else statement._3
+                    }
+                </td>
+                <td>
+                    <a href="javascript: removeStatement('@statement._1.value','@statement._2.value','@statement._3.value')" class="glyphicon glyphicon-remove"></a>
+                </td>
+                </tr>
+            }
+        </tbody>
+    </table>

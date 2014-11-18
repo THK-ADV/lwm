@@ -14,13 +14,7 @@ object StudentsManagement extends Controller with Authentication {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { implicit request ⇒
-      Future.successful(Redirect(routes.StudentsManagement.pagedIndex("1")))
-    }
-  }
-
-  def pagedIndex(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def index(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       for {
         students ← Students.all()
@@ -29,7 +23,6 @@ object StudentsManagement extends Controller with Authentication {
         val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round + 1
-
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
       }
     }
@@ -81,7 +74,7 @@ object StudentsManagement extends Controller with Authentication {
           }
         },
         student ⇒ {
-          Students.create(student).map(_ ⇒ Redirect(routes.StudentsManagement.index()))
+          Students.create(student).map(_ ⇒ Redirect(routes.StudentsManagement.index("1")))
         }
       )
     }
@@ -107,7 +100,7 @@ object StudentsManagement extends Controller with Authentication {
           LabworkApplications.delete(application)
         })
       }.flatMap { hui ⇒
-        Students.delete(Resource(id)).map(_ ⇒ Redirect(routes.StudentsManagement.index()))
+        Students.delete(Resource(id)).map(_ ⇒ Redirect(routes.StudentsManagement.index("1")))
       }
     }
   }
@@ -169,7 +162,7 @@ object StudentsManagement extends Controller with Authentication {
             s.update(LWM.hasEnrollment, degree, Resource(student.degree))
             s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
           }
-          Future.successful(Redirect(routes.StudentsManagement.index()))
+          Future.successful(Redirect(routes.StudentsManagement.index("1")))
         }
       )
     }

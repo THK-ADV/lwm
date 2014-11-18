@@ -150,6 +150,9 @@ function removeAlternateDate(student, schedule) {
     ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student}, reload);
 }
 
+function removeStatement(resource, property, rdfnode) {
+    ajaxRequest("/superuser", "DELETE", "application/json", {resource: resource, property: property, node: rdfnode}, reload);
+}
 
 var timer = 5;
 

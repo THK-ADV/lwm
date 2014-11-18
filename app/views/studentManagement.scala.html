@@ -42,7 +42,7 @@
                 <div class="row">
                     Seite:
                     @for(n <- 1 until nrPages) {
-                        <a href="@routes.StudentsManagement.pagedIndex(n.toString)">@n</a>
+                        <a href="@routes.StudentsManagement.index(n.toString)">@n</a>
                     }
                 </div>
             </div>
