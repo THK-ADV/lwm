@@ -135,7 +135,8 @@ DELETE        /students/overview/:id                                  controller
 GET           /superuser                                              controllers.SuperUser.index()
 GET           /superuser/:id                                          controllers.SuperUser.resourceOverview(id)
 GET           /superuser/:typ/:id                                     controllers.SuperUser.resourceDetails(typ, id)
-DELETE        /superuser                                              controllers.SuperUser.removeStatement()
+POST          /superuser                                              controllers.SuperUser.statementUpdate()
+DELETE        /superuser                                              controllers.SuperUser.statementRemoval()
 
 
 POST          /breadcrumbs                                            controllers.Application.refreshCrumbs()

@@ -154,6 +154,36 @@ function removeStatement(resource, property, rdfnode) {
     ajaxRequest("/superuser", "DELETE", "application/json", {resource: resource, property: property, node: rdfnode}, reload);
 }
 
+function resourceFormCatcher(hash, url) {
+        var prevRes = $("#prevRes"+hash).val();
+        var prevProp = $("#prevProp"+hash).val();
+        var prevNode = $("#prevNode"+hash).val();
+        var nextRes = $("#nextRes"+hash).val();
+        var nextProp = $("#nextProp"+hash).val();
+        var nextNode = $("#nextNode"+hash).val();
+
+        nextRes = (prevRes != nextRes) ? nextRes : prevRes;
+        nextProp = (prevProp != nextProp) ? nextProp : prevProp;
+        nextNode = (prevNode != nextNode) ? nextNode : prevNode;
+
+        applyEdit("UPDATE "+nextProp+" WITH "+nextNode+" IN "+nextRes, url);
+}
+
+function superUserUpdate(hash, url) {
+
+    var obj = {
+        prevRes: $("#prevRes"+hash).val(),
+        prevProp: $("#prevProp"+hash).val(),
+        prevNode: $("#prevNode"+hash).val(),
+        nextRes:  $("#nextRes"+hash).val(),
+        nextProp: $("#nextProp"+hash).val(),
+        nextNode: $("#nextNode"+hash).val(),
+        url: url
+    };
+
+    ajaxRequest("/superuser", "POST", "application/json", obj, reload);
+}
+
 var timer = 5;
 
 var socket;

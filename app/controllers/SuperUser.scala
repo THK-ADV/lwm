@@ -54,7 +54,7 @@ object SuperUser extends Controller with Authentication {
     }
   }
 
-  def removeStatement() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def statementRemoval() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val r = (request.body \ "resource").asOpt[String]
       val p = (request.body \ "property").asOpt[String]
@@ -73,11 +73,40 @@ object SuperUser extends Controller with Authentication {
               |$resource $property $rdfnode
               |}
             """.stripMargin
-
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(routes.SuperUser.resourceOverview(r.get))).recover { case NonFatal(t) ⇒ Redirect(routes.SuperUser.index()) }
 
       } else {
         Future.successful(Ok(views.html.helpers.sudo.mainPage()))
+      }
+    }
+  }
+
+  def statementUpdate() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action.async(parse.json) { implicit request ⇒
+
+      val prevRes = (request.body \ "prevRes").asOpt[String]
+      val prevProp = (request.body \ "prevProp").asOpt[String]
+      val prevNode = (request.body \ "prevNode").asOpt[String]
+      val nextRes = (request.body \ "nextRes").asOpt[String]
+      val nextProp = (request.body \ "nextProp").asOpt[String]
+      val nextNode = (request.body \ "nextNode").asOpt[String]
+
+      val url = (request.body \ "url").asOpt[String]
+      if (prevRes.isDefined && prevProp.isDefined && prevNode.isDefined && nextRes.isDefined && nextProp.isDefined && nextNode.isDefined) {
+        val pn = if (prevNode.get.contains("http")) prevNode.get; else s"'${prevNode.get.split(" ").mkString("+")}'"
+        val nn = if (nextNode.get.contains("http")) nextNode.get; else s"'${nextNode.get.split(" ").mkString("+")}'"
+        val u =
+          s"""
+            Delete data {
+            ${prevRes.get} ${prevProp.get} $pn
+            };
+            Insert data {
+            ${nextRes.get} ${nextProp.get} $nn
+            }
+          """.stripMargin
+        sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(url.get)).recover { case NonFatal(t) ⇒ Redirect(url.get) }
+      } else {
+        Future.successful(Redirect(url.get))
       }
     }
   }

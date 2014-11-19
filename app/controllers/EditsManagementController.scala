@@ -6,7 +6,7 @@ import models._
 import org.joda.time.LocalDate
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ OWL, FOAF, RDF, LWM }
+import utils.semantic.Vocabulary._
 import utils.semantic._
 import utils.Global._
 import scala.collection.mutable
@@ -17,11 +17,11 @@ import Synchronize._
 
 /**
   * Syntax: Operations must be written in capital letters (for now)
-  * CREATE <object> HAVING <statements> WITH <values>
+  * CREATE <object> HAVING <properties> WITH <rdfnodes>
   * DELETE <object> HAVING <resource>
-  * INSERT <statements> WITH <values> IN <resource>
-  * REMOVE <statements> WITH <values> IN <resource>
-  * UPDATE <statements> WITH <values> IN <resource>
+  * INSERT <properties> WITH <rdfnodes> IN <resource>
+  * REMOVE <properties> WITH <rdfnodes> IN <resource>
+  * UPDATE <properties> WITH <rdfnodes> IN <resource>
   *
   * !- Statements, values and resources can directly be added through @{LWM.bla} -!
   * Some examples being:
@@ -182,17 +182,13 @@ object EditsManagementController extends Controller with Authentication {
     val i = Individual(Resource(c.identifier))
     val oldValueMap = mutable.Map[Property, RDFNode]()
     c.mappedValues.foreach { v ⇒
-      // TODO i.props.get, nicht props und try catch
-      try {
-        val list = i.props(v._1)
+
+      i.props.get(v._1).map { list ⇒
         for (all ← list) yield oldValueMap += v._1 -> all
 
         oldValueMap.foreach { o ⇒
           i.update(o._1, o._2, c.mappedValues.get(o._1).get)
         }
-      } catch {
-        case nse: NoSuchElementException ⇒ println("Non existent key")
-        case NonFatal(t)                 ⇒ println("Internal error")
       }
     }
     Future.successful(true)
@@ -255,6 +251,7 @@ case object Synchronize {
         case LWM.hasYear.value                         ⇒ newMap += LWM.hasYear -> StringLiteral(e._2.toString)
         case FOAF.firstName.value                      ⇒ newMap += FOAF.firstName -> StringLiteral(e._2.toString)
         case FOAF.lastName.value                       ⇒ newMap += FOAF.lastName -> StringLiteral(e._2.toString)
+        case RDFS.label.value                          ⇒ newMap += RDFS.label -> StringLiteral(e._2.toString)
         case deletion.value                            ⇒ newMap += deletion -> Resource(e._2.toString)
         case _: String                                 ⇒ println("False match")
       }
