@@ -6669,6 +6669,12 @@ button.close {
     }
 }
 
+@media print {
+    a[href]:after {
+        content: none !important;
+    }
+}
+
 .navbar-default .badge {
     background-color: #fff;
     color: #dd4814

@@ -137,7 +137,6 @@ function displayBreadCrumbs(data) {
 
 function breadCrumbs(label) {
     var path = window.location.pathname;
-    if(path.indexOf("/administration/students/page") > -1) path = "";
     ajaxRequest("/breadcrumbs", "POST", "application/json", {label: label, url: path}, displayBreadCrumbs);
 }
 

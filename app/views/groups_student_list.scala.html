@@ -8,7 +8,7 @@
         <tbody>
             <tr><th>Kennung</th> <th>Nachname</th><th>Vorname</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehl</th><th>Nicht best.</th></tr>
 
-            @for((s, index) <- students.zipWithIndex; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
+            @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
                 <tr>
                     <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)">@gm.value</a> </td>
                     <td>@ln.value</td>
@@ -51,10 +51,10 @@
 
                     }
 
-                    <td><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@index"></a></td>
+                    <td><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@s.hashCode()"></a></td>
                     <td><a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></td>
                 </tr>
-                <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="@s.hashCode()" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -63,7 +63,7 @@
                                 <h4 class="modal-title" id="myModalLabel">Gruppe ändern</h4>
                             </div>
                             <div class="modal-body">
-                            @change_group_select(index, s, group, groups)
+                            @change_group_select(s.hashCode(), s, group, groups)
                             </div>
 
                         </div>
