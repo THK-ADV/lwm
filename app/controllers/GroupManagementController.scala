@@ -5,7 +5,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic._
-import utils.semantic.Vocabulary.{ RDF, LWM, OWL }
+import utils.semantic.Vocabulary.{ RDFS, RDF, LWM, OWL }
 import utils.Global._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -144,70 +144,86 @@ object GroupManagementController extends Controller with Authentication {
         val newGroup = (request.body \ "new").asOpt[String]
         if (student.isDefined && oldGroup.isDefined && newGroup.isDefined) {
 
-          val studentIndividual = Individual(Resource(student.get))
-          val oldGroupIndividual = Individual(Resource(oldGroup.get))
-          val newGroupIndividual = Individual(Resource(newGroup.get))
+          def procure(id: Option[String]): String = {
+            Individual(Resource(id.get)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+          }
+          println(s"P: ${procure(student)} - ${student.get}\nO: ${procure(oldGroup)} - ${oldGroup.get}\nN: ${procure(newGroup)} - ${newGroup.get}")
 
-          def statementInsertion(entryWithSchedule: Resource, group: Resource) = {
-            val query =
+          def assData(entryWithSchedule: Resource) = {
+            val q =
               s"""
-          select distinct ?s ?p ?o where {
-          $group ${LWM.hasScheduleAssociation} ?newGroup .
-          $entryWithSchedule ${LWM.hasScheduleAssociation} ?s .
-          ?newGroup ${LWM.hasAssignmentAssociation} ?assoc .
-          ?s ${LWM.hasAssignmentAssociation} ?assoc .
-          ?newGroup ?p ?o .
-          filter(?p != ${RDF.typ} && ?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual})
-          }
-          """.stripMargin
+                 Select ?s ?p ?o where {
+                 $entryWithSchedule ${LWM.hasScheduleAssociation} ?schedule .
+                  ?schedule ${LWM.hasAssignmentAssociation} ?s .
+                  ?schedule ?p ?o
+                 filter(?p != ${RDF.typ} && ?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual})
+                 } order by asc(?s) asc(?p)
+               """.stripMargin
 
-            sparqlExecutionContext.executeQuery(query).map { result ⇒
-              val statements = SPARQLTools.statementsFromString(result).map(r ⇒ (r.s, r.p, r.o))
-              val update = buildQuery("insert", statements)
-              //println(s"Insert: \n$update")
-              sparqlExecutionContext.executeUpdate(update)
+            sparqlExecutionContext.executeQuery(q).map { result ⇒
+              SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p, e.o))
             }
           }
-          def statementRemoval(entryWithSchedule: Resource, group: Resource) = {
-            val query =
+          def scheduleLink(student: Resource, oldGroup: Resource) = {
+            val q = s"""
+                 Select ?s (${LWM.hasAssignmentAssociation} as ?p) ?o where {
+                 $student ${LWM.hasScheduleAssociation} ?s .
+                  ?s ${LWM.hasGroup} $oldGroup .
+                  ?s ${LWM.hasAssignmentAssociation} ?o
+                  } order by asc(?o)
+               """.stripMargin
+
+            sparqlExecutionContext.executeQuery(q).map { result ⇒
+              SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p, e.o))
+            }
+          }
+          def removeStatements(student: Resource, oldGroup: Resource) = {
+            val u =
               s"""
-          select ?s ?p ?o where {
-            $entryWithSchedule ${LWM.hasScheduleAssociation} ?s .
-            ?s ${LWM.hasGroup} $group .
-            ?s ?p ?o .
-            filter(?p != ${RDF.typ} && ?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual} && ?p != ${LWM.hasPassed} && ?p != ${LWM.hasAttended})
-          }
-          """.stripMargin
-
-            sparqlExecutionContext.executeQuery(query).map { result ⇒
-              val statements = SPARQLTools.statementsFromString(result).map(r ⇒ (r.s, r.p, r.o))
-              val update = buildQuery("delete", statements)
-              //println(s"Remove: \n$update")
-              sparqlExecutionContext.executeUpdate(update)
-            }
+                  Delete {
+                  ?s ?p ?o
+                  } where {
+                  $student ${LWM.hasScheduleAssociation} ?s .
+                  ?s ${LWM.hasGroup} $oldGroup .
+                  ?s ?p ?o
+                  filter(?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual} && ?p != ${RDF.typ} && ?p != ${LWM.hasPassed} && ?p != ${LWM.hasAttended})
+                  }
+                """.stripMargin
+            sparqlExecutionContext.executeUpdate(u)
           }
 
-          def buildQuery(op: String, map: Seq[(Resource, Property, RDFNode)]): String = {
-            val builder = new StringBuilder
-            if (op == "delete") builder.append("DELETE DATA { ") else builder.append("INSERT DATA { ")
-            map.foreach {
-              e ⇒
-                builder.append(s"${e._1} ${e._2} ${e._3.toQueryString} . ")
+          def insertStatements(fpiece: Seq[(Resource, Property, RDFNode)], spiece: Seq[(Resource, Property, RDFNode)]) = {
+            val builder = StringBuilder.newBuilder
+            builder.append("Insert data { ")
+            fpiece.map {
+              head ⇒
+                spiece.map {
+                  tail ⇒
+                    if (head._3.value == tail._1.value) {
+                      builder.append(s"${head._1} ${tail._2} ${if (tail._3.value.contains("http")) tail._3; else s"'${tail._3}'"} . ")
+                    }
+                }
             }
-            builder.deleteCharAt(builder.length - 2)
-            builder.append("}")
-            builder.toString()
+            val u = builder.dropRight(2).append("}").toString()
+
+            sparqlExecutionContext.executeUpdate(u)
           }
 
           for {
-            deleteStage1 ← statementRemoval(studentIndividual.uri, oldGroupIndividual.uri)
-            deleteStage2 ← deleteStage1
-            insertStage1 ← statementInsertion(studentIndividual.uri, newGroupIndividual.uri)
-            insertStage2 ← insertStage1
+            studentAssocs ← scheduleLink(Resource(student.get), Resource(oldGroup.get))
+            groupAssocs ← assData(Resource(newGroup.get))
+            removal ← removeStatements(Resource(student.get), Resource(oldGroup.get))
+            add ← insertStatements(studentAssocs, groupAssocs)
           } yield {
-            studentIndividual.update(LWM.memberOf, oldGroupIndividual.uri, newGroupIndividual.uri)
-            oldGroupIndividual.remove(LWM.hasMember, studentIndividual.uri)
-            newGroupIndividual.add(LWM.hasMember, studentIndividual.uri)
+
+            val studentIndividual = Individual(Resource(student.get))
+            val oldGroupIndividual = Individual(Resource(oldGroup.get))
+            val newGroupIndividual = Individual(Resource(newGroup.get))
+
+            studentIndividual.update(LWM.memberOf, Resource(oldGroup.get), Resource(newGroup.get))
+            oldGroupIndividual.remove(LWM.hasMember, Resource(student.get))
+            newGroupIndividual.add(LWM.hasMember, Resource(student.get))
+
             Redirect(routes.GroupManagementController.index(oldGroupIndividual.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value, oldGroupIndividual.uri.value))
           }
         } else {

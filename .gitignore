@@ -62,3 +62,6 @@ data
 #csv
 /csv
 *.csv
+
+#personal
+./personal
