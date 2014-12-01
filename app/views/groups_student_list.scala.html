@@ -51,8 +51,8 @@
 
                     }
 
-                    <td><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@s.hashCode()"></a></td>
-                    <td><a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></td>
+                    <td><h3><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@s.hashCode()"></a></h3></td>
+                    <td><h3><a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
                 </tr>
                 <div class="modal fade" id="@s.hashCode()" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -76,6 +76,6 @@
     </div>
     <div class="panel-footer">
         @student_autocomplete_field()
-        <a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a>
+        <h3><a class="glyphicon glyphicon-plus" href="javascript: addStudentToGroup('@labwork.uri.value','@group.uri.value')"></a></h3>
     </div>
 </div>

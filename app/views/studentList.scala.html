@@ -31,8 +31,8 @@
                     <td>@student.props.getOrElse(Vocabulary.FOAF.lastName, List(StringLiteral(""))).head.value</td>
                     <td>@student.props.getOrElse(Vocabulary.FOAF.firstName, List(StringLiteral(""))).head.value</td>
                     <td>@Individual(student.props.getOrElse(Vocabulary.LWM.hasEnrollment, List(Resource(""))).head.asResource.get).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
-                    <td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@index"></a></td>
-                    <td><a href="javascript: if(confirmed()) deleteStudent('@student.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                    <td><h3><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@index"></a></h3></td>
+                    <td><h3><a href="javascript: if(confirmed()) deleteStudent('@student.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
                 </tr>
 
                 <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

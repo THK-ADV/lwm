@@ -13,7 +13,7 @@
         @for(semester<- semesters) {
             <tr>
                 <td>@semester.props(RDFS.label)</td>
-                <td><a href="javascript: if(confirmed()) deleteSemester('@semester.uri.value')" class="glyphicon glyphicon-remove"></a></td></tr>
+                <td><h3><a href="javascript: if(confirmed()) deleteSemester('@semester.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td></tr>
         }
     </table>
 

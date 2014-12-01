@@ -3,7 +3,7 @@ package utils.semantic
 import java.net.{ URLDecoder, URLEncoder }
 import java.util.UUID
 import com.hp.hpl.jena.rdf.model.{ ResourceFactory, AnonId }
-import org.joda.time.{ LocalDate, DateTime }
+import org.joda.time.{ LocalDateTime, LocalDate, DateTime }
 import scala.xml.XML._
 
 object ResourceUtils {
@@ -50,7 +50,7 @@ case class Property(value: String) extends RDFNode {
 }
 
 trait Literal extends RDFNode {
-  val encoded: Boolean
+  def encoded: Boolean
   lazy val encodedString = if (encoded) value else URLEncoder.encode(value, "UTF-8")
   lazy val decodedString = if (encoded) URLDecoder.decode(value, "UTF-8") else value
 }
@@ -64,6 +64,16 @@ case class StringLiteral(value: String, encoded: Boolean = false) extends Litera
   override def asLiteral(): Option[Literal] = Some(this)
 
   override def toQueryString: String = if (value == null) s"""""""" else s""""$encodedString""""
+}
+
+case class DateTimeLiteral(time: LocalDateTime, encoded: Boolean = false) extends Literal {
+  override val value: String = time.toString("yyyy-MM-dd-hh:mm:ss")
+
+  override def asResource(): Option[Resource] = None
+
+  override def asLiteral(): Option[Literal] = Some(this)
+
+  override def toQueryString: String = if (value == null) s"""""""" else s""""$decodedString""""
 }
 
 case class DateLiteral(date: LocalDate, encoded: Boolean = false) extends Literal {

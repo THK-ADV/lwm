@@ -18,8 +18,8 @@
                 <td>@user.props.getOrElse(Vocabulary.LWM.hasGmId, List(StringLiteral(""))).head.value</td>
                 <td>@user.props.getOrElse(Vocabulary.FOAF.lastName, List(StringLiteral(""))).head.value</td>
                 <td>@user.props.getOrElse(Vocabulary.FOAF.firstName, List(StringLiteral(""))).head.value</td>
-                <td><a href="#" class="glyphicon glyphicon-pencil" data-target="#@index" data-toggle="modal"></a></td>
-                <td><a href="javascript: if(confirmed()) deleteUser('@user.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                <td><h3><a href="#" class="glyphicon glyphicon-pencil" data-target="#@index" data-toggle="modal"></a></h3></td>
+                <td><h3><a href="javascript: if(confirmed()) deleteUser('@user.uri.value')" class="glyphicon glyphicon-remove" ></a></h3></td>
             </tr>
 
             <div class="modal fade" id="@index" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
