@@ -14,13 +14,8 @@ object SearchController extends Controller with Authentication {
 
   def search(param: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      val parameter = {
-        if (param.contains("http")) param
-        else s"'${URLEncoder.encode(param, "UTF-8")}'"
-      }
-
       val regex = s"${URLEncoder.encode(param, "UTF-8")}".toCharArray.toList.map(e ⇒ s"[$e]").mkString("")
-      
+
       val futureFirstName = {
         val q = s"""
                 Select ?s (${RDFS.label} as ?p) ?o where {
