@@ -1,0 +1,35 @@
+@(result: Seq[(Resource, RDFNode)])(implicit request: RequestHeader)
+@import utils.BreadCrumbKeeper
+@import utils.semantic.Resource
+@import utils.semantic.RDFNode
+
+<!DOCTYPE html>
+<html>
+    @head("Search results")
+    <body>
+        <div class="container" id="everything">
+            <div class="container" id="everything">
+                <div class="row">
+                @header_loggedIn_admin(BreadCrumbKeeper.noStorageRef)
+                </div>
+                <div class="row">
+                    @navigation_admin()
+                    <div class="col-md-9">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Suchergebnisse</div>
+                            <table class="table">
+                                <tr><th>Eintrag</th></tr>
+                                <tbody>
+                                @for(elm <- result) {
+                                    <tr><td><a href="@routes.StudentInformationController.showInformation(elm._1.value)">@elm._2</a></td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">@footerAdmin()</div>
+            </div>
+    </body>
+</html>

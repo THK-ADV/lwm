@@ -138,7 +138,7 @@ GET           /superuser/:typ/:id                                     controller
 POST          /superuser                                              controllers.SuperUser.statementUpdate()
 DELETE        /superuser                                              controllers.SuperUser.statementRemoval()
 
-
+GET          /administration/search                                   controllers.SearchController.search(param: String)
 POST          /breadcrumbs                                            controllers.Application.refreshCrumbs()
 POST          /currentUser                                            controllers.Application.currentUser()
 # For test purposes only
