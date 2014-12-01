@@ -25,17 +25,17 @@
                                     @defining(Individual(maybeSolution.head.asResource().get)) { solution =>
                                         <tr>
                                             <td><a href="#" data-toggle="modal" data-target="#editAssignment">Aufgabe</a></td>
-                                            <td><a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
+                                            <td><h1><a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)" class="glyphicon glyphicon-export"></a></h1></td>
                                         </tr>
                                         <tr>
                                             <td><a href="#"data-toggle="modal" data-target="#editSolution">Musterlösung</a></td>
 
                                             @p.get(LWM.hasSolution).headOption match {
                                                 case Some(s) => {
-                                                    <td><a href="@routes.AssignmentManagementController.exportSolution(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
+                                                    <td><h1><a href="@routes.AssignmentManagementController.exportSolution(assignment.uri.value)" class="glyphicon glyphicon-export"></a></h1></td>
                                                 }
                                                 case None => {
-                                                    <td><a href="@routes.AssignmentManagementController.detailed(assignment.uri.value)" class="glyphicon glyphicon-export"></a></td>
+                                                    <td><h1><a href="@routes.AssignmentManagementController.detailed(assignment.uri.value)" class="glyphicon glyphicon-export"></a></h1></td>
                                                 }
                                             }
                                         </tr>

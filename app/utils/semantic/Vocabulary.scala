@@ -147,6 +147,16 @@ object Vocabulary {
     val hasAlternateScheduleAssociation = property("hasAlternateScheduleAssociation")
     val hasAttended = property("hasAttended")
     val hasPassed = property("hasPassed")
+
+    val Transaction = resource("Transaction")
+    val hasActor = property("hasActor")
+    val Action = resource("Action")
+    val CreateAction = resource("CreateAction")
+    val DeleteAction = resource("DeleteAction")
+    val ModifyAction = resource("ModifyAction")
+    val actionObject = property("actionObject")
+    val description = property("description")
+    val time = property("time")
   }
 
   /**

@@ -70,16 +70,16 @@
 
             s"""<tr>
                |<td><span class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoom</span><a href="javascript:removeAlternateDate('${student.value}','$alternateUri');" class="glyphicon glyphicon-remove"></a></td>
-               |<td><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></td>
-               |<td><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></td>
-               |<td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td>
+               |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
+               |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
+               |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
                |</tr>""".stripMargin
         }else{
             s"""<tr>
                |<td><span class="text-success">$date, $time Uhr, Raum $room</span></td>
-               |<td><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></td>
-               |<td><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></td>
-               |<td><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></td>
+               |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
+               |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
+               |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
                |</tr>""".stripMargin
         }
 

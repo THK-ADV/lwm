@@ -5,7 +5,7 @@
 
 
 
-<label>Aufgabe: <a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)" class="glyphicon glyphicon-export"></a></label>
+<label>Aufgabe: <a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)"><h3><span class="glyphicon glyphicon-export"></span></h3></a></label>
 @defining(form.fill(AssignmentSolutionFormModel(solution.props.getOrElse(LWM.hasFileName, List(StringLiteral(""))).head.value,
                                                 solution.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value))) { f =>
 

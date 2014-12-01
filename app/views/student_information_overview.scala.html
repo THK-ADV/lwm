@@ -29,7 +29,7 @@
                 @navigation_admin()
                 <div class="col-md-9">ven11
 
-                    <h2>Übersicht für @helpers.students.studentName(student)</h2>
+                    <h3>Übersicht für @helpers.students.studentName(student)</h3>
                     @Students.labworksForStudent(student).map{labwork =>
                         <h3><a href="@routes.LabworkManagementController.edit(labwork._1.value)">@helpers.labworks.labworkName(labwork._1)</a>
                             @helpers.students.groupForStudent(student, labwork._1)

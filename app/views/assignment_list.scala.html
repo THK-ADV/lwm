@@ -17,7 +17,7 @@
                 <td><a href="@routes.AssignmentManagementController.detailed(a.uri.value)">@a.props(Vocabulary.RDFS.label)</a></td>
                 <td>@a.props(Vocabulary.LWM.hasDescription)</td>
                 <td>@a.props(Vocabulary.LWM.hasTopic)</td>
-                <td><a href="javascript: if(confirmed()) deleteAssignment('@a.uri.value')" class="glyphicon glyphicon-remove"></a></td></tr>
+                <td><h1><a href="javascript: if(confirmed()) deleteAssignment('@a.uri.value')" class="glyphicon glyphicon-remove"></a></h1></td></tr>
         }
     </table>
 

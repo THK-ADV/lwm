@@ -15,8 +15,8 @@
         </tr>
         @for(blacklist <- blacklists) {
             <tr>
-                <td><a href="@routes.BlacklistManagementController.blacklistEdit(blacklist.uri.value)">@blacklist.props.get(LWM.hasSemester).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.head.asLiteral().map(_.decodedString)))) </a></td>
-                <td><a href="javascript: if(confirmed()) deleteBlacklist('@blacklist.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                <td><h3><a href="@routes.BlacklistManagementController.blacklistEdit(blacklist.uri.value)">@blacklist.props.get(LWM.hasSemester).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.head.asLiteral().map(_.decodedString)))) </a></h3></td>
+                <td><h3><a href="javascript: if(confirmed()) deleteBlacklist('@blacklist.uri.value')" class="glyphicon glyphicon-remove" ></a></h3></td>
             </tr>
         }
     </table>

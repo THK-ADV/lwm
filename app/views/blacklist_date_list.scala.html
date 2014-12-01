@@ -16,7 +16,7 @@
                     @dn.asLiteral().map { d =>
                         <tr>
                             <td>@d.decodedString</td>
-                            <td><a href="javascript: if(confirmed()) deleteBlacklistDate('@blacklist.uri.value', '@date.uri.value')" class="glyphicon glyphicon-remove" ></a></td>
+                            <td><h3><a href="javascript: if(confirmed()) deleteBlacklistDate('@blacklist.uri.value', '@date.uri.value')" class="glyphicon glyphicon-remove" ></a></h3></td>
                         </tr>
                     }
                 }

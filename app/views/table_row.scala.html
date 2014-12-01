@@ -21,8 +21,8 @@
                 <h6><b>Raum:</b> @Individual(Resource(e.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value</h6>
                 <h6><b>Endzeit:</b> @et.head.toString</h6>
 
-                <a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a>
-                <a href="javascript: if(confirmed()) deleteTableEntry('@e.uri.value', '@t.value','@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a><br />
+                <h3><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a></h3>
+                <h3><a href="javascript: if(confirmed()) deleteTableEntry('@e.uri.value', '@t.value','@labwork.uri.value')" class="glyphicon glyphicon-remove" ></a></h3><br />
 
             <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

@@ -69,10 +69,10 @@
                 s"""<tr>
                    |<td>$assignmentLabel</td>
                    |<td><span class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoomId</span></td>
-                   |<td><span id="attendance-${scheduleRes.toString.hashCode}"  class="${if(attended){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></td>
+                   |<td><h1><span id="attendance-${scheduleRes.toString.hashCode}"  class="${if(attended){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></h1></td>
                    |<td><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></tr>""".stripMargin
             }else{
-                s"""<tr><td>$assignmentLabel</td><td><span class="text-success">$date, $time Uhr, Raum $room</span> <br /></td><td><span id="attendance-${scheduleRes.toString.hashCode}"  class="${if(attended){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></td> <td><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></tr>"""
+                s"""<tr><td>$assignmentLabel</td><td><h1><span class="text-success">$date, $time Uhr, Raum $room</span> <br /></h1></td><td><h1><span id="attendance-${scheduleRes.toString.hashCode}"  class="${if(attended){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span><h1></td> <td><h1><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){ "glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-warning-sign text-danger"}}"></span></h1></td></tr>"""
             }
 
             lines = lines :+ row

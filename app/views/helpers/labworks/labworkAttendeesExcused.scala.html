@@ -64,8 +64,8 @@
              |<td>$firstName</td>
              |<td>$gmId</td>
              |<td><span class="text-success">$aDate $aTime Uhr, Gruppe $groupId, Raum $aRoom</span></td>
-             |<td><a href="javascript:attendanceSwitch('${association.toString}', 'attendance-${association.toString.hashCode}');"><span id="attendance-${association.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></td>
-             |<td><a href="javascript:passedSwitch('${association.toString}', 'passed-${association.toString.hashCode}');"><span id="passed-${association.toString.hashCode}"  class="${if(attended){if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}else{if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-minus text-muted"}}}"></td>
+             |<td><h1><a href="javascript:attendanceSwitch('${association.toString}', 'attendance-${association.toString.hashCode}');"><span id="attendance-${association.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
+             |<td><h1><a href="javascript:passedSwitch('${association.toString}', 'passed-${association.toString.hashCode}');"><span id="passed-${association.toString.hashCode}"  class="${if(attended){if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}else{if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-minus text-muted"}}}"></h1></td>
              |</tr>""".stripMargin :: lines
 
         lines =
