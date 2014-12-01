@@ -1,6 +1,5 @@
-@import utils.BreadCrumbKeeper
-
 @(today: LocalDate, lowerBound: Int, upperBound: Int)(implicit request: RequestHeader)
+@import utils.BreadCrumbKeeper
 @import utils.BreadCrumbKeeper.UrlReference
 @import org.joda.time.LocalDate
 @import org.joda.time.DateTime
@@ -17,7 +16,6 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @search.searchbar()
                     <h4 class="text-center">
                         <a class="glyphicon glyphicon-arrow-up" href="@routes.AdministrationDashboardController.dashboard(s"${lowerBound - 1}", s"$upperBound")"></a>
                         <a class="glyphicon glyphicon-arrow-down" href="@routes.AdministrationDashboardController.dashboard(s"${lowerBound + 1}", s"$upperBound")"></a>
