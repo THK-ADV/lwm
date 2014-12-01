@@ -41,7 +41,9 @@ object LDAPAuthentication {
           val bindResult = connection.bind(bindRequest)
           if (bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("invalid credentials")
         } catch {
-          case e: LDAPException ⇒ Left(e.getMessage)
+          case e: LDAPException ⇒
+            println(e)
+            Left(e.getMessage)
         } finally {
           connection.close()
         }
