@@ -1,5 +1,7 @@
 package controllers
 
+import java.net.URLEncoder
+
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic._
@@ -93,8 +95,8 @@ object SuperUser extends Controller with Authentication {
 
       val url = (request.body \ "url").asOpt[String]
       if (prevRes.isDefined && prevProp.isDefined && prevNode.isDefined && nextRes.isDefined && nextProp.isDefined && nextNode.isDefined) {
-        val pn = if (prevNode.get.contains("http")) prevNode.get; else s"'${prevNode.get.split(" ").mkString("+")}'"
-        val nn = if (nextNode.get.contains("http")) nextNode.get; else s"'${nextNode.get.split(" ").mkString("+")}'"
+        val pn = if (prevNode.get.contains("http")) prevNode.get; else s"'${URLEncoder.encode(prevNode.get, "UTF-8")}'"
+        val nn = if (nextNode.get.contains("http")) nextNode.get; else s"'${URLEncoder.encode(nextNode.get, "UTF-8")}'"
         val u =
           s"""
             Delete data {
@@ -104,7 +106,9 @@ object SuperUser extends Controller with Authentication {
             ${nextRes.get} ${nextProp.get} $nn
             }
           """.stripMargin
+
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(url.get)).recover { case NonFatal(t) ⇒ Redirect(url.get) }
+        Future.successful(Redirect(url.get))
       } else {
         Future.successful(Redirect(url.get))
       }
