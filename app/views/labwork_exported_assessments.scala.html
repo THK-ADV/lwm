@@ -1,0 +1,23 @@
+@(data: List[(Individual, Int, Int, Int)])(implicit header: RequestHeader)
+@import utils.semantic.{Individual, Resource, StringLiteral}
+@import utils.semantic.Vocabulary.{LWM,RDFS}
+@import utils.BreadCrumbKeeper
+
+<!DOCTYPE html>
+<html>
+    @head("Assessment Overview")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+            @header_loggedIn_admin(BreadCrumbKeeper.noStorageRef)
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                @labwork_exported_assessments_dist(data)
+                </div>
+            </div>
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+</html>

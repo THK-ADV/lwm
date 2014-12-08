@@ -19,6 +19,7 @@ object LabworkExportModes {
   val PublicSchedule = "publicSchedule"
   val PublicGroupMembersTable = "publicMembers"
   val InternalSchedule = "internalSchedule"
+  val AssessmentSchedule = "assessmentSchedule"
 }
 
 object LabWorkForms {

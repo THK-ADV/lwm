@@ -16,6 +16,7 @@ import scala.concurrent.Future
 import scala.reflect.io.Path
 import scala.util.control.NonFatal
 import java.io._
+import org.joda.time._
 
 /**
   * Created by rgiacinto on 20/08/14.
@@ -226,33 +227,56 @@ object LabworkManagementController extends Controller with Authentication {
   def export(labworkid: String, typ: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async {
       implicit request ⇒
-        val i = Individual(Resource(labworkid))
-        val groupQuery =
-          s"""
+        val labwork = Individual(Resource(labworkid))
+
+        def groupsFuture(labwork: Resource) = {
+          val q = s"""
           |select ?s (${LWM.hasGroupId} as ?p) ?o where {
           | <$labworkid> ${LWM.hasGroup} ?s .
           | ?s ${LWM.hasGroupId} ?o }
           | ORDER BY ASC(?o)
         """.stripMargin
 
-        val groupsFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.s)
+          sparqlExecutionContext.executeQuery(q).map { result ⇒
+            SPARQLTools.statementsFromString(result).map(_.s)
+          }
+        }
+
+        def assessmentsFuture(labwork: Resource) = {
+          val q = s"""
+        Select ?s ?p ?o where {
+        $labwork ${LWM.hasGroup} ?group .
+        ?group ${LWM.hasMember} ?s .
+        ?s ${LWM.hasScheduleAssociation} ?schedule .
+        ?schedule ${LWM.hasGroup} ?group .
+        ?group ${LWM.hasLabWork} $labwork .
+        ?schedule ${LWM.hasAssignmentDate} ?date .
+        ?schedule ?p ?o
+        filter(?date < '${DateTime.now().toLocalDate.toString}')
+        filter((?p = ${LWM.hasPassed} && ?o = "false") || (?p = ${LWM.hasAttended} && ?o = "false") || ?p = ${LWM.hasAlternateScheduleAssociation})
+        } order by asc(?s)
+        """.stripMargin
+          println(q)
+          sparqlExecutionContext.executeQuery(q).map { result ⇒
+            SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p))
+          }
         }
         (for {
-          groups ← groupsFuture
+          groups ← groupsFuture(labwork.uri)
+          assessments ← assessmentsFuture(labwork.uri)
         } yield {
           val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
+          val countedData = assessments.groupBy(_._1).map(e ⇒ (Individual(e._1), e._2.count(s ⇒ s._2 == LWM.hasAttended), e._2.count(s ⇒ s._2 == LWM.hasPassed), e._2.count(s ⇒ s._2 == LWM.hasAlternateScheduleAssociation))).toList
           typ match {
-            case LabworkExportModes.InternalSchedule        ⇒ Ok(views.html.labwork_exported_groups(i, groupsWithStudents.toList))
-            case LabworkExportModes.PublicGroupMembersTable ⇒ Ok(views.html.labwork_partial_exported_groups(i, groupsWithStudents.toList))
-            case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(Resource(labworkid)))
+            case LabworkExportModes.InternalSchedule        ⇒ Ok(views.html.labwork_exported_groups(labwork, groupsWithStudents.toList))
+            case LabworkExportModes.PublicGroupMembersTable ⇒ Ok(views.html.labwork_partial_exported_groups(labwork, groupsWithStudents.toList))
+            case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(labwork.uri))
+            case LabworkExportModes.AssessmentSchedule      ⇒ Ok(views.html.labwork_exported_assessments(countedData.sortBy(s ⇒ s._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)))
           }
-
         }).recover {
           case NonFatal(e) ⇒
             Redirect(routes.LabworkManagementController.edit(labworkid))
         }
-
     }
   }
 

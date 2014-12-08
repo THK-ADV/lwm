@@ -1,0 +1,19 @@
+@(data: List[(Individual, Int, Int, Int)])
+
+@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.{Individual, Resource, StringLiteral}
+
+
+<table class="table">
+    <tr> <th>Student</th> <th>Abwesendheiten</th> <th>Abnahmen</th> <th>Termine</th></tr>
+    <tbody>
+    @for(entry <- data) {
+        <tr @if((entry._2 > 1) || (entry._3 > 1) || (entry._4 > 1)) {class="alert-danger"}>
+            <td><a href="@routes.StudentInformationController.showInformation(entry._1.uri.value)">@entry._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</a></td>
+            <td>@entry._2</td>
+            <td>@entry._3</td>
+            <td>@entry._4</td>
+        </tr>
+        }
+    </tbody>
+</table>
