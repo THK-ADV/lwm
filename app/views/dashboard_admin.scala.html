@@ -1,4 +1,5 @@
 @(today: LocalDate, lowerBound: Int, upperBound: Int)(implicit request: RequestHeader)
+@import utils.BreadCrumbKeeper
 @import utils.BreadCrumbKeeper.UrlReference
 @import org.joda.time.LocalDate
 @import org.joda.time.DateTime
@@ -10,7 +11,7 @@
     <body>
         <div class="container" id="everything">
            <div class="row">
-            @header_loggedIn_admin("")
+            @header_loggedIn_admin(BreadCrumbKeeper.noStorageRef)
            </div>
             <div class="row">
                 @navigation_admin()

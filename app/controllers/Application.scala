@@ -9,6 +9,7 @@ import models.UserForms
 import play.api._
 import play.api.mvc._
 import play.libs.Akka
+import utils.BreadCrumbKeeper
 import utils.BreadCrumbKeeper.UrlReference
 import utils.Global._
 import utils.Security.Authentication
@@ -106,7 +107,7 @@ object Application extends Controller with Authentication {
     Action.async(parse.json) { implicit request ⇒
       val label = (request.body \ "label").asOpt[String]
       val url = (request.body \ "url").asOpt[String]
-      if (url.isDefined && label.isDefined) {
+      if (url.isDefined && label.isDefined && label.get.trim != BreadCrumbKeeper.noStorageRef) {
         session.breadcrumbKeeper.add(UrlReference(label.get, url.get))
       }
       Future.successful(Ok(session.breadcrumbKeeper.generate()))

@@ -8,9 +8,12 @@ object BreadCrumbKeeper {
 
   case class UrlReference(label: String, uri: String)
 
+  final val noStorageRef = "noStorage"
 }
 
 class BreadCrumbKeeper {
+
+  import BreadCrumbKeeper._
 
   private lazy val breadcrumbs: ListBuffer[UrlReference] = ListBuffer[UrlReference]()
   private lazy val builder = StringBuilder.newBuilder

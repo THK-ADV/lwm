@@ -153,6 +153,11 @@ function removeStatement(resource, property, rdfnode) {
     ajaxRequest("/superuser", "DELETE", "application/json", {resource: resource, property: property, node: rdfnode}, reload);
 }
 
+function completeSearch() {
+    var parameter = $("#completeSearch").val();
+    redirect({url: "/administration/search?param="+parameter});
+}
+
 function resourceFormCatcher(hash, url) {
         var prevRes = $("#prevRes"+hash).val();
         var prevProp = $("#prevProp"+hash).val();
