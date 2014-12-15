@@ -1,0 +1,48 @@
+@(transactions: List[QuerySolution])(implicit header: RequestHeader)
+@import utils.semantic.StringLiteral
+@import org.joda.time.format.DateTimeFormat
+@import utils.QuerySolution
+@import org.joda.time.LocalDateTime
+
+
+
+
+    <!DOCTYPE html>
+
+    <html>
+        @head("Veranstaltungsverwaltung")
+    <body>
+        <div class="container" id="everything">
+            <div class="row">
+                @header_loggedIn_admin("Veranstaltungen")
+            </div>
+            <div class="row">
+                @navigation_admin()
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Transaktionen</div>
+
+                        <table class="table">
+                            <tr>
+                                <th>Zeit</th>
+                                <th>Beschreibung</th>
+                            </tr>
+                            @for(transaction <- transactions) {
+                                @println(s"transaction: $transaction")
+                                <tr>
+                                    <td>@LocalDateTime.parse(transaction.data("time").asLiteral().getString, DateTimeFormat.forPattern("yyyy-MM-dd-hh:mm:ss")).toString("yyyy-MM-dd hh:mm:ss")</td>
+                                    <td>@{StringLiteral(transaction.data("description").asLiteral().getString, encoded = true).toString}<td>
+                                </tr>
+                            }
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">@footerAdmin()</div>
+        </div>
+    </body>
+    </html>

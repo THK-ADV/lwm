@@ -2,19 +2,22 @@ package controllers
 
 import models._
 import play.api.mvc.{ Action, Controller }
-import utils.ListGrouping
+import play.libs.Akka
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ FOAF, RDF, RDFS, LWM }
-import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
+import utils.semantic.Vocabulary.{ FOAF, LWM, RDF, RDFS }
+import utils.semantic.{ Individual, Resource, SPARQLTools, StringLiteral }
+import utils.{ ListGrouping, TransactionSupport }
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-object LabworkApplicationController extends Controller with Authentication {
+object LabworkApplicationController extends Controller with Authentication with TransactionSupport {
 
   import utils.Global._
 
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  override val system = Akka.system()
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
@@ -22,7 +25,6 @@ object LabworkApplicationController extends Controller with Authentication {
       val t = LabworkApplicationLists.all().flatMap { lists ⇒
         Future.sequence(getApplicationListInfo(lists))
       }
-
       for (info ← t) yield Ok(views.html.labwork_application_management(info))
     }
   }
@@ -111,6 +113,7 @@ object LabworkApplicationController extends Controller with Authentication {
                 partnerList.flatMap { list ⇒
                   val labworkApplication = LabworkApplication(applicantResource, Resource(s.labwork), list)
                   LabworkApplications.create(labworkApplication).map { l ⇒
+                    createTransaction(session.user, l.uri, s"Labwork Application ${l.uri} created by ${session.user}")
                     Redirect(routes.StudentDashboardController.dashboard())
                   }
                 }
@@ -155,7 +158,9 @@ object LabworkApplicationController extends Controller with Authentication {
       applicationsFuture.flatMap { applications ⇒
         val mapped = applications.map(e ⇒ (e, e.props.getOrElse(LWM.hasApplicant, List(Resource(""))).map(s ⇒ Individual(s.asResource().get)).head))
         val sorted = mapped.sortBy(_._2.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)
-        openLabs.map(a ⇒ Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, sorted)))
+        openLabs.map { a ⇒
+          Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, sorted))
+        }
       }.recover {
         case NonFatal(t) ⇒
           Redirect(routes.LabworkApplicationController.index())
@@ -218,7 +223,14 @@ object LabworkApplicationController extends Controller with Authentication {
             }
 
             (for (application ← applications(Resource(lab.get))) yield {
-              if (application.nonEmpty) LabworkApplications.delete(application.head).map(_ ⇒ Redirect(routes.StudentDashboardController.dashboard())).recover { case NonFatal(t) ⇒ routes.StudentDashboardController.dashboard() }
+              if (application.nonEmpty) {
+                LabworkApplications.delete(application.head).map { deleted ⇒
+                  deleteTransaction(session.user, deleted, s"Labwork Application removed by ${session.user}")
+                  Redirect(routes.StudentDashboardController.dashboard())
+                }.recover {
+                  case NonFatal(t) ⇒ routes.StudentDashboardController.dashboard()
+                }
+              }
             }).recover {
               case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard())
             }
@@ -295,6 +307,7 @@ object LabworkApplicationController extends Controller with Authentication {
         val listI = Individual(Resource(listId))
         val labwork = listI.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head
         LabworkApplications.create(LabworkApplication(Resource(student.get), labwork.asResource().get, Nil)).map { e ⇒
+          createTransaction(session.user, e.uri, s"Labwork Application created by ${session.user}")
           listI.add(LWM.hasApplication, e.uri)
           Redirect(routes.LabworkApplicationController.applicationListEdit(listId))
         }.recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.applicationListEdit(listId) }
@@ -302,4 +315,5 @@ object LabworkApplicationController extends Controller with Authentication {
       Future.successful(Redirect(routes.LabworkApplicationController.index()))
     }
   }
+
 }

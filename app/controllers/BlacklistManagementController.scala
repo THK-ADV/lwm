@@ -1,7 +1,10 @@
 package controllers
 
+import actors.TransactionsLoggerActor.Transaction
 import models._
-import org.joda.time.{ Days, Interval, LocalDate }
+import org.joda.time.{ LocalDateTime, Days, Interval, LocalDate }
+import play.api.Play
+import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Global._
 import utils.Security.Authentication
@@ -13,6 +16,8 @@ import scala.concurrent.Future
 object BlacklistManagementController extends Controller with Authentication {
 
   import scala.concurrent.ExecutionContext.Implicits.global
+  import Play.current
+  val system = Akka.system
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
@@ -62,6 +67,7 @@ object BlacklistManagementController extends Controller with Authentication {
         },
         blacklist ⇒ {
           Blacklists.create(Blacklist(Resource(blacklist.semesterResource))).map { i ⇒
+            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"New Backlist created by ${session.user}.")))
             Redirect(routes.BlacklistManagementController.index())
           }
         }
@@ -76,6 +82,7 @@ object BlacklistManagementController extends Controller with Authentication {
         for (dates ← BlacklistDates.getAll(Resource(id))) yield {
           dates.foreach(d ⇒ BlacklistDates.delete(d.uri))
           Blacklists.delete(Resource(id))
+          system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), DeleteAction(Resource(id), s"Backlist deleted by ${session.user}.")))
           Redirect(routes.BlacklistManagementController.index())
         }
     }
@@ -109,6 +116,7 @@ object BlacklistManagementController extends Controller with Authentication {
         },
         blacklist ⇒ {
           BlacklistDates.create(BlacklistDate(Resource(blacklist.blacklistResource), blacklist.date)).map { i ⇒
+            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(i.uri, s"Backlist Entry for ${blacklist.date} created by ${session.user}.")))
             Redirect(routes.BlacklistManagementController.blacklistEdit(blacklist.blacklistResource))
           }
         }
@@ -146,7 +154,11 @@ object BlacklistManagementController extends Controller with Authentication {
           val dates = for (d ← 0 to Days.daysBetween(blacklist.startDate, blacklist.endDate).getDays) yield blacklist.startDate.plusDays(d)
 
           Future.sequence(dates.map { date ⇒
-            BlacklistDates.create(BlacklistDate(Resource(blacklist.blacklistResource), date))
+
+            BlacklistDates.create(BlacklistDate(Resource(blacklist.blacklistResource), date)).map { ind ⇒
+              system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(ind.uri, s"Backlist Entry for $date created by ${session.user}.")))
+              ind
+            }
           }).map { i ⇒
             Redirect(routes.BlacklistManagementController.blacklistEdit(blacklist.blacklistResource))
           }
@@ -167,6 +179,7 @@ object BlacklistManagementController extends Controller with Authentication {
 
       maybeDeleted match {
         case Some(deleted) ⇒ deleted.map { id ⇒
+          system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), DeleteAction(id, s"Backlist Entry deleted by ${session.user}.")))
           Redirect(routes.BlacklistManagementController.blacklistEdit(listId.get))
         }
         case None ⇒ Future.successful(Redirect(routes.BlacklistManagementController.index()))

@@ -5,9 +5,12 @@ import controllers.StudentsManagement._
 import models._
 import org.joda.time.{ LocalDate, DateTime }
 import org.pegdown.PegDownProcessor
+import play.api.Play
+import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import play.twirl.api.Html
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.Vocabulary._
 import utils.semantic._
 import utils.Global._
@@ -20,10 +23,13 @@ import java.io._
 /**
   * Created by rgiacinto on 20/08/14.
   */
-object LabworkManagementController extends Controller with Authentication {
+object LabworkManagementController extends Controller with Authentication with TransactionSupport {
 
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
+
+  import Play.current
+  override val system = Akka.system
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
@@ -146,7 +152,8 @@ object LabworkManagementController extends Controller with Authentication {
         },
         labwork ⇒ {
           LabWorks.create(
-            LabWork(Resource(labwork.courseId), Resource(labwork.semester))).map { _ ⇒
+            LabWork(Resource(labwork.courseId), Resource(labwork.semester))).map { lw ⇒
+              createTransaction(session.user, lw.uri, s"New labwork ${lw.uri} created by ${session.user}")
               Redirect(routes.LabworkManagementController.index())
             }
         }
@@ -157,7 +164,8 @@ object LabworkManagementController extends Controller with Authentication {
   def labworkRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val id = (request.body \ "id").as[String]
-      LabWorks.delete(Resource(id)).map { _ ⇒
+      LabWorks.delete(Resource(id)).map { lw ⇒
+        deleteTransaction(session.user, lw, s"Labwork $lw deleted by ${session.user}")
         Redirect(routes.LabworkManagementController.index())
       }
     }
@@ -179,8 +187,10 @@ object LabworkManagementController extends Controller with Authentication {
                   head.value match {
                     case "true" ⇒
                       li.update(LWM.isVisibleToStudents, head, StringLiteral("false"))
+                      modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to false")
                     case "false" ⇒
                       li.update(LWM.isVisibleToStudents, head, StringLiteral("true"))
+                      modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to true")
                   }
               }
           }
@@ -216,6 +226,7 @@ object LabworkManagementController extends Controller with Authentication {
                 i.update(LWM.hasEndDate, eD, DateLiteral(new LocalDate(labwork.endDate)))
                 i.update(LWM.hasSemester, semester, Resource(labwork.semester))
                 i.update(RDFS.label, oC.props.getOrElse(RDFS.label, List(StringLiteral(""))).head, nC.props.getOrElse(RDFS.label, List(StringLiteral(""))).head)
+                modifyTransaction(session.user, i.uri, s"Labworl ${i.uri} edited by ${session.user}")
               }
               Future.successful(Redirect(routes.LabworkManagementController.edit(id)))
             }

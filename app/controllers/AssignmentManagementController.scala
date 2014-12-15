@@ -1,7 +1,11 @@
 package controllers
 
+import actors.TransactionsLoggerActor.Transaction
 import models._
+import org.joda.time.LocalDateTime
 import org.pegdown.PegDownProcessor
+import play.api.Play
+import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDF, RDFS, LWM }
@@ -13,6 +17,8 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 object AssignmentManagementController extends Controller with Authentication {
+  import Play.current
+  val system = Akka.system
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
@@ -50,7 +56,8 @@ object AssignmentManagementController extends Controller with Authentication {
             },
             a ⇒
               Assignments.create(Assignment(a.heading, a.description, a.text, a.goals, a.hints, a.topics.split(",").toList, a.courses)).map {
-                _ ⇒
+                assignment ⇒
+                  system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(assignment.uri, s"New assignment created by ${session.user}")))
                   Redirect(routes.AssignmentManagementController.index())
               }
           )
@@ -63,7 +70,8 @@ object AssignmentManagementController extends Controller with Authentication {
         implicit request ⇒
           val id = (request.body \ "id").as[String]
           Assignments.delete(Resource(id)).map {
-            _ ⇒
+            assignment ⇒
+              system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(assignment, s"Assignment deleted by ${session.user}.")))
               Redirect(routes.AssignmentManagementController.index())
           }
       }
@@ -84,6 +92,7 @@ object AssignmentManagementController extends Controller with Authentication {
               }
             },
             a ⇒ {
+              system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(i.uri, s"Assignment modified by ${session.user}.")))
               val maybeId = i.props.get(RDFS.label)
               val maybeDesc = i.props.get(LWM.hasDescription)
               val maybeText = i.props.get(LWM.hasText)
@@ -153,6 +162,7 @@ object AssignmentManagementController extends Controller with Authentication {
                 s1 ← solution
                 s2 ← s1
               } yield {
+                system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(s2.uri, s"Assignment Solution created by ${session.user}.")))
                 Redirect(routes.AssignmentManagementController.detailed(assignmentid))
               }).recover {
                 case NonFatal(t) ⇒ Redirect(routes.AssignmentManagementController.index())
@@ -177,6 +187,7 @@ object AssignmentManagementController extends Controller with Authentication {
             },
             a ⇒ {
               val i = Individual(Resource(associationid))
+              system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Assignment added to $labworkid by ${session.user}.")))
               i.add(LWM.hasAssignment, Resource(a.assignment))
               i.add(LWM.hasPreparationTime, StringLiteral(s"${
                 a.preparationTime
@@ -204,6 +215,7 @@ object AssignmentManagementController extends Controller with Authentication {
               i.remove(LWM.hasPreparationTime, a)
             }
           }
+          system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Assignment removed from $labworkid by ${session.user}.")))
           Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
       }
   }

@@ -5,8 +5,10 @@ import java.net.URLDecoder
 import models.{ LiveAssignment, LiveAssignments }
 import org.pegdown.PegDownProcessor
 import play.api.mvc.{ Action, Controller, Result }
+import play.libs.Akka
 import play.twirl.api.Html
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
@@ -14,7 +16,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise }
 import scala.util.Random
 
-object LiveAssignmentManagementController extends Controller with Authentication {
+object LiveAssignmentManagementController extends Controller with Authentication with TransactionSupport {
+  import play.api.Play.current
+  override val system = Akka.system()
+
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async { implicit request ⇒
@@ -43,6 +48,7 @@ object LiveAssignmentManagementController extends Controller with Authentication
           },
           liveAssignment ⇒ {
             LiveAssignments.create(LiveAssignment(liveAssignment.title, liveAssignment.assignment, liveAssignment.example, liveAssignment.topics.split(",").toList)).map { i ⇒
+              createTransaction(session.user, i.uri, s"Live Assignment ${i.uri} created by ${session.user}")
               p.success(Redirect(routes.LiveAssignmentManagementController.index()))
             }
           }
@@ -60,7 +66,11 @@ object LiveAssignmentManagementController extends Controller with Authentication
         maybeId match {
           case None ⇒ p.success(Redirect(routes.LiveAssignmentManagementController.index()))
           case Some(id) ⇒
-            LiveAssignments.delete(Resource(id)).map(r ⇒ p.success(Redirect(routes.LiveAssignmentManagementController.index())))
+            LiveAssignments.delete(Resource(id)).map {
+              r ⇒
+                deleteTransaction(session.user, r, s"Live Assignment $r deleted by ${session.user}.")
+                p.success(Redirect(routes.LiveAssignmentManagementController.index()))
+            }
         }
 
         p.future
@@ -120,6 +130,7 @@ object LiveAssignmentManagementController extends Controller with Authentication
           liveAssignment.topics.split(",").map { topic ⇒
             ass.add(LWM.hasTopic, StringLiteral(topic.trim))
           }
+          modifyTransaction(session.user, ass.uri, s"Live Assignment ${ass.uri} modified by ${session.user}")
           Future.successful(Redirect(routes.LiveAssignmentManagementController.index()))
         }
       )

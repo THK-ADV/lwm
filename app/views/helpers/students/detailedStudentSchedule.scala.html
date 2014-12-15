@@ -1,4 +1,4 @@
-@(student: Resource, labwork: Resource, form: Form[AlternateAssociationFormModel])
+@(student: Resource, labwork: Resource, form: Form[AlternateAssociationFormModel])(implicit request: RequestHeader)
 @import java.net.URLDecoder
 @import utils.semantic.Vocabulary.RDFS
 @import utils.semantic._
@@ -70,15 +70,15 @@
 
             s"""<tr>
                |<td><span class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoom</span><a href="javascript:removeAlternateDate('${student.value}','$alternateUri');" class="glyphicon glyphicon-remove"></a></td>
-               |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
-               |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
+               |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
+               |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
                |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
                |</tr>""".stripMargin
         }else{
             s"""<tr>
                |<td><span class="text-success">$date, $time Uhr, Raum $room</span></td>
-               |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
-               |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
+               |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
+               |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
                |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
                |</tr>""".stripMargin
         }

@@ -9,6 +9,7 @@ import play.api.libs.json.{ Reads, JsValue }
 import play.api.mvc._
 import play.libs.Akka
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.Vocabulary.LWM
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import play.api.Play.current
@@ -30,12 +31,15 @@ object SupervisionChangeWrites {
   )(SupervisionChange.apply _)
 }
 
-object SupervisionController extends Controller with Authentication {
+object SupervisionController extends Controller with Authentication with TransactionSupport {
 
   import scala.concurrent.duration._
   import akka.pattern.ask
   import scala.concurrent.ExecutionContext.Implicits.global
   import SupervisionChangeWrites._
+
+  import play.api.Play.current
+  override val system = Akka.system()
 
   private implicit val timeout = Timeout(5.seconds)
   private val sessionsHandler = Akka.system.actorSelection("user/sessions")
@@ -68,7 +72,7 @@ object SupervisionController extends Controller with Authentication {
   def supervisionPost = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     import utils.Global._
 
-    Action.async(parse.json) { implicit request ⇒
+    Action(parse.json) { implicit request ⇒
 
       val json = request.body
       (json \ "data").as[List[JsValue]].map(_.asOpt[SupervisionChange]).flatten.map { entry ⇒
@@ -76,17 +80,21 @@ object SupervisionController extends Controller with Authentication {
         i.props.get(LWM.hasAttended).map { attendedList ⇒
           attendedList.map { attended ⇒
             i.remove(LWM.hasAttended, attended)
+            modifyTransaction(session.user, i.uri, s"Attending flag removed for Student ${i.uri} by ${session.user}")
           }
         }
         i.props.get(LWM.hasPassed).map { passedList ⇒
           passedList.map { passed ⇒
             i.remove(LWM.hasPassed, passed)
+            modifyTransaction(session.user, i.uri, s"Passed flag removed for Student ${i.uri} by ${session.user}")
           }
         }
         i.add(LWM.hasAttended, StringLiteral(entry.attended.toString))
+        modifyTransaction(session.user, i.uri, s"Attending flag changed to ${entry.attended} for Student with association ${i.uri} by ${session.user}")
         i.add(LWM.hasPassed, StringLiteral(entry.passed.toString))
+        modifyTransaction(session.user, i.uri, s"Passed flag changed to ${entry.passed} for Student with association ${i.uri} by ${session.user}")
       }
-      Future.successful(Ok("Updates committed"))
+      Ok("Updates committed")
     }
   }
 }

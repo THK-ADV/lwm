@@ -1,9 +1,13 @@
 package controllers
 
+import akka.actor.ActorSystem
 import controllers.LabworkManagementController._
 import models._
+import play.api.Play
 import play.api.mvc.{ Action, Controller }
+import play.libs.Akka
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.Vocabulary.{ RDFS, LWM }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
@@ -13,10 +17,12 @@ import scala.concurrent.Future
   * Room Management:
   *
   */
-object RoomManagementController extends Controller with Authentication {
+object RoomManagementController extends Controller with Authentication with TransactionSupport {
 
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
+  import Play.current
+  override def system: ActorSystem = Akka.system()
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
@@ -38,6 +44,7 @@ object RoomManagementController extends Controller with Authentication {
         },
         room ⇒ {
           Rooms.create(Room(room.roomId, room.name)).map { i ⇒
+            createTransaction(session.user, i.uri, s"Room ${i.uri} created by ${session.user}")
             Redirect(routes.RoomManagementController.index())
           }
         }
@@ -50,7 +57,8 @@ object RoomManagementController extends Controller with Authentication {
       Action.async(parse.json) {
         implicit request ⇒
           val id = (request.body \ "id").as[String]
-          Rooms.delete(Resource(id)).map { _ ⇒
+          Rooms.delete(Resource(id)).map { r ⇒
+            deleteTransaction(session.user, r, s"Room $r removed by ${session.user}")
             Redirect(routes.RoomManagementController.index())
           }
       }
@@ -74,10 +82,12 @@ object RoomManagementController extends Controller with Authentication {
               i.update(LWM.hasRoomId, id, StringLiteral(room.roomId))
               i.update(LWM.hasName, name, StringLiteral(room.name))
               i.update(RDFS.label, name, StringLiteral(room.name))
+              modifyTransaction(session.user, i.uri, s"Room ${i.uri} modified by ${session.user}")
             }
             Future.successful(Redirect(routes.RoomManagementController.index()))
           }
         )
       }
   }
+
 }

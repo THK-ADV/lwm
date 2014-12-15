@@ -1,9 +1,13 @@
 package controllers
 
+import java.util.Scanner
+
 import controllers.LabworkManagementController._
 import models._
+import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic._
 import utils.semantic.Vocabulary.{ RDFS, RDF, LWM, OWL }
 import utils.Global._
@@ -11,7 +15,9 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
 
-object GroupManagementController extends Controller with Authentication {
+object GroupManagementController extends Controller with Authentication with TransactionSupport {
+  import play.api.Play.current
+  val system = Akka.system
 
   def index(labworkId: String, groupId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
@@ -57,14 +63,18 @@ object GroupManagementController extends Controller with Authentication {
           if (isStudent && isGroup) {
             ScheduleAssociations.getForGroup(groupResource).map { assocs ⇒
               assocs.map { assoc ⇒
-                ScheduleAssociations.create(assoc, studentResource)
+                ScheduleAssociations.create(assoc, studentResource).map { i ⇒
+                  createTransaction(session.user, i.uri, s"Schedule ${i.uri} created for Student $studentResource by ${session.user}")
+                }
               }
             }
             val ig = Individual(groupResource)
 
             ig.add(LWM.hasMember, studentResource)
+            createTransaction(session.user, ig.uri, s"Student $studentResource added to Group ${ig.uri} by ${session.user}")
             val is = Individual(studentResource)
             is.add(LWM.memberOf, groupResource)
+            createTransaction(session.user, ig.uri, s"Student $studentResource added to Group ${ig.uri} by ${session.user}")
 
             val applicationsFuture = findApplication(groupResource, studentResource)
 
@@ -121,14 +131,14 @@ object GroupManagementController extends Controller with Authentication {
                  """.stripMargin
 
               SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
-                val r = SPARQLBuilder.removeIndividual(statement.o.asResource().get)
-                sparqlExecutionContext.executeUpdate(r)
+                sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(statement.o.asResource().get))
               }
 
               val ig = Individual(groupResource)
               ig.remove(LWM.hasMember, studentResource)
               val is = Individual(studentResource)
               is.remove(LWM.memberOf, groupResource)
+              deleteTransaction(session.user, groupResource, s"Student $studentResource removed from Group $groupResource by ${session.user}")
             }
             Redirect(routes.LabworkManagementController.index())
           }
@@ -223,7 +233,7 @@ object GroupManagementController extends Controller with Authentication {
             studentIndividual.update(LWM.memberOf, Resource(oldGroup.get), Resource(newGroup.get))
             oldGroupIndividual.remove(LWM.hasMember, Resource(student.get))
             newGroupIndividual.add(LWM.hasMember, Resource(student.get))
-
+            modifyTransaction(session.user, studentIndividual.uri, s"Student ${studentIndividual.props.get(RDFS.label).map(_.headOption.map(_.toString)).getOrElse("")} moved to new Group ${newGroupIndividual.props.get(RDFS.label).map(_.headOption.map(_.toString)).getOrElse("")} by ${session.user}")
             Redirect(routes.GroupManagementController.index(oldGroupIndividual.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value, oldGroupIndividual.uri.value))
           }
         } else {

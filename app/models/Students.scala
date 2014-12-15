@@ -157,7 +157,7 @@ object Students {
             } .
           filter(?date < "${LocalDate.now().plusDays(1).toString("yyyy-MM-dd")}")
           filter(?attended = "false")
-          filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")
+          optional{filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")}
         }
      """.stripMargin
 

@@ -1,18 +1,24 @@
 package actors
 
 import actors.TransactionsLoggerActor.Transaction
-import akka.actor.Actor
+import akka.actor.{ Props, ActorLogging, Actor }
 import akka.actor.Actor.Receive
-import models.Action
+import models.{ Transactions, Action }
 import org.joda.time.LocalDateTime
 import utils.semantic.Resource
 
 object TransactionsLoggerActor {
-  case class Transaction(actor: Resource, time: LocalDateTime, action: Action)
+  case class Transaction(actor: String, time: LocalDateTime, action: Action)
+  def props() = Props(new TransactionsLoggerActor)
 }
 
-class TransactionsLoggerActor extends Actor {
+class TransactionsLoggerActor extends Actor with ActorLogging {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  context.system.eventStream.subscribe(self, classOf[Transaction])
+
   override def receive: Receive = {
-    case Transaction(actor, time, action) ⇒
+    case t @ Transaction(actor, time, action) ⇒
+      Transactions.create(t)
   }
 }

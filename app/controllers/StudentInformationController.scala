@@ -2,7 +2,9 @@ package controllers
 
 import models.{ ScheduleAssociations, LabWorks }
 import play.api.mvc.{ Result, Action, Controller }
+import play.libs.Akka
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic._
 import utils.semantic.Vocabulary.{ RDF, LWM }
 import utils.Global._
@@ -10,7 +12,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Promise, Future }
 import scala.util.control.NonFatal
 
-object StudentInformationController extends Controller with Authentication {
+object StudentInformationController extends Controller with Authentication with TransactionSupport {
+
+  import play.api.Play.current
+  override val system = Akka.system()
+
   def showInformation(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       Future.successful(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
@@ -42,6 +48,7 @@ object StudentInformationController extends Controller with Authentication {
                 schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
                 p.success(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
               }
+              modifyTransaction(session.user, schedule.uri, s"Alternate Schedule entry added to ${schedule.uri} by ${session.user}")
           }
 
           p.future
@@ -89,6 +96,7 @@ object StudentInformationController extends Controller with Authentication {
             first ← statementRemoval(Resource(student.get), Resource(scheduleId))
             second ← first
           } yield {
+            deleteTransaction(session.user, Resource(scheduleId), s"Alternate Schedule entry ${Resource(scheduleId)} removed by ${session.user}")
             Redirect(routes.StudentInformationController.showInformation(student.get))
           }).recover {
             case NonFatal(t) ⇒ Redirect(routes.StudentInformationController.showInformation(student.get))

@@ -268,12 +268,13 @@ function initLocalState(association, attended, passed) {
     };
 }
 
-function attendanceSwitch(association, id) {
+function attendanceSwitch(association, id, user) {
     localState[association].attended = !localState[association].attended;
     dirty = true;
 
     var data = {
         "type" : "attendance-change",
+        "user" : user,
         "association" : association
     };
     $( "#saveButton" ).show( "highlight", {}, 500, {});
@@ -287,12 +288,13 @@ function attendanceSwitch(association, id) {
     socket.send(JSON.stringify(data));
 }
 
-function passedSwitch(association, id) {
+function passedSwitch(association, id, user) {
     localState[association].passed = !localState[association].passed;
     dirty = true;
 
     var data = {
         "type" : "passed-change",
+        "user" : user,
         "association" : association
     };
     $( "#saveButton" ).show( "highlight", {}, 500, {});

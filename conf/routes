@@ -141,6 +141,10 @@ DELETE        /superuser                                              controller
 
 POST          /breadcrumbs                                            controllers.Application.refreshCrumbs()
 POST          /currentUser                                            controllers.Application.currentUser()
+
+GET           /administration/transactions                            controllers.TransactionsController.index()
+
+
 # For test purposes only
 #GET           /administration/testdata                                controllers.TestDataController.generateTestData()
 

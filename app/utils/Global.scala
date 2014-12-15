@@ -1,6 +1,6 @@
 package utils
 
-import actors.{ OntologyDumperActor, EmailHandler, SessionHandler }
+import actors.{ TransactionsLoggerActor, OntologyDumperActor, EmailHandler, SessionHandler }
 import akka.util.Timeout
 import controllers.UserInfoManagement
 import models.{ Students, Student }
@@ -33,6 +33,7 @@ object Global extends GlobalSettings {
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
     // Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
     Akka.system.actorOf(OntologyDumperActor.props(dataInf), "dumper")
+    Akka.system.actorOf(TransactionsLoggerActor.props(), "logger")
     Logger.debug("Application has started")
   }
 

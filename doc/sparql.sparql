@@ -1,0 +1,48 @@
+prefix lwm: <http://lwm.gm.fh-koeln.de/>
+insert {?association lwm:hasPassed 'false'}
+where{
+  ?student lwm:hasScheduleAssociation ?association .
+  ?association lwm:hasAssignmentDate ?date .
+  optional{?association lwm:hasPassed ?passed} .
+  filter(!bound(?passed))
+}
+
+
+
+
+prefix lwm: <http://lwm.gm.fh-koeln.de/>
+insert {?association lwm:hasAttended 'false'}
+where{
+  ?student lwm:hasScheduleAssociation ?association .
+  ?association lwm:hasAssignmentDate ?date .
+  optional{?association lwm:hasAttended ?attended} .
+  filter(!bound(?attended))
+}
+
+
+
+
+prefix lwm: <http://lwm.gm.fh-koeln.de/>
+
+select * where {
+  ?student lwm:hasScheduleAssociation ?association .
+  ?association lwm:hasAssignmentDate ?date .
+  optional{?association lwm:hasAttended ?attended} .
+  filter(?date < "2014-11-15")
+}
+
+
+prefix lwm: <http://lwm.gm.fh-koeln.de/>
+
+select count(?attended) where {
+  ?student lwm:hasScheduleAssociation ?association .
+  ?association lwm:hasAssignmentDate ?date .
+  optional{?association lwm:hasAttended ?attended} .
+  optional{
+    ?association lwm:hasAlternateScheduleAssociation ?alternate .
+    ?alternate lwm:hasAssignmentDate ?alternateDate .
+    filter(?alternateDate < "30-11-30")
+  } .
+  filter(?date < "2014-11-30")
+  filter(?attended = "false")
+}

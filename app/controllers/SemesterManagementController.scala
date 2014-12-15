@@ -2,14 +2,18 @@ package controllers
 
 import models._
 import play.api.mvc.{ Action, Controller }
+import play.libs.Akka
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.Resource
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by root on 9/13/14.
   */
-object SemesterManagementController extends Controller with Authentication {
+object SemesterManagementController extends Controller with Authentication with TransactionSupport {
+
+  override val system = Akka.system()
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
@@ -37,7 +41,8 @@ object SemesterManagementController extends Controller with Authentication {
               case _ ⇒
                 WinterSemester(s.year)
             }
-            Semesters.create(semester).map { _ ⇒
+            Semesters.create(semester).map { s ⇒
+              createTransaction(session.user, s.uri, s"New Semester ${s.uri} created by ${session.user}")
               Redirect(routes.SemesterManagementController.index())
             }
           }
@@ -50,7 +55,8 @@ object SemesterManagementController extends Controller with Authentication {
       Action.async(parse.json) {
         implicit request ⇒
           val id = (request.body \ "id").as[String]
-          Semesters.delete(Resource(id)).map { _ ⇒
+          Semesters.delete(Resource(id)).map { s ⇒
+            deleteTransaction(session.user, s, s"New Semester $s created by ${session.user}")
             Redirect(routes.SemesterManagementController.index())
           }
       }

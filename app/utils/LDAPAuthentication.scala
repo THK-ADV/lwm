@@ -33,10 +33,8 @@ object LDAPAuthentication {
   def authenticate(user: String, password: String, bindHost: String, bindPort: Int, dn: String): Future[Either[String, Boolean]] = {
     val bindDN = s"uid=$user, $dn"
     val bindRequest = new SimpleBindRequest(bindDN, password)
-    println("in authenticate")
     Future {
       bind[Boolean](bindHost, bindPort, dn, "", ssl = true) { connection ⇒
-        println(connection)
         try {
           val bindResult = connection.bind(bindRequest)
           if (bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("invalid credentials")

@@ -1,6 +1,10 @@
 package controllers
 
+import actors.TransactionsLoggerActor.Transaction
 import models._
+import org.joda.time.LocalDateTime
+import play.api.Play
+import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.Vocabulary.{ RDFS, LWM }
@@ -13,6 +17,8 @@ import scala.concurrent.{ Future, ExecutionContext }
   */
 object CourseManagementController extends Controller with Authentication {
   import ExecutionContext.Implicits.global
+  import Play.current
+  val system = Akka.system
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
@@ -37,7 +43,8 @@ object CourseManagementController extends Controller with Authentication {
           }
         },
         course ⇒ {
-          Courses.create(Course(course.name, course.id, Resource(course.degree))).map { _ ⇒
+          Courses.create(Course(course.name, course.id, Resource(course.degree))).map { c ⇒
+            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(c.uri, s"New Course created by ${session.user}.")))
             Redirect(routes.CourseManagementController.index())
           }
         }
@@ -48,7 +55,8 @@ object CourseManagementController extends Controller with Authentication {
   def courseRemoval = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val id = (request.body \ "id").as[String]
-      Courses.delete(Resource(id)).map { _ ⇒
+      Courses.delete(Resource(id)).map { c ⇒
+        system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), DeleteAction(c, s"Course deleted by ${session.user}.")))
         Redirect(routes.CourseManagementController.index())
       }
     }
@@ -76,6 +84,7 @@ object CourseManagementController extends Controller with Authentication {
             i.update(LWM.hasId, id, StringLiteral(course.id))
             i.update(LWM.hasName, name, StringLiteral(course.name))
             i.update(RDFS.label, name, StringLiteral(course.name))
+            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Course modified by ${session.user}.")))
           }
           Future.successful(Redirect(routes.CourseManagementController.index()))
         }

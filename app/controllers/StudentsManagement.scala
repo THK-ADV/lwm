@@ -1,18 +1,24 @@
 package controllers
 
+import controllers.SemesterManagementController._
 import models._
 import play.api.libs.json.{ JsArray, JsString, Json }
 import play.api.mvc.{ Result, Action, Controller }
+import play.libs.Akka
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
 import utils.semantic.Vocabulary.{ LWM, RDFS, NCO, FOAF }
 import utils.Global._
 import scala.concurrent.{ Promise, Future }
 import scala.util.control.NonFatal
 
-object StudentsManagement extends Controller with Authentication {
+object StudentsManagement extends Controller with Authentication with TransactionSupport {
 
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  import play.api.Play.current
+  override val system = Akka.system()
 
   def index(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
@@ -47,7 +53,10 @@ object StudentsManagement extends Controller with Authentication {
               if (student.gmId != user) {
                 promise.success(Redirect(routes.FirstTimeSetupController.setupStudent()))
               } else {
-                Students.create(student).map(_ ⇒ promise.success(Redirect(routes.StudentDashboardController.dashboard())))
+                Students.create(student).map { s ⇒
+                  createTransaction(session.user, s.uri, s"New Student ${s.uri} created by ${session.user}")
+                  promise.success(Redirect(routes.StudentDashboardController.dashboard()))
+                }
               }
             }
           }.recover {
@@ -74,7 +83,10 @@ object StudentsManagement extends Controller with Authentication {
           }
         },
         student ⇒ {
-          Students.create(student).map(_ ⇒ Redirect(routes.StudentsManagement.index("1")))
+          Students.create(student).map { s ⇒
+            createTransaction(session.user, s.uri, s"New Student ${s.uri} created by ${session.user}")
+            Redirect(routes.StudentsManagement.index("1"))
+          }
         }
       )
     }
@@ -100,7 +112,10 @@ object StudentsManagement extends Controller with Authentication {
           LabworkApplications.delete(application)
         })
       }.flatMap { hui ⇒
-        Students.delete(Resource(id)).map(_ ⇒ Redirect(routes.StudentsManagement.index("1")))
+        Students.delete(Resource(id)).map { s ⇒
+          deleteTransaction(session.user, s, s"Student $s deleted by ${session.user}")
+          Redirect(routes.StudentsManagement.index("1"))
+        }
       }
     }
   }
@@ -161,6 +176,7 @@ object StudentsManagement extends Controller with Authentication {
             s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
             s.update(LWM.hasEnrollment, degree, Resource(student.degree))
             s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
+            modifyTransaction(session.user, s.uri, s"Student ${s.uri} modified by ${session.user}")
           }
           Future.successful(Redirect(routes.StudentsManagement.index("1")))
         }
@@ -211,6 +227,7 @@ object StudentsManagement extends Controller with Authentication {
                 s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
                 s.update(LWM.hasEnrollment, degree, Resource(student.degree))
                 s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
+                modifyTransaction(session.user, s.uri, s"Student ${s.uri} modified by ${session.user}")
               }
               if (degree.value != student.degree) {
                 applicationFuture.flatMap { applications ⇒

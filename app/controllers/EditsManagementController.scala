@@ -2,10 +2,15 @@ package controllers
 
 import java.util.NoSuchElementException
 
+import actors.TransactionsLoggerActor.Transaction
+import com.google.common.primitives.Doubles
 import models._
-import org.joda.time.LocalDate
+import org.joda.time.{ LocalDateTime, LocalDate }
+import play.api.Play
+import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
+import utils.TransactionSupport
 import utils.semantic.Vocabulary._
 import utils.semantic._
 import utils.Global._
@@ -31,7 +36,9 @@ import Synchronize._
   * or
   * DELETE group HAVING @{group.uri.value}
   */
-object EditsManagementController extends Controller with Authentication {
+object EditsManagementController extends Controller with Authentication with TransactionSupport {
+  import Play.current
+  val system = Akka.system
 
   case class Component(operation: String, mappedValues: mutable.Map[Property, RDFNode], identifier: String)
 
@@ -45,11 +52,11 @@ object EditsManagementController extends Controller with Authentication {
           val component = parseQuery(maybeQuery.get)
 
           component.operation match {
-            case "INSERT" ⇒ for (inserted ← insert(component)) yield if (inserted) Ok(maybeUri.get)
-            case "REMOVE" ⇒ for (removed ← remove(component)) yield if (removed) Ok(maybeUri.get)
-            case "UPDATE" ⇒ for (updated ← update(component)) yield if (updated) Ok(maybeUri.get)
-            case "CREATE" ⇒ for (created ← create(component)) yield if (created) Ok(maybeUri.get)
-            case "DELETE" ⇒ for (deleted ← delete(component)) yield if (deleted) Ok(maybeUri.get)
+            case "INSERT" ⇒ for (inserted ← insert(component, session.user)) yield if (inserted) Ok(maybeUri.get)
+            case "REMOVE" ⇒ for (removed ← remove(component, session.user)) yield if (removed) Ok(maybeUri.get)
+            case "UPDATE" ⇒ for (updated ← update(component, session.user)) yield if (updated) Ok(maybeUri.get)
+            case "CREATE" ⇒ for (created ← create(component, session.user)) yield if (created) Ok(maybeUri.get)
+            case "DELETE" ⇒ for (deleted ← delete(component, session.user)) yield if (deleted) Ok(maybeUri.get)
           }
         }
 
@@ -86,7 +93,8 @@ object EditsManagementController extends Controller with Authentication {
     }
   }
 
-  private def create(c: Component): Future[Boolean] = {
+  private def create(c: Component, user: String): Future[Boolean] = {
+
     c.identifier match {
       case "group" ⇒
         val groupQuery =
@@ -112,57 +120,106 @@ object EditsManagementController extends Controller with Authentication {
           lwk ← labworkGroupFuture
           c ← LabworkGroups.create(lwk)
         } yield {
+          createTransaction(user, c.uri, s"Labwork Group $lwk created by $user.")
           true
         }
 
       case "assignmentassociation" ⇒
         val labwork = c.mappedValues.get(LWM.hasLabWork).get.asResource().get
         val orderId = c.mappedValues.get(LWM.hasOrderId).get.value.toInt
-        AssignmentAssociations.create(AssignmentAssociation(labwork, orderId)).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+        AssignmentAssociations.create(AssignmentAssociation(labwork, orderId)).map { assignmentAssociation ⇒
+          createTransaction(user, assignmentAssociation.uri, s"Labwork Assignment Association for $labwork created by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
       case "room" ⇒
         val rId = c.mappedValues.get(LWM.hasRoomId).get
         val name = c.mappedValues.get(LWM.hasName).get
-        Rooms.create(Room(rId.value, name.value)).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+        Rooms.create(Room(rId.value, name.value)).map { room ⇒
+          createTransaction(user, room.uri, s"Room ${name.value} created by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
       case "course" ⇒
         val name = c.mappedValues.get(LWM.hasName).get
         val id = c.mappedValues.get(LWM.hasId).get
         val degree = c.mappedValues.get(LWM.hasDegree).get.asResource().get
-        Courses.create(Course(name.value, id.value, degree)).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+        Courses.create(Course(name.value, id.value, degree)).map { c ⇒
+          createTransaction(user, c.uri, s"Course ${name.value} created by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
       case "degree" ⇒
         val name = c.mappedValues.get(LWM.hasName).get
         val id = c.mappedValues.get(LWM.hasId).get
-        Degrees.create(Degree(name.value, id.value)).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+        Degrees.create(Degree(name.value, id.value)).map { d ⇒
+          createTransaction(user, d.uri, s"Degree ${name.value} created by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
       case "labwork" ⇒
         val course = c.mappedValues.get(LWM.hasCourse).get.asResource().get
         val semester = c.mappedValues.get(LWM.hasSemester).get.asResource().get
-        LabWorks.create(LabWork(course, semester)).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+        LabWorks.create(LabWork(course, semester)).map { l ⇒
+          createTransaction(user, l.uri, s"Labwork for course $course created by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
       case "semester" ⇒
         val semester: Semester = c.mappedValues.get(LWM.hasId).get.toString.toLowerCase match {
           case "sommersemester" ⇒ SummerSemester(c.mappedValues.get(LWM.hasYear).get.value.toInt)
           case _                ⇒ WinterSemester(c.mappedValues.get(LWM.hasYear).get.value.toInt)
         }
-        Semesters.create(semester).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+        Semesters.create(semester).map { s ⇒
+          createTransaction(user, s.uri, s"$semester created by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
       case "timetable" ⇒
         val labwork = c.mappedValues.get(LWM.hasLabWork).get.asResource().get
-        Timetables.create(Timetable(labwork))
+        val t = Timetables.create(Timetable(labwork))
+        createTransaction(user, t.uri, s"Timetable for $labwork created by $user.")
         Future.successful(true)
     }
   }
 
-  private def delete(c: Component): Future[Boolean] = {
+  private def delete(c: Component, user: String): Future[Boolean] = {
     val toBeDeleted = c.mappedValues.get(deletion).get.asResource().get
     c.identifier match {
-      case "group"                 ⇒ LabworkGroups.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
-      case "assignmentassociation" ⇒ AssignmentAssociations.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
-      case "room"                  ⇒ Rooms.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
-      case "course"                ⇒ Courses.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
-      case "degree"                ⇒ Degrees.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
-      case "labwork"               ⇒ LabWorks.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
-      case "semester"              ⇒ Semesters.delete(toBeDeleted).map(_ ⇒ true).recover { case NonFatal(t) ⇒ true }
+      case "group" ⇒
+        LabworkGroups.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"Group $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
+      case "assignmentassociation" ⇒
+        AssignmentAssociations.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"AssignmentAssociation $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
+
+      case "room" ⇒
+        Rooms.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"AssignmentAssociation $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
+      case "course" ⇒
+        Courses.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"AssignmentAssociation $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
+      case "degree" ⇒
+        Degrees.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"AssignmentAssociation $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
+      case "labwork" ⇒
+        LabWorks.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"AssignmentAssociation $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
+      case "semester" ⇒
+        Semesters.delete(toBeDeleted).map { l ⇒
+          deleteTransaction(user, l, s"AssignmentAssociation $l deleted by $user.")
+          true
+        }.recover { case NonFatal(t) ⇒ true }
     }
   }
 
-  private def insert(c: Component): Future[Boolean] = {
+  private def insert(c: Component, user: String): Future[Boolean] = {
     val i = Individual(Resource(c.identifier))
     c.mappedValues.foreach {
       v ⇒ i.add(v._1, v._2)
@@ -170,15 +227,16 @@ object EditsManagementController extends Controller with Authentication {
     Future.successful(true)
   }
 
-  private def remove(c: Component): Future[Boolean] = {
+  private def remove(c: Component, user: String): Future[Boolean] = {
     val i = Individual(Resource(c.identifier))
     c.mappedValues.foreach { v ⇒
+      modifyTransaction(user, i.uri, s"Statement (${v._1}, ${v._2}} removed from ${i.uri} by $user.)")
       i.remove(v._1, v._2)
     }
     Future.successful(true)
   }
 
-  private def update(c: Component): Future[Boolean] = {
+  private def update(c: Component, user: String): Future[Boolean] = {
     val i = Individual(Resource(c.identifier))
     val oldValueMap = mutable.Map[Property, RDFNode]()
     c.mappedValues.foreach { v ⇒

@@ -1,7 +1,9 @@
 package models
 
 import actors.TransactionsLoggerActor.Transaction
+import com.hp.hpl.jena.query.ParameterizedSparqlString
 import utils.Global._
+import utils.QuerySolution
 import utils.semantic.Vocabulary._
 import utils.semantic._
 
@@ -27,7 +29,7 @@ object Transactions {
         Statement(transactionResource, RDF.typ, LWM.Transaction),
         Statement(transactionResource, RDF.typ, OWL.NamedIndividual),
         Statement(transactionResource, LWM.time, DateTimeLiteral(transaction.time)),
-        Statement(transactionResource, LWM.hasActor, transaction.actor),
+        Statement(transactionResource, LWM.hasActor, StringLiteral(transaction.actor)),
         Statement(transactionResource, LWM.actionObject, action.uri)
       )
 
@@ -37,9 +39,48 @@ object Transactions {
     }
 
   }
-  def all(): Future[List[Resource]] = ???
+
+  def all(): List[QuerySolution] = {
+    import utils.Global._
+    import utils.Implicits._
+    """
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |
+      |select * where {
+      | ?transaction rdf:type lwm:Transaction .
+      | ?transaction lwm:time ?time .
+      | ?transaction lwm:hasActor ?actor .
+      | ?transaction lwm:actionObject ?object .
+      | ?object lwm:hasDescription ?description .
+      |} order by desc(?time)
+    """.stripMargin.execSelect()
+  }
 }
 
 object Actions {
-  def create(action: Action): Future[Individual] = ???
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def create(action: Action): Future[Individual] = {
+    val resource = ResourceUtils.createResource(lwmNamespace)
+
+    val typeStatements = action match {
+      case ca: CreateAction ⇒
+        Statement(resource, RDF.typ, LWM.Action) :: Statement(resource, RDF.typ, LWM.CreateAction) :: Nil
+      case da: DeleteAction ⇒
+        Statement(resource, RDF.typ, LWM.Action) :: Statement(resource, RDF.typ, LWM.DeleteAction) :: Nil
+      case ma: ModifyAction ⇒
+        Statement(resource, RDF.typ, LWM.Action) :: Statement(resource, RDF.typ, LWM.ModifyAction) :: Nil
+    }
+
+    val statements = List(
+      Statement(resource, RDF.typ, OWL.NamedIndividual),
+      Statement(resource, LWM.hasDescription, StringLiteral(action.description)),
+      Statement(resource, LWM.actionObject, action.actionObject)
+    )
+
+    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements ::: typeStatements: _*)).map { r ⇒
+      Individual(resource)
+    }
+  }
 }
