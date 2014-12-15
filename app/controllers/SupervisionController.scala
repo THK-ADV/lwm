@@ -4,6 +4,7 @@ import actors.SessionHandler.Valid
 import actors.{ SessionHandler, SupervisionSocketActor }
 import akka.util.Timeout
 import controllers.SupervisionChangeWrites.SupervisionChange
+import models.Students
 import org.joda.time.LocalDate
 import play.api.libs.json.{ Reads, JsValue }
 import play.api.mvc._
@@ -80,19 +81,19 @@ object SupervisionController extends Controller with Authentication with Transac
         i.props.get(LWM.hasAttended).map { attendedList ⇒
           attendedList.map { attended ⇒
             i.remove(LWM.hasAttended, attended)
-            modifyTransaction(session.user, i.uri, s"Attending flag removed for Student ${i.uri} by ${session.user}")
+            modifyTransaction(session.user, i.uri, s"Attending flag removed for Student ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
           }
         }
         i.props.get(LWM.hasPassed).map { passedList ⇒
           passedList.map { passed ⇒
             i.remove(LWM.hasPassed, passed)
-            modifyTransaction(session.user, i.uri, s"Passed flag removed for Student ${i.uri} by ${session.user}")
+            modifyTransaction(session.user, i.uri, s"Passed flag removed for Student ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
           }
         }
         i.add(LWM.hasAttended, StringLiteral(entry.attended.toString))
-        modifyTransaction(session.user, i.uri, s"Attending flag changed to ${entry.attended} for Student with association ${i.uri} by ${session.user}")
+        modifyTransaction(session.user, i.uri, s"Attending flag changed to ${entry.attended} for Student  ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
         i.add(LWM.hasPassed, StringLiteral(entry.passed.toString))
-        modifyTransaction(session.user, i.uri, s"Passed flag changed to ${entry.passed} for Student with association ${i.uri} by ${session.user}")
+        modifyTransaction(session.user, i.uri, s"Passed flag changed to ${entry.passed} for Student ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
       }
       Ok("Updates committed")
     }

@@ -5,6 +5,7 @@ import java.net.URLDecoder
 import actors.SupervisionSocketActor.SupervisionChange
 import akka.actor.{ ActorSystem, Props, ActorRef, Actor }
 import akka.actor.Actor.Receive
+import models.Students
 import play.api.libs.json.{ JsBoolean, JsString, JsObject, JsValue }
 import utils.TransactionSupport
 import utils.semantic.Vocabulary.LWM
@@ -40,7 +41,7 @@ class SupervisionSocketActor(out: ActorRef) extends Actor with TransactionSuppor
         t.toLowerCase match {
           case "passed-change" ⇒
             val status = handlePassed(res)
-            modifyTransaction(u, res.uri, s"Passed flag changed to $status for ${res.uri} by $u")
+            modifyTransaction(u, res.uri, s"Passed flag changed to $status for ${Students.studentForLabworkAssociation(res.uri).mkString(" ")} by $u")
             context.system.eventStream.publish(SupervisionChange(JsObject(Seq(
               "type" -> JsString("passed"),
               "association" -> JsString(a),
@@ -50,7 +51,7 @@ class SupervisionSocketActor(out: ActorRef) extends Actor with TransactionSuppor
             )), self))
           case "attendance-change" ⇒
             val status = handleAttendance(res)
-            modifyTransaction(u, res.uri, s"Attending flag changed to $status for ${res.uri} by $u")
+            modifyTransaction(u, res.uri, s"Attending flag changed to $status for ${Students.studentForLabworkAssociation(res.uri).mkString(" ")} by $u")
             context.system.eventStream.publish(SupervisionChange(JsObject(Seq(
               "type" -> JsString("attending"),
               "association" -> JsString(a),

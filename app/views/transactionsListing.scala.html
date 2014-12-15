@@ -28,9 +28,8 @@
                                 <th>Beschreibung</th>
                             </tr>
                             @for(transaction <- transactions) {
-                                @println(s"transaction: $transaction")
                                 <tr>
-                                    <td>@LocalDateTime.parse(transaction.data("time").asLiteral().getString, DateTimeFormat.forPattern("yyyy-MM-dd-hh:mm:ss")).toString("yyyy-MM-dd hh:mm:ss")</td>
+                                    <td>@LocalDateTime.parse(transaction.data("time").asLiteral().getString, DateTimeFormat.forPattern("yyyy-MM-dd-HH:mm:ss")).toString("yyyy-MM-dd HH:mm:ss")</td>
                                     <td>@{StringLiteral(transaction.data("description").asLiteral().getString, encoded = true).toString}<td>
                                 </tr>
                             }

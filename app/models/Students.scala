@@ -21,6 +21,7 @@ object Students {
   import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
+  import utils.Implicits._
 
   def create(student: Student): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
@@ -167,7 +168,7 @@ object Students {
   }
 
   def dateCountNotPassed(student: Resource, group: Resource): Int = {
-    import utils.Implicits._
+
     s"""
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
 
@@ -185,7 +186,7 @@ object Students {
   }
 
   def dateCountAlternate(student: Resource, group: Resource): Int = {
-    import utils.Implicits._
+
     s"""
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
 
@@ -199,6 +200,22 @@ object Students {
      """.stripMargin.execSelect().headOption.map { solution ⇒
       solution.data.get("count").map(_.asLiteral().getInt)
     }.flatten.getOrElse(0)
+  }
+
+  def studentForLabworkAssociation(labworkAssociation: Resource) = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |
+      |select ?student ?id where {
+      |    ?student lwm:hasScheduleAssociation $labworkAssociation .
+      |    ?student rdf:type lwm:Student .
+      |    ?student lwm:hasGmId ?id .
+      |}
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("id").asLiteral().getString
+    }.take(1)
   }
 
 }

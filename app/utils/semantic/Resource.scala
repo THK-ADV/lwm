@@ -67,7 +67,7 @@ case class StringLiteral(value: String, encoded: Boolean = false) extends Litera
 }
 
 case class DateTimeLiteral(time: LocalDateTime, encoded: Boolean = false) extends Literal {
-  override val value: String = time.toString("yyyy-MM-dd-hh:mm:ss")
+  override val value: String = time.toString("yyyy-MM-dd-HH:mm:ss")
 
   override def asResource(): Option[Resource] = None
 
