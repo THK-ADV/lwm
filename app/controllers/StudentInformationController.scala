@@ -58,52 +58,26 @@ object StudentInformationController extends Controller with Authentication with 
   }
 
   def removeAlternateDate(scheduleId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async(parse.json) {
+    Action(parse.json) {
       implicit request ⇒
-        val student = (request.body \ "student").asOpt[String]
+        import utils.Implicits._
 
-        if (student.isDefined) {
-          def statementRemoval(student: Resource, schedule: Resource) = {
-            val query =
-              s"""
-            select distinct ?s (${LWM.hasAlternateScheduleAssociation} as ?p) ($schedule as ?o) where {
-            $student ${LWM.hasScheduleAssociation} ?s .
-            ?s ${LWM.hasAlternateScheduleAssociation} $schedule
-            }
-            """.stripMargin
+        val student = (request.body \ "student").as[String]
+        val oldSchedule = (request.body \ "oldSchedule").as[String]
+        val alternate = (request.body \ "schedule").as[String]
 
-            sparqlExecutionContext.executeQuery(query).map { result ⇒
-              val statements = SPARQLTools.statementsFromString(result).map(r ⇒ (r.s, r.p, r.o))
-              val update = buildQuery("delete", statements)
-              //println(s"Remove: \n$update")
-              sparqlExecutionContext.executeUpdate(update)
-            }
-          }
+        s"""
+        |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+        |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        |
+        |delete data {
+        |  <$student> lwm:hasSchedule <$oldSchedule> .
+        |  <$oldSchedule> lwm:hasAlternateScheduleAssociation <$alternate> .
+        |}
+    """.stripMargin.execUpdate()
 
-          def buildQuery(op: String, map: Seq[(Resource, Property, RDFNode)]): String = {
-            val builder = new StringBuilder
-            if (op == "delete") builder.append("DELETE DATA { ") else builder.append("INSERT DATA { ")
-            map.foreach {
-              e ⇒
-                builder.append(s"${e._1} ${e._2} ${e._3.toQueryString} . ")
-            }
-            builder.deleteCharAt(builder.length - 2)
-            builder.append("}")
-            builder.toString()
-          }
-
-          (for {
-            first ← statementRemoval(Resource(student.get), Resource(scheduleId))
-            second ← first
-          } yield {
-            deleteTransaction(session.user, Resource(scheduleId), s"Alternate Schedule entry ${Resource(scheduleId)} removed by ${session.user}")
-            Redirect(routes.StudentInformationController.showInformation(student.get))
-          }).recover {
-            case NonFatal(t) ⇒ Redirect(routes.StudentInformationController.showInformation(student.get))
-          }
-        } else {
-          Future.successful(Redirect(routes.StudentInformationController.showInformation(student.get)))
-        }
+        Ok("Schedule removed")
     }
   }
 }

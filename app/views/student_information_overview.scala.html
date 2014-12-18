@@ -42,19 +42,17 @@
 
         <script>
             $(document ).ready(function(){
-                function(){
-                    $(window).bind('beforeunload', function(){
-                        if(dirty){
-                            $("#saveButton").show();
-                            return 'Es wurden Daten auf dieser Seite geändert. Sind Sie sicher, dass Sie die Seite verlassen wollen?';
-                        }
-                    });
-
-                    createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
-
-                    $("#connectionWarning").hide();
-                    $("#saveButton").hide();
+                $(window).bind('beforeunload', function(){
+                if(dirty){
+                $("#saveButton").show();
+                return 'Es wurden Daten auf dieser Seite geändert. Sind Sie sicher, dass Sie die Seite verlassen wollen?';
                 }
+                });
+
+                createSocket("@routes.SupervisionController.superviseSocket().webSocketURL(secure = Play.isProd(play.api.Play.current))");
+
+                $("#connectionWarning").hide();
+                $("#saveButton").hide();
             });
         </script>
     </body>

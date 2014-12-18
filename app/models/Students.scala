@@ -173,12 +173,30 @@ object Students {
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
 
         select (count(?passed) as ?count) where {
-          $student lwm:hasScheduleAssociation ?association .
-          ?association lwm:hasGroup $group .
-          ?association lwm:hasAssignmentDate ?date .
-          optional{?association lwm:hasPassed ?passed} .
-          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
-          filter(?passed = "false")
+          {
+            select ?passed where {
+              $student lwm:hasScheduleAssociation ?association .
+              ?association lwm:hasGroup $group .
+              ?association lwm:hasAssignmentDate ?date .
+
+              ?association lwm:hasAlternateScheduleAssociation ?alternate .
+              ?alternate lwm:lwm:hasAssignmentDate ?alternateDate .
+              optional{?association lwm:hasPassed ?passed} .
+
+              filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")
+              filter(?passed = "false")
+            }
+          } union {
+            select ?passed where {
+              $student lwm:hasScheduleAssociation ?association .
+              ?association lwm:hasGroup $group .
+              ?association lwm:hasAssignmentDate ?date .
+              optional{?association lwm:hasPassed ?passed} .
+              filter exists (?association lwm:hasAlternateScheduleAssociation ?alternate )
+              filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
+              filter(?passed = "false")
+            }
+          }
         }
      """.stripMargin.execSelect().headOption.map { solution ⇒
       solution.data.get("count").map(_.asLiteral().getInt)

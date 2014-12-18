@@ -1,14 +1,15 @@
 function toggleHiddenStatus(labworkUri, studentUri, studentHash, status){
 
-    if(status){
-        $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-open");
-        $("#" + studentHash).removeClass();
+    ajaxRequest("/administration/hideStates", "POST", "application/json", {student: studentUri, labwork: labworkUri, hide: !status}, function(data){
+        if(status){
+            $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-open");
+            $("#" + studentHash).removeClass();
 
-    }else{
-        $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-close");
-        $("#" + studentHash).addClass("danger");
-    }
-    ajaxRequest("/administration/hideStates", "POST", "application/json", {student: studentUri, labwork: labworkUri, hide: !status}, {});
+        }else{
+            $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-close");
+            $("#" + studentHash).addClass("danger");
+        }
+    } );
 }
 
 
@@ -159,8 +160,12 @@ function swapGroups(index, student, oldGroup) {
     ajaxRequest("/administration/groups/swap", "POST", "application/json", {student: student, old: oldGroup, new: newGroup}, reload);
 }
 
-function removeAlternateDate(student, schedule) {
-    ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student}, reload);
+function removeAlternateDate(student,oldSchedule, schedule, hash) {
+    $("#new" + hash).remove();
+    $("#rm" + hash).remove();
+    $("#old" + hash).removeClass().addClass("text-success");
+    ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student, schedule: schedule, oldSchedule: oldSchedule}, {});
+
 }
 
 function removeStatement(resource, property, rdfnode) {
@@ -318,6 +323,7 @@ function passedSwitch(association, id, user) {
     localState[association].passed = !localState[association].passed;
 
     if(localState[association].passed == localState[association].ss_passed && localState[association].attended == localState[association].ss_attended){
+        alert("changing state");
         localState[association].dirty = false;
     }else{
         dirty = true;
