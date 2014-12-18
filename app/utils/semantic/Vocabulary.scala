@@ -157,6 +157,11 @@ object Vocabulary {
     val actionObject = property("actionObject")
     val description = property("description")
     val time = property("time")
+
+    val HidingState = resource("HidingState")
+    val hasHidingState = property("hasHidingState")
+    val hasHidingSubject = property("hasHidingSubject")
+
   }
 
   /**

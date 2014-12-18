@@ -156,7 +156,7 @@ object Students {
               ?association lwm:hasAlternateScheduleAssociation ?alternate .
               ?alternate lwm:hasAssignmentDate ?alternateDate .
             } .
-          filter(?date < "${LocalDate.now().plusDays(1).toString("yyyy-MM-dd")}")
+          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
           filter(?attended = "false")
           optional{filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")}
         }
@@ -216,6 +216,53 @@ object Students {
     """.stripMargin.execSelect().map { solution ⇒
       solution.data("id").asLiteral().getString
     }.take(1)
+  }
+
+  def isHidden(labwork: Resource, student: Resource) = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |
+      |select (count(?state) as ?count) where {
+      |    $student lwm:hasHidingState ?state .
+      |    ?state lwm:hasHidingSubject $labwork .
+      |}
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("count").asLiteral().getInt > 0
+    }.head
+  }
+
+  def removeHideState(labwork: Resource, student: Resource) = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |
+      |delete {
+      |  ?state ?p ?o .
+      |  $student lwm:hasHidingState ?state
+      |} where {
+      |  select * where{
+      |    $student lwm:hasHidingState ?state .
+      |    ?state lwm:hasHidingSubject $labwork
+      |  }
+      |}
+    """.stripMargin.execUpdate()
+  }
+
+  def addHideState(labwork: Resource, student: Resource) = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |
+      |insert data {
+      | $student lwm:hasHidingState [
+      |   lwm:hasHidingSubject $labwork
+      | ]
+      |}
+    """.stripMargin.execUpdate()
   }
 
 }

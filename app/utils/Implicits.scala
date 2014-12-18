@@ -2,8 +2,11 @@ package utils
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
 import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.update.{ UpdateFactory, UpdateExecutionFactory }
 
 case class QueryHost(host: String)
+
+case class UpdateHost(host: String)
 
 case class QuerySolution(data: Map[String, RDFNode])
 
@@ -22,6 +25,11 @@ object Implicits {
         }
         QuerySolution(data.toMap)
       }.toList
+    }
+
+    def execUpdate()(implicit updateHost: UpdateHost) = {
+      val request = UpdateFactory.create(string)
+      UpdateExecutionFactory.createRemote(request, updateHost.host).execute()
     }
   }
 

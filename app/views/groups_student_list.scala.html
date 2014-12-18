@@ -9,7 +9,8 @@
             <tr><th>Kennung</th> <th>Nachname</th><th>Vorname</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehl</th><th>Nicht best.</th></tr>
 
             @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
-                <tr>
+                @defining(Students.isHidden(labwork.uri, s.uri)){hidden =>
+                <tr @if(hidden)("class=danger") id="@s.uri.hashCode()">
                     <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)">@gm.value</a> </td>
                     <td>@ln.value</td>
                     <td>@fn.value</td>
@@ -53,7 +54,29 @@
 
                     <td><h3><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@s.hashCode()"></a></h3></td>
                     <td><h3><a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
+                    <td><h3>
+                        <a href="@{
+                            val u = s.uri
+                            val hash = s.uri.hashCode()
+
+                            val string =s"""javascript:toggleHiddenStatus("${labwork.uri.value}","${s.uri.value}", ${s.uri.hashCode()},$hidden);"""
+                            string
+                        }" id = "eye@s.uri.hashCode()" class="@{
+                            if(hidden){
+                                "glyphicon glyphicon-eye-close"
+                            }else {
+                                "glyphicon glyphicon-eye-open"
+                            }
+                        }">
+                            </a>
+                            </h3></td>
+
+
+
+
+
                 </tr>
+            }
                 <div class="modal fade" id="@s.hashCode()" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">

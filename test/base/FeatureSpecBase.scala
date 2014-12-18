@@ -7,9 +7,8 @@ import org.openqa.selenium.firefox.FirefoxDriver
 import org.scalatest.mock.MockitoSugar
 import org.scalatest._
 
-
-trait FeatureSpecBase extends FeatureSpec with Matchers
-with GivenWhenThen with BeforeAndAfterAll with MockitoSugar {
+trait FeatureSpecBase extends FeatureSpecLike with Matchers
+    with GivenWhenThen with MockitoSugar {
 
   lazy val driver = {
     val d = new FirefoxDriver()
@@ -18,12 +17,12 @@ with GivenWhenThen with BeforeAndAfterAll with MockitoSugar {
     d.manage().window().setSize(new Dimension(1200, 1024))
     d
   }
-  protected def noWait(block: => Unit) = {
+  protected def noWait(block: ⇒ Unit) = {
     driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
     try {
       block
     } catch {
-      case e: org.openqa.selenium.NoSuchElementException => // ignore
+      case e: org.openqa.selenium.NoSuchElementException ⇒ // ignore
     } finally {
       driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS)
     }

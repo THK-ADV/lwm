@@ -1,3 +1,17 @@
+function toggleHiddenStatus(labworkUri, studentUri, studentHash, status){
+
+    if(status){
+        $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-open");
+        $("#" + studentHash).removeClass();
+
+    }else{
+        $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-close");
+        $("#" + studentHash).addClass("danger");
+    }
+    ajaxRequest("/administration/hideStates", "POST", "application/json", {student: studentUri, labwork: labworkUri, hide: !status}, {});
+}
+
+
 function logOut() {
     ajaxRequest("/api/sessions", "DELETE", null, null, redirect);
 }
@@ -268,6 +282,8 @@ function initLocalState(association, attended, passed) {
     keys.push(association);
     localState[association] = {
         "association" : association,
+        "ss_attended": attended,
+        "ss_passed": passed,
         "attended" : attended,
         "passed" : passed
     };
@@ -275,8 +291,13 @@ function initLocalState(association, attended, passed) {
 
 function attendanceSwitch(association, id, user) {
     localState[association].attended = !localState[association].attended;
-    dirty = true;
 
+    if(localState[association].passed == localState[association].ss_passed && localState[association].attended == localState[association].ss_attended){
+        localState[association].dirty = false;
+    }else{
+        dirty = true;
+        localState[association].dirty = true;
+    }
     var data = {
         "type" : "attendance-change",
         "user" : user,
@@ -295,7 +316,15 @@ function attendanceSwitch(association, id, user) {
 
 function passedSwitch(association, id, user) {
     localState[association].passed = !localState[association].passed;
-    dirty = true;
+
+    if(localState[association].passed == localState[association].ss_passed && localState[association].attended == localState[association].ss_attended){
+        localState[association].dirty = false;
+    }else{
+        dirty = true;
+        localState[association].dirty = true;
+    }
+
+
 
     var data = {
         "type" : "passed-change",
@@ -317,7 +346,9 @@ function postSupervisionChanges(url){
     var temp = [];
 
     keys.forEach(function(entry) {
-        temp.push(localState[entry]);
+        if(entry.dirty){
+            temp.push(localState[entry]);
+        }
     });
 
     var postData = {

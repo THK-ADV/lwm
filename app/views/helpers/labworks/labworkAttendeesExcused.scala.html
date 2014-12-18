@@ -22,6 +22,8 @@
           ?student lwm:hasGmId ?gmId .
           ?association lwm:hasGroup ${group.toQueryString} .
           ?association lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
+          ?association lwm:hasAssignmentAssociation ?assignment .
+          ?assignment lwm:hasLabWork ?labwork .
           optional {?association lwm:hasPassed ?passed } .
           optional {?association lwm:hasAttended ?attended } .
           optional {
@@ -56,7 +58,9 @@
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
 
         val student = solution.getResource("student")
+        val labwork = solution.getResource("labwork")
 
+        if(!Students.isHidden(Resource(labwork.getURI), Resource(student.getURI))){
         lines =
                 s"""
              |<tr>
@@ -74,6 +78,7 @@
              |  initLocalState("$association", $attended, $passed);
              |</script>
            """.stripMargin :: lines
+        }
     }
 
     if(lines.size > 0){

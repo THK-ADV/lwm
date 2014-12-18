@@ -22,7 +22,8 @@ object Global extends GlobalSettings {
   lazy val updateHost = s"http://localhost:$port/$serviceName/update"
   lazy val queryHost = s"http://localhost:$port/$serviceName/query"
   lazy val dataInf = s"http://localhost:$port/$serviceName/data"
-  implicit lazy val host = QueryHost(queryHost)
+  implicit lazy val query = QueryHost(queryHost)
+  implicit lazy val update = UpdateHost(updateHost)
 
   implicit val timeout = Timeout(30.seconds)
   implicit val sparqlExecutionContext = SPARQLExecution(queryHost, updateHost)

@@ -44,6 +44,27 @@ object LabworkManagementController extends Controller with Authentication with T
     }
   }
 
+  def hide() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+    Action(parse.json) { implicit request ⇒
+      val student = (request.body \ "student").asOpt[String]
+      val labwork = (request.body \ "labwork").asOpt[String]
+      val hide = (request.body \ "hide").asOpt[Boolean]
+      for {
+        s ← student
+        l ← labwork
+        h ← hide
+      } {
+        if (h) {
+          Students.addHideState(Resource(l), Resource(s))
+        } else {
+          Students.removeHideState(Resource(l), Resource(s))
+        }
+      }
+
+      Ok("")
+    }
+  }
+
   def edit(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
 

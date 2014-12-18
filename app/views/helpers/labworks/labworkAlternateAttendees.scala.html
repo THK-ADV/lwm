@@ -21,6 +21,8 @@
               ?student foaf:lastName ?lastName .
               ?student lwm:hasGmId ?gmId .
               ?association lwm:hasGroup ?origGroup .
+              ?association lwm:hasAssignmentAssociation ?assignment .
+              ?assignment lwm:hasLabWork ?labwork .
               ?origGroup lwm:hasGroupId ?origGroupId .
               ?association lwm:hasAlternateScheduleAssociation ?alternate .
               ?alternate lwm:hasGroup $group .
@@ -42,24 +44,47 @@
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
         val student = solution.getResource("student")
+        val labwork = solution.getResource("labwork")
 
-        lines =
-                s"""
+        if(!Students.isHidden(Resource(labwork.getURI), Resource(student.getURI))) {
+            lines =
+                    s"""
              |<tr>
              |<td><a href="${routes.StudentInformationController.showInformation(student.getURI)}">$lastName</a></td>
              |<td>$firstName</td>
              |<td>$gmId</td>
              |<td>$groupId</td>
-             |<td><h1><a href="javascript:attendanceSwitch('${association.toString}', 'attendance-${association.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${association.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
-             |<td><h1><a href="javascript:passedSwitch('${association.toString}', 'passed-${association.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${association.toString.hashCode}"  class="${if(attended){if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}else{if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-minus text-muted"}}}"></h1></td>
+             |<td><h1><a href="javascript:attendanceSwitch('${association.toString}', 'attendance-${association.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${association.toString.hashCode}" class="glyphicon glyphicon-user ${
+                        if(attended) {
+                            "text-success"
+                        } else {
+                            "text-danger"
+                        }
+                    }"></span></a></h1></td>
+             |<td><h1><a href="javascript:passedSwitch('${association.toString}', 'passed-${association.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${association.toString.hashCode}"  class="${
+                        if(attended) {
+                            if(passed) {
+                                "glyphicon glyphicon-ok text-success"
+                            } else {
+                                "glyphicon glyphicon-ban-circle text-danger"
+                            }
+                        } else {
+                            if(passed) {
+                                "glyphicon glyphicon-ok text-success"
+                            } else {
+                                "glyphicon glyphicon-minus text-muted"
+                            }
+                        }
+                    }"></h1></td>
              |</tr>""".stripMargin :: lines
 
-        lines =
-                s"""
+            lines =
+                    s"""
              |<script>
              |  initLocalState("$association", $attended, $passed);
              |</script>
            """.stripMargin :: lines
+        }
     }
 
     if(lines.size > 0){
