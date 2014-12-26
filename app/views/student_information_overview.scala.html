@@ -16,7 +16,7 @@
         </div>
         <div class="row bg-danger">
             <div id="saveButton" class="col-md-1">
-                <a href="javascript:postSupervisionChanges('@routes.SupervisionController.supervisionPost()')">Änderungen übernehmen</a>
+                <a href="javascript:postSupervisionChanges('@routes.SupervisionController.supervisionPost()');">Änderungen übernehmen</a>
             </div>
         </div>
 
@@ -30,7 +30,7 @@
                 <div class="col-md-9">
                     <h3>Übersicht für @helpers.students.studentName(student)</h3>
                     @Students.labworksForStudent(student).map{labwork =>
-                        <h3><a href="@routes.LabworkManagementController.edit(labwork._1.value)">@helpers.labworks.labworkName(labwork._1)</a>
+                        <h3> <a href="@routes.LabworkManagementController.edit(labwork._1.value)"> @helpers.labworks.labworkName(labwork._1)</a>
                             @helpers.students.groupForStudent(student, labwork._1)
                         </h3>
                         @helpers.students.detailedStudentSchedule(student, labwork._1, form)
@@ -42,6 +42,13 @@
 
         <script>
             $(document ).ready(function(){
+
+                $("#alternateDateSaveButton").click(function(e){
+                    e.preventDefault()
+
+                });
+
+
                 $(window).bind('beforeunload', function(){
                 if(dirty){
                 $("#saveButton").show();

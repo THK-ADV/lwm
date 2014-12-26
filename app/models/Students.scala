@@ -170,34 +170,40 @@ object Students {
   def dateCountNotPassed(student: Resource, group: Resource): Int = {
 
     s"""
-        prefix lwm: <http://lwm.gm.fh-koeln.de/>
+       prefix lwm: <http://lwm.gm.fh-koeln.de/>
 
-        select (count(?passed) as ?count) where {
-          {
-            select ?passed where {
+       select (count(?notPassed) as ?count) where {
+         {
+         ### not passed dates
+           select ?notPassed where {
               $student lwm:hasScheduleAssociation ?association .
               ?association lwm:hasGroup $group .
               ?association lwm:hasAssignmentDate ?date .
 
-              ?association lwm:hasAlternateScheduleAssociation ?alternate .
-              ?alternate lwm:lwm:hasAssignmentDate ?alternateDate .
-              optional{?association lwm:hasPassed ?passed} .
+              optional{?association lwm:hasPassed ?notPassed} .
+              filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}") .
+              filter(?notPassed = "false") .
+              filter not exists {?association lwm:hasAlternateScheduleAssociation ?alternate } .
+            }
+         } union {
+         ### Alternate dates that are not passed
+           select ?notPassed where {
+                  $student lwm:hasScheduleAssociation ?association .
+                  ?association lwm:hasGroup $group .
+                  ?association lwm:hasAlternateScheduleAssociation ?alternate .
+                  ?alternate lwm:hasAssignmentDate ?alternatedate .
+                  optional{?association lwm:hasPassed ?notPassed} .
 
-              filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")
-              filter(?passed = "false")
-            }
-          } union {
-            select ?passed where {
-              $student lwm:hasScheduleAssociation ?association .
-              ?association lwm:hasGroup $group .
-              ?association lwm:hasAssignmentDate ?date .
-              optional{?association lwm:hasPassed ?passed} .
-              filter exists (?association lwm:hasAlternateScheduleAssociation ?alternate )
-              filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
-              filter(?passed = "false")
-            }
-          }
-        }
+                  filter(?notPassed = "false") .
+                  filter exists {
+                     ?association lwm:hasAlternateScheduleAssociation ?alternate .
+                     ?alternate lwm:hasAssignmentDate ?alternatedate .
+                  } .
+                  filter(?alternatedate < "${LocalDate.now().toString("yyyy-MM-dd")}") .
+           }
+           }
+         }
+
      """.stripMargin.execSelect().headOption.map { solution ⇒
       solution.data.get("count").map(_.asLiteral().getInt)
     }.flatten.getOrElse(0)

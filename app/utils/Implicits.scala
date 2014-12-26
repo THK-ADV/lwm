@@ -17,6 +17,7 @@ object Implicits {
     import scala.collection.JavaConverters._
 
     def execSelect()(implicit queryHost: QueryHost): List[QuerySolution] = {
+      println(string)
       val results = QueryExecutionFactory.sparqlService(queryHost.host, string).execSelect().asScala
       results.map { solution ⇒
         val data = solution.varNames().asScala.map { variable ⇒

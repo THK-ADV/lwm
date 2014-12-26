@@ -7,6 +7,7 @@ import org.joda.time.{ LocalDate, DateTime }
 import org.pegdown.PegDownProcessor
 import play.api.Play
 import play.api.libs.concurrent.Akka
+import play.api.libs.json.{ JsBoolean, JsObject }
 import play.api.mvc.{ Action, Controller }
 import play.twirl.api.Html
 import utils.Security.Authentication
@@ -61,7 +62,9 @@ object LabworkManagementController extends Controller with Authentication with T
         }
       }
 
-      Ok("")
+      Ok(JsObject(Seq(
+        "hidden" -> JsBoolean(hide.getOrElse(false))
+      )))
     }
   }
 

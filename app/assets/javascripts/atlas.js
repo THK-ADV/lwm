@@ -1,13 +1,22 @@
-function toggleHiddenStatus(labworkUri, studentUri, studentHash, status){
+var hideStates = {};
 
-    ajaxRequest("/administration/hideStates", "POST", "application/json", {student: studentUri, labwork: labworkUri, hide: !status}, function(data){
-        if(status){
-            $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-open");
-            $("#" + studentHash).removeClass();
+function initHideState(studentUri, status){
+    hideStates[studentUri] = {
+        hidden: status
+    };
+}
 
-        }else{
+function toggleHiddenStatus(labworkUri, studentUri, studentHash){
+
+    ajaxRequest("/administration/hideStates", "POST", "application/json", {student: studentUri, labwork: labworkUri, hide: !hideStates[studentUri].hidden}, function(data){
+        if(data.hidden){
+            hideStates[studentUri].hidden = true;
             $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-close");
             $("#" + studentHash).addClass("danger");
+        }else{
+            hideStates[studentUri].hidden = false;
+            $("#eye" + studentHash).removeClass().addClass("glyphicon glyphicon-eye-open");
+            $("#" + studentHash).removeClass();
         }
     } );
 }
@@ -160,12 +169,22 @@ function swapGroups(index, student, oldGroup) {
     ajaxRequest("/administration/groups/swap", "POST", "application/json", {student: student, old: oldGroup, new: newGroup}, reload);
 }
 
-function removeAlternateDate(student,oldSchedule, schedule, hash) {
+function removeAlternateDate(student, oldSchedule, schedule, hash) {
     $("#new" + hash).remove();
     $("#rm" + hash).remove();
     $("#old" + hash).removeClass().addClass("text-success");
-    ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student, schedule: schedule, oldSchedule: oldSchedule}, {});
+    ajaxRequest("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student, schedule: schedule, oldSchedule: oldSchedule}, function(data){
+        alert(JSON.stringify(data));
+    });
 
+}
+
+function postAlternateDate(student, oldSchedule, hash){
+    var schedule = $("#newSchedule" + hash + " option:selected").val();
+    ajaxRequest("/students/overview/"+encodeURIComponent(oldSchedule), "POST", "application/json", {student: student, schedule: schedule, oldSchedule: oldSchedule}, function(data){
+        $("#dates" + hash).append("<br /> <span>" + $("#newSchedule" + hash + " option:selected").text() + "</span>");
+        $("#" + hash).modal('hide');
+    });
 }
 
 function removeStatement(resource, property, rdfnode) {
@@ -323,7 +342,6 @@ function passedSwitch(association, id, user) {
     localState[association].passed = !localState[association].passed;
 
     if(localState[association].passed == localState[association].ss_passed && localState[association].attended == localState[association].ss_attended){
-        alert("changing state");
         localState[association].dirty = false;
     }else{
         dirty = true;
@@ -352,20 +370,22 @@ function postSupervisionChanges(url){
     var temp = [];
 
     keys.forEach(function(entry) {
-        if(entry.dirty){
+        if(localState[entry].dirty){
             temp.push(localState[entry]);
         }
     });
 
     var postData = {
-        "keys" : keys,
         "data" : temp
     };
 
     $("#connectionWarning").hide();
     $("#saveButton").hide();
 
-    ajaxRequest(url, "POST", "application/json",postData, {});
+
+
+    ajaxRequest(url, "POST", "application/json",postData, function(data){
+    });
 }
 
 function ajaxRequest(url, type, cType, data, funct) {
@@ -379,7 +399,7 @@ function ajaxRequest(url, type, cType, data, funct) {
             funct(message);
         },
         error: function (error) {
-            console.log(error);
+            console.log(JSON.stringify(error));
         }
     });
 }

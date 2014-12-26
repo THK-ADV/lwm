@@ -1,12 +1,18 @@
 @(student: Resource, oldSchedule: Resource, group: Resource, groupId: String, orderId: String,form: Form[AlternateAssociationFormModel])
 @import utils.semantic.Resource
 
-@helper.form(action = routes.StudentInformationController.postAlternateDate(student.value)) {
-    <input type="hidden" name="oldSchedule" value="@oldSchedule.toString">
-    @helper.select(form("newSchedule"),ScheduleAssociations.getAlternateDates(oldSchedule, group, groupId, orderId) , '_label -> "Neuer Termin:")
+    <form action="javascript:postAlternateDate('@student.value', '@oldSchedule.value', @oldSchedule.value.hashCode);">
+        <input id="oldSchedule@{oldSchedule.value.hashCode}" type="hidden" name="oldSchedule" value="@oldSchedule.toString">
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-        <button type="submit" class="btn btn-primary">Speichern</button>
-    </div>
-}
+        <label for="newSchedule@{oldSchedule.value.hashCode}">Neuer Termin:</label>
+        <select id="newSchedule@{oldSchedule.value.hashCode}" name="newSchedule" >
+        @ScheduleAssociations.getAlternateDates(oldSchedule, group, groupId, orderId).map{entry =>
+            <option value="@entry._1" >@entry._2</option>
+        }
+        </select>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            <button id="alternateDateSaveButton" type="submit" class="btn btn-primary">Speichern</button>
+        </div>
+    </form>

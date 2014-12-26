@@ -144,7 +144,7 @@ POST          /currentUser                                            controller
 
 GET           /administration/transactions                            controllers.TransactionsController.index()
 
-POST          /administration/hideStates                     controllers.LabworkManagementController.hide()
+POST          /administration/hideStates                              controllers.LabworkManagementController.hide()
 
 
 # For test purposes only

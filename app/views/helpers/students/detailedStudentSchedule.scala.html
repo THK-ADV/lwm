@@ -40,6 +40,8 @@
 
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
     var lines = Vector("<table class=\"table\"><tr><th>Termin</th><th>Anwesend</th><th>Bestanden</th><th>Optionen</th></tr>")
+    var modals = List.empty[String]
+    var initScripts = List.empty[String]
     while(result.hasNext){
         val solution = result.next()
         val date = solution.getLiteral("assignmentDate").getString
@@ -76,7 +78,7 @@
                |</tr>""".stripMargin
         }else{
             s"""<tr>
-               |<td><span class="text-success">$date, $time Uhr, Raum $room</span></td>
+               |<td id="dates${scheduleRes.hashCode}"><span id="old${scheduleRes.hashCode}" class="text-success">$date, $time Uhr, Raum $room</span><br /></td>
                |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
                |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
                |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
@@ -95,15 +97,22 @@
                                 <h4 class="modal-title" id="myModalLabel">Ersatztermin angeben</h4>
                             </div>
                             <div class="modal-body">
-                            ${helpers.labworks.alternateDateForm(student,Resource(scheduleRes),Resource(groupRes) ,groupId, orderId, form).toString()}
+                            ${helpers.labworks.alternateDateForm(student,Resource(scheduleRes),Resource(groupRes), groupId, orderId, form).toString}
                             </div>
 
                         </div>
                     </div>
                 </div>
            """.stripMargin
-        lines = lines :+ row :+ modal :+ script
+
+        initScripts = script :: initScripts
+        modals = modal :: modals
+
+        lines = lines :+ row
     }
     lines = lines :+ "</table>"
+    lines = lines ++ initScripts ++ modals
+
+
     Html(lines.mkString("\n"))
 }

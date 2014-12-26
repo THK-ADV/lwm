@@ -14,7 +14,7 @@
        """.stripMargin
 
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect().nextSolution()
-    if(result.getResource("group") == null || result.getLiteral("id") == null) "" else Html(s"<a href='${routes.GroupManagementController.index(labwork.value, URLDecoder.decode(result.getResource("group").getURI, "UTF-8"))}>'<strong> - Gruppe ${URLDecoder.decode(result.getLiteral("id").getString, "UTF-8")}</strong></a>")
+    if(result.getResource("group") == null || result.getLiteral("id") == null) "" else Html(s"<a href='${routes.GroupManagementController.index(labwork.value, URLDecoder.decode(result.getResource("group").getURI, "UTF-8"))}>'><strong> - Gruppe ${URLDecoder.decode(result.getLiteral("id").getString, "UTF-8")}</strong></a>")
 
 
 }

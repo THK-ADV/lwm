@@ -23,12 +23,15 @@ object SupervisionChangeWrites {
   import play.api.libs.json.Reads._
   import play.api.libs.functional.syntax._
 
-  case class SupervisionChange(association: String, attended: Boolean, passed: Boolean)
+  case class SupervisionChange(association: String, attended: Boolean, passed: Boolean, ss_passed: Boolean, ss_attended: Boolean, dirty: Boolean)
 
   implicit val supervisionChangeReads: Reads[SupervisionChange] = (
     (JsPath \ "association").read[String] and
     (JsPath \ "attended").read[Boolean] and
-    (JsPath \ "passed").read[Boolean]
+    (JsPath \ "passed").read[Boolean] and
+    (JsPath \ "ss_passed").read[Boolean] and
+    (JsPath \ "ss_attended").read[Boolean] and
+    (JsPath \ "dirty").read[Boolean]
   )(SupervisionChange.apply _)
 }
 
@@ -76,6 +79,7 @@ object SupervisionController extends Controller with Authentication with Transac
     Action(parse.json) { implicit request ⇒
 
       val json = request.body
+
       (json \ "data").as[List[JsValue]].map(_.asOpt[SupervisionChange]).flatten.map { entry ⇒
         val i = Individual(Resource(entry.association))
         i.props.get(LWM.hasAttended).map { attendedList ⇒

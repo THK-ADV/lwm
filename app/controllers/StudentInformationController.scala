@@ -1,6 +1,7 @@
 package controllers
 
 import models.{ ScheduleAssociations, LabWorks }
+import play.api.libs.json.{ JsString, JsObject }
 import play.api.mvc.{ Result, Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
@@ -18,42 +19,46 @@ object StudentInformationController extends Controller with Authentication with 
   override val system = Akka.system()
 
   def showInformation(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { implicit request ⇒
-      Future.successful(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
+    Action { implicit request ⇒
+      Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm))
     }
   }
 
   def postAlternateDate(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action.async { implicit request ⇒
-      ScheduleAssociations.Forms.alternateForm.bindFromRequest.fold(
-        formWithErrors ⇒ {
-          Future.successful(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
-        },
-        dateChange ⇒ {
-          val p = Promise[Result]()
-          val schedule = Individual(Resource(dateChange.oldSchedule))
-          val newSchedule = Resource(dateChange.newSchedule)
-          schedule.props.get(LWM.hasAlternateScheduleAssociation) match {
-            case None ⇒
-              schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
-              p.success(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
-            case Some(list) ⇒
-              if (list.size > 0) {
-                list.map { l ⇒
-                  schedule.remove(LWM.hasAlternateScheduleAssociation, l)
-                }
-                schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
-                p.success(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
-              } else {
-                schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
-                p.success(Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)))
-              }
-              modifyTransaction(session.user, schedule.uri, s"Alternate Schedule entry added to ${schedule.uri} by ${session.user}")
-          }
+    Action.async(parse.json) { implicit request ⇒
+      val p = Promise[Result]()
+      val os = (request.body \ "oldSchedule").as[String]
+      val ns = (request.body \ "schedule").as[String]
+      val student = (request.body \ "student").as[String]
 
-          p.future
-        }
-      )
+      val schedule = Individual(Resource(os))
+      val newSchedule = Resource(ns)
+      schedule.props.get(LWM.hasAlternateScheduleAssociation) match {
+        case None ⇒
+          schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
+          modifyTransaction(session.user, schedule.uri, s"Alternate Schedule entry added to ${schedule.uri} of Student $student by ${session.user}")
+          p.success(Ok(JsObject(Seq(
+            "status" -> JsString("ok")
+          ))))
+        case Some(list) ⇒
+          if (list.size > 0) {
+            list.map { l ⇒
+              schedule.remove(LWM.hasAlternateScheduleAssociation, l)
+            }
+            schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
+            p.success(Ok(JsObject(Seq(
+              "status" -> JsString("ok")
+            ))))
+          } else {
+            schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
+            p.success(Ok(JsObject(Seq(
+              "status" -> JsString("ok")
+            ))))
+          }
+          modifyTransaction(session.user, schedule.uri, s"Alternate Schedule entry added to ${schedule.uri} of Student $student by ${session.user}")
+      }
+
+      p.future
     }
   }
 
