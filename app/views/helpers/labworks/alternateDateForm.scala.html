@@ -1,7 +1,7 @@
 @(student: Resource, oldSchedule: Resource, group: Resource, groupId: String, orderId: String,form: Form[AlternateAssociationFormModel])
 @import utils.semantic.Resource
 
-    <form action="javascript:postAlternateDate('@student.value', '@oldSchedule.value', @oldSchedule.value.hashCode);">
+    <div class="input-group">
         <input id="oldSchedule@{oldSchedule.value.hashCode}" type="hidden" name="oldSchedule" value="@oldSchedule.toString">
 
         <label for="newSchedule@{oldSchedule.value.hashCode}">Neuer Termin:</label>
@@ -13,6 +13,12 @@
 
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-            <button id="alternateDateSaveButton" type="submit" class="btn btn-primary">Speichern</button>
+            <button id="alternateDateSaveButton@{oldSchedule.value.hashCode}" type="button" class="btn btn-primary">Speichern</button>
         </div>
-    </form>
+    </div>
+
+    <script>
+        $("#alternateDateSaveButton@{oldSchedule.value.hashCode}").click(function(){
+        postAlternateDate('@student.value', '@oldSchedule.value', @oldSchedule.value.hashCode);
+    });
+    </script>
