@@ -1,7 +1,23 @@
 @()
+<script>
+    $(document).ready(function(){
+        $("#searchButton").click(function(e){
+            e.preventDefault();
+            completeSearch();
+        });
 
-<div class="input-group">
-    <label class="input-group-addon">Search: </label>
-    <input class="form-control" type="text" id="completeSearch">
-    <a href="javascript: completeSearch()" class="input-group-addon glyphicon glyphicon-search"></a>
+        $("#completeSearch" ).keypress(function(e){
+            var key = e.which;
+            if(key == 13){
+                completeSearch();
+            }
+        });
+    });
+</script>
+
+<div class="input-group" role="search">
+    <input type="text" id="completeSearch" class="form-control" placeholder="Suche nach...">
+    <span class="input-group-btn">
+        <button class="btn btn-default glyphicon glyphicon-search" id="searchButton" type="button"></button>
+    </span>
 </div>
