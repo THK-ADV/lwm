@@ -8,13 +8,15 @@ import akka.actor.Actor.Receive
 import com.hp.hpl.jena.query.DatasetAccessorFactory
 import org.joda.time.LocalDateTime
 
+import scala.concurrent.duration.FiniteDuration
+
 object OntologyDumperActor {
   case object DumpRequest
 
-  def props(dataUrl: String) = Props(new OntologyDumperActor(dataUrl))
+  def props(dataUrl: String, interval: FiniteDuration) = Props(new OntologyDumperActor(dataUrl, interval))
 }
 
-class OntologyDumperActor(dataUrl: String) extends Actor {
+class OntologyDumperActor(dataUrl: String, interval: FiniteDuration) extends Actor {
   import scala.concurrent.duration._
   import OntologyDumperActor._
   import context.dispatcher
@@ -25,7 +27,7 @@ class OntologyDumperActor(dataUrl: String) extends Actor {
     Files.createDirectory(folder.toPath)
   }
 
-  context.system.scheduler.schedule(3.seconds, 5.minutes, self, DumpRequest)
+  context.system.scheduler.schedule(3.seconds, interval, self, DumpRequest)
   override def receive: Receive = {
     case DumpRequest ⇒
       val unionModel = dataAccess.getModel

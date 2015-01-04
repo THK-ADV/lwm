@@ -33,7 +33,7 @@ object Global extends GlobalSettings {
     Akka.system.actorOf(SessionHandler.props(app.configuration), "sessions")
     Akka.system.actorOf(UserInfoManagement.props(app.configuration), "user-info")
     // Akka.system.actorOf(EmailHandler.props(app.configuration), "emails")
-    Akka.system.actorOf(OntologyDumperActor.props(dataInf), "dumper")
+    Akka.system.actorOf(OntologyDumperActor.props(dataInf, app.configuration.getInt("lwm.backup.interval").getOrElse(30).minutes), "dumper")
     Akka.system.actorOf(TransactionsLoggerActor.props(), "logger")
     Logger.debug("Application has started")
   }
