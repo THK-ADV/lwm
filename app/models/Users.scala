@@ -2,9 +2,11 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
+import utils.{ QueryHost, UpdateHost }
 import utils.semantic._
+import utils.Implicits._
 
-import scala.concurrent.{ Promise, Future }
+import scala.concurrent.{ Promise, Future, blocking }
 
 object UserForms {
   val loginForm = Form(
@@ -45,43 +47,60 @@ case class User(id: String,
                 phone: String)
 
 object Users {
-  import utils.Global._
+
   import utils.semantic.Vocabulary._
+  import utils.Global.lwmNamespace
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(user: User): Future[Individual] = {
-    val resource = ResourceUtils.createResource(lwmNamespace)
-    val statements = List(
-      Statement(resource, RDF.typ, LWM.User),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGmId, StringLiteral(user.id)),
-      Statement(resource, FOAF.firstName, StringLiteral(user.firstname)),
-      Statement(resource, FOAF.lastName, StringLiteral(user.lastname)),
-      Statement(resource, RDFS.label, StringLiteral(s"${user.firstname} ${user.lastname}")),
-      Statement(resource, NCO.phoneNumber, StringLiteral(user.phone)),
-      Statement(resource, FOAF.mbox, StringLiteral(user.email)),
-      Statement(resource, RDFS.label, StringLiteral(s"${user.firstname} ${user.lastname}"))
-    )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
-      Individual(resource)
+  def create(user: User)(implicit updateHost: UpdateHost): Future[Resource] = {
+
+    val resource = Resource(s"${lwmNamespace}users/${user.id}")
+
+    val p = Promise[Resource]()
+
+    blocking {
+      s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |prefix owl: <http://www.w3.org/2002/07/owl#>
+      |prefix foaf: <http://xmlns.com/foaf/0.1/>
+      |prefix nco: <http://www.semanticdesktop.org/ontologies/nco#>
+      |
+      |
+      |insert data {
+      |    $resource rdf:type lwm:User .
+      |    $resource lwm:hasGmId "${user.id}" .
+      |    $resource foaf:lastName "${user.lastname}" .
+      |    $resource foaf:firstName "${user.firstname}" .
+      |    $resource rdfs:label "${user.firstname} ${user.lastname}" .
+      |    $resource nco:phoneNumber "${user.phone}" .
+      |    $resource foaf:mbox "${user.email}" .
+      |}
+    """.stripMargin.execUpdate()
+      p.success(resource)
     }
+
+    p.future
+
   }
 
-  def delete(user: User): Future[User] = {
-    val maybeUser = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.User, Vocabulary.LWM.hasGmId, StringLiteral(user.id))
-    val resultFuture = sparqlExecutionContext.executeQuery(maybeUser)
-    val p = Promise[User]()
-    resultFuture.map { result ⇒
-      val resources = SPARQLTools.statementsFromString(result).map(u ⇒ u.s)
-      resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(user) }
-      }
+  def deleteNew(userId: String)(implicit updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${lwmNamespace}users/$userId")
+
+    val p = Promise[Resource]()
+
+    blocking {
+      SPARQLBuilder.removeIndividual(resource).execUpdate()
+      p.success(resource)
     }
+
     p.future
   }
 
   def delete(resource: Resource): Future[Resource] = {
+    import utils.Global._
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(RDF.typ).contains(LWM.User)) {
@@ -91,6 +110,7 @@ object Users {
   }
 
   def all(): Future[List[Individual]] = {
+    import utils.Global._
     val query = s"""
          |select ?s (${RDF.typ} as ?p) (${LWM.User} as ?o) where {
          | ?s ${RDF.typ} ${LWM.User} .
@@ -102,9 +122,13 @@ object Users {
     }
   }
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
+  def exists(uid: String): Future[Boolean] = {
+    import utils.Global._
+    sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
+  }
 
   def substituteUserMapping(userId: String) = {
+    import utils.Global._
     val query =
       s"""
           |select (?user as ?s) (${RDFS.label} as ?p) (?name as ?o) where {
@@ -120,6 +144,7 @@ object Users {
   }
 
   def userFormMapping() = {
+    import utils.Global._
     val query =
       s"""
           |select (?user as ?s) (${RDFS.label} as ?p) (?name as ?o) where {
@@ -131,5 +156,17 @@ object Users {
     SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
       statement.s.toString.replaceAll("<", "").replaceAll(">", "") -> statement.o.toString
     }
+  }
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    import utils.Implicits._
+    """
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |
+      |select (count(distinct ?user) as ?count) {
+      |   ?user rdf:type lwm:User
+      |}
+    """.stripMargin.execSelect().head.data("count").asLiteral().getInt
   }
 }

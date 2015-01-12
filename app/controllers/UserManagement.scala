@@ -14,6 +14,7 @@ import scala.util.control.NonFatal
 object UserManagement extends Controller with Authentication {
 
   import scala.concurrent.ExecutionContext.Implicits.global
+  import utils.Global._
   import scala.concurrent.duration._
 
   private implicit val timeout = Timeout(5.seconds)
