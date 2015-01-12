@@ -1,7 +1,7 @@
 @(group: Resource)
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.rdfs
 @import utils.semantic._
-@import Vocabulary.LWM
+@import Vocabulary.lwm
 @import utils.Global._
 
 
@@ -9,21 +9,21 @@
 @{
     val query =
         s"""
-         |select (?group as ?s) (${LWM.hasSupervisor} as ?p) (?name as ?o) where {
-         | ?group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
-         | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
-         | ?assignmentAssociation ${LWM.hasSupervisor} ?supervisor .
-         | ?supervisor ${RDFS.label} ?name
+         |select (?group as ?s) (${lwm.hasSupervisor} as ?p) (?name as ?o) where {
+         | ?group ${lwm.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?assignmentAssociation ${lwm.hasSupervisor} ?supervisor .
+         | ?supervisor ${rdfs.label} ?name
          |}
        """.stripMargin
 
     val query2 =
         s"""
-         |select (?group as ?s) (${LWM.hasSupervisor} as ?p) (?name as ?o) where {
-         | ?group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
-         | ?scheduleAssociation ${LWM.hasSubstitution} ?substitution .
-         | ?substitution ${LWM.hasSubstitute} ?substitute .
-         | ?substitute ${RDFS.label} ?name
+         |select (?group as ?s) (${lwm.hasSupervisor} as ?p) (?name as ?o) where {
+         | ?group ${lwm.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${lwm.hasSubstitution} ?substitution .
+         | ?substitution ${lwm.hasSubstitute} ?substitute .
+         | ?substitute ${rdfs.label} ?name
          |}
        """.stripMargin
 

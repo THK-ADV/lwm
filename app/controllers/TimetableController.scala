@@ -4,7 +4,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.SemesterDatesGenerator
-import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ Individual, Resource }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -21,8 +21,8 @@ object TimetableController extends Controller with Authentication {
         rooms ← Rooms.all()
       } yield {
         val labWorkI = Individual(Resource(labworkid))
-        val timetable = Individual((for (i ← labWorkI.props(LWM.hasTimetable)) yield i.asResource().get).head)
-        val entries = timetable.props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r))
+        val timetable = Individual((for (i ← labWorkI.props(lwm.hasTimetable)) yield i.asResource().get).head)
+        val entries = timetable.props.getOrElse(lwm.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r))
 
         Ok(views.html.timetable_management(
           labWorkI,
@@ -42,8 +42,8 @@ object TimetableController extends Controller with Authentication {
           val maybeLabworkid = (request.body \ "id").asOpt[String]
           val r = maybeLabworkid.map { labworkid ⇒
             val i = Individual(Resource(labworkid))
-            val maybeSemester = i.props.get(LWM.hasSemester)
-            val maybeTimetable = i.props.get(LWM.hasTimetable)
+            val maybeSemester = i.props.get(lwm.hasSemester)
+            val maybeTimetable = i.props.get(lwm.hasTimetable)
             val scheduleFuture = for {
               timetableList ← maybeTimetable
               semesterList ← maybeSemester
@@ -74,7 +74,7 @@ object TimetableController extends Controller with Authentication {
                   Individual(Resource(labworkid)),
                   supervisors.toList,
                   TimeSlots.slotTimeMap.values.toList.sorted,
-                  Individual(e.timetable).props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r)),
+                  Individual(e.timetable).props.getOrElse(lwm.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
                   formWithErrors))
               }
@@ -91,7 +91,7 @@ object TimetableController extends Controller with Authentication {
   def convert(id: String, entry: TimetableEntryFormEntry): Future[TimetableEntry] = {
     for (s ← Users.all()) yield {
       val supervisors = s.filter(i ⇒ i.uri.value == entry.supervisors).map(_.uri).toList
-      val timetableId = Individual(Resource(id)).props.getOrElse(LWM.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
+      val timetableId = Individual(Resource(id)).props.getOrElse(lwm.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
       TimetableEntry(
         Weekdays.workWeek.values.filter(p ⇒ p.label == entry.day).head,
         Time(entry.startTime.split(":")(0).toInt, entry.startTime.split(":")(1).toInt),
@@ -126,26 +126,26 @@ object TimetableController extends Controller with Authentication {
                 rooms ← Rooms.all()
               } yield {
                 BadRequest(views.html.timetable_management(
-                  Individual(Resource(ti.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value)),
+                  Individual(Resource(ti.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head.value)),
                   supervisors.toList,
                   TimeSlots.slotTimeMap.values.toList.sorted,
-                  ti.props.getOrElse(LWM.hasTimetableEntry, List(Resource(""))).map(_.asResource().get).map(r ⇒ Individual(r)),
+                  ti.props.getOrElse(lwm.hasTimetableEntry, List(Resource(""))).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
                   TimeTableForm.timetableForm))
               }
             },
             entry ⇒ {
               for {
-                ss ← ei.props.get(LWM.hasSupervisor)
-                rs ← ei.props.get(LWM.hasRoom)
+                ss ← ei.props.get(lwm.hasSupervisor)
+                rs ← ei.props.get(lwm.hasRoom)
               } yield {
-                ss.map(s ⇒ ei.remove(LWM.hasSupervisor, s))
-                rs.map(r ⇒ ei.remove(LWM.hasRoom, r))
+                ss.map(s ⇒ ei.remove(lwm.hasSupervisor, s))
+                rs.map(r ⇒ ei.remove(lwm.hasRoom, r))
               }
-              ei.add(LWM.hasSupervisor, Resource(entry.supervisors))
-              ei.add(LWM.hasRoom, Resource(entry.room))
+              ei.add(lwm.hasSupervisor, Resource(entry.supervisors))
+              ei.add(lwm.hasRoom, Resource(entry.room))
 
-              Future.successful(Redirect(routes.TimetableController.index(ti.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value)))
+              Future.successful(Redirect(routes.TimetableController.index(ti.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head.value)))
             }
           )
       }

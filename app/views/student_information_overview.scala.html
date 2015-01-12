@@ -3,7 +3,7 @@
 @import utils.BreadCrumbKeeper.UrlReference
 @import utils.semantic.{Individual, StringLiteral, Resource}
 @import utils.Global._
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.lwm
 <!DOCTYPE html>
 <html>
     @head("Informationen zu ...")
@@ -23,7 +23,7 @@
 
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(Individual(student).props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(Individual(student).props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()

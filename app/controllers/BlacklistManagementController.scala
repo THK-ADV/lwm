@@ -8,7 +8,7 @@ import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Global._
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ LWM, RDFS }
+import utils.semantic.Vocabulary.{ lwm, rdfs }
 import utils.semantic.{ Individual, Resource, SPARQLTools }
 
 import scala.concurrent.Future
@@ -35,9 +35,9 @@ object BlacklistManagementController extends Controller with Authentication {
       import utils.Global._
       val query =
         s"""
-          |select ?s (${RDFS.label} as ?p) ?o where{
-          | <$id> ${LWM.hasSemester} ?s .
-          | ?s ${RDFS.label} ?o .
+          |select ?s (${rdfs.label} as ?p) ?o where{
+          | <$id> ${lwm.hasSemester} ?s .
+          | ?s ${rdfs.label} ?o .
           |}
         """.stripMargin
 
@@ -102,8 +102,8 @@ object BlacklistManagementController extends Controller with Authentication {
 
             val query =
               s"""
-              |select ?s (${RDFS.label} as ?p) ?o where{
-              | ${semester.uri} ${RDFS.label} ?o .
+              |select ?s (${rdfs.label} as ?p) ?o where{
+              | ${semester.uri} ${rdfs.label} ?o .
               |}
             """.stripMargin
 
@@ -138,8 +138,8 @@ object BlacklistManagementController extends Controller with Authentication {
 
             val query =
               s"""
-              |select ?s (${RDFS.label} as ?p) ?o where{
-              | ${semester.uri} ${RDFS.label} ?o .
+              |select ?s (${rdfs.label} as ?p) ?o where{
+              | ${semester.uri} ${rdfs.label} ?o .
               |}
             """.stripMargin
 

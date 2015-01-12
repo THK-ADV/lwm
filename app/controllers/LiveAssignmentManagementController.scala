@@ -9,7 +9,7 @@ import play.libs.Akka
 import play.twirl.api.Html
 import utils.Security.Authentication
 import utils.TransactionSupport
-import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -84,9 +84,9 @@ object LiveAssignmentManagementController extends Controller with Authentication
         val a = Individual(Resource(id))
         val p = new PegDownProcessor()
 
-        val text = a.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.toString
-        val title = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString
-        val example = a.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.toString
+        val text = a.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.toString
+        val title = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.toString
+        val example = a.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.toString
         Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example))))
       }
   }
@@ -99,9 +99,9 @@ object LiveAssignmentManagementController extends Controller with Authentication
           val a = ass(Random.nextInt(asses.size))
           val p = new PegDownProcessor()
 
-          val text = a.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.toString
-          val title = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString
-          val example = a.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.toString
+          val text = a.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.toString
+          val title = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.toString
+          val example = a.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.toString
           Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example))))
         }
       }
@@ -116,19 +116,19 @@ object LiveAssignmentManagementController extends Controller with Authentication
         liveAssignment ⇒ {
           val ass = Individual(Resource(id))
 
-          val title = ass.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
-          val text = ass.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value
-          val hints = ass.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value
-          val topics = ass.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).map {
+          val title = ass.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
+          val text = ass.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value
+          val hints = ass.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.value
+          val topics = ass.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).map {
             topic ⇒
-              ass.remove(LWM.hasTopic, topic)
+              ass.remove(lwm.hasTopic, topic)
           }
 
-          ass.update(RDFS.label, StringLiteral(title), StringLiteral(liveAssignment.title))
-          ass.update(LWM.hasText, StringLiteral(text), StringLiteral(liveAssignment.assignment))
-          ass.update(LWM.hasHints, StringLiteral(hints), StringLiteral(liveAssignment.example))
+          ass.update(rdfs.label, StringLiteral(title), StringLiteral(liveAssignment.title))
+          ass.update(lwm.hasText, StringLiteral(text), StringLiteral(liveAssignment.assignment))
+          ass.update(lwm.hasHints, StringLiteral(hints), StringLiteral(liveAssignment.example))
           liveAssignment.topics.split(",").map { topic ⇒
-            ass.add(LWM.hasTopic, StringLiteral(topic.trim))
+            ass.add(lwm.hasTopic, StringLiteral(topic.trim))
           }
           modifyTransaction(session.user, ass.uri, s"Live Assignment ${ass.uri} modified by ${session.user}")
           Future.successful(Redirect(routes.LiveAssignmentManagementController.index()))

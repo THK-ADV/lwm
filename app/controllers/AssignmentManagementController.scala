@@ -8,7 +8,7 @@ import play.api.Play
 import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDF, RDFS, LWM }
+import utils.semantic.Vocabulary.{ rdf, rdfs, lwm }
 import utils.semantic._
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
@@ -93,13 +93,13 @@ object AssignmentManagementController extends Controller with Authentication {
             },
             a ⇒ {
               system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(i.uri, s"Assignment modified by ${session.user}.")))
-              val maybeId = i.props.get(RDFS.label)
-              val maybeDesc = i.props.get(LWM.hasDescription)
-              val maybeText = i.props.get(LWM.hasText)
-              val maybeGoals = i.props.get(LWM.hasLearningGoals)
-              val maybeHints = i.props.get(LWM.hasHints)
-              val maybeTopics = i.props.get(LWM.hasTopic)
-              val maybeCourses = i.props.get(LWM.hasCourse)
+              val maybeId = i.props.get(rdfs.label)
+              val maybeDesc = i.props.get(lwm.hasDescription)
+              val maybeText = i.props.get(lwm.hasText)
+              val maybeGoals = i.props.get(lwm.hasLearningGoals)
+              val maybeHints = i.props.get(lwm.hasHints)
+              val maybeTopics = i.props.get(lwm.hasTopic)
+              val maybeCourses = i.props.get(lwm.hasCourse)
               for {
                 label ← maybeId
                 description ← maybeDesc
@@ -109,16 +109,16 @@ object AssignmentManagementController extends Controller with Authentication {
                 hints ← maybeHints
                 goals ← maybeGoals
               } yield {
-                label.headOption.map(head ⇒ i.update(RDFS.label, head, StringLiteral(a.heading)))
-                description.headOption.map(head ⇒ i.update(LWM.hasDescription, head, StringLiteral(a.description)))
-                text.headOption.map(head ⇒ i.update(LWM.hasText, head, StringLiteral(a.text)))
-                hints.headOption.map(head ⇒ i.update(LWM.hasHints, head, StringLiteral(a.hints)))
-                goals.headOption.map(head ⇒ i.update(LWM.hasLearningGoals, head, StringLiteral(a.goals)))
-                topics.map(topic ⇒ i.remove(LWM.hasTopic, topic))
-                if (a.courses.nonEmpty) courses.map(course ⇒ i.remove(LWM.hasCourse, course))
+                label.headOption.map(head ⇒ i.update(rdfs.label, head, StringLiteral(a.heading)))
+                description.headOption.map(head ⇒ i.update(lwm.hasDescription, head, StringLiteral(a.description)))
+                text.headOption.map(head ⇒ i.update(lwm.hasText, head, StringLiteral(a.text)))
+                hints.headOption.map(head ⇒ i.update(lwm.hasHints, head, StringLiteral(a.hints)))
+                goals.headOption.map(head ⇒ i.update(lwm.hasLearningGoals, head, StringLiteral(a.goals)))
+                topics.map(topic ⇒ i.remove(lwm.hasTopic, topic))
+                if (a.courses.nonEmpty) courses.map(course ⇒ i.remove(lwm.hasCourse, course))
               }
-              a.topics.split(",").map(t ⇒ i.add(LWM.hasTopic, StringLiteral(t)))
-              a.courses.map(c ⇒ i.add(LWM.hasCourse, Resource(c)))
+              a.topics.split(",").map(t ⇒ i.add(lwm.hasTopic, StringLiteral(t)))
+              a.courses.map(c ⇒ i.add(lwm.hasCourse, Resource(c)))
               Future.successful(Redirect(routes.AssignmentManagementController.index()))
             }
           )
@@ -141,9 +141,9 @@ object AssignmentManagementController extends Controller with Authentication {
             a ⇒ {
               val query =
                 s"""
-                |select ?s (${LWM.hasAssignment} as ?p) (<$assignmentid> as ?o) where {
-                | ?s ${RDF.typ} ${LWM.AssignmentSolution} .
-                | ?s ${LWM.hasAssignment} <$assignmentid>
+                |select ?s (${lwm.hasAssignment} as ?p) (<$assignmentid> as ?o) where {
+                | ?s ${rdf.typ} ${lwm.AssignmentSolution} .
+                | ?s ${lwm.hasAssignment} <$assignmentid>
                 | }
                 """.stripMargin
 
@@ -188,8 +188,8 @@ object AssignmentManagementController extends Controller with Authentication {
             a ⇒ {
               val i = Individual(Resource(associationid))
               system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Assignment added to $labworkid by ${session.user}.")))
-              i.add(LWM.hasAssignment, Resource(a.assignment))
-              i.add(LWM.hasPreparationTime, StringLiteral(s"${
+              i.add(lwm.hasAssignment, Resource(a.assignment))
+              i.add(lwm.hasPreparationTime, StringLiteral(s"${
                 a.preparationTime
               }"))
               Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
@@ -205,14 +205,14 @@ object AssignmentManagementController extends Controller with Authentication {
           val labworkid = (request.body \ "lId").as[String]
           val associationid = (request.body \ "aId").as[String]
           val i = Individual(Resource(associationid))
-          i.props.get(LWM.hasAssignment).map { rList ⇒
+          i.props.get(lwm.hasAssignment).map { rList ⇒
             rList.map { a ⇒
-              i.remove(LWM.hasAssignment, a)
+              i.remove(lwm.hasAssignment, a)
             }
           }
-          i.props.get(LWM.hasPreparationTime).map { rList ⇒
+          i.props.get(lwm.hasPreparationTime).map { rList ⇒
             rList.map { a ⇒
-              i.remove(LWM.hasPreparationTime, a)
+              i.remove(lwm.hasPreparationTime, a)
             }
           }
           system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Assignment removed from $labworkid by ${session.user}.")))
@@ -227,12 +227,12 @@ object AssignmentManagementController extends Controller with Authentication {
           val i = Individual(Resource(assignment))
           val p = new PegDownProcessor()
 
-          val text = p.markdownToHtml(i.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value)
-          val hints = p.markdownToHtml(i.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value)
-          val goals = p.markdownToHtml(i.props.getOrElse(LWM.hasLearningGoals, List(StringLiteral(""))).head.value)
-          val description = p.markdownToHtml(i.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
-          val label = i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
-          val topics = i.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).head.value
+          val text = p.markdownToHtml(i.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value)
+          val hints = p.markdownToHtml(i.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.value)
+          val goals = p.markdownToHtml(i.props.getOrElse(lwm.hasLearningGoals, List(StringLiteral(""))).head.value)
+          val description = p.markdownToHtml(i.props.getOrElse(lwm.hasDescription, List(StringLiteral(""))).head.value)
+          val label = i.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
+          val topics = i.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).head.value
           Future.successful(Ok(views.html.assignment_export(label, Html.apply(description), Html.apply(text), Html.apply(hints), Html.apply(goals), topics)))
 
       }
@@ -247,9 +247,9 @@ object AssignmentManagementController extends Controller with Authentication {
 
           val query =
             s"""
-                |select ?s (${LWM.hasAssignment} as ?p) (<$assignmentid> as ?o) where {
-                | ?s ${RDF.typ} ${LWM.AssignmentSolution} .
-                | ?s ${LWM.hasAssignment} <$assignmentid>
+                |select ?s (${lwm.hasAssignment} as ?p) (<$assignmentid> as ?o) where {
+                | ?s ${rdf.typ} ${lwm.AssignmentSolution} .
+                | ?s ${lwm.hasAssignment} <$assignmentid>
                 | }
                 """.stripMargin
 
@@ -259,9 +259,9 @@ object AssignmentManagementController extends Controller with Authentication {
           }
 
           solutionFuture.map { s ⇒
-            val name = p.markdownToHtml(s.head.props.getOrElse(LWM.hasFileName, List(StringLiteral(""))).head.value)
-            val text = p.markdownToHtml(s.head.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value)
-            val label = i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+            val name = p.markdownToHtml(s.head.props.getOrElse(lwm.hasFileName, List(StringLiteral(""))).head.value)
+            val text = p.markdownToHtml(s.head.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value)
+            val label = i.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
             Ok(views.html.assignment_solution_export(label, Html(name), Html(text)))
           }
 

@@ -26,11 +26,11 @@ object Transactions {
 
     Actions.create(transaction.action).flatMap { action ⇒
       val statements = List(
-        Statement(transactionResource, RDF.typ, LWM.Transaction),
-        Statement(transactionResource, RDF.typ, OWL.NamedIndividual),
-        Statement(transactionResource, LWM.time, DateTimeLiteral(transaction.time)),
-        Statement(transactionResource, LWM.hasActor, StringLiteral(transaction.actor)),
-        Statement(transactionResource, LWM.actionObject, action.uri)
+        Statement(transactionResource, rdf.typ, lwm.Transaction),
+        Statement(transactionResource, rdf.typ, owl.NamedIndividual),
+        Statement(transactionResource, lwm.time, DateTimeLiteral(transaction.time)),
+        Statement(transactionResource, lwm.hasActor, StringLiteral(transaction.actor)),
+        Statement(transactionResource, lwm.actionObject, action.uri)
       )
 
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
@@ -66,17 +66,17 @@ object Actions {
 
     val typeStatements = action match {
       case ca: CreateAction ⇒
-        Statement(resource, RDF.typ, LWM.Action) :: Statement(resource, RDF.typ, LWM.CreateAction) :: Nil
+        Statement(resource, rdf.typ, lwm.Action) :: Statement(resource, rdf.typ, lwm.CreateAction) :: Nil
       case da: DeleteAction ⇒
-        Statement(resource, RDF.typ, LWM.Action) :: Statement(resource, RDF.typ, LWM.DeleteAction) :: Nil
+        Statement(resource, rdf.typ, lwm.Action) :: Statement(resource, rdf.typ, lwm.DeleteAction) :: Nil
       case ma: ModifyAction ⇒
-        Statement(resource, RDF.typ, LWM.Action) :: Statement(resource, RDF.typ, LWM.ModifyAction) :: Nil
+        Statement(resource, rdf.typ, lwm.Action) :: Statement(resource, rdf.typ, lwm.ModifyAction) :: Nil
     }
 
     val statements = List(
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasDescription, StringLiteral(action.description)),
-      Statement(resource, LWM.actionObject, action.actionObject)
+      Statement(resource, rdf.typ, owl.NamedIndividual),
+      Statement(resource, lwm.hasDescription, StringLiteral(action.description)),
+      Statement(resource, lwm.actionObject, action.actionObject)
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements ::: typeStatements: _*)).map { r ⇒

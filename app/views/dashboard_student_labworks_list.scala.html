@@ -1,6 +1,6 @@
 @(individual: Individual, labworks: List[(Individual, Seq[String])])
 @import utils.semantic.StringLiteral
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.rdfs
 @import utils.semantic.{Individual, Resource}
 
 <div class="panel panel-default">
@@ -13,7 +13,7 @@
                 <div class="row">
                     <div class="col-md-10">
                         <div class="row">
-                            <div class="col-md-4">@a._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.toString</div>
+                            <div class="col-md-4">@a._1.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.toString</div>
                             <div class="col-md-2">Gruppe @group</div>
                             <div class="col-md-6">@helpers.labworks.labworkDegree(a._1.uri)</div>
                         </div>

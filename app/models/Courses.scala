@@ -22,19 +22,19 @@ object Courses {
   def create(course: Course): Future[Individual] = {
     val courseResource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
-      Statement(courseResource, RDF.typ, LWM.Course),
-      Statement(courseResource, RDF.typ, OWL.NamedIndividual),
-      Statement(courseResource, LWM.hasId, StringLiteral(course.id)),
-      Statement(courseResource, RDFS.label, StringLiteral(course.name)),
-      Statement(courseResource, LWM.hasName, StringLiteral(course.name)),
-      Statement(courseResource, LWM.hasDegree, course.degree)
+      Statement(courseResource, rdf.typ, lwm.Course),
+      Statement(courseResource, rdf.typ, owl.NamedIndividual),
+      Statement(courseResource, lwm.hasId, StringLiteral(course.id)),
+      Statement(courseResource, rdfs.label, StringLiteral(course.name)),
+      Statement(courseResource, lwm.hasName, StringLiteral(course.name)),
+      Statement(courseResource, lwm.hasDegree, course.degree)
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(courseResource))
   }
 
   def delete(course: Course): Future[Course] = {
-    val maybeCourse = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Course, Vocabulary.LWM.hasId, StringLiteral(course.id))
+    val maybeCourse = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Course, Vocabulary.lwm.hasId, StringLiteral(course.id))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeCourse)
     val p = Promise[Course]()
     resultFuture.map { result ⇒
@@ -49,7 +49,7 @@ object Courses {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.Course)) {
+    if (individual.props(rdf.typ).contains(lwm.Course)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Course"))
@@ -58,14 +58,14 @@ object Courses {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Course)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.Course)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(course ⇒ Individual(course.s)).toList
     }
   }
 
   def exists(course: Course): Future[Boolean] = {
-    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasId} ${StringLiteral(course.id).toQueryString}}")
-    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasName} ${StringLiteral(course.name).toQueryString}}")
+    val a = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.lwm.hasId} ${StringLiteral(course.id).toQueryString}}")
+    val b = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.lwm.hasName} ${StringLiteral(course.name).toQueryString}}")
     for {
       aRes ← a
       bRes ← b

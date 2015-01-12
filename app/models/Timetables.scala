@@ -5,7 +5,7 @@ import java.util.UUID
 import org.joda.time.{ LocalDate, DateTime }
 import play.api.data.Form
 import play.api.data.Forms._
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.lwm
 import utils.semantic._
 
 import scala.concurrent.{ Future, Promise }
@@ -20,47 +20,47 @@ object Weekdays {
 
   case object Monday extends Weekday {
     override val index = 0
-    override val uri: Resource = LWM.Monday
+    override val uri: Resource = lwm.Monday
     override val label: String = "Montag"
   }
 
   case object Tuesday extends Weekday {
     override val index = 1
-    override val uri: Resource = LWM.Tuesday
+    override val uri: Resource = lwm.Tuesday
     override val label: String = "Dienstag"
   }
 
   case object Wednesday extends Weekday {
     override val index = 2
-    override val uri: Resource = LWM.Wednesday
+    override val uri: Resource = lwm.Wednesday
     override val label: String = "Mittwoch"
   }
 
   case object Thursday extends Weekday {
     override val index = 3
-    override val uri: Resource = LWM.Thursday
+    override val uri: Resource = lwm.Thursday
     override val label: String = "Donnerstag"
   }
 
   case object Friday extends Weekday {
     override val index = 4
-    override val uri: Resource = LWM.Friday
+    override val uri: Resource = lwm.Friday
     override val label: String = "Freitag"
   }
 
   case object Saturday extends Weekday {
     override val index = 5
-    override val uri: Resource = LWM.Saturday
+    override val uri: Resource = lwm.Saturday
     override val label: String = "Samstag"
   }
 
   case object Sunday extends Weekday {
     override val index = 6
-    override val uri: Resource = LWM.Sunday
+    override val uri: Resource = lwm.Sunday
     override val label: String = "Sonntag"
   }
 
-  val workWeek = Map(LWM.Monday -> Monday, LWM.Tuesday -> Tuesday, LWM.Wednesday -> Wednesday, LWM.Thursday -> Thursday, LWM.Friday -> Friday, LWM.Saturday -> Saturday)
+  val workWeek = Map(lwm.Monday -> Monday, lwm.Tuesday -> Tuesday, lwm.Wednesday -> Wednesday, lwm.Thursday -> Thursday, lwm.Friday -> Friday, lwm.Saturday -> Saturday)
 }
 
 case class Time(hours: Int, minutes: Int) extends Ordered[Time] {
@@ -148,11 +148,11 @@ object Timetables {
   def create(timetable: Timetable) = {
     val resource = ResourceUtils.createResource(lwmNamespace, timetable.id)
     val statements = List(
-      Statement(resource, RDF.typ, LWM.Timetable),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasId, StringLiteral(timetable.id.toString)),
-      Statement(resource, LWM.hasLabWork, timetable.labwork),
-      Statement(timetable.labwork, LWM.hasTimetable, resource)
+      Statement(resource, rdf.typ, lwm.Timetable),
+      Statement(resource, rdf.typ, owl.NamedIndividual),
+      Statement(resource, lwm.hasId, StringLiteral(timetable.id.toString)),
+      Statement(resource, lwm.hasLabWork, timetable.labwork),
+      Statement(timetable.labwork, lwm.hasTimetable, resource)
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*))
     Individual(resource)
@@ -160,8 +160,8 @@ object Timetables {
 
   def get(resource: Resource): Option[Timetable] = {
     val i = Individual(resource)
-    val maybeLabwork = i.props.get(LWM.hasLabWork)
-    val maybeId = i.props.get(LWM.hasId)
+    val maybeLabwork = i.props.get(lwm.hasLabWork)
+    val maybeId = i.props.get(lwm.hasId)
     for {
       labWorkList ← maybeLabwork
       idList ← maybeId
@@ -185,23 +185,23 @@ object TimetableEntries {
   def create(timetableEntry: TimetableEntry): Future[Individual] = {
     val timetableEntryResource = ResourceUtils.createResource(lwmNamespace, timetableEntry.id)
     val statements = List(
-      Statement(timetableEntryResource, RDF.typ, LWM.TimetableEntry),
-      Statement(timetableEntryResource, RDF.typ, OWL.NamedIndividual),
-      Statement(timetableEntryResource, LWM.hasStartTime, StringLiteral(timetableEntry.startTime.toString)),
-      Statement(timetableEntryResource, LWM.hasId, StringLiteral(timetableEntry.id.toString)),
-      Statement(timetableEntryResource, LWM.hasEndTime, StringLiteral(timetableEntry.endTime.toString)),
-      Statement(timetableEntryResource, LWM.hasTimetable, timetableEntry.timetable),
-      Statement(timetableEntry.timetable, LWM.hasTimetableEntry, timetableEntryResource),
-      Statement(timetableEntryResource, LWM.hasWeekday, timetableEntry.day.uri),
-      Statement(timetableEntryResource, LWM.hasRoom, timetableEntry.room) // TODO das ist wahrscheinlich was falsch
-    ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, LWM.hasSupervisor, supervisor), Statement(supervisor, LWM.isSupervisorFor, timetableEntryResource))).flatten
+      Statement(timetableEntryResource, rdf.typ, lwm.TimetableEntry),
+      Statement(timetableEntryResource, rdf.typ, owl.NamedIndividual),
+      Statement(timetableEntryResource, lwm.hasStartTime, StringLiteral(timetableEntry.startTime.toString)),
+      Statement(timetableEntryResource, lwm.hasId, StringLiteral(timetableEntry.id.toString)),
+      Statement(timetableEntryResource, lwm.hasEndTime, StringLiteral(timetableEntry.endTime.toString)),
+      Statement(timetableEntryResource, lwm.hasTimetable, timetableEntry.timetable),
+      Statement(timetableEntry.timetable, lwm.hasTimetableEntry, timetableEntryResource),
+      Statement(timetableEntryResource, lwm.hasWeekday, timetableEntry.day.uri),
+      Statement(timetableEntryResource, lwm.hasRoom, timetableEntry.room) // TODO das ist wahrscheinlich was falsch
+    ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, lwm.hasSupervisor, supervisor), Statement(supervisor, lwm.isSupervisorFor, timetableEntryResource))).flatten
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(timetableEntryResource)
     }
   }
 
   def delete(entry: TimetableEntry): Future[TimetableEntry] = {
-    val maybeEntry = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.TimetableEntry, Vocabulary.LWM.hasId, StringLiteral(entry.id.toString))
+    val maybeEntry = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.TimetableEntry, Vocabulary.lwm.hasId, StringLiteral(entry.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeEntry)
     val p = Promise[TimetableEntry]()
     resultFuture.map { result ⇒
@@ -216,7 +216,7 @@ object TimetableEntries {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.TimetableEntry)) {
+    if (individual.props(rdf.typ).contains(lwm.TimetableEntry)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a TimetableEntry"))
@@ -225,20 +225,20 @@ object TimetableEntries {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.TimetableEntry)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.TimetableEntry)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(user ⇒ Individual(user.s)).toList
     }
   }
 
   def get(resource: Resource): Option[TimetableEntry] = {
     val i = Individual(resource)
-    val maybeDay = i.props.get(LWM.hasWeekday)
-    val maybeRoom = i.props.get(LWM.hasRoom)
-    val maybeStartTime = i.props.get(LWM.hasStartTime)
-    val maybeEndTime = i.props.get(LWM.hasEndTime)
-    val maybeId = i.props.get(LWM.hasId)
-    val maybeSupervisors = i.props.get(LWM.hasSupervisor)
-    val maybeTimetable = i.props.get(LWM.hasTimetable)
+    val maybeDay = i.props.get(lwm.hasWeekday)
+    val maybeRoom = i.props.get(lwm.hasRoom)
+    val maybeStartTime = i.props.get(lwm.hasStartTime)
+    val maybeEndTime = i.props.get(lwm.hasEndTime)
+    val maybeId = i.props.get(lwm.hasId)
+    val maybeSupervisors = i.props.get(lwm.hasSupervisor)
+    val maybeTimetable = i.props.get(lwm.hasTimetable)
     for {
       dayList ← maybeDay
       roomList ← maybeRoom

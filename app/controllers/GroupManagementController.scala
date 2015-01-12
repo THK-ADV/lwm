@@ -9,7 +9,7 @@ import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.TransactionSupport
 import utils.semantic._
-import utils.semantic.Vocabulary.{ RDFS, RDF, LWM, OWL }
+import utils.semantic.Vocabulary.{ rdfs, rdf, lwm, owl }
 import utils.Global._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,10 +24,10 @@ object GroupManagementController extends Controller with Authentication with Tra
       Action.async { implicit request ⇒
         val query =
           s"""
-         select ?s (${LWM.hasGroupId} as ?p) ?o where {
-          ?s ${RDF.typ} ${LWM.Group} .
-          ?s ${LWM.hasLabWork} <$labworkId> .
-          ?s ${LWM.hasGroupId} ?o
+         select ?s (${lwm.hasGroupId} as ?p) ?o where {
+          ?s ${rdf.typ} ${lwm.Group} .
+          ?s ${lwm.hasLabWork} <$labworkId> .
+          ?s ${lwm.hasGroupId} ?o
           }
           ORDER BY ASC(?o)
             """.stripMargin
@@ -39,8 +39,8 @@ object GroupManagementController extends Controller with Authentication with Tra
         futureGroups.map { g ⇒
           val lI = Individual(Resource(labworkId))
           val gI = Individual(Resource(groupId))
-          val s = gI.props.getOrElse(LWM.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
-          val a = lI.props.getOrElse(LWM.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+          val s = gI.props.getOrElse(lwm.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
+          val a = lI.props.getOrElse(lwm.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
           Ok(views.html.groups_detail_management(lI, gI, s, g.toList, a))
         }
       }
@@ -70,10 +70,10 @@ object GroupManagementController extends Controller with Authentication with Tra
             }
             val ig = Individual(groupResource)
 
-            ig.add(LWM.hasMember, studentResource)
+            ig.add(lwm.hasMember, studentResource)
             createTransaction(session.user, ig.uri, s"Student $studentResource added to Group ${ig.uri} by ${session.user}")
             val is = Individual(studentResource)
-            is.add(LWM.memberOf, groupResource)
+            is.add(lwm.memberOf, groupResource)
             createTransaction(session.user, ig.uri, s"Student $studentResource added to Group ${ig.uri} by ${session.user}")
 
             val applicationsFuture = findApplication(groupResource, studentResource)
@@ -94,10 +94,10 @@ object GroupManagementController extends Controller with Authentication with Tra
   def findApplication(group: Resource, student: Resource) = {
     val query =
       s"""
-         select ($student as ?s) (${LWM.hasApplication} as ?p) (?application as ?o) where {
-          $student ${LWM.hasPendingApplication} ?application .
-          ?application ${LWM.hasLabWork} ?labwork .
-          ?labwork ${LWM.hasGroup} $group .
+         select ($student as ?s) (${lwm.hasApplication} as ?p) (?application as ?o) where {
+          $student ${lwm.hasPendingApplication} ?application .
+          ?application ${lwm.hasLabWork} ?labwork .
+          ?labwork ${lwm.hasGroup} $group .
         }
        """.stripMargin
 
@@ -124,9 +124,9 @@ object GroupManagementController extends Controller with Authentication with Tra
             if (isStudent && isGroup) {
               val query =
                 s"""
-                   |select ($studentResource as ?s) (${LWM.hasScheduleAssociation} as ?p) (?ass as ?o) where {
-                   | $studentResource ${LWM.hasScheduleAssociation} ?ass .
-                   | ?ass ${LWM.hasGroup} $groupResource
+                   |select ($studentResource as ?s) (${lwm.hasScheduleAssociation} as ?p) (?ass as ?o) where {
+                   | $studentResource ${lwm.hasScheduleAssociation} ?ass .
+                   | ?ass ${lwm.hasGroup} $groupResource
                    |}
                  """.stripMargin
 
@@ -135,9 +135,9 @@ object GroupManagementController extends Controller with Authentication with Tra
               }
 
               val ig = Individual(groupResource)
-              ig.remove(LWM.hasMember, studentResource)
+              ig.remove(lwm.hasMember, studentResource)
               val is = Individual(studentResource)
-              is.remove(LWM.memberOf, groupResource)
+              is.remove(lwm.memberOf, groupResource)
               deleteTransaction(session.user, groupResource, s"Student $studentResource removed from Group $groupResource by ${session.user}")
             }
             Redirect(routes.LabworkManagementController.index())
@@ -155,7 +155,7 @@ object GroupManagementController extends Controller with Authentication with Tra
         if (student.isDefined && oldGroup.isDefined && newGroup.isDefined) {
 
           def procure(id: Option[String]): String = {
-            Individual(Resource(id.get)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+            Individual(Resource(id.get)).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
           }
           println(s"P: ${procure(student)} - ${student.get}\nO: ${procure(oldGroup)} - ${oldGroup.get}\nN: ${procure(newGroup)} - ${newGroup.get}")
 
@@ -163,10 +163,10 @@ object GroupManagementController extends Controller with Authentication with Tra
             val q =
               s"""
                  Select ?s ?p ?o where {
-                 $entryWithSchedule ${LWM.hasScheduleAssociation} ?schedule .
-                  ?schedule ${LWM.hasAssignmentAssociation} ?s .
+                 $entryWithSchedule ${lwm.hasScheduleAssociation} ?schedule .
+                  ?schedule ${lwm.hasAssignmentAssociation} ?s .
                   ?schedule ?p ?o
-                 filter(?p != ${RDF.typ} && ?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual})
+                 filter(?p != ${rdf.typ} && ?p != ${lwm.hasAssignmentAssociation} && ?p != ${owl.NamedIndividual})
                  } order by asc(?s) asc(?p)
                """.stripMargin
 
@@ -176,10 +176,10 @@ object GroupManagementController extends Controller with Authentication with Tra
           }
           def scheduleLink(student: Resource, oldGroup: Resource) = {
             val q = s"""
-                 Select ?s (${LWM.hasAssignmentAssociation} as ?p) ?o where {
-                 $student ${LWM.hasScheduleAssociation} ?s .
-                  ?s ${LWM.hasGroup} $oldGroup .
-                  ?s ${LWM.hasAssignmentAssociation} ?o
+                 Select ?s (${lwm.hasAssignmentAssociation} as ?p) ?o where {
+                 $student ${lwm.hasScheduleAssociation} ?s .
+                  ?s ${lwm.hasGroup} $oldGroup .
+                  ?s ${lwm.hasAssignmentAssociation} ?o
                   } order by asc(?o)
                """.stripMargin
 
@@ -193,10 +193,10 @@ object GroupManagementController extends Controller with Authentication with Tra
                   Delete {
                   ?s ?p ?o
                   } where {
-                  $student ${LWM.hasScheduleAssociation} ?s .
-                  ?s ${LWM.hasGroup} $oldGroup .
+                  $student ${lwm.hasScheduleAssociation} ?s .
+                  ?s ${lwm.hasGroup} $oldGroup .
                   ?s ?p ?o
-                  filter(?p != ${LWM.hasAssignmentAssociation} && ?p != ${OWL.NamedIndividual} && ?p != ${RDF.typ} && ?p != ${LWM.hasPassed} && ?p != ${LWM.hasAttended})
+                  filter(?p != ${lwm.hasAssignmentAssociation} && ?p != ${owl.NamedIndividual} && ?p != ${rdf.typ} && ?p != ${lwm.hasPassed} && ?p != ${lwm.hasAttended})
                   }
                 """.stripMargin
             sparqlExecutionContext.executeUpdate(u)
@@ -230,11 +230,11 @@ object GroupManagementController extends Controller with Authentication with Tra
             val oldGroupIndividual = Individual(Resource(oldGroup.get))
             val newGroupIndividual = Individual(Resource(newGroup.get))
 
-            studentIndividual.update(LWM.memberOf, Resource(oldGroup.get), Resource(newGroup.get))
-            oldGroupIndividual.remove(LWM.hasMember, Resource(student.get))
-            newGroupIndividual.add(LWM.hasMember, Resource(student.get))
-            modifyTransaction(session.user, studentIndividual.uri, s"Student ${studentIndividual.props.get(RDFS.label).map(_.headOption.map(_.toString)).getOrElse("")} moved to new Group ${newGroupIndividual.props.get(RDFS.label).map(_.headOption.map(_.toString)).getOrElse("")} by ${session.user}")
-            Redirect(routes.GroupManagementController.index(oldGroupIndividual.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value, oldGroupIndividual.uri.value))
+            studentIndividual.update(lwm.memberOf, Resource(oldGroup.get), Resource(newGroup.get))
+            oldGroupIndividual.remove(lwm.hasMember, Resource(student.get))
+            newGroupIndividual.add(lwm.hasMember, Resource(student.get))
+            modifyTransaction(session.user, studentIndividual.uri, s"Student ${studentIndividual.props.get(rdfs.label).map(_.headOption.map(_.toString)).getOrElse("")} moved to new Group ${newGroupIndividual.props.get(rdfs.label).map(_.headOption.map(_.toString)).getOrElse("")} by ${session.user}")
+            Redirect(routes.GroupManagementController.index(oldGroupIndividual.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head.value, oldGroupIndividual.uri.value))
           }
         } else {
           Future.successful(Redirect(routes.LabworkManagementController.index()))

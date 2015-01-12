@@ -2,9 +2,9 @@ package utils.semantic
 
 object SPARQLBuilder {
 
-  private val rdf = Vocabulary.RDF
-  private val rdfs = Vocabulary.RDFS
-  private val owl = Vocabulary.OWL
+  private val rdf = Vocabulary.rdf
+  private val rdfs = Vocabulary.rdfs
+  private val owl = Vocabulary.owl
 
   def createClass(uri: Resource, graph: NamedGraph): String = {
     s"INSERT DATA {GRAPH $graph {$uri ${rdf.typ} ${owl.Class}}}"

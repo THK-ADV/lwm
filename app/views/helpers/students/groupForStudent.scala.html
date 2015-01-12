@@ -1,15 +1,15 @@
 @(student: Resource, labwork: Resource)
 @import utils.semantic.Resource
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.Global._
 @import com.hp.hpl.jena.query.QueryExecutionFactory
 @import java.net.URLDecoder
 @{ val query =
     s"""
          |select ?group ?id where {
-         | $student ${LWM.memberOf} ?group .
-         | ?group ${LWM.hasLabWork} $labwork .
-         | ?group ${LWM.hasGroupId} ?id
+         | $student ${lwm.memberOf} ?group .
+         | ?group ${lwm.hasLabWork} $labwork .
+         | ?group ${lwm.hasGroupId} ?id
          |}
        """.stripMargin
 

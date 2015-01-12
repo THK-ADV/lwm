@@ -8,7 +8,7 @@ import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
 import utils.TransactionSupport
-import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.Future
@@ -76,12 +76,12 @@ object RoomManagementController extends Controller with Authentication with Tran
           },
           room ⇒ {
             for {
-              id ← i.props(LWM.hasRoomId)
-              name ← i.props(LWM.hasName)
+              id ← i.props(lwm.hasRoomId)
+              name ← i.props(lwm.hasName)
             } yield {
-              i.update(LWM.hasRoomId, id, StringLiteral(room.roomId))
-              i.update(LWM.hasName, name, StringLiteral(room.name))
-              i.update(RDFS.label, name, StringLiteral(room.name))
+              i.update(lwm.hasRoomId, id, StringLiteral(room.roomId))
+              i.update(lwm.hasName, name, StringLiteral(room.name))
+              i.update(rdfs.label, name, StringLiteral(room.name))
               modifyTransaction(session.user, i.uri, s"Room ${i.uri} modified by ${session.user}")
             }
             Future.successful(Redirect(routes.RoomManagementController.index()))

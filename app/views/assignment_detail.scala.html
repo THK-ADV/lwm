@@ -1,7 +1,7 @@
 @(assignment: Individual, courses: List[Individual], aForm: Form[AssignmentFormModel], sForm: Form[AssignmentSolutionFormModel])(implicit request: RequestHeader)
 @import utils.BreadCrumbKeeper.UrlReference
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.Global._
 <!DOCTYPE html>
 <html>
@@ -9,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(assignment.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(assignment.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()
@@ -21,7 +21,7 @@
                         <table class="table table-bordered">
                             <tr><th>Datei</th><th>Export</th></tr>
                             @defining(assignment.props) { p =>
-                                @defining(p.getOrElse(LWM.hasSolution, List(Resource("")))) { maybeSolution =>
+                                @defining(p.getOrElse(lwm.hasSolution, List(Resource("")))) { maybeSolution =>
                                     @defining(Individual(maybeSolution.head.asResource().get)) { solution =>
                                         <tr>
                                             <td><a href="#" data-toggle="modal" data-target="#editAssignment">Aufgabe</a></td>
@@ -30,7 +30,7 @@
                                         <tr>
                                             <td><a href="#"data-toggle="modal" data-target="#editSolution">Musterlösung</a></td>
 
-                                            @p.get(LWM.hasSolution).headOption match {
+                                            @p.get(lwm.hasSolution).headOption match {
                                                 case Some(s) => {
                                                     <td><h1><a href="@routes.AssignmentManagementController.exportSolution(assignment.uri.value)" class="glyphicon glyphicon-export"></a></h1></td>
                                                 }

@@ -26,16 +26,16 @@ object Students {
   def create(student: Student): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
-      Statement(resource, RDF.typ, LWM.Student),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGmId, StringLiteral(student.gmId.toLowerCase)),
-      Statement(resource, FOAF.firstName, StringLiteral(student.firstname)),
-      Statement(resource, FOAF.lastName, StringLiteral(student.lastname)),
-      Statement(resource, RDFS.label, StringLiteral(s"${student.firstname} ${student.lastname}")),
-      Statement(resource, NCO.phoneNumber, StringLiteral(student.phone)),
-      Statement(resource, FOAF.mbox, StringLiteral(student.email)),
-      Statement(resource, LWM.hasEnrollment, Resource(student.degree)),
-      Statement(resource, LWM.hasRegistrationId, StringLiteral(student.registrationNumber))
+      Statement(resource, rdf.typ, lwm.Student),
+      Statement(resource, rdf.typ, owl.NamedIndividual),
+      Statement(resource, lwm.hasGmId, StringLiteral(student.gmId.toLowerCase)),
+      Statement(resource, foaf.firstName, StringLiteral(student.firstname)),
+      Statement(resource, foaf.lastName, StringLiteral(student.lastname)),
+      Statement(resource, rdfs.label, StringLiteral(s"${student.firstname} ${student.lastname}")),
+      Statement(resource, nco.phoneNumber, StringLiteral(student.phone)),
+      Statement(resource, foaf.mbox, StringLiteral(student.email)),
+      Statement(resource, lwm.hasEnrollment, Resource(student.degree)),
+      Statement(resource, lwm.hasRegistrationId, StringLiteral(student.registrationNumber))
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
@@ -44,7 +44,7 @@ object Students {
   }
 
   def delete(student: Student): Future[Student] = {
-    val maybeStudent = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, Vocabulary.LWM.hasGmId, StringLiteral(student.gmId))
+    val maybeStudent = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Student, Vocabulary.lwm.hasGmId, StringLiteral(student.gmId))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeStudent)
     val p = Promise[Student]()
     resultFuture.map { result ⇒
@@ -59,7 +59,7 @@ object Students {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.Student)) {
+    if (individual.props(rdf.typ).contains(lwm.Student)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Student"))
@@ -70,9 +70,9 @@ object Students {
   def all(): Future[List[Individual]] = {
     val query =
       s"""
-         |select ?s (${RDF.typ} as ?p) (${LWM.Student} as ?o) where {
-         | ?s ${RDF.typ} ${LWM.Student} .
-         | optional {?s ${FOAF.lastName} ?lastname}
+         |select ?s (${rdf.typ} as ?p) (${lwm.Student} as ?o) where {
+         | ?s ${rdf.typ} ${lwm.Student} .
+         | optional {?s ${foaf.lastName} ?lastname}
          |}order by asc(?lastname)
        """.stripMargin
     sparqlExecutionContext.executeQuery(query).map { stringResult ⇒
@@ -82,7 +82,7 @@ object Students {
 
   def get(gmId: String): Future[Resource] = {
     val p = Promise[Resource]()
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, LWM.hasGmId, StringLiteral(gmId))).map { result ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Student, lwm.hasGmId, StringLiteral(gmId))).map { result ⇒
       val resource = SPARQLTools.statementsFromString(result).map(student ⇒ student.s)
       if (resource.nonEmpty) {
         p.success(resource.head)
@@ -96,7 +96,7 @@ object Students {
   private def search(query: String): Future[List[(String, String, String)]] = {
     val sparqlQuery =
       s"""
-        |SELECT ?s (${LWM.hasGmId} as ?p) ?o where {?s ${LWM.hasGmId} ?o
+        |SELECT ?s (${lwm.hasGmId} as ?p) ?o where {?s ${lwm.hasGmId} ?o
         |FILTER regex(?o, "^$query")
         |}
       """.stripMargin
@@ -107,7 +107,7 @@ object Students {
       val statements = SPARQLTools.statementsFromString(result)
       statements.map { statement ⇒
         val individual = Individual(statement.s)
-        val name = individual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+        val name = individual.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
         (statement.o.value, name, statement.s.value)
       }
     }
@@ -116,17 +116,17 @@ object Students {
 
   def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid.toLowerCase).toQueryString}}")
+  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.lwm.hasGmId} ${StringLiteral(uid.toLowerCase).toQueryString}}")
 
-  def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Student}}")
+  def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.rdf.typ} ${lwm.Student}}")
 
   def labworksForStudent(student: Resource) = {
     val query1 =
       s"""
          |select * where {
-         | $student ${LWM.memberOf} ?group .
-         | ?group ${LWM.hasLabWork} ?labwork.
-         | ?labwork ${RDFS.label} ?labworkName .
+         | $student ${lwm.memberOf} ?group .
+         | ?group ${lwm.hasLabWork} ?labwork.
+         | ?labwork ${rdfs.label} ?labworkName .
          |}order by desc(?labworkName)
        """.stripMargin
     val results = QueryExecutionFactory.sparqlService(queryHost, query1).execSelect()

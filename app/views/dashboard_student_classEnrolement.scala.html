@@ -1,6 +1,6 @@
 @(openLabworks: List[Individual], form: Form[LabworkApplicationFormModel])
     @import utils.semantic.{Individual, Resource}
-    @import utils.semantic.Vocabulary.{LWM, RDFS}
+    @import utils.semantic.Vocabulary.{lwm, rdfs}
     <!-- TODO: ADD BUTTON FUNCTIONALITY AND FORM -->
 
     <div class="panel panel-default">
@@ -11,7 +11,7 @@
                 <th>Anmelden</th>
             </tr>
             <tbody>
-            @for(labwork <- openLabworks; label <- labwork.props.get(RDFS.label)) {
+            @for(labwork <- openLabworks; label <- labwork.props.get(rdfs.label)) {
                 <tr>
                     <td>@label.headOption.fold("")(_.toString)</td>
                     <td>@dashboard_labwork_application_form(labwork, form)</td>

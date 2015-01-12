@@ -1,14 +1,14 @@
 @(student: Individual, degrees: List[Individual], form: Form[Student])
-@import utils.semantic.Vocabulary.{LWM, RDFS, NCO, FOAF}
+@import utils.semantic.Vocabulary.{lwm, rdfs, nco, foaf}
 @import utils.semantic.{Individual, Resource, StringLiteral}
 
-@defining(form.fill(Student(student.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(FOAF.mbox, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(NCO.phoneNumber, List(StringLiteral(""))).head.value,
-    student.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))) { f =>
+@defining(form.fill(Student(student.props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(foaf.firstName, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(foaf.mbox, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(nco.phoneNumber, List(StringLiteral(""))).head.value,
+    student.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))) { f =>
     @helper.form(action = routes.StudentsManagement.changeInformation(student.uri.value)) {
         <input type="hidden" name="id" value="@f("id").value">
         @helper.inputText(f("firstname"), '_class -> "dl-horizontal",'_label -> "Vorname:")
@@ -17,7 +17,7 @@
         @helper.inputText(f("email"), '_class -> "dl-horizontal",'_label -> "Email:")
         @helper.inputText(f("phone"), '_class -> "dl-horizontal",'_label -> "*Telefon:")
         @helper.select(form("degree"), (for(d <- degrees) yield {
-            d.uri.value -> d.props.getOrElse(RDFS.label, List(StringLiteral(d.uri.value))).head.value
+            d.uri.value -> d.props.getOrElse(rdfs.label, List(StringLiteral(d.uri.value))).head.value
         }).sortBy(_._2), '_class -> "dl-horizontal", '_label -> "Studiengang:")
         <b>* = optional</b>
         <div class="modal-footer">

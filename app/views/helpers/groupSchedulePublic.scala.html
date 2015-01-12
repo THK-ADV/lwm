@@ -1,8 +1,8 @@
 @(group: Resource)
 @import java.net.URLDecoder
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.rdfs
 @import utils.semantic._
-@import Vocabulary.LWM
+@import Vocabulary.lwm
 @import utils.Global._
 @import com.hp.hpl.jena.query.QueryExecutionFactory
 
@@ -11,14 +11,14 @@
     val query =
         s"""
          |select * where {
-         | $group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
-         | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
-         | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
-         | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
-         | ?entry ${LWM.hasRoom} ?room .
-         | ?entry ${LWM.hasStartTime} ?startTime .
-         | ?room ${LWM.hasRoomId} ?roomId .
-         | ?assignmentAssociation ${LWM.hasOrderId} ?id .
+         | $group ${lwm.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?scheduleAssociation ${lwm.hasAssignmentDate} ?assignmentDate .
+         | ?scheduleAssociation ${lwm.hasAssignmentDateTimetableEntry} ?entry .
+         | ?entry ${lwm.hasRoom} ?room .
+         | ?entry ${lwm.hasStartTime} ?startTime .
+         | ?room ${lwm.hasRoomId} ?roomId .
+         | ?assignmentAssociation ${lwm.hasOrderId} ?id .
          |} order by asc(?id)
        """.stripMargin
 

@@ -4,7 +4,7 @@ import models._
 import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ FOAF, LWM, RDF, RDFS }
+import utils.semantic.Vocabulary.{ foaf, lwm, rdf, rdfs }
 import utils.semantic.{ Individual, Resource, SPARQLTools, StringLiteral }
 import utils.{ ListGrouping, TransactionSupport }
 
@@ -33,10 +33,10 @@ object LabworkApplicationController extends Controller with Authentication with 
     def semester(list: Resource) = {
       val query =
         s"""
-             |select ($list as ?s) (${LWM.hasSemester} as ?p) ?o where {
-             | $list ${LWM.hasLabWork} ?labwork .
-             | ?labwork ${LWM.hasSemester} ?semester .
-             | ?semester ${RDFS.label} ?o .
+             |select ($list as ?s) (${lwm.hasSemester} as ?p) ?o where {
+             | $list ${lwm.hasLabWork} ?labwork .
+             | ?labwork ${lwm.hasSemester} ?semester .
+             | ?semester ${rdfs.label} ?o .
              |}
            """.stripMargin
 
@@ -48,11 +48,11 @@ object LabworkApplicationController extends Controller with Authentication with 
     def degree(list: Resource) = {
       val query =
         s"""
-             |select ($list as ?s) (${LWM.hasDegree} as ?p) ?o where {
-             | $list ${LWM.hasLabWork} ?labwork .
-             | ?labwork ${LWM.hasCourse} ?course .
-             | ?course ${LWM.hasDegree} ?degree .
-             | ?degree ${RDFS.label} ?o .
+             |select ($list as ?s) (${lwm.hasDegree} as ?p) ?o where {
+             | $list ${lwm.hasLabWork} ?labwork .
+             | ?labwork ${lwm.hasCourse} ?course .
+             | ?course ${lwm.hasDegree} ?degree .
+             | ?degree ${rdfs.label} ?o .
              |}
            """.stripMargin
 
@@ -64,8 +64,8 @@ object LabworkApplicationController extends Controller with Authentication with 
     def applications(list: Resource) = {
       val query =
         s"""
-             |select ($list as ?s) (${LWM.hasApplication} as ?p) ?o where {
-             | $list ${LWM.hasApplication} ?o .
+             |select ($list as ?s) (${lwm.hasApplication} as ?p) ?o where {
+             | $list ${lwm.hasApplication} ?o .
              |}
            """.stripMargin
 
@@ -95,7 +95,7 @@ object LabworkApplicationController extends Controller with Authentication with 
             Students.get(s.applicant).flatMap { applicantResource ⇒
               val labworkIndividual = Individual(Resource(s.labwork))
 
-              val applicationsAllowed = labworkIndividual.props.getOrElse(LWM.allowsApplications, List(StringLiteral("false"))).head.value.toBoolean
+              val applicationsAllowed = labworkIndividual.props.getOrElse(lwm.allowsApplications, List(StringLiteral("false"))).head.value.toBoolean
               if (applicationsAllowed) {
                 val partnersFuture = s.partners.map(Students.get)
 
@@ -142,11 +142,11 @@ object LabworkApplicationController extends Controller with Authentication with 
       def openLabs = {
         val query =
           s"""
-             |select ?s (${LWM.allowsApplications} as ?p) ?o where {
-             | ?s ${LWM.allowsApplications} "true" .
-             | ?s ${LWM.hasCourse} ?course .
-             | ?course ${LWM.hasDegree} ?degree .
-             | ?degree ${RDFS.label} ?o
+             |select ?s (${lwm.allowsApplications} as ?p) ?o where {
+             | ?s ${lwm.allowsApplications} "true" .
+             | ?s ${lwm.hasCourse} ?course .
+             | ?course ${lwm.hasDegree} ?degree .
+             | ?degree ${rdfs.label} ?o
              |}
            """.stripMargin
 
@@ -156,8 +156,8 @@ object LabworkApplicationController extends Controller with Authentication with 
       }
 
       applicationsFuture.flatMap { applications ⇒
-        val mapped = applications.map(e ⇒ (e, e.props.getOrElse(LWM.hasApplicant, List(Resource(""))).map(s ⇒ Individual(s.asResource().get)).head))
-        val sorted = mapped.sortBy(_._2.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)
+        val mapped = applications.map(e ⇒ (e, e.props.getOrElse(lwm.hasApplicant, List(Resource(""))).map(s ⇒ Individual(s.asResource().get)).head))
+        val sorted = mapped.sortBy(_._2.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.value)
         openLabs.map { a ⇒
           Ok(views.html.labwork_application_list_details(a.toList.map(r ⇒ (Individual(r._1), r._2.value)), applicationlist, sorted))
         }
@@ -177,7 +177,7 @@ object LabworkApplicationController extends Controller with Authentication with 
         val applicationlist = Individual(Resource(id))
         val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
         applicationsFuture.map { applications ⇒
-          applicationlist.props.get(LWM.hasLabWork).map { labwork ⇒
+          applicationlist.props.get(lwm.hasLabWork).map { labwork ⇒
             ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), min.get.toInt, min.get.toInt) // TODO -> has to be in application.conf
           }
         }
@@ -211,9 +211,9 @@ object LabworkApplicationController extends Controller with Authentication with 
             def applications(labwork: Resource) = {
               val query =
                 s"""
-             |select ?s (${LWM.hasLabWork} as ?p) ($labwork as ?o) where {
-             | ?s ${LWM.hasLabWork} $labwork .
-             | ?s ${LWM.hasApplicant} <${s.get}>
+             |select ?s (${lwm.hasLabWork} as ?p) ($labwork as ?o) where {
+             | ?s ${lwm.hasLabWork} $labwork .
+             | ?s ${lwm.hasApplicant} <${s.get}>
              |}
            """.stripMargin
 
@@ -250,13 +250,13 @@ object LabworkApplicationController extends Controller with Authentication with 
           e ⇒ {
             val labwork = Resource(e.labwork)
             val application = Individual(Resource(e.application))
-            val oldLabwork = application.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.asResource().get
+            val oldLabwork = application.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head.asResource().get
 
             def oldApplicationList(labwork: Resource) = {
               val query =
                 s"""
-             |select ?s (${LWM.hasLabWork} as ?p) ($labwork as ?o) where {
-             | $labwork ${LWM.hasApplicationList} ?s .
+             |select ?s (${lwm.hasLabWork} as ?p) ($labwork as ?o) where {
+             | $labwork ${lwm.hasApplicationList} ?s .
              |}
            """.stripMargin
 
@@ -268,9 +268,9 @@ object LabworkApplicationController extends Controller with Authentication with 
             def newApplicationList(labwork: Resource) = {
               val query =
                 s"""
-             |select ?s (${LWM.hasLabWork} as ?p) ($labwork as ?o) where {
-             | ?s ${RDF.typ} ${LWM.LabworkApplicationList} .
-             | ?s ${LWM.hasLabWork} $labwork
+             |select ?s (${lwm.hasLabWork} as ?p) ($labwork as ?o) where {
+             | ?s ${rdf.typ} ${lwm.LabworkApplicationList} .
+             | ?s ${lwm.hasLabWork} $labwork
              |}
            """.stripMargin
 
@@ -287,9 +287,9 @@ object LabworkApplicationController extends Controller with Authentication with 
                 d1 ← oldList
                 d2 ← newList
               } yield {
-                Individual(d1).remove(LWM.hasApplication, application.uri)
-                Individual(d2).add(LWM.hasApplication, application.uri)
-                application.update(LWM.hasLabWork, oldLabwork, labwork)
+                Individual(d1).remove(lwm.hasApplication, application.uri)
+                Individual(d2).add(lwm.hasApplication, application.uri)
+                application.update(lwm.hasLabWork, oldLabwork, labwork)
               }
               Redirect(routes.LabworkApplicationController.index())
             }).recover {
@@ -305,10 +305,10 @@ object LabworkApplicationController extends Controller with Authentication with 
       val student = (request.body \ "student").asOpt[String]
       if (student.isDefined) {
         val listI = Individual(Resource(listId))
-        val labwork = listI.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head
+        val labwork = listI.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head
         LabworkApplications.create(LabworkApplication(Resource(student.get), labwork.asResource().get, Nil)).map { e ⇒
           createTransaction(session.user, e.uri, s"Labwork Application created by ${session.user}")
-          listI.add(LWM.hasApplication, e.uri)
+          listI.add(lwm.hasApplication, e.uri)
           Redirect(routes.LabworkApplicationController.applicationListEdit(listId))
         }.recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.applicationListEdit(listId) }
       }

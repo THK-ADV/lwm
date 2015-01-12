@@ -1,13 +1,13 @@
 @(entry: Individual, timetable: Resource, supervisors: List[Individual], rooms: List[Individual], form: Form[TimetableEntryEditForm])
 @import utils.semantic.{Resource, StringLiteral}
 @import utils.semantic.Individual
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 
 
-@defining(form.fill(TimetableEntryEditForm(entry.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).head.value, entry.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value))){f =>
+@defining(form.fill(TimetableEntryEditForm(entry.props.getOrElse(lwm.hasSupervisor, List(Resource(""))).head.value, entry.props.getOrElse(lwm.hasRoom, List(Resource(""))).head.value))){f =>
     @helper.form(action = routes.TimetableController.entryEdit(timetable.value, entry.uri.value)) {
         @helper.select(f("supervisors"), Users.userFormMapping(), '_label -> "Betreuer:")
-        @helper.select(f("rooms"), for(r <- rooms) yield r.uri.value -> r.props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value, '_label -> "Räume:")
+        @helper.select(f("rooms"), for(r <- rooms) yield r.uri.value -> r.props.getOrElse(lwm.hasRoomId, List(StringLiteral(""))).head.value, '_label -> "Räume:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             <button type="submit" class="btn btn-primary">Ändern</button>

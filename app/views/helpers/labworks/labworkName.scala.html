@@ -1,8 +1,8 @@
 @(labwork: Resource)
 @import java.net.URLDecoder
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.rdfs
 @import utils.semantic._
-@import Vocabulary.LWM
+@import Vocabulary.lwm
 @import utils.Global._
 @import com.hp.hpl.jena.query.QueryExecutionFactory
 
@@ -10,7 +10,7 @@
     val query =
       s"""
          |select * where {
-         | $labwork ${RDFS.label} ?name
+         | $labwork ${rdfs.label} ?name
          |}
        """.stripMargin
 

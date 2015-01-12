@@ -1,5 +1,5 @@
 @(courses: List[Individual], form: Form[AssignmentFormModel])
-    @import utils.semantic.Vocabulary.{RDFS, LWM}
+    @import utils.semantic.Vocabulary.{rdfs, lwm}
     @import utils.semantic.{Resource, StringLiteral}
     @import utils.semantic.Individual
     @import utils.Global._
@@ -12,8 +12,8 @@
         @helper.textarea(form("hints"), 'rows -> 10, 'cols -> 65, '_label -> "Lösungshinweise (Plaintext oder Markdown)")
         @helper.inputText(form("topics"), '_label -> "Themen (Mehrfachangaben mit Komma trennen):")
         <label>Veranstaltungen:</label> <br />
-        @for((c, index) <- courses.zipWithIndex; l <- c.props(RDFS.label); d <- c.props(LWM.hasDegree); i = Individual(Resource(d.value))) {
-            <input type="checkbox" name="courses[@index]" value="@c.uri.value"> @l - @i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value <br />
+        @for((c, index) <- courses.zipWithIndex; l <- c.props(rdfs.label); d <- c.props(lwm.hasDegree); i = Individual(Resource(d.value))) {
+            <input type="checkbox" name="courses[@index]" value="@c.uri.value"> @l - @i.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value <br />
         }
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>

@@ -1,5 +1,5 @@
 @(labworks: List[Individual])
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.semantic.Individual
 @import utils.semantic.Resource
 @import utils.semantic.Vocabulary
@@ -20,14 +20,14 @@
             <th>Semester</th>
 
         </tr>
-        @for(labwork <- labworks; v <- labwork.props(LWM.allowsApplications);label <- labwork.props(RDFS.label); c <- labwork.props.getOrElse(Vocabulary.LWM.hasCourse, List(Resource(""))); i = Individual(c.asResource().get)) {
+        @for(labwork <- labworks; v <- labwork.props(lwm.allowsApplications);label <- labwork.props(rdfs.label); c <- labwork.props.getOrElse(Vocabulary.lwm.hasCourse, List(Resource(""))); i = Individual(c.asResource().get)) {
             <tr>
                 <td>@if(v.value == "false") {<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'true')" class="glyphicon glyphicon-remove-circle"></a>}else{<a href="javascript: setVisible('@routes.LabworkManagementController.setVisibility()','@labwork.uri.value', 'false')" class="glyphicon glyphicon-ok-circle"></a>}</td>
-                <td><a href="@routes.LabworkManagementController.edit(labwork.uri.value)">@i.props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</a></td>
-                <td>@Individual(Resource(i.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
-                <td>@labwork.props.getOrElse(Vocabulary.LWM.hasGroup, Nil).size</td>
-                <td>@labwork.props.getOrElse(Vocabulary.LWM.hasAssignmentAssociation, Nil).size</td>
-                <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.LWM.hasSemester, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(StringLiteral(""))).head.value</td>
+                <td><a href="@routes.LabworkManagementController.edit(labwork.uri.value)">@i.props.getOrElse(Vocabulary.rdfs.label, List(StringLiteral(""))).head.value</a></td>
+                <td>@Individual(Resource(i.props.getOrElse(lwm.hasDegree, List(Resource(""))).head.value)).props.getOrElse(Vocabulary.rdfs.label, List(StringLiteral(""))).head.value</td>
+                <td>@labwork.props.getOrElse(Vocabulary.lwm.hasGroup, Nil).size</td>
+                <td>@labwork.props.getOrElse(Vocabulary.lwm.hasAssignmentAssociation, Nil).size</td>
+                <td>@Individual(Resource(labwork.props.getOrElse(Vocabulary.lwm.hasSemester, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.rdfs.label, List(StringLiteral(""))).head.value</td>
                 <td><h3><a href="javascript: if(confirmed()) deleteLabwork('@labwork.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
             </tr>
         }

@@ -1,7 +1,7 @@
 @(student: Individual, labwork: Individual, associations: List[Resource])
-@import utils.semantic.Vocabulary.RDF
+@import utils.semantic.Vocabulary.rdf
 @import utils.semantic.{Resource, Individual, StringLiteral}
-    @import utils.semantic.Vocabulary.{LWM, RDFS}
+    @import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.Global._
 
 <!DOCTYPE html>
@@ -17,7 +17,7 @@
             <div class="col-md-9">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                    @labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+                    @labwork.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
                     </div>
                     <table class="table table-bordered">
                         <tr>
@@ -26,7 +26,7 @@
                         @for((a, index) <- associations.zipWithIndex) {
                             <tr>
                                 <td>
-                                    <a href="@routes.LabworkManagementController.exportAssignment(labwork.uri.value, a.value)">@{index + 1} Aufgabe: @Individual(a).props.get(LWM.hasAssignment).map(_.headOption.map(node => Individual(Resource(node.value)).props.getOrElse(RDFS.label, Nil).headOption.map(_.toString))) </a>
+                                    <a href="@routes.LabworkManagementController.exportAssignment(labwork.uri.value, a.value)">@{index + 1} Aufgabe: @Individual(a).props.get(lwm.hasAssignment).map(_.headOption.map(node => Individual(Resource(node.value)).props.getOrElse(rdfs.label, Nil).headOption.map(_.toString))) </a>
                                 </td>
                             </tr>
                         }

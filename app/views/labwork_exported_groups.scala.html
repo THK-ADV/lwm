@@ -1,6 +1,6 @@
 @(labwork: Individual, groupsWithStudents: List[(Individual, List[Individual])])
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS, FOAF}
+@import utils.semantic.Vocabulary.{lwm, rdfs, foaf}
 <html>
     @head("Zugewiesene Studenten")
     <body>
@@ -8,24 +8,24 @@
         <section class="pagebreak">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Gruppe @gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</h3>
+                    <h3 class="panel-title">Gruppe @gws._1.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value</h3>
                 </div>
                 <table class="table table-bordered">
                     <tr>
-                        <th>@gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</th>
+                        <th>@gws._1.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value</th>
                         <th>Kennung</th>
                         <th>Nachname</th>
                         <th>Vorname</th>
                         <th>Matrikelnummer</th>
                     </tr>
                     <tbody>
-                    @for(s <- gws._2.sortBy(s => s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value)) {
+                    @for(s <- gws._2.sortBy(s => s.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.value)) {
                         <tr>
                             <td></td>
-                            <td>@s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value</td>
-                            <td>@s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value</td>
-                            <td>@s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value</td>
-                            <td>@s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value</td>
+                            <td>@s.props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value</td>
+                            <td>@s.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.value</td>
+                            <td>@s.props.getOrElse(foaf.firstName, List(StringLiteral(""))).head.value</td>
+                            <td>@s.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral(""))).head.value</td>
                         </tr>
                     }
                     </tbody>
@@ -37,7 +37,7 @@
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Staffelplan der Gruppe @gws._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value</h3>
+                    <h3 class="panel-title">Staffelplan der Gruppe @gws._1.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value</h3>
                 </div>
                 @helpers.groupSchedule(gws._1.uri)
             </div>

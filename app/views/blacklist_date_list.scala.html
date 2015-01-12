@@ -11,7 +11,7 @@
             <th>Datum</th>
         </tr>
         @for(date <- dates) {
-            @date.props.get(Vocabulary.LWM.hasDate).map { dateList =>
+            @date.props.get(Vocabulary.lwm.hasDate).map { dateList =>
                 @dateList.headOption.map { dn =>
                     @dn.asLiteral().map { d =>
                         <tr>

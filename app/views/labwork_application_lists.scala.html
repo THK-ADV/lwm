@@ -1,7 +1,7 @@
 
 @(labworkApplicationLists: List[(Individual, String, String, Int)])
-@import utils.semantic.Vocabulary.RDFS
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.rdfs
+@import utils.semantic.Vocabulary.lwm
 @import utils.semantic.Individual
 @import utils.Global._
 
@@ -18,7 +18,7 @@
         </tr>
         @for((applicationList, index) <- labworkApplicationLists.zipWithIndex) {
             <tr>
-                <td><a href="@routes.LabworkApplicationController.applicationListEdit(applicationList._1.uri.value)">@applicationList._1.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString))))</a></td>
+                <td><a href="@routes.LabworkApplicationController.applicationListEdit(applicationList._1.uri.value)">@applicationList._1.props.get(lwm.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(rdfs.label).map(y => y.headOption.map(_.toString))))</a></td>
                 <td>@applicationList._2</td>
                 <td>@applicationList._3</td>
                 <td>@applicationList._4</td>

@@ -1,8 +1,8 @@
 @(room: Individual, form: Form[RoomFormModel])
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 
-    @defining(form.fill(RoomFormModel(room.props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value, room.props.getOrElse(LWM.hasName, List(StringLiteral(""))).head.value))) {f=>
+    @defining(form.fill(RoomFormModel(room.props.getOrElse(lwm.hasRoomId, List(StringLiteral(""))).head.value, room.props.getOrElse(lwm.hasName, List(StringLiteral(""))).head.value))) {f=>
         @helper.form(action = routes.RoomManagementController.roomEdit(room.uri.value)) {
             @helper.inputText(f("id"), '_label -> "Raumnummer:")
             @helper.inputText(f("name"), '_label -> "Bezeichnung:")

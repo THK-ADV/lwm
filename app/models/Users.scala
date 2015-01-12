@@ -103,7 +103,7 @@ object Users {
     import utils.Global._
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.User)) {
+    if (individual.props(rdf.typ).contains(lwm.User)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     }
     p.future
@@ -112,9 +112,9 @@ object Users {
   def all(): Future[List[Individual]] = {
     import utils.Global._
     val query = s"""
-         |select ?s (${RDF.typ} as ?p) (${LWM.User} as ?o) where {
-         | ?s ${RDF.typ} ${LWM.User} .
-         | optional {?s ${FOAF.lastName} ?lastname}
+         |select ?s (${rdf.typ} as ?p) (${lwm.User} as ?o) where {
+         | ?s ${rdf.typ} ${lwm.User} .
+         | optional {?s ${foaf.lastName} ?lastname}
          |}order by asc(?lastname)
        """.stripMargin
     sparqlExecutionContext.executeQuery(query).map { stringResult ⇒
@@ -124,17 +124,17 @@ object Users {
 
   def exists(uid: String): Future[Boolean] = {
     import utils.Global._
-    sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid).toQueryString}}")
+    sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.lwm.hasGmId} ${StringLiteral(uid).toQueryString}}")
   }
 
   def substituteUserMapping(userId: String) = {
     import utils.Global._
     val query =
       s"""
-          |select (?user as ?s) (${RDFS.label} as ?p) (?name as ?o) where {
-          |  ?user ${RDF.typ} ${LWM.User} .
-          |  ?user ${RDFS.label} ?name .
-          |  filter not exists {?user ${LWM.hasGmId} "$userId"}
+          |select (?user as ?s) (${rdfs.label} as ?p) (?name as ?o) where {
+          |  ?user ${rdf.typ} ${lwm.User} .
+          |  ?user ${rdfs.label} ?name .
+          |  filter not exists {?user ${lwm.hasGmId} "$userId"}
           |}
         """.stripMargin
 
@@ -147,9 +147,9 @@ object Users {
     import utils.Global._
     val query =
       s"""
-          |select (?user as ?s) (${RDFS.label} as ?p) (?name as ?o) where {
-          |  ?user ${RDF.typ} ${LWM.User} .
-          |  ?user ${RDFS.label} ?name
+          |select (?user as ?s) (${rdfs.label} as ?p) (?name as ?o) where {
+          |  ?user ${rdf.typ} ${lwm.User} .
+          |  ?user ${rdfs.label} ?name
           |}
         """.stripMargin
 

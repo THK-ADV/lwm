@@ -11,7 +11,16 @@ object Vocabulary {
     def property(localName: String) = Property(s"$ns$localName")
   }
 
-  object LWM extends ResourceHelper {
+  val defaulPrefixes =
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |prefix owl: <http://www.w3.org/2002/07/owl#>
+      |prefix foaf: <http://xmlns.com/foaf/0.1/>
+     """.stripMargin
+
+  object lwm extends ResourceHelper {
     val ns = Namespace("http://lwm.gm.fh-koeln.de/")
     val prefix = Prefix("lwm")
 
@@ -167,7 +176,7 @@ object Vocabulary {
   /**
     * XML Schema
     */
-  object XSD extends ResourceHelper {
+  object xsd extends ResourceHelper {
     val ns = Namespace("http://www.w3.org/2001/XMLSchema#")
     val prefix = Prefix("xsd")
   }
@@ -175,7 +184,7 @@ object Vocabulary {
   /**
     * RDF Base Vocabulary
     */
-  object RDF extends ResourceHelper {
+  object rdf extends ResourceHelper {
     val ns = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
     val prefix = Prefix("rdf")
 
@@ -199,7 +208,7 @@ object Vocabulary {
   /**
     * RDF Schema Vocabulary
     */
-  object RDFS extends ResourceHelper {
+  object rdfs extends ResourceHelper {
     val ns = Namespace("http://www.w3.org/2000/01/rdf-schema#")
     val prefix = Prefix("rdfs")
 
@@ -223,7 +232,7 @@ object Vocabulary {
   /**
     * OWL Base Vocabulary
     */
-  object OWL extends ResourceHelper {
+  object owl extends ResourceHelper {
     val ns = Namespace("http://www.w3.org/2002/07/owl#")
     val prefix = Prefix("owl")
 
@@ -304,7 +313,7 @@ object Vocabulary {
   /**
     * Nepomuk Messaging Ontology.
     */
-  object NMO extends ResourceHelper {
+  object nmo extends ResourceHelper {
     val prefix = Prefix("nmo")
     val ns = Namespace("http://www.semanticdesktop.org/ontologies/nmo#")
 
@@ -335,7 +344,7 @@ object Vocabulary {
   /**
     * Nepomuk Communication Ontology.
     */
-  object NCO extends ResourceHelper {
+  object nco extends ResourceHelper {
     val prefix = Prefix("nco")
     val ns = Namespace("http://www.semanticdesktop.org/ontologies/nco#")
 
@@ -425,7 +434,7 @@ object Vocabulary {
   /**
     * Friend of a Friend Ontology.
     */
-  object FOAF extends ResourceHelper {
+  object foaf extends ResourceHelper {
     val prefix = Prefix("foaf")
     val ns = Namespace("http://xmlns.com/foaf/0.1/")
 

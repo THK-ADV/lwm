@@ -1,6 +1,6 @@
 @(student: Individual, pending: List[Individual])
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.Global._
 <div class="panel panel-default">
     <div class="panel-heading">Praktikumsanmeldungen</div>
@@ -13,9 +13,9 @@
     <tbody>
         @for(a <- pending) {
             <tr>
-                <td>@a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</td>
+                <td>@a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value</td>
                 <td>Wird bearbeitet</td>
-                @defining(a.props.getOrElse(LWM.allowsApplications, List(StringLiteral(""))).head.value) { p =>
+                @defining(a.props.getOrElse(lwm.allowsApplications, List(StringLiteral(""))).head.value) { p =>
                     @if(p == "true") {
                         <td><h3><a href="javascript: sDeleteApplication('@student.uri.value','@a.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
                     }

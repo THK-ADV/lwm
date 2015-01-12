@@ -7,7 +7,7 @@ import play.api.Play
 import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.{ Future, ExecutionContext }
@@ -73,12 +73,12 @@ object DegreeManagementController extends Controller with Authentication {
         },
         degree ⇒ {
           for {
-            id ← i.props(LWM.hasId)
-            name ← i.props(LWM.hasName)
+            id ← i.props(lwm.hasId)
+            name ← i.props(lwm.hasName)
           } yield {
-            i.update(LWM.hasId, id, StringLiteral(degree.id))
-            i.update(LWM.hasName, name, StringLiteral(degree.name))
-            i.update(RDFS.label, name, StringLiteral(degree.name))
+            i.update(lwm.hasId, id, StringLiteral(degree.id))
+            i.update(lwm.hasName, name, StringLiteral(degree.name))
+            i.update(rdfs.label, name, StringLiteral(degree.name))
             system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(i.uri, s"Degree modified by ${session.user}.")))
           }
           Future.successful(Redirect(routes.DegreeManagementController.index()))

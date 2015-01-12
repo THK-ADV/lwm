@@ -7,7 +7,7 @@ import play.api.Play
 import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDFS, LWM }
+import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.{ Future, ExecutionContext }
@@ -76,14 +76,14 @@ object CourseManagementController extends Controller with Authentication {
         },
         course ⇒ {
           for {
-            degree ← i.props(LWM.hasDegree)
-            id ← i.props(LWM.hasId)
-            name ← i.props(LWM.hasName)
+            degree ← i.props(lwm.hasDegree)
+            id ← i.props(lwm.hasId)
+            name ← i.props(lwm.hasName)
           } yield {
-            i.update(LWM.hasDegree, Resource(degree.value), Resource(course.degree))
-            i.update(LWM.hasId, id, StringLiteral(course.id))
-            i.update(LWM.hasName, name, StringLiteral(course.name))
-            i.update(RDFS.label, name, StringLiteral(course.name))
+            i.update(lwm.hasDegree, Resource(degree.value), Resource(course.degree))
+            i.update(lwm.hasId, id, StringLiteral(course.id))
+            i.update(lwm.hasName, name, StringLiteral(course.name))
+            i.update(rdfs.label, name, StringLiteral(course.name))
             system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Course modified by ${session.user}.")))
           }
           Future.successful(Redirect(routes.CourseManagementController.index()))

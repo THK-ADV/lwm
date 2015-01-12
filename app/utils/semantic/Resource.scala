@@ -150,7 +150,7 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
   }
 
   def ontClasses: List[Resource] = {
-    val response = executionContext.executeQueryBlocking(SPARQLBuilder.listIndividualProperties(uri, Vocabulary.RDF.typ))
+    val response = executionContext.executeQueryBlocking(SPARQLBuilder.listIndividualProperties(uri, Vocabulary.rdf.typ))
     val xml = loadString(response)
 
     val statements = SPARQLTools.statementsFromXML(xml)

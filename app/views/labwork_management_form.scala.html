@@ -7,8 +7,8 @@
 @import utils.semantic.Individual
 
     @helper.form(action = routes.LabworkManagementController.labWorkPost()) {
-        @helper.select(labworks("courseId"), for {course <- courses;labelList <- course.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString+ " - " +Individual(Resource(course.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value), '_label -> "Veranstaltung:")
-        @helper.select(labworks("semester"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
+        @helper.select(labworks("courseId"), for {course <- courses;labelList <- course.props.get(rdfs.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString+ " - " +Individual(Resource(course.props.getOrElse(lwm.hasDegree, List(Resource(""))).head.value)).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value), '_label -> "Veranstaltung:")
+        @helper.select(labworks("semester"), for {semester <- semesters; labelList <- semester.props.get(rdfs.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             <button type="submit" class="btn btn-primary">Hinzufügen</button>

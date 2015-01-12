@@ -5,7 +5,7 @@ import java.util.{ Date, UUID }
 import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.data.Forms._
-import utils.semantic.Vocabulary.{ RDFS, OWL, LWM, RDF }
+import utils.semantic.Vocabulary.{ rdfs, owl, lwm, rdf }
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
@@ -49,17 +49,17 @@ object Blacklists {
   def create(blacklist: Blacklist): Future[Individual] = {
     val blacklistResource = ResourceUtils.createResource(lwmNamespace, blacklist.id)
     val statements = List(
-      Statement(blacklistResource, RDF.typ, LWM.Blacklist),
-      Statement(blacklistResource, RDF.typ, OWL.NamedIndividual),
-      Statement(blacklistResource, RDFS.label, StringLiteral(Individual(blacklist.semester).props.get(RDFS.label).get.head.asLiteral().get.decodedString)),
-      Statement(blacklistResource, LWM.hasSemester, blacklist.semester),
-      Statement(blacklistResource, LWM.hasId, StringLiteral(blacklist.id.toString))
+      Statement(blacklistResource, rdf.typ, lwm.Blacklist),
+      Statement(blacklistResource, rdf.typ, owl.NamedIndividual),
+      Statement(blacklistResource, rdfs.label, StringLiteral(Individual(blacklist.semester).props.get(rdfs.label).get.head.asLiteral().get.decodedString)),
+      Statement(blacklistResource, lwm.hasSemester, blacklist.semester),
+      Statement(blacklistResource, lwm.hasId, StringLiteral(blacklist.id.toString))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(_ ⇒ Individual(blacklistResource))
   }
 
   def delete(blacklist: Blacklist): Future[Blacklist] = {
-    val maybeBlacklist = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Blacklist, Vocabulary.LWM.hasId, StringLiteral(blacklist.id.toString))
+    val maybeBlacklist = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Blacklist, Vocabulary.lwm.hasId, StringLiteral(blacklist.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeBlacklist)
     val p = Promise[Blacklist]()
     resultFuture.map { result ⇒
@@ -74,7 +74,7 @@ object Blacklists {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.Blacklist)) {
+    if (individual.props(rdf.typ).contains(lwm.Blacklist)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a Blacklist"))
@@ -83,7 +83,7 @@ object Blacklists {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Blacklist)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.Blacklist)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(blacklist ⇒ Individual(blacklist.s)).toList
     }
   }
@@ -96,19 +96,19 @@ object BlacklistDates {
   def create(blacklist: BlacklistDate): Future[Individual] = {
     val blacklistResource = ResourceUtils.createResource(lwmNamespace, blacklist.id)
     val statements = List(
-      Statement(blacklistResource, RDF.typ, LWM.BlacklistDate),
-      Statement(blacklistResource, RDF.typ, OWL.NamedIndividual),
-      Statement(blacklistResource, LWM.hasBlacklist, blacklist.blacklist),
-      Statement(blacklistResource, LWM.hasDate, DateLiteral(blacklist.date)),
-      Statement(blacklist.blacklist, LWM.hasBlacklistDate, blacklistResource),
-      Statement(blacklistResource, RDFS.label, StringLiteral(s"BlacklistDate: ${blacklist.date.toString}")),
-      Statement(blacklistResource, LWM.hasId, StringLiteral(blacklist.id.toString))
+      Statement(blacklistResource, rdf.typ, lwm.BlacklistDate),
+      Statement(blacklistResource, rdf.typ, owl.NamedIndividual),
+      Statement(blacklistResource, lwm.hasBlacklist, blacklist.blacklist),
+      Statement(blacklistResource, lwm.hasDate, DateLiteral(blacklist.date)),
+      Statement(blacklist.blacklist, lwm.hasBlacklistDate, blacklistResource),
+      Statement(blacklistResource, rdfs.label, StringLiteral(s"BlacklistDate: ${blacklist.date.toString}")),
+      Statement(blacklistResource, lwm.hasId, StringLiteral(blacklist.id.toString))
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(_ ⇒ Individual(blacklistResource))
   }
 
   def delete(blacklist: BlacklistDate): Future[BlacklistDate] = {
-    val maybeBlacklist = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.BlacklistDate, Vocabulary.LWM.hasId, StringLiteral(blacklist.id.toString))
+    val maybeBlacklist = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.BlacklistDate, Vocabulary.lwm.hasId, StringLiteral(blacklist.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeBlacklist)
     val p = Promise[BlacklistDate]()
     resultFuture.map { result ⇒
@@ -123,7 +123,7 @@ object BlacklistDates {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.BlacklistDate)) {
+    if (individual.props(rdf.typ).contains(lwm.BlacklistDate)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a BlacklistDate"))
@@ -132,7 +132,7 @@ object BlacklistDates {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.BlacklistDate)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.BlacklistDate)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(blacklist ⇒ Individual(blacklist.s)).toList
     }
   }
@@ -140,8 +140,8 @@ object BlacklistDates {
   def getAll(blacklist: Resource): Future[List[Individual]] = {
     sparqlExecutionContext.executeQuery(
       s"""
-        |select ($blacklist as ?s) (${LWM.hasBlacklistDate} as ?p) ?o where{
-        |$blacklist ${LWM.hasBlacklistDate} ?o
+        |select ($blacklist as ?s) (${lwm.hasBlacklistDate} as ?p) ?o where{
+        |$blacklist ${lwm.hasBlacklistDate} ?o
         |}
       """.stripMargin).map { stringResult ⇒
         SPARQLTools.statementsFromString(stringResult).map(blacklist ⇒ Individual(blacklist.o.asResource().get)).toList
@@ -150,10 +150,10 @@ object BlacklistDates {
 
   def getAllForSemester(semester: Resource): Future[List[LocalDate]] = {
     val query = s"""
-        |select ?s (${LWM.hasBlacklistDate} as ?p) ?o where{
-        |?s ${LWM.hasSemester} $semester .
-        |?s ${LWM.hasBlacklistDate} ?d .
-        |?d ${LWM.hasDate} ?o .
+        |select ?s (${lwm.hasBlacklistDate} as ?p) ?o where{
+        |?s ${lwm.hasSemester} $semester .
+        |?s ${lwm.hasBlacklistDate} ?d .
+        |?d ${lwm.hasDate} ?o .
         |}
       """.stripMargin
 
