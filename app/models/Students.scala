@@ -4,6 +4,7 @@ import java.net.URLDecoder
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
 import org.joda.time.LocalDate
+import utils.QueryHost
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future }
@@ -15,7 +16,7 @@ case class Student(
   email: String,
   phone: String, degree: String)
 
-object Students {
+object Students extends CheckedDelete {
 
   import utils.Global._
   import utils.semantic.Vocabulary._
@@ -289,6 +290,7 @@ object Students {
     """.stripMargin.execUpdate()
   }
 
+  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = ???
 }
 
 object StudentForms {

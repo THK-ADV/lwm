@@ -1,7 +1,6 @@
 package controllers
 
 import java.util.NoSuchElementException
-
 import actors.TransactionsLoggerActor.Transaction
 import com.google.common.primitives.Doubles
 import models._
@@ -10,10 +9,10 @@ import play.api.Play
 import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.TransactionSupport
+import utils.{ QueryHost, TransactionSupport, UpdateHost }
+import utils.Implicits._
 import utils.semantic.Vocabulary._
 import utils.semantic._
-import utils.Global._
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,7 +36,9 @@ import Synchronize._
   * DELETE group HAVING @{group.uri.value}
   */
 object EditsManagementController extends Controller with Authentication with TransactionSupport {
+
   import Play.current
+
   val system = Akka.system
 
   case class Component(operation: String, mappedValues: mutable.Map[Property, RDFNode], identifier: String)
@@ -45,18 +46,18 @@ object EditsManagementController extends Controller with Authentication with Tra
   def applyEdit = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
       Action.async(parse.json) { implicit request ⇒
+
         val maybeQuery = (request.body \ "query").asOpt[String]
         val maybeUri = (request.body \ "redirect").asOpt[String]
 
         if (maybeQuery.isDefined && maybeUri.isDefined) {
           val component = parseQuery(maybeQuery.get)
-
           component.operation match {
             case "INSERT" ⇒ for (inserted ← insert(component, session.user)) yield if (inserted) Ok(maybeUri.get)
             case "REMOVE" ⇒ for (removed ← remove(component, session.user)) yield if (removed) Ok(maybeUri.get)
             case "UPDATE" ⇒ for (updated ← update(component, session.user)) yield if (updated) Ok(maybeUri.get)
-            case "CREATE" ⇒ for (created ← create(component, session.user)) yield if (created) Ok(maybeUri.get)
-            case "DELETE" ⇒ for (deleted ← delete(component, session.user)) yield if (deleted) Ok(maybeUri.get)
+            case "CREATE" ⇒ for (created ← create(component, session.user)(utils.Global.update, utils.Global.query)) yield if (created) Ok(maybeUri.get)
+            case "DELETE" ⇒ for (deleted ← delete(component, session.user)(utils.Global.update, utils.Global.query)) yield if (deleted) Ok(maybeUri.get)
           }
         }
 
@@ -93,24 +94,30 @@ object EditsManagementController extends Controller with Authentication with Tra
     }
   }
 
-  private def create(c: Component, user: String): Future[Boolean] = {
+  private def create(c: Component, user: String)(implicit updateHost: UpdateHost, queryHost: QueryHost): Future[Boolean] = {
 
     c.identifier match {
+
       case "group" ⇒
-        val groupQuery =
-          s"""
+
+        def groupIdFuture(c: Component) = {
+          import utils.Global._
+
+          val query = s"""
           |select (${c.mappedValues.get(lwm.hasLabWork).get} as ?s) (${lwm.hasGroupId} as ?p) ?o where {
           | ${c.mappedValues.get(lwm.hasLabWork).get} ${lwm.hasGroup} ?group .
           | ?group ${lwm.hasGroupId} ?o
           |}
-        """.stripMargin
+          """.stripMargin
 
-        val groupIdFuture = sparqlExecutionContext.executeQuery(groupQuery).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.o)
+          sparqlExecutionContext.executeQuery(query).map { result ⇒
+            SPARQLTools.statementsFromString(result).map(_.o)
+
+          }
         }
 
         val labworkGroupFuture = for {
-          groupIds ← groupIdFuture
+          groupIds ← groupIdFuture(c)
           labwork = c.mappedValues.get(lwm.hasLabWork).get.asResource().get
         } yield {
           if (groupIds.nonEmpty) LabWorkGroup((groupIds(groupIds.size - 1).value.charAt(0) + 1).asInstanceOf[Char].toString, labwork)
@@ -135,7 +142,7 @@ object EditsManagementController extends Controller with Authentication with Tra
         val rId = c.mappedValues.get(lwm.hasRoomId).get
         val name = c.mappedValues.get(lwm.hasName).get
         Rooms.create(Room(rId.value, name.value)).map { room ⇒
-          createTransaction(user, room.uri, s"Room ${name.value} created by $user.")
+          createTransaction(user, room, s"Room ${name.value} created by $user.")
           true
         }.recover { case NonFatal(t) ⇒ true }
       case "course" ⇒
@@ -177,7 +184,7 @@ object EditsManagementController extends Controller with Authentication with Tra
     }
   }
 
-  private def delete(c: Component, user: String): Future[Boolean] = {
+  private def delete(c: Component, user: String)(implicit updateHost: UpdateHost, queryHost: QueryHost): Future[Boolean] = {
     val toBeDeleted = c.mappedValues.get(deletion).get.asResource().get
     c.identifier match {
       case "group" ⇒
@@ -220,6 +227,7 @@ object EditsManagementController extends Controller with Authentication with Tra
   }
 
   private def insert(c: Component, user: String): Future[Boolean] = {
+    import utils.Global._
     val i = Individual(Resource(c.identifier))
     c.mappedValues.foreach {
       v ⇒ i.add(v._1, v._2)
@@ -228,6 +236,7 @@ object EditsManagementController extends Controller with Authentication with Tra
   }
 
   private def remove(c: Component, user: String): Future[Boolean] = {
+    import utils.Global._
     val i = Individual(Resource(c.identifier))
     c.mappedValues.foreach { v ⇒
       modifyTransaction(user, i.uri, s"Statement (${v._1}, ${v._2}} removed from ${i.uri} by $user.)")
@@ -237,6 +246,7 @@ object EditsManagementController extends Controller with Authentication with Tra
   }
 
   private def update(c: Component, user: String): Future[Boolean] = {
+    import utils.Global._
     val i = Individual(Resource(c.identifier))
     val oldValueMap = mutable.Map[Property, RDFNode]()
     c.mappedValues.foreach { v ⇒

@@ -91,7 +91,7 @@ object Users extends CheckedDelete {
     delete(resource)
   }
 
- def delete(resource: Resource): Future[Resource] = {
+  def delete(resource: Resource): Future[Resource] = {
     import utils.Global._
     val p = Promise[Resource]()
     val individual = Individual(resource)

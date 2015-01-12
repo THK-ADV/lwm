@@ -29,7 +29,7 @@ object TimetableController extends Controller with Authentication {
           supervisors.toList.map(r ⇒ Individual(r)),
           TimeSlots.slotTimeMap.values.toList.sorted,
           entries,
-          rooms,
+          rooms.map(e ⇒ Individual(e)),
           TimeTableForm.timetableForm))
       }
     }
@@ -75,7 +75,7 @@ object TimetableController extends Controller with Authentication {
                   supervisors.toList.map(r ⇒ Individual(r)),
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   Individual(e.timetable).props.getOrElse(lwm.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r)),
-                  rooms,
+                  rooms.map(e ⇒ Individual(e)),
                   formWithErrors))
               }
             },
@@ -131,7 +131,7 @@ object TimetableController extends Controller with Authentication {
                   supervisors.toList.map(r ⇒ Individual(r)),
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   ti.props.getOrElse(lwm.hasTimetableEntry, List(Resource(""))).map(_.asResource().get).map(r ⇒ Individual(r)),
-                  rooms,
+                  rooms.map(e ⇒ Individual(e)),
                   TimeTableForm.timetableForm))
               }
             },

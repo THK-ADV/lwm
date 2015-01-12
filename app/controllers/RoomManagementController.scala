@@ -12,7 +12,7 @@ import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.Future
-
+import utils.QueryHost
 /**
   * Room Management:
   *
@@ -29,7 +29,7 @@ object RoomManagementController extends Controller with Authentication with Tran
       for {
         rooms ← Rooms.all()
       } yield {
-        Ok(views.html.room_management(rooms, Rooms.Forms.roomForm))
+        Ok(views.html.room_management(rooms.map(e ⇒ Individual(e)), Rooms.Forms.roomForm))
       }
     }
   }
@@ -39,12 +39,12 @@ object RoomManagementController extends Controller with Authentication with Tran
       Rooms.Forms.roomForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Rooms.all()) yield {
-            BadRequest(views.html.room_management(all.toList, formWithErrors))
+            BadRequest(views.html.room_management(all.map(e ⇒ Individual(e)).toList, formWithErrors))
           }
         },
         room ⇒ {
           Rooms.create(Room(room.roomId, room.name)).map { i ⇒
-            createTransaction(session.user, i.uri, s"Room ${i.uri} created by ${session.user}")
+            createTransaction(session.user, i, s"Room $i created by ${session.user}")
             Redirect(routes.RoomManagementController.index())
           }
         }
@@ -71,7 +71,7 @@ object RoomManagementController extends Controller with Authentication with Tran
         Rooms.Forms.roomForm.bindFromRequest.fold(
           formWithErrors ⇒ {
             for (all ← Rooms.all()) yield {
-              BadRequest(views.html.room_management(all.toList, formWithErrors))
+              BadRequest(views.html.room_management(all.map(e ⇒ Individual(e)).toList, formWithErrors))
             }
           },
           room ⇒ {
