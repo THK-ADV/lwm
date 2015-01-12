@@ -70,7 +70,7 @@ class RoomSpec extends SemanticFeatureSpec {
     }
 
     "should return true if an arbitrary resource is really a room" in {
-      Rooms.check(expectedResource1) should be(true)
+      Rooms.check(expectedResource1) should be(right = true)
     }
   }
 }
