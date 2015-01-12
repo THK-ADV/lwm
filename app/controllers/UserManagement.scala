@@ -21,7 +21,7 @@ object UserManagement extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList, UserForms.userForm))
+      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList.map(r ⇒ Individual(r)), UserForms.userForm))
     }
   }
 
@@ -34,20 +34,15 @@ object UserManagement extends Controller with Authentication {
         user ⇒ {
           val promise = Promise[Result]()
 
-          Users.exists(session.user).map { exists ⇒
-            if (exists) {
-              promise.success(Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max)))
+          if (Users.exists(session.id)) {
+            promise.success(Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max)))
+          } else {
+            if (user.id != session.user) {
+              promise.success(Redirect(routes.FirstTimeSetupController.setupUser()))
             } else {
-              if (user.id != session.user) {
-                promise.success(Redirect(routes.FirstTimeSetupController.setupUser()))
-              } else {
-                Users.create(user).map(_ ⇒ promise.success(Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max))))
-              }
+              Users.create(user).map(_ ⇒ promise.success(Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max))))
             }
-          }.recover {
-            case NonFatal(e) ⇒ promise.success(Redirect(routes.Application.index()).withNewSession)
           }
-
           promise.future
         }
       )
@@ -59,7 +54,7 @@ object UserManagement extends Controller with Authentication {
       UserForms.userForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for (all ← Users.all()) yield {
-            BadRequest(views.html.userManagement(all.toList, formWithErrors))
+            BadRequest(views.html.userManagement(all.toList.map(r ⇒ Individual(r)), formWithErrors))
           }
         },
         user ⇒ {
@@ -87,7 +82,7 @@ object UserManagement extends Controller with Authentication {
           for {
             all ← Users.all()
           } yield {
-            BadRequest(views.html.userManagement(all, formWithErrors))
+            BadRequest(views.html.userManagement(all.map(r ⇒ Individual(r)), formWithErrors))
           }
         },
         user ⇒ {

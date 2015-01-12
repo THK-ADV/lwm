@@ -26,7 +26,7 @@ object TimetableController extends Controller with Authentication {
 
         Ok(views.html.timetable_management(
           labWorkI,
-          supervisors.toList,
+          supervisors.toList.map(r ⇒ Individual(r)),
           TimeSlots.slotTimeMap.values.toList.sorted,
           entries,
           rooms,
@@ -72,7 +72,7 @@ object TimetableController extends Controller with Authentication {
               } yield {
                 BadRequest(views.html.timetable_management(
                   Individual(Resource(labworkid)),
-                  supervisors.toList,
+                  supervisors.toList.map(r ⇒ Individual(r)),
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   Individual(e.timetable).props.getOrElse(LWM.hasTimetableEntry, List.empty[Resource]).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
@@ -90,7 +90,7 @@ object TimetableController extends Controller with Authentication {
 
   def convert(id: String, entry: TimetableEntryFormEntry): Future[TimetableEntry] = {
     for (s ← Users.all()) yield {
-      val supervisors = s.filter(i ⇒ i.uri.value == entry.supervisors).map(_.uri).toList
+      val supervisors = s.map(r ⇒ Individual(r)).filter(i ⇒ i.uri.value == entry.supervisors).map(_.uri).toList
       val timetableId = Individual(Resource(id)).props.getOrElse(LWM.hasTimetable, List.empty[Resource]).map(_.asResource().get).head
       TimetableEntry(
         Weekdays.workWeek.values.filter(p ⇒ p.label == entry.day).head,
@@ -127,7 +127,7 @@ object TimetableController extends Controller with Authentication {
               } yield {
                 BadRequest(views.html.timetable_management(
                   Individual(Resource(ti.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value)),
-                  supervisors.toList,
+                  supervisors.toList.map(r ⇒ Individual(r)),
                   TimeSlots.slotTimeMap.values.toList.sorted,
                   ti.props.getOrElse(LWM.hasTimetableEntry, List(Resource(""))).map(_.asResource().get).map(r ⇒ Individual(r)),
                   rooms,
