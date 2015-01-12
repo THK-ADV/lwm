@@ -3,13 +3,14 @@
 @import utils.semantic.{Individual, Resource}
 
 @import utils.semantic.Vocabulary._
+@import utils.Global._
 
 @helper.form(action = routes.TimetableController.entryPost(labWorkId.value)) {
     @helper.select(form("day"), for(weekday <- weekdays) yield weekday.label -> weekday.label, '_label -> "Tag:")
     @helper.select(form("room"), for (room <- rooms; labelList <- room.props.get(lwm.hasRoomId); label = labelList.headOption.getOrElse("")) yield room.uri.value -> label.toString, '_label -> "Raum:")
     @helper.select(form("start"), for(st <- time) yield st.toString -> st.toString, '_label -> "Startzeit:")
     @helper.select(form("end"), for(et <- time) yield et.toString -> et.toString, '_label -> "Endzeit:")
-    @helper.select(form("supervisors"), Users.userFormMapping(), '_label -> "Betreuer:")
+    @helper.select(form("supervisors"), Users.userMapping(), '_label -> "Betreuer:")
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
         <button type="submit" class="btn btn-primary">Hinzufügen</button>

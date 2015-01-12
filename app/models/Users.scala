@@ -133,35 +133,30 @@ object Users extends CheckedDelete {
       Resource(solution.data("s").toString)
     }
   }
-
-  def substituteUserMapping(userId: String) = {
-    import utils.Global._
-    val query =
-      s"""
-          |select (?user as ?s) (${rdfs.label} as ?p) (?name as ?o) where {
+  def possibleSubstitutes(userId: String)(implicit queryHost: QueryHost) = {
+    s"""
+          |select ?user ?name where {
           |  ?user ${rdf.typ} ${lwm.User} .
           |  ?user ${rdfs.label} ?name .
           |  filter not exists {?user ${lwm.hasGmId} "$userId"}
           |}
-        """.stripMargin
-
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
-      statement.s.toString.replaceAll("<", "").replaceAll(">", "") -> statement.o.toString
+        """.stripMargin.execSelect().map { solution ⇒
+      val resource = solution.data("user").toString
+      val name = solution.data("name").toString
+      resource -> name
     }
   }
 
-  def userFormMapping() = {
-    import utils.Global._
-    val query =
-      s"""
-          |select (?user as ?s) (${rdfs.label} as ?p) (?name as ?o) where {
+  def userMapping()(implicit queryHost: QueryHost) = {
+    s"""
+          |select ?user ?name where {
           |  ?user ${rdf.typ} ${lwm.User} .
           |  ?user ${rdfs.label} ?name
           |}
-        """.stripMargin
-
-    SPARQLTools.statementsFromString(sparqlExecutionContext.executeQueryBlocking(query)).map { statement ⇒
-      statement.s.toString.replaceAll("<", "").replaceAll(">", "") -> statement.o.toString
+        """.stripMargin.execSelect().map { solution ⇒
+      val resource = solution.data("user").toString
+      val name = solution.data("name").toString
+      resource -> name
     }
   }
 

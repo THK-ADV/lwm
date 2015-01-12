@@ -10,6 +10,7 @@ import utils.Implicits._
 import scala.concurrent.{ Promise, Future, blocking }
 
 case class Room(roomId: String, name: String, id: UUID = UUID.randomUUID())
+
 case class RoomFormModel(roomId: String, name: String)
 
 object Rooms extends CheckedDelete {
@@ -48,7 +49,7 @@ object Rooms extends CheckedDelete {
     p.future
   }
 
-  def delete(roomId: String)(implicit queryHost: QueryHost): Future[Resource] = {
+  def delete(roomId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
     val resource = Resource(s"${utils.Global.lwmNamespace}rooms/$roomId")
     delete(resource)
   }
@@ -71,6 +72,16 @@ object Rooms extends CheckedDelete {
          | $resource rdf:type lwm:Room
          |}
        """.stripMargin.executeAsk()
+  }
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    s"""
+       ${Vocabulary.defaulPrefixes}
+       |Select (count(distinct ?s) as ?count) {
+       |
+       |?s rdf:type lwm:Room
+       }
+     """.stripMargin.execSelect().map(s ⇒ s.data("s").asLiteral().getInt).head
   }
 }
 
