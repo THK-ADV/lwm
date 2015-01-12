@@ -65,3 +65,7 @@ data
 
 #personal
 ./personal
+
+
+#backup
+/projectFilesBackup

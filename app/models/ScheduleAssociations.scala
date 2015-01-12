@@ -235,9 +235,54 @@ object ScheduleAssociations {
       val altGroupId = solution.getLiteral("groupId").getString
       val altDate = solution.getLiteral("date").getString
       val altTime = URLDecoder.decode(solution.getLiteral("time").getString, "UTF-8")
-      val groupMembers = Individual(Resource(solution.getResource("group").getURI)).props.getOrElse(LWM.hasMember, List(StringLiteral("")))
-      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId (${groupMembers.size})") :: alternates
+      val groupMembersSize = {
+        val newGroup = Resource(solution.getResource("group").getURI)
+        val groupCount = Individual(newGroup).props.getOrElse(LWM.hasMember, List(StringLiteral("")))
+        val normalizedGroupCount = getNormalizedCount(newGroup, altDate)
+        groupCount.size + normalizedGroupCount
+      }
+      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)") :: alternates
     }
     alternates
+  }
+
+  def getNormalizedCount(group: Resource, date: String): Int = {
+    import utils.Implicits._
+    val queryAlternate =
+      s"""
+          PREFIX owl: <http://www.w3.org/2002/07/owl#>
+          PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
+          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+        Select (count(?s) as ?count) where {
+          ?s lwm:memberOf ?group .
+          ?group lwm:hasLabWork <http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ff7> .
+          ?s lwm:hasScheduleAssociation ?sched .
+          ?sched lwm:hasAlternateScheduleAssociation ?alter .
+          ?alter lwm:hasAssignmentDate "$date" .
+          ?alter lwm:hasGroup ?g2 .
+          ?g2 lwm:hasLabWork <http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ff7>
+        }
+      """.stripMargin.execSelect().map(querys ⇒ querys.data.get("count")).head.map(s ⇒ s.asLiteral().getInt)
+
+    val queryHidden =
+      s"""
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+       Select (count(distinct ?s) as ?count) where {
+        ?s lwm:memberOf $group .
+        ?group lwm:hasLabWork ?labwork .
+        ?s lwm:hasHidingState ?state .
+        ?state lwm:hasHidingSubject ?labwork
+    }
+     """.stripMargin.execSelect().map(querys ⇒ querys.data.get("count")).head.map(s ⇒ s.asLiteral().getInt)
+
+    queryAlternate.getOrElse(0) - queryHidden.getOrElse(0)
   }
 }
