@@ -31,6 +31,8 @@ object Implicits {
       val request = UpdateFactory.create(string)
       UpdateExecutionFactory.createRemote(request, updateHost.host).execute()
     }
+
+    def executeAsk()(implicit queryHost: QueryHost) = QueryExecutionFactory.sparqlService(queryHost.host, string).execAsk()
   }
 
 }

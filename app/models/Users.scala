@@ -2,7 +2,7 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
-import utils.{ QueryHost, UpdateHost }
+import utils.{ Global, QueryHost, UpdateHost }
 import utils.semantic._
 import utils.Implicits._
 
@@ -46,7 +46,7 @@ case class User(id: String,
                 email: String,
                 phone: String)
 
-object Users {
+object Users extends CheckedDelete {
 
   import utils.semantic.Vocabulary._
   import utils.Global.lwmNamespace
@@ -86,20 +86,12 @@ object Users {
 
   }
 
-  def deleteNew(userId: String)(implicit updateHost: UpdateHost): Future[Resource] = {
+  def delete(userId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
     val resource = Resource(s"${lwmNamespace}users/$userId")
-
-    val p = Promise[Resource]()
-
-    blocking {
-      SPARQLBuilder.removeIndividual(resource).execUpdate()
-      p.success(resource)
-    }
-
-    p.future
+    delete(resource)
   }
 
-  def delete(resource: Resource): Future[Resource] = {
+ def delete(resource: Resource): Future[Resource] = {
     import utils.Global._
     val p = Promise[Resource]()
     val individual = Individual(resource)
@@ -109,22 +101,37 @@ object Users {
     p.future
   }
 
-  def all(): Future[List[Individual]] = {
-    import utils.Global._
-    val query = s"""
+  def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |
+      |ask {
+      |   ?s lwm:hasGmId "$uid"
+      |}
+    """.stripMargin.executeAsk()
+  }
+
+  def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |
+      |ask {
+      |   $resource rdf:type lwm:User
+      |}
+    """.stripMargin.executeAsk()
+  }
+
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
          |select ?s (${rdf.typ} as ?p) (${lwm.User} as ?o) where {
          | ?s ${rdf.typ} ${lwm.User} .
          | optional {?s ${foaf.lastName} ?lastname}
-         |}order by asc(?lastname)
-       """.stripMargin
-    sparqlExecutionContext.executeQuery(query).map { stringResult ⇒
-      SPARQLTools.statementsFromString(stringResult).map(user ⇒ Individual(user.s)).toList
+         |}order by desc(?lastname)
+       """.stripMargin.execSelect().map { solution ⇒
+      Resource(solution.data("s").toString)
     }
-  }
-
-  def exists(uid: String): Future[Boolean] = {
-    import utils.Global._
-    sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.lwm.hasGmId} ${StringLiteral(uid).toQueryString}}")
   }
 
   def substituteUserMapping(userId: String) = {
