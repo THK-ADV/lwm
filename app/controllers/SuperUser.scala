@@ -67,7 +67,7 @@ object SuperUser extends Controller with Authentication {
         val property = Property(p.get)
         val rdfnode = {
           if (n.get.contains("http")) Resource(n.get)
-          else s"'${n.get.split(" ").mkString("+")}'"
+          else s"'${URLEncoder.encode(n.get, "UTF-8")}'"
         }
         val u =
           s"""
@@ -75,6 +75,7 @@ object SuperUser extends Controller with Authentication {
               |$resource $property $rdfnode
               |}
             """.stripMargin
+
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(routes.SuperUser.resourceOverview(r.get))).recover { case NonFatal(t) ⇒ Redirect(routes.SuperUser.index()) }
 
       } else {
@@ -106,7 +107,6 @@ object SuperUser extends Controller with Authentication {
             ${nextRes.get} ${nextProp.get} $nn
             }
           """.stripMargin
-
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(url.get)).recover { case NonFatal(t) ⇒ Redirect(url.get) }
         Future.successful(Redirect(url.get))
       } else {
