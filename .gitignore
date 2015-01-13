@@ -64,7 +64,7 @@ data
 *.csv
 
 #personal
-./personal
+/sparql
 
 
 #backup
