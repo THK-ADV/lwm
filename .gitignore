@@ -41,7 +41,7 @@ data
 /manifest.mf
 
 # Mac filesystem dust
-/.DS_Store
+*/.DS_Store
 
 # Log files
 /*.log
@@ -54,10 +54,10 @@ data
 /tmp
 
 /store
+/storeTest
 
 #db dump
 /dump
-*.ttl
 
 #csv
 /csv
