@@ -1,13 +1,13 @@
 package models
 
-import java.net.URLDecoder
+import java.net.{ URLEncoder, URLDecoder }
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
 import org.joda.time.LocalDate
-import utils.QueryHost
+import utils.{ UpdateHost, QueryHost }
 import utils.semantic._
 
-import scala.concurrent.{ Promise, Future }
+import scala.concurrent.{ Promise, Future, blocking }
 
 case class Student(
   gmId: String,
@@ -18,87 +18,108 @@ case class Student(
 
 object Students extends CheckedDelete {
 
-  import utils.Global._
-  import utils.semantic.Vocabulary._
-
   import scala.concurrent.ExecutionContext.Implicits.global
   import utils.Implicits._
 
-  def create(student: Student): Future[Individual] = {
-    val resource = ResourceUtils.createResource(lwmNamespace)
-    val statements = List(
-      Statement(resource, rdf.typ, lwm.Student),
-      Statement(resource, rdf.typ, owl.NamedIndividual),
-      Statement(resource, lwm.hasGmId, StringLiteral(student.gmId.toLowerCase)),
-      Statement(resource, foaf.firstName, StringLiteral(student.firstname)),
-      Statement(resource, foaf.lastName, StringLiteral(student.lastname)),
-      Statement(resource, rdfs.label, StringLiteral(s"${student.firstname} ${student.lastname}")),
-      Statement(resource, nco.phoneNumber, StringLiteral(student.phone)),
-      Statement(resource, foaf.mbox, StringLiteral(student.email)),
-      Statement(resource, lwm.hasEnrollment, Resource(student.degree)),
-      Statement(resource, lwm.hasRegistrationId, StringLiteral(student.registrationNumber))
-    )
+  def create(student: Student)(implicit updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}students/${student.gmId}")
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
-      Individual(resource)
-    }
-  }
-
-  def delete(student: Student): Future[Student] = {
-    val maybeStudent = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Student, Vocabulary.lwm.hasGmId, StringLiteral(student.gmId))
-    val resultFuture = sparqlExecutionContext.executeQuery(maybeStudent)
-    val p = Promise[Student]()
-    resultFuture.map { result ⇒
-      val resources = SPARQLTools.statementsFromString(result).map(student ⇒ student.s)
-      resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(student) }
-      }
-    }
-    p.future
-  }
-
-  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
-    val individual = Individual(resource)
-    if (individual.props(rdf.typ).contains(lwm.Student)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
-    } else {
-      p.failure(new IllegalArgumentException("Resource is not a Student"))
-    }
-    p.future
-  }
-
-  def all(): Future[List[Individual]] = {
-    val query =
+    blocking {
       s"""
-         |select ?s (${rdf.typ} as ?p) (${lwm.Student} as ?o) where {
-         | ?s ${rdf.typ} ${lwm.Student} .
-         | optional {?s ${foaf.lastName} ?lastname}
-         |}order by asc(?lastname)
-       """.stripMargin
-    sparqlExecutionContext.executeQuery(query).map { stringResult ⇒
-      SPARQLTools.statementsFromString(stringResult).map(student ⇒ Individual(student.s)).toList
-    }
-  }
-
-  def get(gmId: String): Future[Resource] = {
-    val p = Promise[Resource]()
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Student, lwm.hasGmId, StringLiteral(gmId))).map { result ⇒
-      val resource = SPARQLTools.statementsFromString(result).map(student ⇒ student.s)
-      if (resource.nonEmpty) {
-        p.success(resource.head)
-      } else {
-        p.failure(new NoSuchElementException(s"There is no student with ID $gmId"))
-      }
+     |${Vocabulary.defaulPrefixes}
+     |
+     |Insert data {
+     |
+     |    $resource rdf:type lwm:Student .
+     |    $resource lwm:hasGmId "${student.gmId}" .
+     |    $resource lwm:hasEnrollment <${student.degree}> .
+     |    $resource lwm:hasRegistrationId "${student.registrationNumber}" .
+     |    $resource foaf:firstName "${student.firstname}" .
+     |    $resource foaf:lastName "${student.lastname}" .
+     |    $resource foaf:mbox "${student.email}" .
+     |    $resource nco:phoneNumber "${student.phone}" .
+     |    $resource rdfs:label "${student.firstname} ${student.lastname}" .
+     |
+     |}
+   """.stripMargin.execUpdate()
+      p.success(resource)
     }
     p.future
   }
 
-  private def search(query: String): Future[List[(String, String, String)]] = {
+  def delete(gmId: String)(implicit updateHost: UpdateHost, queryHost: QueryHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}students/$gmId")
+    delete(resource)
+  }
+
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         |select ?s (rdf:type as ?p) (lwm:Student as ?o) where {
+         | ?s rdf:type lwm:Student .
+         | optional {?s foaf:lastName ?lastname}
+         |} order by asc(?lastname)
+         |
+       """.stripMargin.execSelect().map(s ⇒ Resource(s.data("s").toString))
+  }
+
+  def get(gmId: String)(implicit queryHost: QueryHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}students/$gmId")
+
+    val p = Promise[Resource]()
+
+    if (exists(gmId)) {
+      p.success(resource)
+    } else {
+      p.failure(new NoSuchElementException(s"There is no student with ID $gmId"))
+    }
+
+    p.future
+  }
+
+  def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |
+      |ask {
+      |   ?s lwm:hasGmId "$uid"
+      |}
+    """.stripMargin.executeAsk()
+  }
+
+  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       |ASK {
+       |  $resource rdf:type lwm:Student
+       |}
+     """.stripMargin.executeAsk()
+  }
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       |Select (count(distinct ?s) as ?count) where {
+       |  ?s rdf:type lwm:Student
+       |}
+     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+  }
+
+  //------------------ UNREFACTORED ---------------
+
+  private def search(inputQuery: String): Future[List[(String, String, String)]] = {
+    import utils.Global._
+    import utils.semantic.Vocabulary._
+
     val sparqlQuery =
       s"""
         |SELECT ?s (${lwm.hasGmId} as ?p) ?o where {?s ${lwm.hasGmId} ?o
-        |FILTER regex(?o, "^$query")
+        |FILTER regex(?o, "^$inputQuery")
         |}
       """.stripMargin
 
@@ -117,11 +138,9 @@ object Students extends CheckedDelete {
 
   def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.lwm.hasGmId} ${StringLiteral(uid.toLowerCase).toQueryString}}")
-
-  def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.rdf.typ} ${lwm.Student}}")
-
   def labworksForStudent(student: Resource) = {
+    import utils.semantic.Vocabulary._
+    import utils.Global._
     val query1 =
       s"""
          |select * where {
@@ -143,7 +162,7 @@ object Students extends CheckedDelete {
     mapping
   }
 
-  def dateCountMissed(student: Resource, group: Resource): Int = {
+  def dateCountMissed(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
     import utils.Implicits._
     val q = s"""
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
@@ -168,7 +187,7 @@ object Students extends CheckedDelete {
     }.flatten.getOrElse(0)
   }
 
-  def dateCountNotPassed(student: Resource, group: Resource): Int = {
+  def dateCountNotPassed(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
 
     s"""
        prefix lwm: <http://lwm.gm.fh-koeln.de/>
@@ -210,7 +229,7 @@ object Students extends CheckedDelete {
     }.flatten.getOrElse(0)
   }
 
-  def dateCountAlternate(student: Resource, group: Resource): Int = {
+  def dateCountAlternate(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
 
     s"""
         prefix lwm: <http://lwm.gm.fh-koeln.de/>
@@ -227,7 +246,7 @@ object Students extends CheckedDelete {
     }.flatten.getOrElse(0)
   }
 
-  def studentForLabworkAssociation(labworkAssociation: Resource) = {
+  def studentForLabworkAssociation(labworkAssociation: Resource)(implicit queryHost: QueryHost) = {
     s"""
       |prefix lwm: <http://lwm.gm.fh-koeln.de/>
       |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -243,7 +262,7 @@ object Students extends CheckedDelete {
     }.take(1)
   }
 
-  def isHidden(labwork: Resource, student: Resource) = {
+  def isHidden(labwork: Resource, student: Resource)(implicit queryHost: QueryHost) = {
     s"""
       |prefix lwm: <http://lwm.gm.fh-koeln.de/>
       |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -258,7 +277,7 @@ object Students extends CheckedDelete {
     }.head
   }
 
-  def removeHideState(labwork: Resource, student: Resource) = {
+  def removeHideState(labwork: Resource, student: Resource)(implicit updateHost: UpdateHost) = {
     s"""
       |prefix lwm: <http://lwm.gm.fh-koeln.de/>
       |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -276,7 +295,7 @@ object Students extends CheckedDelete {
     """.stripMargin.execUpdate()
   }
 
-  def addHideState(labwork: Resource, student: Resource) = {
+  def addHideState(labwork: Resource, student: Resource)(implicit updateHost: UpdateHost) = {
     s"""
       |prefix lwm: <http://lwm.gm.fh-koeln.de/>
       |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -290,11 +309,12 @@ object Students extends CheckedDelete {
     """.stripMargin.execUpdate()
   }
 
-  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = ???
 }
 
 object StudentForms {
+
   import play.api.data.Forms._
   import play.api.data._
+
 }
 

@@ -57,10 +57,9 @@ object GroupManagementController extends Controller with Authentication with Tra
         val studentResource = Resource(maybeStudent.get)
         val groupResource = Resource(maybeGroup.get)
         for {
-          isStudent ← Students.isStudent(studentResource)
           isGroup ← LabworkGroups.isLabWorkGroup(groupResource)
         } yield {
-          if (isStudent && isGroup) {
+          if (Students.check(studentResource) && isGroup) {
             ScheduleAssociations.getForGroup(groupResource).map { assocs ⇒
               assocs.map { assoc ⇒
                 ScheduleAssociations.create(assoc, studentResource).map { i ⇒
@@ -118,10 +117,9 @@ object GroupManagementController extends Controller with Authentication with Tra
           val studentResource = Resource(maybeStudent.get)
           val groupResource = Resource(maybeGroup.get)
           for {
-            isStudent ← Students.isStudent(studentResource)
             isGroup ← LabworkGroups.isLabWorkGroup(groupResource)
           } yield {
-            if (isStudent && isGroup) {
+            if (Students.check(studentResource) && isGroup) {
               val query =
                 s"""
                    |select ($studentResource as ?s) (${lwm.hasScheduleAssociation} as ?p) (?ass as ?o) where {

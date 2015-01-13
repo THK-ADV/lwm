@@ -25,8 +25,9 @@ object StudentsManagement extends Controller with Authentication with Transactio
       for {
         students ← Students.all()
         degrees ← Degrees.all()
+        s = students.map(i ⇒ Individual(i))
       } yield {
-        val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
+        val sorted = s.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round + 1
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
@@ -46,7 +47,8 @@ object StudentsManagement extends Controller with Authentication with Transactio
           val user = session.user
           val promise = Promise[Result]()
 
-          Students.exists(user).map { exists ⇒
+          Future {
+            val exists = Students.exists(user)
             if (exists) {
               promise.success(Redirect(routes.StudentDashboardController.dashboard()))
             } else {
@@ -54,7 +56,7 @@ object StudentsManagement extends Controller with Authentication with Transactio
                 promise.success(Redirect(routes.FirstTimeSetupController.setupStudent()))
               } else {
                 Students.create(student).map { s ⇒
-                  createTransaction(session.user, s.uri, s"New Student ${s.uri} created by ${session.user}")
+                  createTransaction(session.user, s, s"New Student $s created by ${session.user}")
                   promise.success(Redirect(routes.StudentDashboardController.dashboard()))
                 }
               }
@@ -76,15 +78,16 @@ object StudentsManagement extends Controller with Authentication with Transactio
           for {
             students ← Students.all()
             degrees ← Degrees.all()
+            s = students.map(i ⇒ Individual(i))
           } yield {
-            val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
+            val sorted = s.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
             BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
           }
         },
         student ⇒ {
           Students.create(student).map { s ⇒
-            createTransaction(session.user, s.uri, s"New Student ${s.uri} created by ${session.user}")
+            createTransaction(session.user, s, s"New Student $s created by ${session.user}")
             Redirect(routes.StudentsManagement.index("1"))
           }
         }
@@ -150,8 +153,9 @@ object StudentsManagement extends Controller with Authentication with Transactio
           for {
             students ← Students.all()
             degrees ← Degrees.all()
+            s = students.map(i ⇒ Individual(i))
           } yield {
-            val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
+            val sorted = s.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
             BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
           }

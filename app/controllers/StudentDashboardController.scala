@@ -74,7 +74,7 @@ object StudentDashboardController extends Controller {
           SPARQLTools.statementsFromString(result).map(_.o.asLiteral()).flatten
         }
       }
-
+      import utils.Global._
       (for {
         student ← Students.get(session.user)
         availableLabworks ← availableLabworks(student)
@@ -103,9 +103,11 @@ object StudentDashboardController extends Controller {
   }
 
   def assignmentsPage(labid: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
+
     Action.async {
       implicit request ⇒
-        val studentFuture = for (s ← Students.get(session.user)) yield s
+
+        val studentFuture = for (s ← Students.get(session.user)(utils.Global.query)) yield s
 
         val query =
           s"""
