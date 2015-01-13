@@ -33,19 +33,18 @@ class RoomSpec extends SemanticFeatureSpec {
           ${Vocabulary.defaulPrefixes}
           |
           |select * where {
+          |
           |    $expectedResource1 rdf:type lwm:Room .
-          |    $expectedResource1 lwm:hasId ?id  .
           |    $expectedResource1 lwm:hasRoomId ?roomId .
           |    $expectedResource1 lwm:hasName ?name .
           |    $expectedResource1 rdfs:label ?label .
           |}
         """.stripMargin.execSelect().map { solution ⇒
-          val id = solution.data("id").asLiteral().getString
           val name = solution.data("name").asLiteral().getString
           val roomId = solution.data("roomId").asLiteral().getString
           val label = solution.data("label").asLiteral().getString
-          (id, name, roomId, label)
-        } should contain theSameElementsAs List((room_1.id, room_1.name, room_1.roomId, room_1.name))
+          (roomId, name, label)
+        } should contain theSameElementsAs List((room_1.roomId, room_1.name, room_1.name))
       }
     }
 

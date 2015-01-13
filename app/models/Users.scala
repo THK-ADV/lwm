@@ -91,16 +91,6 @@ object Users extends CheckedDelete {
     delete(resource)
   }
 
-  def delete(resource: Resource): Future[Resource] = {
-    import utils.Global._
-    val p = Promise[Resource]()
-    val individual = Individual(resource)
-    if (individual.props(rdf.typ).contains(lwm.User)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
-    }
-    p.future
-  }
-
   def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
     s"""
       |prefix lwm: <http://lwm.gm.fh-koeln.de/>

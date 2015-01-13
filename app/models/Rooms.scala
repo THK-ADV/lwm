@@ -9,7 +9,7 @@ import utils.semantic._
 import utils.Implicits._
 import scala.concurrent.{ Promise, Future, blocking }
 
-case class Room(roomId: String, name: String, id: UUID = UUID.randomUUID())
+case class Room(roomId: String, name: String)
 
 case class RoomFormModel(roomId: String, name: String)
 
@@ -27,25 +27,26 @@ object Rooms extends CheckedDelete {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(room: Room)(implicit updateHost: UpdateHost): Future[Resource] = {
-    import utils.Global._
 
-    val resource = Resource(s"${lwmNamespace}rooms/${room.id}")
+    val resource = Resource(s"${utils.Global.lwmNamespace}rooms/${room.roomId}")
 
     val p = Promise[Resource]()
 
     blocking {
       s"""
          ${Vocabulary.defaulPrefixes}
+
          |insert data {
-         |$resource rdf:type lwm:Room .
-         |$resource rdfs:label "${room.name}" .
-         |$resource lwm:hasName "${room.name}" .
-         |$resource lwm:hasId "${room.id}" .
-         |$resource lwm:hasRoomId "${room.roomId}" .
+         |    $resource rdf:type lwm:Room .
+         |    $resource rdfs:label "${room.name}" .
+         |    $resource lwm:hasName "${room.name}" .
+         |    $resource lwm:hasRoomId "${room.roomId}" .
          |}
        """.stripMargin.execUpdate()
+
       p.success(resource)
     }
+
     p.future
   }
 
@@ -78,10 +79,9 @@ object Rooms extends CheckedDelete {
     s"""
        ${Vocabulary.defaulPrefixes}
        |Select (count(distinct ?s) as ?count) {
-       |
        |?s rdf:type lwm:Room
        }
-     """.stripMargin.execSelect().map(s ⇒ s.data("s").asLiteral().getInt).head
+     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
   }
 }
 
