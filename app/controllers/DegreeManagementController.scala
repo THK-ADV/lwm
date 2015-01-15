@@ -21,7 +21,8 @@ object DegreeManagementController extends Controller with Authentication {
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       for {
-        degrees ← Degrees.all()
+        degreeResources ← Degrees.all()
+        degrees = degreeResources.map(d ⇒ Individual(d))
       } yield {
         Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm))
       }
@@ -33,14 +34,15 @@ object DegreeManagementController extends Controller with Authentication {
       DegreeForms.degreeForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            degrees ← Degrees.all()
+            degreeResources ← Degrees.all()
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
             BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors))
           }
         },
         degree ⇒ {
           Degrees.create(degree).map { i ⇒
-            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(i.uri, s"New Degree created by ${session.user}.")))
+            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(i, s"New Degree created by ${session.user}.")))
             Redirect(routes.DegreeManagementController.index())
           }
         }
@@ -54,7 +56,7 @@ object DegreeManagementController extends Controller with Authentication {
       Degrees.delete(Resource(id)).flatMap { deleted ⇒
         system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(deleted, s"Course deleted by ${session.user}.")))
         Degrees.all().map { all ⇒
-          Ok(views.html.degreeManagement(all, DegreeForms.degreeForm))
+          Ok(views.html.degreeManagement(all.map(e ⇒ Individual(e)), DegreeForms.degreeForm))
         }
       }
     }
@@ -66,7 +68,8 @@ object DegreeManagementController extends Controller with Authentication {
       DegreeForms.degreeForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            degrees ← Degrees.all()
+            degreeResources ← Degrees.all()
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
             BadRequest(views.html.degreeManagement(degrees.toList, formWithErrors))
           }

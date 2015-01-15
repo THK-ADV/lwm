@@ -2,7 +2,7 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
-import utils.{ Global, QueryHost, UpdateHost }
+import utils.{ QueryHost, UpdateHost }
 import utils.semantic._
 import utils.Implicits._
 
@@ -48,7 +48,6 @@ case class User(id: String,
 
 object Users extends CheckedDelete {
 
-  import utils.semantic.Vocabulary._
   import utils.Global.lwmNamespace
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,15 +60,9 @@ object Users extends CheckedDelete {
 
     blocking {
       s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      |prefix owl: <http://www.w3.org/2002/07/owl#>
-      |prefix foaf: <http://xmlns.com/foaf/0.1/>
-      |prefix nco: <http://www.semanticdesktop.org/ontologies/nco#>
+      |${Vocabulary.defaulPrefixes}
       |
-      |
-      |insert data {
+      | Insert data {
       |    $resource rdf:type lwm:User .
       |    $resource lwm:hasGmId "${user.id}" .
       |    $resource foaf:lastName "${user.lastname}" .
@@ -77,7 +70,7 @@ object Users extends CheckedDelete {
       |    $resource rdfs:label "${user.firstname} ${user.lastname}" .
       |    $resource nco:phoneNumber "${user.phone}" .
       |    $resource foaf:mbox "${user.email}" .
-      |}
+      | }
     """.stripMargin.execUpdate()
       p.success(resource)
     }
@@ -91,45 +84,52 @@ object Users extends CheckedDelete {
     delete(resource)
   }
 
+  def delete(user: User)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${lwmNamespace}users/${user.id}")
+    delete(resource)
+  }
+
   def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
     s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |${Vocabulary.defaulPrefixes}
       |
-      |ask {
-      |   ?s lwm:hasGmId "$uid"
-      |}
+      | ASK {
+      |  ?s lwm:hasGmId "$uid"
+      | }
     """.stripMargin.executeAsk()
   }
 
   def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |${Vocabulary.defaulPrefixes}
       |
-      |ask {
-      |   $resource rdf:type lwm:User
-      |}
+      | ASK {
+      |  $resource rdf:type lwm:User
+      | }
     """.stripMargin.executeAsk()
   }
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-         |select ?s (${rdf.typ} as ?p) (${lwm.User} as ?o) where {
-         | ?s ${rdf.typ} ${lwm.User} .
-         | optional {?s ${foaf.lastName} ?lastname}
-         |}order by desc(?lastname)
-       """.stripMargin.execSelect().map { solution ⇒
-      Resource(solution.data("s").toString)
-    }
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select ?s (rdf:type as ?p) (lwm:User as ?o) where {
+         |    ?s rdf:type lwm:User .
+         |    optional { ?s foaf:lastName ?lastname }
+         |
+         | } order by desc(?lastname)
+       """.stripMargin.execSelect().map(solution ⇒ Resource(solution.data("s").toString))
   }
+
   def possibleSubstitutes(userId: String)(implicit queryHost: QueryHost) = {
     s"""
-          |select ?user ?name where {
-          |  ?user ${rdf.typ} ${lwm.User} .
-          |  ?user ${rdfs.label} ?name .
-          |  filter not exists {?user ${lwm.hasGmId} "$userId"}
-          |}
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select ?user ?name where {
+          |    ?user rdf:type lwm:User .
+          |    ?user rdfs:label ?name .
+          |  filter not exists {?user lwm:hasGmId "$userId"}
+          | }
         """.stripMargin.execSelect().map { solution ⇒
       val resource = solution.data("user").toString
       val name = solution.data("name").toString
@@ -139,10 +139,12 @@ object Users extends CheckedDelete {
 
   def userMapping()(implicit queryHost: QueryHost) = {
     s"""
-          |select ?user ?name where {
-          |  ?user ${rdf.typ} ${lwm.User} .
-          |  ?user ${rdfs.label} ?name
-          |}
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select ?user ?name where {
+          |    ?user rdf:type lwm:User .
+          |    ?user rdfs:label ?name
+          | }
         """.stripMargin.execSelect().map { solution ⇒
       val resource = solution.data("user").toString
       val name = solution.data("name").toString
@@ -151,14 +153,12 @@ object Users extends CheckedDelete {
   }
 
   def size()(implicit queryHost: QueryHost): Int = {
-    import utils.Implicits._
-    """
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    s"""
+      |${Vocabulary.defaulPrefixes}
       |
-      |select (count(distinct ?user) as ?count) {
+      | Select (count(distinct ?user) as ?count) {
       |   ?user rdf:type lwm:User
-      |}
+      | }
     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
   }
 }

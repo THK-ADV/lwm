@@ -150,14 +150,14 @@ object EditsManagementController extends Controller with Authentication with Tra
         val id = c.mappedValues.get(lwm.hasId).get
         val degree = c.mappedValues.get(lwm.hasDegree).get.asResource().get
         Courses.create(Course(name.value, id.value, degree)).map { c ⇒
-          createTransaction(user, c.uri, s"Course ${name.value} created by $user.")
+          createTransaction(user, c, s"Course ${name.value} created by $user.")
           true
         }.recover { case NonFatal(t) ⇒ true }
       case "degree" ⇒
         val name = c.mappedValues.get(lwm.hasName).get
         val id = c.mappedValues.get(lwm.hasId).get
         Degrees.create(Degree(name.value, id.value)).map { d ⇒
-          createTransaction(user, d.uri, s"Degree ${name.value} created by $user.")
+          createTransaction(user, d, s"Degree ${name.value} created by $user.")
           true
         }.recover { case NonFatal(t) ⇒ true }
       case "labwork" ⇒

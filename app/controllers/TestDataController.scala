@@ -25,7 +25,7 @@ object TestDataController extends Controller with Authentication {
           val labworkFuture = for {
             semester ← semesterFuture
             course ← courseFuture
-          } yield LabWorks.create(LabWork(course.uri, semester.uri))
+          } yield LabWorks.create(LabWork(course, semester.uri))
 
           val studentsAffeFutures = for (i ← 1 to 500) yield Students.create(Student(
             s"mi_$i",
@@ -133,6 +133,7 @@ object TestDataController extends Controller with Authentication {
             lwf ← labworkFuture
             lw ← lwf
           } yield {
+
             LabworkApplications.create(LabworkApplication(s1, lw.uri, List(s5, s3, s4)))
             LabworkApplications.create(LabworkApplication(s2, lw.uri, List(s1, s3, s4)))
             LabworkApplications.create(LabworkApplication(s3, lw.uri, List(s2, s1, s4)))

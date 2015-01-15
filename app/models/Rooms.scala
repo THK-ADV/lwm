@@ -34,14 +34,14 @@ object Rooms extends CheckedDelete {
 
     blocking {
       s"""
-         ${Vocabulary.defaulPrefixes}
-
-         |insert data {
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Insert data {
          |    $resource rdf:type lwm:Room .
          |    $resource rdfs:label "${room.name}" .
          |    $resource lwm:hasName "${room.name}" .
          |    $resource lwm:hasRoomId "${room.roomId}" .
-         |}
+         | }
        """.stripMargin.execUpdate()
 
       p.success(resource)
@@ -55,32 +55,33 @@ object Rooms extends CheckedDelete {
     delete(resource)
   }
 
-  def all()(implicit queryHost: QueryHost): Future[List[Resource]] =
-    Future {
-      s"""
-        ${Vocabulary.defaulPrefixes}
-       Select ?s (rdf:type as ?p) (lwm:Room as ?o) {
-       ?s rdf:type lwm:Room
-       }
-     """.stripMargin.execSelect().map(s ⇒ Resource(s.data("s").toString))
-    }
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select ?s (rdf:type as ?p) (lwm:Room as ?o) {
+         |    ?s rdf:type lwm:Room
+         | }
+         """.stripMargin.execSelect().map(s ⇒ Resource(s.data("s").toString))
+  }
 
   override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-         ${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaulPrefixes}
          |
-         |ASK {
-         | $resource rdf:type lwm:Room
-         |}
+         | ASK {
+         |  $resource rdf:type lwm:Room
+         | }
        """.stripMargin.executeAsk()
   }
 
   def size()(implicit queryHost: QueryHost): Int = {
     s"""
-       ${Vocabulary.defaulPrefixes}
-       |Select (count(distinct ?s) as ?count) {
-       |?s rdf:type lwm:Room
-       }
+       |${Vocabulary.defaulPrefixes}
+       |
+       | Select (count(distinct ?s) as ?count) {
+       |    ?s rdf:type lwm:Room
+       | }
      """.stripMargin.execSelect().head.data("count").asLiteral().getInt
   }
 }

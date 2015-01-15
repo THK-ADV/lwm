@@ -23,11 +23,12 @@ object StudentsManagement extends Controller with Authentication with Transactio
   def index(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       for {
-        students ← Students.all()
-        degrees ← Degrees.all()
-        s = students.map(i ⇒ Individual(i))
+        studentResources ← Students.all()
+        degreeResources ← Degrees.all()
+        students = studentResources.map(s ⇒ Individual(s))
+        degrees = degreeResources.map(d ⇒ Individual(d))
       } yield {
-        val sorted = s.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
+        val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round + 1
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
@@ -40,7 +41,8 @@ object StudentsManagement extends Controller with Authentication with Transactio
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            degrees ← Degrees.all()
+            degreeResources ← Degrees.all()
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield BadRequest(views.html.firstTimeInputStudents(degrees, formWithErrors))
         },
         student ⇒ {
@@ -76,11 +78,12 @@ object StudentsManagement extends Controller with Authentication with Transactio
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            students ← Students.all()
-            degrees ← Degrees.all()
-            s = students.map(i ⇒ Individual(i))
+            studentResources ← Students.all()
+            degreeResources ← Degrees.all()
+            students = studentResources.map(s ⇒ Individual(s))
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
-            val sorted = s.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
+            val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
             BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
           }
@@ -139,7 +142,7 @@ object StudentsManagement extends Controller with Authentication with Transactio
 
   def studentSearch(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d))).recover {
+      Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d.map(e ⇒ Individual(e))))).recover {
         case NonFatal(t) ⇒ Redirect(routes.LabworkManagementController.index())
       }
 
@@ -151,11 +154,12 @@ object StudentsManagement extends Controller with Authentication with Transactio
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            students ← Students.all()
-            degrees ← Degrees.all()
-            s = students.map(i ⇒ Individual(i))
+            studentResources ← Students.all()
+            degreeResources ← Degrees.all()
+            students = studentResources.map(s ⇒ Individual(s))
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
-            val sorted = s.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
+            val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
             BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
           }
@@ -196,7 +200,8 @@ object StudentsManagement extends Controller with Authentication with Transactio
           UserForms.studentForm.bindFromRequest.fold(
             formWithErrors ⇒ {
               for {
-                degrees ← Degrees.all()
+                degreeResources ← Degrees.all()
+                degrees = degreeResources.map(d ⇒ Individual(d))
               } yield {
                 BadRequest(views.html.dashboard_student_edit_details(s, degrees, formWithErrors))
               }

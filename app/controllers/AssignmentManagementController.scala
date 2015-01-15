@@ -26,7 +26,8 @@ object AssignmentManagementController extends Controller with Authentication {
         implicit request ⇒
           for {
             assignments ← Assignments.all()
-            courses ← Courses.all()
+            courseResources ← Courses.all()
+            courses = courseResources.map(c ⇒ Individual(c))
           } yield {
             Ok(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm))
           }
@@ -37,7 +38,7 @@ object AssignmentManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         implicit request ⇒
-          Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses, AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm)))
+          Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses.map(c ⇒ Individual(c)), AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm)))
       }
   }
 
@@ -49,7 +50,8 @@ object AssignmentManagementController extends Controller with Authentication {
             formWithErrors ⇒ {
               for {
                 assignments ← Assignments.all()
-                courses ← Courses.all()
+                courseResources ← Courses.all()
+                courses = courseResources.map(c ⇒ Individual(c))
               } yield {
                 BadRequest(views.html.assignmentManagement(assignments, courses, formWithErrors))
               }
@@ -86,7 +88,8 @@ object AssignmentManagementController extends Controller with Authentication {
             formWithErrors ⇒ {
               for {
                 assignments ← Assignments.all()
-                courses ← Courses.all()
+                courseResources ← Courses.all()
+                courses = courseResources.map(c ⇒ Individual(c))
               } yield {
                 BadRequest(views.html.assignmentManagement(assignments, courses, formWithErrors))
               }
@@ -133,7 +136,8 @@ object AssignmentManagementController extends Controller with Authentication {
             formWithErrors ⇒ {
               for {
                 assignments ← Assignments.all()
-                courses ← Courses.all()
+                courseResources ← Courses.all()
+                courses = courseResources.map(c ⇒ Individual(c))
               } yield {
                 BadRequest(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm))
               }

@@ -98,7 +98,7 @@ object StudentDashboardController extends Controller {
     Action.async {
       implicit request ⇒
         val student = Individual(Resource(id))
-        Degrees.all().map(d ⇒ Ok(views.html.dashboard_student_edit_details(student, d, UserForms.studentForm))).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
+        Degrees.all().map(d ⇒ Ok(views.html.dashboard_student_edit_details(student, d.map(e ⇒ Individual(e)), UserForms.studentForm))).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
     }
   }
 

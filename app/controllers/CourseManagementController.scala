@@ -23,8 +23,11 @@ object CourseManagementController extends Controller with Authentication {
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       for {
-        courses ← Courses.all()
-        degrees ← Degrees.all()
+        courseResources ← Courses.all()
+        degreeResources ← Degrees.all()
+        courses = courseResources.map(c ⇒ Individual(c))
+        degrees = degreeResources.map(d ⇒ Individual(d))
+
       } yield {
         Ok(views.html.courseManagement(degrees.toList, courses.toList, CourseForms.courseForm))
       }
@@ -36,15 +39,17 @@ object CourseManagementController extends Controller with Authentication {
       CourseForms.courseForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            courses ← Courses.all()
-            degrees ← Degrees.all()
+            courseResources ← Courses.all()
+            degreeResources ← Degrees.all()
+            courses = courseResources.map(c ⇒ Individual(c))
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
             BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors))
           }
         },
         course ⇒ {
           Courses.create(Course(course.name, course.id, Resource(course.degree))).map { c ⇒
-            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(c.uri, s"New Course created by ${session.user}.")))
+            system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(c, s"New Course created by ${session.user}.")))
             Redirect(routes.CourseManagementController.index())
           }
         }
@@ -68,8 +73,10 @@ object CourseManagementController extends Controller with Authentication {
       CourseForms.courseForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            courses ← Courses.all()
-            degrees ← Degrees.all()
+            courseResources ← Courses.all()
+            degreeResources ← Degrees.all()
+            courses = courseResources.map(c ⇒ Individual(c))
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
             BadRequest(views.html.courseManagement(degrees.toList, courses.toList, formWithErrors))
           }

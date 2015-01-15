@@ -86,7 +86,7 @@ class StudentSpec extends SemanticFeatureSpec {
       }
     }
 
-    "get a particuluar student" in {
+    "get one particuluar student" in {
       "drop all".execUpdate()
       val futureStudents = Students.create(student1) :: Students.create(student2) :: Nil
 
