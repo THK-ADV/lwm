@@ -5,11 +5,13 @@ import java.util.UUID
 import org.joda.time.{ LocalDate, DateTime }
 import play.api.data.Form
 import play.api.data.Forms._
-import utils.semantic.Vocabulary.lwm
+import utils.{ QueryHost, UpdateHost }
+import utils.semantic.Vocabulary._
 import utils.semantic._
-
-import scala.concurrent.{ Future, Promise }
-
+import utils.Global.lwmNamespace
+import scala.concurrent.{ Future, Promise, blocking }
+import utils.Implicits._
+import scala.concurrent.ExecutionContext.Implicits.global
 object Weekdays {
 
   sealed trait Weekday {
@@ -140,39 +142,85 @@ case class TimetableEntryFormEntry(day: String, startTime: String, endTime: Stri
 
 case class TimetableEntryEditForm(supervisors: String, room: String)
 
-object Timetables {
+object Timetables extends CheckedDelete {
 
-  import utils.Global._
-  import utils.semantic.Vocabulary._
+  def create(timetable: Timetable)(implicit updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${lwmNamespace}timetables/${timetable.id}")
 
-  def create(timetable: Timetable) = {
-    val resource = ResourceUtils.createResource(lwmNamespace, timetable.id)
-    val statements = List(
-      Statement(resource, rdf.typ, lwm.Timetable),
-      Statement(resource, rdf.typ, owl.NamedIndividual),
-      Statement(resource, lwm.hasId, StringLiteral(timetable.id.toString)),
-      Statement(resource, lwm.hasLabWork, timetable.labwork),
-      Statement(timetable.labwork, lwm.hasTimetable, resource)
-    )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*))
-    Individual(resource)
+    val p = Promise[Resource]()
+
+    blocking {
+      s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | Insert data {
+       |
+       |      $resource rdf:type lwm:Timetable .
+       |      $resource lwm:hasId "${timetable.id}" .
+       |      $resource lwm:hasLabWork ${timetable.labwork} .
+       |      ${timetable.labwork} lwm:hasTimetable $resource .
+       |
+       | }
+     """.stripMargin.execUpdate()
+      p.success(resource)
+    }
+
+    p.future
   }
 
-  def get(resource: Resource): Option[Timetable] = {
-    val i = Individual(resource)
-    val maybeLabwork = i.props.get(lwm.hasLabWork)
-    val maybeId = i.props.get(lwm.hasId)
-    for {
-      labWorkList ← maybeLabwork
-      idList ← maybeId
-    } yield {
-      println(resource)
-      val labwork = labWorkList.head.asResource().get
-      val id = UUID.fromString(idList.head.asLiteral().get.decodedString)
+  def get(resource: Resource)(implicit queryHost: QueryHost): Option[Timetable] = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | Select ?id ?labwork where {
+       |     $resource lwm:hasId ?id .
+       |     $resource lwm:hasLabWork ?labwork .
+       | }
+     """.stripMargin.execSelect().map { qs ⇒
+
+      val labwork = Resource(qs.data("labwork").asResource().getURI)
+      val id = UUID.fromString(qs.data("id").asLiteral().getString)
+
       Timetable(labwork, id)
     }
+  }.headOption
+
+  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | ASK {
+       |  $resource rdf:type lwm:Timetable
+       | }
+   """.stripMargin.executeAsk()
   }
 
+  def size()(implicit queryHost: QueryHost): Int = {
+    s"""
+     |${Vocabulary.defaulPrefixes}
+     |
+     | Select (count(distinct ?s) as ?count) where {
+     |     ?s rdf:type lwm:Timetable
+     |
+     | }
+   """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+  }
+
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select ?s (rdf:type as ?p) (lwm:Timetable as ?o) where {
+         |     ?s rdf:type lwm:Timetable .
+         |
+         |     optional {
+         |        ?s lwm:hasLabWork ?labwork .
+         |        ?labwork rdfs:label ?label
+         |     }
+         |
+         | } order by desc(?label)
+       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("s").toString))
+  }
 }
 
 object TimetableEntries {

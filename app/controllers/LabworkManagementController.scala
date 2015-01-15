@@ -38,8 +38,9 @@ object LabworkManagementController extends Controller with Authentication with T
       for {
         courseResources ← Courses.all()
         labworks ← LabWorks.all()
-        semesters ← Semesters.all()
+        semesterResources ← Semesters.all()
         courses = courseResources.map(c ⇒ Individual(c))
+        semesters = semesterResources.map(s ⇒ Individual(s))
       } yield {
         Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
       }
@@ -159,7 +160,7 @@ object LabworkManagementController extends Controller with Authentication with T
           associations.toList.map(node ⇒ Individual(node.asResource().get)),
           applications,
           allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
-          semesters, courses.map(c ⇒ Individual(c)),
+          semesters.map(s ⇒ Individual(s)), courses.map(c ⇒ Individual(c)),
           AssignmentForms.assignmentAssociationForm,
           LabWorkForms.labworkUpdateForm))
       }
@@ -173,8 +174,9 @@ object LabworkManagementController extends Controller with Authentication with T
           for {
             courseResources ← Courses.all()
             labworks ← LabWorks.all()
-            semesters ← Semesters.all()
+            semesterResources ← Semesters.all()
             courses = courseResources.map(c ⇒ Individual(c))
+            semesters = semesterResources.map(s ⇒ Individual(s))
           } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
         },
         labwork ⇒ {
@@ -235,8 +237,9 @@ object LabworkManagementController extends Controller with Authentication with T
               for {
                 courseResources ← Courses.all()
                 labworks ← LabWorks.all()
-                semesters ← Semesters.all()
+                semesterResources ← Semesters.all()
                 courses = courseResources.map(c ⇒ Individual(c))
+                semesters = semesterResources.map(s ⇒ Individual(s))
               } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
             },
             labwork ⇒ {

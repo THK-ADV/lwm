@@ -12,6 +12,7 @@ class UserSpec extends SemanticFeatureSpec {
   val user1 = User("test_id_1", "test_firstname", "test_lastname", "test_email", "test_phone")
   val user2 = User("test_id_2", "test_firstname", "test_lastname", "test_email", "test_phone")
   val user3 = User("test_id_3", "test_firstname", "test_lastname", "test_email", "test_phone")
+
   val expectedResource1 = Resource("http://lwm.gm.fh-koeln.de/users/test_id_1")
   val expectedResource2 = Resource("http://lwm.gm.fh-koeln.de/users/test_id_2")
   val expectedResource3 = Resource("http://lwm.gm.fh-koeln.de/users/test_id_3")

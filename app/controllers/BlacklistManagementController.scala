@@ -23,7 +23,8 @@ object BlacklistManagementController extends Controller with Authentication {
     Action.async { implicit request ⇒
       for {
         blacklists ← Blacklists.all()
-        semesters ← Semesters.all()
+        semesterResources ← Semesters.all()
+        semesters = semesterResources.map(s ⇒ Individual(s))
       } yield {
         Ok(views.html.blacklist_management(blacklists, semesters, Blacklists.Forms.blacklistForm))
       }
@@ -59,10 +60,11 @@ object BlacklistManagementController extends Controller with Authentication {
       Blacklists.Forms.blacklistForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            all ← Blacklists.all()
-            semesters ← Semesters.all()
+            blacklists ← Blacklists.all()
+            semesterResources ← Semesters.all()
+            semesters = semesterResources.map(s ⇒ Individual(s))
           } yield {
-            BadRequest(views.html.blacklist_management(all, semesters, formWithErrors))
+            BadRequest(views.html.blacklist_management(blacklists, semesters, formWithErrors))
           }
         },
         blacklist ⇒ {

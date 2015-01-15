@@ -173,14 +173,15 @@ object EditsManagementController extends Controller with Authentication with Tra
           case _                ⇒ WinterSemester(c.mappedValues.get(lwm.hasYear).get.value.toInt)
         }
         Semesters.create(semester).map { s ⇒
-          createTransaction(user, s.uri, s"$semester created by $user.")
+          createTransaction(user, s, s"$semester created by $user.")
           true
         }.recover { case NonFatal(t) ⇒ true }
       case "timetable" ⇒
         val labwork = c.mappedValues.get(lwm.hasLabWork).get.asResource().get
-        val t = Timetables.create(Timetable(labwork))
-        createTransaction(user, t.uri, s"Timetable for $labwork created by $user.")
-        Future.successful(true)
+        Timetables.create(Timetable(labwork)).map { t ⇒
+          createTransaction(user, t, s"Timetable for $labwork created by $user.")
+          true
+        }
     }
   }
 

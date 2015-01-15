@@ -62,27 +62,31 @@ object LabWorks {
     val courseIndividual = Individual(labWork.course)
 
     val resource = ResourceUtils.createResource(lwmNamespace)
-    val timetable = Timetables.create(Timetable(resource))
+    val futureTimetable = Timetables.create(Timetable(resource))
     val labworkApplicationList = LabworkApplicationLists.create(LabworkApplicationList(resource))
 
     val label = courseIndividual.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.asLiteral().get
 
-    val statements = List(
-      Statement(resource, rdf.typ, lwm.LabWork),
-      Statement(resource, rdf.typ, owl.NamedIndividual),
-      Statement(resource, rdfs.label, label),
-      Statement(resource, lwm.hasTimetable, timetable.uri),
-      Statement(resource, lwm.hasCourse, labWork.course),
-      Statement(resource, lwm.hasStartDate, startDate),
-      Statement(resource, lwm.hasEndDate, endDate),
-      Statement(resource, lwm.allowsApplications, StringLiteral("false")),
-      Statement(resource, lwm.isClosed, StringLiteral("false")),
-      Statement(resource, lwm.hasSemester, labWork.semester)
-    )
+    val futureStatements = futureTimetable.map { timetable ⇒
+      List(
+        Statement(resource, rdf.typ, lwm.LabWork),
+        Statement(resource, rdf.typ, owl.NamedIndividual),
+        Statement(resource, rdfs.label, label),
+        Statement(resource, lwm.hasTimetable, timetable),
+        Statement(resource, lwm.hasCourse, labWork.course),
+        Statement(resource, lwm.hasStartDate, startDate),
+        Statement(resource, lwm.hasEndDate, endDate),
+        Statement(resource, lwm.allowsApplications, StringLiteral("false")),
+        Statement(resource, lwm.isClosed, StringLiteral("false")),
+        Statement(resource, lwm.hasSemester, labWork.semester)
+      )
+    }
 
     labworkApplicationList.flatMap { list ⇒
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
-        Individual(resource)
+      futureStatements.flatMap { statements ⇒
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
+          Individual(resource)
+        }
       }
     }
   }

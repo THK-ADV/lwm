@@ -1,17 +1,14 @@
 package models
 
-import java.util.UUID
-
-import com.hp.hpl.jena.rdf.model.AnonId
-import org.joda.time.{ LocalDate, DateTime }
-import play.api.data.Form
-import utils.Global._
-import utils.semantic.Vocabulary.{ rdfs, owl, lwm, rdf }
+import org.joda.time.LocalDate
+import utils.Global.lwmNamespace
+import utils.{ QueryHost, UpdateHost }
+import utils.semantic.Vocabulary
 import utils.semantic._
 import play.api.data.Form
 import play.api.data.Forms._
-
-import scala.concurrent.{ Promise, Future }
+import utils.Implicits._
+import scala.concurrent.{ Promise, Future, blocking }
 
 sealed trait Semester {
   val year: Int
@@ -31,79 +28,139 @@ case class WinterSemester(year: Int) extends Semester {
 
 case class SemesterModelForm(semester: String, year: Int)
 
-object Semesters {
+object Semesters extends CheckedDelete {
+
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  def create(semester: Semester) = {
-
-    def startEndList(res: Resource) = List(
-      Statement(res, lwm.hasStartDate, DateLiteral(semester.startDate)),
-      Statement(res, lwm.hasEndDate, DateLiteral(semester.endDate))
-    )
-    val semesterStatement = semester match {
-      case ss: SummerSemester ⇒
-        val id = s"Sommersemester_${semester.year}"
-        val semesterResource = Resource(s"$lwmNamespace$id")
-        val sts = List(Statement(semesterResource, lwm.hasYear, StringLiteral(s"${semester.year}")), Statement(semesterResource, rdf.typ, owl.NamedIndividual), Statement(semesterResource, lwm.hasId, StringLiteral(id)), Statement(semesterResource, rdf.typ, lwm.SummerSemester), Statement(semesterResource, rdf.typ, lwm.Semester), Statement(semesterResource, rdfs.label, StringLiteral(s"Sommersemester ${semester.year}")))
-        (semesterResource, sts ++ startEndList(semesterResource))
-      case ws: WinterSemester ⇒
-        val id = s"Wintersemester${semester.year}"
-        val semesterResource = Resource(s"$lwmNamespace$id")
-        val sts = List(Statement(semesterResource, lwm.hasYear, StringLiteral(s"${semester.year}")), Statement(semesterResource, rdf.typ, owl.NamedIndividual), Statement(semesterResource, lwm.hasId, StringLiteral(id)), Statement(semesterResource, rdf.typ, lwm.WinterSemester), Statement(semesterResource, rdf.typ, lwm.Semester), Statement(semesterResource, rdfs.label, StringLiteral(s"Wintersemester ${semester.year}")))
-        (semesterResource, sts ++ startEndList(semesterResource))
-    }
-
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(semesterStatement._2: _*)).map(_ ⇒ Individual(semesterStatement._1))
-  }
-
-  def delete(semester: Semester): Future[Semester] = {
-    val p = Promise[Semester]()
-    semester match {
-      case ss: SummerSemester ⇒
-        val id = s"Sommersemester_${semester.year}"
-        val maybeSemester = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.SummerSemester, Vocabulary.lwm.hasId, StringLiteral(id))
-        val resultFuture = sparqlExecutionContext.executeQuery(maybeSemester)
-
-        resultFuture.map { result ⇒
-          val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
-          resources.map { resource ⇒
-            sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(semester) }
-          }
-        }
-      case ws: WinterSemester ⇒
-        val id = s"Wintersemester${semester.year}"
-        val maybeSemester = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.SummerSemester, Vocabulary.lwm.hasId, StringLiteral(id))
-        val resultFuture = sparqlExecutionContext.executeQuery(maybeSemester)
-
-        resultFuture.map { result ⇒
-          val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
-          resources.map { resource ⇒
-            sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(semester) }
-          }
-        }
-    }
-    p.future
-  }
-
-  def delete(resource: Resource): Future[Resource] = {
-    val p = Promise[Resource]()
-    val individual = Individual(resource)
-    if (individual.props(rdf.typ).contains(lwm.Semester) || individual.props(rdf.typ).contains(lwm.SummerSemester) || individual.props(rdf.typ).contains(lwm.WinterSemester)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
-    } else {
-      p.failure(new IllegalArgumentException("Resource is not a Semester"))
-    }
-    p.future
-  }
-
-  def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.Semester)).map { stringResult ⇒
-      SPARQLTools.statementsFromString(stringResult).map(semester ⇒ Individual(semester.s)).toList
-    }
-  }
 
   val options = List("Sommersemester", "Wintersemester")
 
+  def create(semester: Semester)(implicit updateHost: UpdateHost): Future[Resource] = {
+
+    val p = Promise[Resource]()
+
+    semester match {
+      case ss: SummerSemester ⇒
+        val id = s"Sommersemester_${semester.year}"
+        val resource = Resource(s"${lwmNamespace}semesters/$id")
+
+        blocking {
+          s"""
+             |${Vocabulary.defaulPrefixes}
+             |
+             | Insert data {
+             |
+             |      $resource rdf:type lwm:Semester .
+             |      $resource rdf:type lwm:SummerSemester .
+             |      $resource lwm:hasId "$id" .
+             |      $resource lwm:hasYear "${semester.year}" .
+             |      $resource lwm:hasStartDate "${semester.startDate.toString("yyyy-MM-dd")}" .
+             |      $resource lwm:hasEndDate "${semester.endDate.toString("yyyy-MM-dd")}" .
+             |      $resource rdfs:label "$id" .
+             |
+             | }
+           """.stripMargin.execUpdate()
+          p.success(resource)
+        }
+
+        p.future
+
+      case ws: WinterSemester ⇒
+        val id = s"Wintersemester_${semester.year}"
+        val resource = Resource(s"${lwmNamespace}semesters/$id")
+
+        blocking {
+          s"""
+             |${Vocabulary.defaulPrefixes}
+             |
+             | Insert data {
+             |
+             |      $resource rdf:type lwm:Semester .
+             |      $resource rdf:type lwm:WinterSemester .
+             |      $resource lwm:hasId "$id" .
+             |      $resource lwm:hasYear "${semester.year}" .
+             |      $resource lwm:hasStartDate "${semester.startDate.toString("yyyy-MM-dd")}" .
+             |      $resource lwm:hasEndDate "${semester.endDate.toString("yyyy-MM-dd")}" .
+             |      $resource rdfs:label "$id" .
+             | }
+           """.stripMargin.execUpdate()
+          p.success(resource)
+        }
+
+        p.future
+    }
+  }
+
+  def delete(semester: Semester)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
+    semester match {
+      case ss: SummerSemester ⇒
+        val resource = Resource(s"${lwmNamespace}semesters/Sommersemester_${semester.year}")
+        delete(resource)
+
+      case ws: WinterSemester ⇒
+        val resource = Resource(s"${lwmNamespace}semesters/Wintersemester_${semester.year}")
+        delete(resource)
+    }
+  }
+
+  def delete(semesterId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${lwmNamespace}semesters/$semesterId")
+    delete(resource)
+  }
+
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | Select ?s (rdf:type as ?p) (lwm:Semester as ?o) where {
+       |     ?s rdf:type lwm:Semester .
+       |     optional { ?s lwm:hasYear ?year }
+       |
+       | } order by desc(?year)
+     """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("s").toString))
+  }
+
+  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | ASK {
+       |  $resource rdf:type lwm:Semester
+       | }
+     """.stripMargin.executeAsk()
+  }
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | Select (count(distinct ?s) as ?count) where {
+       |
+       |     ?s rdf:type lwm:Semester
+       | }
+     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+  }
+
+  def exists(semester: Semester)(implicit queryHost: QueryHost): Boolean = {
+
+    def semesterQuery(semesterSeason: String) = {
+      s"""
+           |${Vocabulary.defaulPrefixes}
+           |
+           | ASK {
+           |  ?s rdf:type lwm:Semester .
+           |  ?s lwm:hasId "${semesterSeason}_${semester.year}" .
+           |  ?s lwm:hasYear "${semester.year}" .
+           |  ?s lwm:hasStartDate "${semester.startDate.toString("yyyy-MM-dd")}" .
+           |  ?s lwm:hasEndDate "${semester.endDate.toString("yyyy-MM-dd")}" .
+           | }
+         """.stripMargin.executeAsk()
+    }
+
+    semester match {
+      case ss: SummerSemester ⇒ semesterQuery("Sommersemester")
+      case ws: WinterSemester ⇒ semesterQuery("Wintersemester")
+    }
+  }
 }
 
 object SemesterForm {

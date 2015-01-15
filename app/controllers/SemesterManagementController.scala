@@ -5,9 +5,9 @@ import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
 import utils.TransactionSupport
-import utils.semantic.Resource
+import utils.semantic.{ Individual, Resource }
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import utils.Global._
 /**
   * Created by root on 9/13/14.
   */
@@ -19,7 +19,10 @@ object SemesterManagementController extends Controller with Authentication with 
     session ⇒
       Action.async {
         implicit request ⇒
-          for (semesters ← Semesters.all()) yield {
+          for {
+            semesterResources ← Semesters.all()
+            semesters = semesterResources.map(s ⇒ Individual(s))
+          } yield {
             Ok(views.html.semesterManagement(semesters, Semesters.options, SemesterForm.semesterForm))
           }
       }
@@ -30,8 +33,11 @@ object SemesterManagementController extends Controller with Authentication with 
       Action.async { implicit request ⇒
         SemesterForm.semesterForm.bindFromRequest.fold(
           formWithErrors ⇒ {
-            for (semester ← Semesters.all()) yield {
-              BadRequest(views.html.semesterManagement(semester, Semesters.options, formWithErrors))
+            for {
+              semesterResources ← Semesters.all()
+              semesters = semesterResources.map(s ⇒ Individual(s))
+            } yield {
+              BadRequest(views.html.semesterManagement(semesters, Semesters.options, formWithErrors))
             }
           },
           s ⇒ {
@@ -42,7 +48,7 @@ object SemesterManagementController extends Controller with Authentication with 
                 WinterSemester(s.year)
             }
             Semesters.create(semester).map { s ⇒
-              createTransaction(session.user, s.uri, s"New Semester ${s.uri} created by ${session.user}")
+              createTransaction(session.user, s, s"New Semester $s created by ${session.user}")
               Redirect(routes.SemesterManagementController.index())
             }
           }

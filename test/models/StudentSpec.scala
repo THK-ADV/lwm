@@ -12,12 +12,13 @@ class StudentSpec extends SemanticFeatureSpec {
   val student1 = Student("test_gm_1", "test_firstname", "test_lastname", "test_regnr_1", "test_email", "test_phone", "http://test1.test/test_degree")
   val student2 = Student("test_gm_2", "test_firstname", "test_lastname", "test_regnr_2", "test_email", "test_phone", "http://test1.test/test_degree")
   val student3 = Student("test_gm_3", "test_firstname", "test_lastname", "test_regnr_3", "test_email", "test_phone", "http://test1.test/test_degree")
+
   val expectedResource1 = Resource("http://lwm.gm.fh-koeln.de/students/test_gm_1")
   val expectedResource2 = Resource("http://lwm.gm.fh-koeln.de/students/test_gm_2")
   val expectedResource3 = Resource("http://lwm.gm.fh-koeln.de/students/test_gm_3")
 
   "Students" should {
-    "return the number of Students" in {
+    "return the number of students" in {
       val expected = 0
       eventually {
         Students.size should be(expected)
@@ -73,7 +74,7 @@ class StudentSpec extends SemanticFeatureSpec {
       }
     }
 
-    "return a list of all Students" in {
+    "return a list of all students" in {
       "drop all".execUpdate()
       val futureStudents = Students.create(student1) ::
         Students.create(student2) ::
