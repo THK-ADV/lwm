@@ -4,9 +4,9 @@ import play.api.data.Forms._
 import play.api.data._
 import utils.Implicits._
 import utils.semantic._
-import utils.{QueryHost, UpdateHost}
+import utils.{ QueryHost, UpdateHost }
 
-import scala.concurrent.{Future, Promise, blocking}
+import scala.concurrent.{ Future, Promise, blocking }
 
 object UserForms {
   val loginForm = Form(
@@ -48,9 +48,7 @@ case class User(id: String,
 
 object Users extends CheckedDelete {
 
-  import utils.semantic.Vocabulary._
   import utils.Global.lwmNamespace
-  import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -88,8 +86,7 @@ object Users extends CheckedDelete {
 
   def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |${Vocabulary.defaulPrefixes}
       |
       |ask {
       |   $resource rdf:type lwm:User
@@ -99,9 +96,10 @@ object Users extends CheckedDelete {
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-         |select ?s (${RDF.typ} as ?p) (${LWM.User} as ?o) where {
-         | ?s ${RDF.typ} ${LWM.User} .
-         | optional {?s ${FOAF.lastName} ?lastname}
+         |${Vocabulary.defaulPrefixes}
+         |select ?s (rdf:type as ?p) (lwm:User as ?o) where {
+         | ?s rdf:type lwm:User .
+         | optional {?s foaf:lastName ?lastname}
          |}order by desc(?lastname)
        """.stripMargin.execSelect().map { solution ⇒
       Resource(solution.data("s").toString)
@@ -110,8 +108,7 @@ object Users extends CheckedDelete {
 
   def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
     s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |${Vocabulary.defaulPrefixes}
       |
       |ask {
       |   ?s lwm:hasGmId "$uid"

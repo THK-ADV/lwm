@@ -74,17 +74,6 @@ class UserSpec extends SemanticFeatureSpec {
       }
     }
 
-    "delete one particuluar user" in {
-      "drop all".execUpdate()
-      val futureUsers = Users.create(user1) :: Users.create(user2) :: Nil
-
-      whenReady(Future.sequence(futureUsers)) { users ⇒
-        whenReady(Users.delete(user2)) { user ⇒
-          user should be(expectedResource2)
-        }
-      }
-    }
-
     "return a list of all users" in {
       "drop all".execUpdate()
       val futureUsers = Users.create(user1) ::
