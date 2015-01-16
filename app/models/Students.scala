@@ -84,6 +84,7 @@ object Students extends CheckedDelete {
          |${Vocabulary.defaulPrefixes}
          |
          | Ask {
+         |  ?s rdf:type lwm:Student .
          |  ?s lwm:hasGmId "$uid"
          | }
     """.stripMargin.executeAsk()
