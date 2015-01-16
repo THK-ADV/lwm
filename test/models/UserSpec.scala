@@ -61,23 +61,16 @@ class UserSpec extends SemanticFeatureSpec {
       }
     }
 
+    "should return true if an arbitrary resource is really a user" in {
+      Users.check(expectedResource1) should be(true)
+    }
+
     "delete an existing user" in {
       val futureResource = Users.delete(user1.id)
 
       whenReady(futureResource) { deleted ⇒
         deleted should be(expectedResource1)
         Users.size should be(0)
-      }
-    }
-
-    "delete one particuluar user" in {
-      "drop all".execUpdate()
-      val futureUsers = Users.create(user1) :: Users.create(user2) :: Nil
-
-      whenReady(Future.sequence(futureUsers)) { users ⇒
-        whenReady(Users.delete(user2)) { user ⇒
-          user should be(expectedResource2)
-        }
       }
     }
 
@@ -119,10 +112,6 @@ class UserSpec extends SemanticFeatureSpec {
           expectedResource2.value -> s"${user2.firstname} ${user2.lastname}",
           expectedResource3.value -> s"${user3.firstname} ${user3.lastname}")
       }
-    }
-
-    "should return true if an arbitrary resource is really a user" in {
-      Users.check(expectedResource1) should be(true)
     }
   }
 

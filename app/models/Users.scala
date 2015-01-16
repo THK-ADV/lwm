@@ -2,11 +2,11 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
-import utils.{ QueryHost, UpdateHost }
-import utils.semantic._
 import utils.Implicits._
+import utils.semantic._
+import utils.{ QueryHost, UpdateHost }
 
-import scala.concurrent.{ Promise, Future, blocking }
+import scala.concurrent.{ Future, Promise, blocking }
 
 object UserForms {
   val loginForm = Form(
@@ -62,7 +62,8 @@ object Users extends CheckedDelete {
       s"""
       |${Vocabulary.defaulPrefixes}
       |
-      | Insert data {
+      |
+      |insert data {
       |    $resource rdf:type lwm:User .
       |    $resource lwm:hasGmId "${user.id}" .
       |    $resource foaf:lastName "${user.lastname}" .
@@ -70,13 +71,12 @@ object Users extends CheckedDelete {
       |    $resource rdfs:label "${user.firstname} ${user.lastname}" .
       |    $resource nco:phoneNumber "${user.phone}" .
       |    $resource foaf:mbox "${user.email}" .
-      | }
+      |}
     """.stripMargin.execUpdate()
       p.success(resource)
     }
 
     p.future
-
   }
 
   def delete(userId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
@@ -84,41 +84,36 @@ object Users extends CheckedDelete {
     delete(resource)
   }
 
-  def delete(user: User)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
-    val resource = Resource(s"${lwmNamespace}users/${user.id}")
-    delete(resource)
-  }
-
-  def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
-    s"""
-      |${Vocabulary.defaulPrefixes}
-      |
-      | ASK {
-      |  ?s lwm:hasGmId "$uid"
-      | }
-    """.stripMargin.executeAsk()
-  }
-
   def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
       |${Vocabulary.defaulPrefixes}
       |
-      | ASK {
-      |  $resource rdf:type lwm:User
-      | }
+      |ask {
+      |   $resource rdf:type lwm:User
+      |}
     """.stripMargin.executeAsk()
   }
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
          |${Vocabulary.defaulPrefixes}
-         |
-         | Select ?s (rdf:type as ?p) (lwm:User as ?o) where {
-         |    ?s rdf:type lwm:User .
-         |    optional { ?s foaf:lastName ?lastname }
-         |
-         | } order by desc(?lastname)
-       """.stripMargin.execSelect().map(solution ⇒ Resource(solution.data("s").toString))
+         |select ?s (rdf:type as ?p) (lwm:User as ?o) where {
+         | ?s rdf:type lwm:User .
+         | optional {?s foaf:lastName ?lastname}
+         |}order by desc(?lastname)
+       """.stripMargin.execSelect().map { solution ⇒
+      Resource(solution.data("s").toString)
+    }
+  }
+
+  def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+      |${Vocabulary.defaulPrefixes}
+      |
+      |ask {
+      |   ?s lwm:hasGmId "$uid"
+      |}
+    """.stripMargin.executeAsk()
   }
 
   def possibleSubstitutes(userId: String)(implicit queryHost: QueryHost) = {
@@ -156,9 +151,9 @@ object Users extends CheckedDelete {
     s"""
       |${Vocabulary.defaulPrefixes}
       |
-      | Select (count(distinct ?user) as ?count) {
+      |select (count(distinct ?user) as ?count) {
       |   ?user rdf:type lwm:User
-      | }
+      |}
     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
   }
 }
