@@ -21,6 +21,7 @@ import scala.reflect.io.Path
 import scala.util.control.NonFatal
 import java.io._
 import org.joda.time._
+import utils.Implicits._
 
 /**
   * Created by rgiacinto on 20/08/14.
@@ -207,23 +208,40 @@ object LabworkManagementController extends Controller with Authentication with T
           val id = (request.body \ "id").as[String]
           val li = Individual(Resource(id))
 
-          li.props.get(lwm.isVisibleToStudents) match {
-            case None ⇒ li.add(lwm.isVisibleToStudents, StringLiteral("true"))
-            case Some(list) ⇒
-              list.headOption match {
-                case None ⇒ li.add(lwm.isVisibleToStudents, StringLiteral("true"))
-                case Some(head) ⇒
-                  head.value match {
-                    case "true" ⇒
-                      li.update(lwm.isVisibleToStudents, head, StringLiteral("false"))
-                      modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to false")
-                    case "false" ⇒
-                      li.update(lwm.isVisibleToStudents, head, StringLiteral("true"))
-                      modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to true")
-                  }
-              }
+          val typ =
+            s"""
+               |${Vocabulary.defaulPrefixes}
+               |
+               | Select (${li.uri} as ?s) (rdf:type as ?p) ?o where {
+               |     ${li.uri} rdf:type ?o .
+               |     filter(?o != owl:NamedIndividual)
+               | }
+             """.stripMargin.execSelect().head.data("o").asResource().getURI
+
+          Resource(typ) match {
+            case lwm.LabWork               ⇒ setProp(lwm.allowsApplications)
+            case lwm.AssignmentAssociation ⇒ setProp(lwm.isVisibleToStudents)
           }
 
+          def setProp(property: Property) = {
+            li.props.get(property) match {
+              case None ⇒ li.add(property, StringLiteral("true"))
+              case Some(list) ⇒
+                list.headOption match {
+                  case None ⇒ li.add(property, StringLiteral("true"))
+                  case Some(head) ⇒
+                    head.value match {
+                      case "true" ⇒
+                        li.update(property, head, StringLiteral("false"))
+                        modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to false")
+                      case "false" ⇒
+                        li.update(property, head, StringLiteral("true"))
+                        modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to true")
+                    }
+                }
+            }
+
+          }
           Future.successful(Redirect(routes.LabworkManagementController.index()))
       }
   }
