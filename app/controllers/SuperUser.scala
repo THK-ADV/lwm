@@ -5,7 +5,7 @@ import java.net.URLEncoder
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic._
-import utils.semantic.Vocabulary.{ RDFS, RDF }
+import utils.semantic.Vocabulary.{ rdfs, rdf }
 import utils.Global._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,9 +26,9 @@ object SuperUser extends Controller with Authentication {
     Action.async { implicit request ⇒
       val q =
         s"""
-          Select ?s (${RDFS.label} as ?p) ?o where {
-          ?s ${RDF.typ} <$typ> .
-          ?s ${RDFS.label} ?o
+          Select ?s (${rdfs.label} as ?p) ?o where {
+          ?s ${rdf.typ} <$typ> .
+          ?s ${rdfs.label} ?o
           }
         """.stripMargin
 
@@ -45,7 +45,7 @@ object SuperUser extends Controller with Authentication {
         s"""
           Select (<$resource> as ?s) ?p ?o where {
           <$resource> ?p ?o
-          filter(?p != ${RDF.typ})
+          filter(?p != ${rdf.typ})
           }
         """.stripMargin
 
@@ -67,7 +67,7 @@ object SuperUser extends Controller with Authentication {
         val property = Property(p.get)
         val rdfnode = {
           if (n.get.contains("http")) Resource(n.get)
-          else s"'${n.get.split(" ").mkString("+")}'"
+          else s"'${URLEncoder.encode(n.get, "UTF-8")}'"
         }
         val u =
           s"""
@@ -75,6 +75,7 @@ object SuperUser extends Controller with Authentication {
               |$resource $property $rdfnode
               |}
             """.stripMargin
+
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(routes.SuperUser.resourceOverview(r.get))).recover { case NonFatal(t) ⇒ Redirect(routes.SuperUser.index()) }
 
       } else {
@@ -106,7 +107,6 @@ object SuperUser extends Controller with Authentication {
             ${nextRes.get} ${nextProp.get} $nn
             }
           """.stripMargin
-
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(url.get)).recover { case NonFatal(t) ⇒ Redirect(url.get) }
         Future.successful(Redirect(url.get))
       } else {

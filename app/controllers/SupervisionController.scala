@@ -11,7 +11,7 @@ import play.api.mvc._
 import play.libs.Akka
 import utils.Security.Authentication
 import utils.TransactionSupport
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.lwm
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import play.api.Play.current
 
@@ -82,21 +82,21 @@ object SupervisionController extends Controller with Authentication with Transac
 
       (json \ "data").as[List[JsValue]].map(_.asOpt[SupervisionChange]).flatten.map { entry ⇒
         val i = Individual(Resource(entry.association))
-        i.props.get(LWM.hasAttended).map { attendedList ⇒
+        i.props.get(lwm.hasAttended).map { attendedList ⇒
           attendedList.map { attended ⇒
-            i.remove(LWM.hasAttended, attended)
+            i.remove(lwm.hasAttended, attended)
             modifyTransaction(session.user, i.uri, s"Attending flag removed for Student ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
           }
         }
-        i.props.get(LWM.hasPassed).map { passedList ⇒
+        i.props.get(lwm.hasPassed).map { passedList ⇒
           passedList.map { passed ⇒
-            i.remove(LWM.hasPassed, passed)
+            i.remove(lwm.hasPassed, passed)
             modifyTransaction(session.user, i.uri, s"Passed flag removed for Student ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
           }
         }
-        i.add(LWM.hasAttended, StringLiteral(entry.attended.toString))
+        i.add(lwm.hasAttended, StringLiteral(entry.attended.toString))
         modifyTransaction(session.user, i.uri, s"Attending flag changed to ${entry.attended} for Student  ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
-        i.add(LWM.hasPassed, StringLiteral(entry.passed.toString))
+        i.add(lwm.hasPassed, StringLiteral(entry.passed.toString))
         modifyTransaction(session.user, i.uri, s"Passed flag changed to ${entry.passed} for Student ${Students.studentForLabworkAssociation(i.uri).mkString(" ")} by ${session.user}")
       }
       Ok("Updates committed")

@@ -11,13 +11,13 @@
 @defining(labworks.fill(LabworkUpdateModel(
                         courseId,
                         semester,
-                        LocalDate.parse(labwork.props.getOrElse(LWM.hasStartDate, DateLiteral(LocalDate.now()) :: Nil).head.value).toDate,
-                        LocalDate.parse(labwork.props.getOrElse(LWM.hasEndDate, DateLiteral(LocalDate.now()) :: Nil).head.value).toDate))) { f =>
+                        LocalDate.parse(labwork.props.getOrElse(lwm.hasStartDate, DateLiteral(LocalDate.now()) :: Nil).head.value).toDate,
+                        LocalDate.parse(labwork.props.getOrElse(lwm.hasEndDate, DateLiteral(LocalDate.now()) :: Nil).head.value).toDate))) { f =>
     @helper.form(action = routes.LabworkManagementController.metaEdit(labwork.uri.value)) {
         @helper.inputDate(f("startDate"), '_label -> "Praktikumsbeginn")
         @helper.inputDate(f("endDate"), '_label -> "Praktikumsende")
-        @helper.select(f("courseId"), for {course <- courses; labelList <- course.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString + " - " + Individual(Resource(course.props.getOrElse(LWM.hasDegree, List(Resource(""))).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value), '_label -> "Veranstaltung:")
-        @helper.select(f("semester"), for {semester <- semesters; labelList <- semester.props.get(RDFS.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
+        @helper.select(f("courseId"), for {course <- courses; labelList <- course.props.get(rdfs.label); label = labelList.headOption.getOrElse("")} yield course.uri.value -> (label.toString + " - " + Individual(Resource(course.props.getOrElse(lwm.hasDegree, List(Resource(""))).head.value)).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value), '_label -> "Veranstaltung:")
+        @helper.select(f("semester"), for {semester <- semesters; labelList <- semester.props.get(rdfs.label); label = labelList.headOption.getOrElse("")} yield semester.uri.value -> label.toString, '_label -> "Semester:")
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             <button type="submit" class="btn btn-primary">Aktualisieren</button>

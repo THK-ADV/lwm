@@ -1,7 +1,7 @@
 @(student: Resource)
 @import java.net.URLDecoder
 @import com.hp.hpl.jena.query.QueryExecutionFactory
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.rdfs
 @import utils.semantic._
 @import utils.Global._
 
@@ -9,7 +9,7 @@
     val query =
       s"""
          |select * where {
-         | $student ${RDFS.label} ?name
+         | $student ${rdfs.label} ?name
          |}
        """.stripMargin
 

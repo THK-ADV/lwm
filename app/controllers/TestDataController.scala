@@ -3,7 +3,7 @@ package controllers
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.lwm
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -14,17 +14,18 @@ object TestDataController extends Controller with Authentication {
 
   def generateTestData() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
+      import utils.Global._
       Action.async {
         implicit request ⇒
 
           val semesterFuture = Semesters.create(WinterSemester(2014))
 
-          val courseFuture = Courses.create(Course("Algorithmen und Programmierung 1", "AP1", LWM.MediaInformaticsBachelor))
+          val courseFuture = Courses.create(Course("Algorithmen und Programmierung 1", "AP1", lwm.MediaInformaticsBachelor))
 
           val labworkFuture = for {
             semester ← semesterFuture
             course ← courseFuture
-          } yield LabWorks.create(LabWork(course.uri, semester.uri))
+          } yield LabWorks.create(LabWork(course, semester))
 
           val studentsAffeFutures = for (i ← 1 to 500) yield Students.create(Student(
             s"mi_$i",
@@ -33,7 +34,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_$i@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
 
           val studentsSchweinFutures = for (i ← 501 to 1000) yield Students.create(Student(
@@ -43,7 +44,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_$i@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
 
           for {
@@ -53,7 +54,7 @@ object TestDataController extends Controller with Authentication {
               affe ← affeFuture
               lwf ← labworkFuture
               lw ← lwf
-            } yield LabworkApplications.create(LabworkApplication(affe.uri, lw.uri, Nil))
+            } yield LabworkApplications.create(LabworkApplication(affe, lw.uri, Nil))
           }
 
           for {
@@ -63,7 +64,7 @@ object TestDataController extends Controller with Authentication {
               affe ← schweinFutures
               lwf ← labworkFuture
               lw ← lwf
-            } yield LabworkApplications.create(LabworkApplication(affe.uri, lw.uri, Nil))
+            } yield LabworkApplications.create(LabworkApplication(affe, lw.uri, Nil))
           }
 
           val student1 = Students.create(Student(
@@ -73,7 +74,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_1111@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
           val student2 = Students.create(Student(
             s"mi_1112",
@@ -82,7 +83,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_1111@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
           val student3 = Students.create(Student(
             s"mi_1113",
@@ -91,7 +92,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_1111@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
           val student4 = Students.create(Student(
             s"mi_1114",
@@ -100,7 +101,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_1111@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
 
           val student5 = Students.create(Student(
@@ -110,7 +111,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_1111@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
           val student6 = Students.create(Student(
             s"mi_1116",
@@ -119,7 +120,7 @@ object TestDataController extends Controller with Authentication {
             s"${Random.nextInt(10000) + 11000000}",
             s"random_email_1111@gm.fh-koeln.de",
             s"${Random.nextInt(7726262)}",
-            s"${LWM.MediaInformaticsBachelor.value}"
+            s"${lwm.MediaInformaticsBachelor.value}"
           ))
 
           for {
@@ -132,12 +133,13 @@ object TestDataController extends Controller with Authentication {
             lwf ← labworkFuture
             lw ← lwf
           } yield {
-            LabworkApplications.create(LabworkApplication(s1.uri, lw.uri, List(s5.uri, s3.uri, s4.uri)))
-            LabworkApplications.create(LabworkApplication(s2.uri, lw.uri, List(s1.uri, s3.uri, s4.uri)))
-            LabworkApplications.create(LabworkApplication(s3.uri, lw.uri, List(s2.uri, s1.uri, s4.uri)))
-            LabworkApplications.create(LabworkApplication(s4.uri, lw.uri, List(s2.uri, s3.uri, s1.uri)))
-            LabworkApplications.create(LabworkApplication(s5.uri, lw.uri, List(s1.uri, s6.uri)))
-            LabworkApplications.create(LabworkApplication(s6.uri, lw.uri, List(s6.uri)))
+
+            LabworkApplications.create(LabworkApplication(s1, lw.uri, List(s5, s3, s4)))
+            LabworkApplications.create(LabworkApplication(s2, lw.uri, List(s1, s3, s4)))
+            LabworkApplications.create(LabworkApplication(s3, lw.uri, List(s2, s1, s4)))
+            LabworkApplications.create(LabworkApplication(s4, lw.uri, List(s2, s3, s1)))
+            LabworkApplications.create(LabworkApplication(s5, lw.uri, List(s1, s6)))
+            LabworkApplications.create(LabworkApplication(s6, lw.uri, List(s6)))
           }
 
           Future.successful(Redirect(routes.StudentsManagement.index("1")))

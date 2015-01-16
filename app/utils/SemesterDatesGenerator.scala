@@ -2,7 +2,7 @@ package utils
 
 import models._
 import org.joda.time.LocalDate
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.lwm
 import utils.semantic._
 
 import scala.annotation.tailrec
@@ -31,8 +31,8 @@ object SemesterDatesGenerator {
   def create(timetable: Resource, semester: Resource): Future[Boolean] = {
     val initQuery =
       s"""
-         |select ($timetable as ?s) (${LWM.hasScheduleAssociation} as ?p) (?schedule as ?o) where {
-         |  $timetable ${LWM.hasScheduleAssociation} ?schedule
+         |select ($timetable as ?s) (${lwm.hasScheduleAssociation} as ?p) (?schedule as ?o) where {
+         |  $timetable ${lwm.hasScheduleAssociation} ?schedule
          |}
        """.stripMargin
     val p = Promise[Boolean]()
@@ -43,8 +43,8 @@ object SemesterDatesGenerator {
       }
       Timetables.get(timetable).map { t ⇒
         val labwork = Individual(t.labwork)
-        val maybeStart = labwork.props.get(LWM.hasStartDate)
-        val maybeEnd = labwork.props.get(LWM.hasEndDate)
+        val maybeStart = labwork.props.get(lwm.hasStartDate)
+        val maybeEnd = labwork.props.get(lwm.hasEndDate)
 
         for {
           end ← maybeEnd
@@ -55,7 +55,7 @@ object SemesterDatesGenerator {
           eDate = LocalDate.parse(endDate.toString)
         } {
 
-          val entryResource = Individual(timetable).props.getOrElse(LWM.hasTimetableEntry, Nil)
+          val entryResource = Individual(timetable).props.getOrElse(lwm.hasTimetableEntry, Nil)
           val entries = entryResource.map { entry ⇒
             TimetableEntries.get(entry.asResource().get)
           }.flatten
@@ -73,8 +73,8 @@ object SemesterDatesGenerator {
           blacklistedDates.map { bdates ⇒
             var possibleDates = available.filterNot(d ⇒ holidays.contains(d.date)).filterNot(d ⇒ bdates.contains(d.date)).sortWith((a, b) ⇒ a.date.compareTo(b.date) < 0)
 
-            val groupCount = labwork.props.getOrElse(LWM.hasGroup, Nil).size
-            val assignmentCount = labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil).size
+            val groupCount = labwork.props.getOrElse(lwm.hasGroup, Nil).size
+            val assignmentCount = labwork.props.getOrElse(lwm.hasAssignmentAssociation, Nil).size
 
             if (possibleDates.size < groupCount * assignmentCount) {
               println(s"ERROR: Not enough available assignment dates for $groupCount groups with $assignmentCount assignments")
@@ -83,17 +83,17 @@ object SemesterDatesGenerator {
               p.failure(new IllegalArgumentException("Not enough available assignment dates for $groupCount groups with $assignmentCount assignments"))
             } else {
               val orderedAssocs = (for {
-                assocNode ← labwork.props.getOrElse(LWM.hasAssignmentAssociation, Nil)
+                assocNode ← labwork.props.getOrElse(lwm.hasAssignmentAssociation, Nil)
                 assoc = assocNode.asResource().get
-                orderIdNode ← Individual(assoc).props.getOrElse(LWM.hasOrderId, Nil)
+                orderIdNode ← Individual(assoc).props.getOrElse(lwm.hasOrderId, Nil)
                 orderId = orderIdNode.asLiteral().get
-                prepTime = Individual(assoc).props.getOrElse(LWM.hasPreparationTime, Nil).headOption.getOrElse(StringLiteral("0")).value.toInt
+                prepTime = Individual(assoc).props.getOrElse(lwm.hasPreparationTime, Nil).headOption.getOrElse(StringLiteral("0")).value.toInt
               } yield orderId.decodedString.toInt -> (assoc, prepTime.toInt)).sortBy(_._1)
 
               val orderedGroups = (for {
-                groupNode ← labwork.props.getOrElse(LWM.hasGroup, Nil)
+                groupNode ← labwork.props.getOrElse(lwm.hasGroup, Nil)
                 group = groupNode.asResource().get
-                groupIdNode ← Individual(group).props.getOrElse(LWM.hasGroupId, Nil)
+                groupIdNode ← Individual(group).props.getOrElse(lwm.hasGroupId, Nil)
                 orderId = groupIdNode.asLiteral().get
               } yield orderId.decodedString -> group).sortBy(_._1)
 
@@ -127,7 +127,7 @@ object SemesterDatesGenerator {
                 val due = dues((date.association._2._1, date.group._2)).head
                 val scheduleAssociation = ScheduleAssociation(date.group._2, date.association._2._1, date.date.date, due.date.date, date.date.entry.ownResource.get, due.date.entry.ownResource.get, timetable)
 
-                Individual(date.group._2).props.get(LWM.hasMember).map { studentNodes ⇒
+                Individual(date.group._2).props.get(lwm.hasMember).map { studentNodes ⇒
                   studentNodes.map { studentNode ⇒
                     ScheduleAssociations.create(scheduleAssociation, studentNode.asResource().get)
                   }

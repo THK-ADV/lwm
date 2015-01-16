@@ -4,7 +4,7 @@ import controllers.AdministrationDashboardController._
 import models._
 import play.api.mvc.{ DiscardingCookie, Action, Controller }
 import utils.semantic.{ SPARQLTools, StringLiteral, Resource, Individual }
-import utils.semantic.Vocabulary.{ RDFS, LWM, RDF }
+import utils.semantic.Vocabulary.{ rdfs, lwm, rdf }
 import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -19,11 +19,11 @@ object StudentDashboardController extends Controller {
       def availableLabworks(student: Resource) = {
         val query =
           s"""
-                   select ($student as ?s) (${LWM.allowsApplications} as ?p) ?o where {
-                     $student ${LWM.hasEnrollment} ?degree .
-                     ?course ${LWM.hasDegree} ?degree .
-                     ?o ${LWM.hasCourse} ?course .
-                     ?o ${LWM.allowsApplications} "true" .
+                   select ($student as ?s) (${lwm.allowsApplications} as ?p) ?o where {
+                     $student ${lwm.hasEnrollment} ?degree .
+                     ?course ${lwm.hasDegree} ?degree .
+                     ?o ${lwm.hasCourse} ?course .
+                     ?o ${lwm.allowsApplications} "true" .
                    }
                  """.stripMargin
 
@@ -35,9 +35,9 @@ object StudentDashboardController extends Controller {
       def pendingLabworkApplications(student: Resource) = {
         val query =
           s"""
-                   select ($student as ?s) (${LWM.hasPendingApplication} as ?p) ?o where {
-                     $student ${LWM.hasPendingApplication} ?application .
-                     ?application ${LWM.hasLabWork} ?o .
+                   select ($student as ?s) (${lwm.hasPendingApplication} as ?p) ?o where {
+                     $student ${lwm.hasPendingApplication} ?application .
+                     ?application ${lwm.hasLabWork} ?o .
                    }
                  """.stripMargin
 
@@ -49,9 +49,9 @@ object StudentDashboardController extends Controller {
       def studentLabworks(student: Resource) = {
         val query =
           s"""
-                   select ($student as ?s) (${LWM.hasLabWork} as ?p) ?o where {
-                     $student ${LWM.memberOf} ?group .
-                     ?group ${LWM.hasLabWork} ?o .
+                   select ($student as ?s) (${lwm.hasLabWork} as ?p) ?o where {
+                     $student ${lwm.memberOf} ?group .
+                     ?group ${lwm.hasLabWork} ?o .
                    }
                  """.stripMargin
 
@@ -63,10 +63,10 @@ object StudentDashboardController extends Controller {
       def studentLabworkGroup(student: Resource, labwork: Resource) = {
         val query =
           s"""
-                   select ($student as ?s) (${LWM.memberOf} as ?p) ?o where {
-                     $labwork ${LWM.hasGroup} ?group .
-                     ?group ${LWM.hasMember} $student .
-                     ?group ${RDFS.label} ?o .
+                   select ($student as ?s) (${lwm.memberOf} as ?p) ?o where {
+                     $labwork ${lwm.hasGroup} ?group .
+                     ?group ${lwm.hasMember} $student .
+                     ?group ${rdfs.label} ?o .
                    }
                  """.stripMargin
 
@@ -74,7 +74,7 @@ object StudentDashboardController extends Controller {
           SPARQLTools.statementsFromString(result).map(_.o.asLiteral()).flatten
         }
       }
-
+      import utils.Global._
       (for {
         student ← Students.get(session.user)
         availableLabworks ← availableLabworks(student)
@@ -98,22 +98,24 @@ object StudentDashboardController extends Controller {
     Action.async {
       implicit request ⇒
         val student = Individual(Resource(id))
-        Degrees.all().map(d ⇒ Ok(views.html.dashboard_student_edit_details(student, d, UserForms.studentForm))).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
+        Degrees.all().map(d ⇒ Ok(views.html.dashboard_student_edit_details(student, d.map(e ⇒ Individual(e)), UserForms.studentForm))).recover { case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard()) }
     }
   }
 
   def assignmentsPage(labid: String) = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
+
     Action.async {
       implicit request ⇒
-        val studentFuture = for (s ← Students.get(session.user)) yield s
+
+        val studentFuture = for (s ← Students.get(session.user)(utils.Global.query)) yield s
 
         val query =
           s"""
-         |select ?s (${LWM.hasLabWork} as ?p) (<$labid> as ?o) where {
-         | ?s ${RDF.typ} ${LWM.AssignmentAssociation} .
-         | ?s ${LWM.hasOrderId} ?orderId .
-         | ?s ${LWM.hasLabWork} <$labid> .
-         | ?s ${LWM.isVisibleToStudents} "true"
+         |select ?s (${lwm.hasLabWork} as ?p) (<$labid> as ?o) where {
+         | ?s ${rdf.typ} ${lwm.AssignmentAssociation} .
+         | ?s ${lwm.hasOrderId} ?orderId .
+         | ?s ${lwm.hasLabWork} <$labid> .
+         | ?s ${lwm.isVisibleToStudents} "true"
          | } order by asc(?orderId)
        """.stripMargin
 

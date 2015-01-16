@@ -4,7 +4,7 @@
 <label>Gruppe:</label>
     <select id="groupSwap@hash">
     @for(g <- groups) {
-        <option value="@g.uri.value">@g.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value (@g.props.getOrElse(LWM.hasMember, List(Resource(""))).size)</option>
+        <option value="@g.uri.value">@g.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value (@g.props.getOrElse(lwm.hasMember, List(Resource(""))).size)</option>
     }
     </select>
     <div class="modal-footer">

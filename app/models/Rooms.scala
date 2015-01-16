@@ -4,14 +4,17 @@ import java.util.UUID
 
 import play.api.data.Form
 import play.api.data.Forms._
+import utils.{ QuerySolution, QueryHost, UpdateHost }
 import utils.semantic._
+import utils.Implicits._
+import scala.concurrent.{ Promise, Future, blocking }
 
-import scala.concurrent.{ Promise, Future }
+case class Room(roomId: String, name: String)
 
-case class Room(roomId: String, name: String, id: UUID = UUID.randomUUID())
 case class RoomFormModel(roomId: String, name: String)
 
-object Rooms {
+object Rooms extends CheckedDelete {
+
   object Forms {
     val roomForm = Form(
       mapping(
@@ -21,51 +24,65 @@ object Rooms {
     )
   }
 
-  import utils.Global._
-  import utils.semantic.Vocabulary._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(room: Room): Future[Individual] = {
-    val courseResource = ResourceUtils.createResource(lwmNamespace)
-    val statements = List(
-      Statement(courseResource, RDF.typ, LWM.Room),
-      Statement(courseResource, RDF.typ, OWL.NamedIndividual),
-      Statement(courseResource, LWM.hasName, StringLiteral(room.name)),
-      Statement(courseResource, RDFS.label, StringLiteral(room.name)),
-      Statement(courseResource, LWM.hasId, StringLiteral(room.id.toString)),
-      Statement(courseResource, LWM.hasRoomId, StringLiteral(room.roomId))
-    )
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(_ ⇒ Individual(courseResource))
-  }
+  def create(room: Room)(implicit updateHost: UpdateHost): Future[Resource] = {
 
-  def delete(room: Room): Future[Room] = {
-    val maybeRoom = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Room, Vocabulary.LWM.hasId, StringLiteral(room.id.toString))
-    val resultFuture = sparqlExecutionContext.executeQuery(maybeRoom)
-    val p = Promise[Room]()
-    resultFuture.map { result ⇒
-      val resources = SPARQLTools.statementsFromString(result).map(r ⇒ r.s)
-      resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(room) }
-      }
-    }
-    p.future
-  }
+    val resource = Resource(s"${utils.Global.lwmNamespace}rooms/${room.roomId}")
 
-  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
-    val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.Room)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
-    } else {
-      p.failure(new IllegalArgumentException("Resource is not a Room"))
+
+    blocking {
+      s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Insert data {
+         |    $resource rdf:type lwm:Room .
+         |    $resource rdfs:label "${room.name}" .
+         |    $resource lwm:hasName "${room.name}" .
+         |    $resource lwm:hasRoomId "${room.roomId}" .
+         | }
+       """.stripMargin.execUpdate()
+
+      p.success(resource)
     }
+
     p.future
   }
 
-  def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Room)).map { stringResult ⇒
-      SPARQLTools.statementsFromString(stringResult).map(student ⇒ Individual(student.s)).toList
-    }
+  def delete(roomId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}rooms/$roomId")
+    delete(resource)
+  }
+
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select ?s (rdf:type as ?p) (lwm:Room as ?o) {
+         |    ?s rdf:type lwm:Room
+         | }
+         """.stripMargin.execSelect().map(s ⇒ Resource(s.data("s").toString))
+  }
+
+  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | ASK {
+         |  $resource rdf:type lwm:Room
+         | }
+       """.stripMargin.executeAsk()
+  }
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    s"""
+       |${Vocabulary.defaulPrefixes}
+       |
+       | Select (count(distinct ?s) as ?count) {
+       |    ?s rdf:type lwm:Room
+       | }
+     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
   }
 }
 

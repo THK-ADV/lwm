@@ -14,7 +14,7 @@ import utils.BreadCrumbKeeper.UrlReference
 import utils.Global._
 import utils.Security.Authentication
 import utils.semantic.SPARQLTools
-import utils.semantic.Vocabulary.{ LWM, FOAF }
+import utils.semantic.Vocabulary.{ lwm, foaf }
 
 import scala.concurrent.Future
 
@@ -71,9 +71,9 @@ object Application extends Controller with Authentication {
 
           def firstNameFuture = {
             val query = s"""
-          |select ?s (${FOAF.firstName} as ?p) ?o where {
-          | ?s ${LWM.hasGmId} "$user" .
-          | ?s ${FOAF.firstName} ?o
+          |select ?s (${foaf.firstName} as ?p) ?o where {
+          | ?s ${lwm.hasGmId} "$user" .
+          | ?s ${foaf.firstName} ?o
           | }
         """.stripMargin
 
@@ -84,9 +84,9 @@ object Application extends Controller with Authentication {
 
           def lastNameFuture = {
             val query = s"""
-          |select ?s (${FOAF.lastName} as ?p) ?o where {
-          | ?s ${LWM.hasGmId} "$user" .
-          | ?s ${FOAF.lastName} ?o
+          |select ?s (${foaf.lastName} as ?p) ?o where {
+          | ?s ${lwm.hasGmId} "$user" .
+          | ?s ${foaf.lastName} ?o
           | }
         """.stripMargin
 

@@ -1,8 +1,8 @@
 @(degree: Individual, form: Form[Degree])
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 
-    @defining(form.fill(Degree(degree.props.getOrElse(LWM.hasName, List(StringLiteral(""))).head.value, degree.props.getOrElse(LWM.hasId, List(StringLiteral(""))).head.value))){f=>
+    @defining(form.fill(Degree(degree.props.getOrElse(lwm.hasName, List(StringLiteral(""))).head.value, degree.props.getOrElse(lwm.hasId, List(StringLiteral(""))).head.value))){f=>
             @helper.form(action = routes.DegreeManagementController.degreeEdit(degree.uri.value)) {
                 @helper.inputText(f("name"), '_label -> "Name:")
                 @helper.inputText(f("id"), '_label -> "Id:")

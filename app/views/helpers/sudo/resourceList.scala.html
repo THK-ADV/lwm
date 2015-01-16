@@ -1,5 +1,5 @@
 @()
-@import utils.semantic.Vocabulary.{RDFS, RDF, LWM}
+@import utils.semantic.Vocabulary.{rdfs, rdf, lwm}
 @import utils.semantic.Resource
 @import utils.Global._
 @import utils.Implicits._
@@ -14,7 +14,7 @@
       """.stripMargin)
     s"""
       Select distinct ?o where {
-       ?s ${RDF.typ} ?o
+       ?s ${rdf.typ} ?o
        filter regex(str(?o) ,"^((?!http://www.w3.org/2002/07/owl#).)*$$", "i")
         }
     """.stripMargin.execSelect().map {

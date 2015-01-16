@@ -13,11 +13,11 @@
                 <th>ID</th>
                 <th>Studiengang</th>
             </tr>
-            @for(course <- courses; id <- course.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral("")))) {
+            @for(course <- courses; id <- course.props.getOrElse(Vocabulary.lwm.hasId, List(StringLiteral("")))) {
                 <tr>
-                    <td><a data-toggle="modal" data-target="#@id">@course.props.getOrElse(Vocabulary.LWM.hasName, List(StringLiteral(""))).head.value</a></td>
-                    <td>@course.props.getOrElse(Vocabulary.LWM.hasId, List(StringLiteral(""))).head.value</td>
-                    <td>@Individual(Resource(course.props.getOrElse(Vocabulary.LWM.hasDegree, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.RDFS.label, List(Resource(""))).head.value</td>
+                    <td><a data-toggle="modal" data-target="#@id">@course.props.getOrElse(Vocabulary.lwm.hasName, List(StringLiteral(""))).head.value</a></td>
+                    <td>@course.props.getOrElse(Vocabulary.lwm.hasId, List(StringLiteral(""))).head.value</td>
+                    <td>@Individual(Resource(course.props.getOrElse(Vocabulary.lwm.hasDegree, List(StringLiteral(""))).head.value)).props.getOrElse(Vocabulary.rdfs.label, List(Resource(""))).head.value</td>
                     <td><h3><a href="javascript: if(confirmed()) deleteCourse('@course.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
                 </tr>
 

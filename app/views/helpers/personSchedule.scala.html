@@ -1,8 +1,8 @@
 @(student: Resource, labwork: Resource)
     @import java.net.URLDecoder
-    @import utils.semantic.Vocabulary.RDFS
+    @import utils.semantic.Vocabulary.rdfs
     @import utils.semantic._
-    @import Vocabulary.LWM
+    @import Vocabulary.lwm
     @import utils.Global._
     @import com.hp.hpl.jena.query.QueryExecutionFactory
 
@@ -11,32 +11,32 @@
         val query =
             s"""
          select * where {
-          $student ${LWM.hasScheduleAssociation} ?scheduleAssociation .
-          ?scheduleAssociation ${LWM.hasGroup} ?group .
-          ?group ${LWM.hasGroupId} ?groupId .
-          ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
-          ?assignmentAssociation ${LWM.hasAssignment} ?assignment .
-          ?assignment ${RDFS.label} ?assignmentLabel .
-          ?assignmentAssociation ${LWM.hasLabWork} $labwork .
-          ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
-          ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
-          ?entry ${LWM.hasRoom} ?room .
-          ?entry ${LWM.hasStartTime} ?startTime .
-          ?room ${LWM.hasRoomId} ?roomId .
-          ?entry ${LWM.hasSupervisor} ?supervisor .
-          ?supervisor ${RDFS.label} ?supervisorName .
-          ?assignmentAssociation ${LWM.hasOrderId} ?id .
-          optional {?scheduleAssociation ${LWM.hasPassed} ?passed } .
-          optional {?scheduleAssociation ${LWM.hasAttended} ?attended } .
+          $student ${lwm.hasScheduleAssociation} ?scheduleAssociation .
+          ?scheduleAssociation ${lwm.hasGroup} ?group .
+          ?group ${lwm.hasGroupId} ?groupId .
+          ?scheduleAssociation ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
+          ?assignmentAssociation ${lwm.hasAssignment} ?assignment .
+          ?assignment ${rdfs.label} ?assignmentLabel .
+          ?assignmentAssociation ${lwm.hasLabWork} $labwork .
+          ?scheduleAssociation ${lwm.hasAssignmentDate} ?assignmentDate .
+          ?scheduleAssociation ${lwm.hasAssignmentDateTimetableEntry} ?entry .
+          ?entry ${lwm.hasRoom} ?room .
+          ?entry ${lwm.hasStartTime} ?startTime .
+          ?room ${lwm.hasRoomId} ?roomId .
+          ?entry ${lwm.hasSupervisor} ?supervisor .
+          ?supervisor ${rdfs.label} ?supervisorName .
+          ?assignmentAssociation ${lwm.hasOrderId} ?id .
+          optional {?scheduleAssociation ${lwm.hasPassed} ?passed } .
+          optional {?scheduleAssociation ${lwm.hasAttended} ?attended } .
           optional {
-            ?scheduleAssociation ${LWM.hasAlternateScheduleAssociation} ?alternate .
-            ?alternate ${LWM.hasGroup} ?alternateGroup .
-            ?alternate ${LWM.hasAssignmentDate} ?alternateDate .
-            ?alternate ${LWM.hasAssignmentDateTimetableEntry} ?alternateEntry .
-            ?alternateEntry ${LWM.hasStartTime} ?alternateTime .
-            ?alternateGroup ${LWM.hasGroupId} ?alternateGroupId .
-            ?alternateEntry ${LWM.hasRoom} ?alternateRoom .
-            ?alternateRoom ${LWM.hasRoomId} ?alternateRoomId
+            ?scheduleAssociation ${lwm.hasAlternateScheduleAssociation} ?alternate .
+            ?alternate ${lwm.hasGroup} ?alternateGroup .
+            ?alternate ${lwm.hasAssignmentDate} ?alternateDate .
+            ?alternate ${lwm.hasAssignmentDateTimetableEntry} ?alternateEntry .
+            ?alternateEntry ${lwm.hasStartTime} ?alternateTime .
+            ?alternateGroup ${lwm.hasGroupId} ?alternateGroupId .
+            ?alternateEntry ${lwm.hasRoom} ?alternateRoom .
+            ?alternateRoom ${lwm.hasRoomId} ?alternateRoomId
           }
          } order by asc(?id)
        """.stripMargin

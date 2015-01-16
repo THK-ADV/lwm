@@ -1,13 +1,13 @@
 @(user: Individual, form: Form[User])
 
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS, FOAF, NCO}
+@import utils.semantic.Vocabulary.{lwm, rdfs, foaf, nco}
 
-@defining(form.fill(User(user.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value,
-    user.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value,
-    user.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value,
-    user.props.getOrElse(FOAF.mbox, List(StringLiteral(""))).head.value,
-    user.props.getOrElse(NCO.phoneNumber, List(StringLiteral(""))).head.value))) { f =>
+@defining(form.fill(User(user.props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(foaf.firstName, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(foaf.mbox, List(StringLiteral(""))).head.value,
+    user.props.getOrElse(nco.phoneNumber, List(StringLiteral(""))).head.value))) { f =>
 
     @helper.form(action = routes.UserManagement.userEdit(user.uri.value)) {
         @helper.inputText(f("id"), '_label -> "GmId:")

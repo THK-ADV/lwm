@@ -1,17 +1,17 @@
 @(labwork: Individual, groups: List[Individual])
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 
 <div class="panel panel-default">
     <div class="panel-heading">Gruppen</div>
     <table class="table table-bordered">
         <tbody>
             <tr><th>Gruppe</th><th>Anzahl</th></tr>
-            @defining(groups.map(g => (g, g.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value))) { mapped =>
+            @defining(groups.map(g => (g, g.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value))) { mapped =>
                 @for(g <- mapped.sortBy(_._2); gId <- g._2) {
                     <tr>
                         <td><a href="@routes.GroupManagementController.index(labwork.uri.value, g._1.uri.value)">@gId</a></td>
-                        <td>@g._1.props.getOrElse(LWM.hasMember, List.empty).size</td>
+                        <td>@g._1.props.getOrElse(lwm.hasMember, List.empty).size</td>
                         <td><a href="javascript: if(confirmed()) applyEdit('DELETE group HAVING @{g._1.uri.value}','@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-remove"></a>
                         </td>
                     </tr>
@@ -19,7 +19,7 @@
             }
         </tbody>
     </table>
-    <div class="panel-footer"><h3><a href="javascript: applyEdit('CREATE group HAVING @{LWM.hasLabWork} WITH @{labwork.uri.value}', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></h3>
+    <div class="panel-footer"><h3><a href="javascript: applyEdit('CREATE group HAVING @{lwm.hasLabWork} WITH @{labwork.uri.value}', '@routes.LabworkManagementController.edit(labwork.uri.value)')" class="glyphicon glyphicon-plus"></a></h3>
     </div>
 </div>
 

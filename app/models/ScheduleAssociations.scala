@@ -8,7 +8,7 @@ import org.joda.time.{ LocalTime, LocalDate }
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Global._
-import utils.semantic.Vocabulary.{ LWM, OWL, RDF, RDFS }
+import utils.semantic.Vocabulary.{ lwm, owl, rdf, rdfs }
 import utils.semantic._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,16 +34,16 @@ object ScheduleAssociations {
     val assocResource = ResourceUtils.createResource(lwmNamespace, id)
 
     val statements = List(
-      Statement(assocResource, RDF.typ, LWM.ScheduleAssociation),
-      Statement(assocResource, RDF.typ, OWL.NamedIndividual),
-      Statement(assocResource, LWM.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
-      Statement(assignment.timetable, LWM.hasScheduleAssociation, assocResource),
-      Statement(assocResource, LWM.hasDueDate, DateLiteral(assignment.dueDate)),
-      Statement(assocResource, LWM.hasGroup, assignment.group),
-      Statement(assignment.group, LWM.hasScheduleAssociation, assocResource),
-      Statement(assocResource, LWM.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
-      Statement(assocResource, LWM.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
-      Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
+      Statement(assocResource, rdf.typ, lwm.ScheduleAssociation),
+      Statement(assocResource, rdf.typ, owl.NamedIndividual),
+      Statement(assocResource, lwm.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
+      Statement(assignment.timetable, lwm.hasScheduleAssociation, assocResource),
+      Statement(assocResource, lwm.hasDueDate, DateLiteral(assignment.dueDate)),
+      Statement(assocResource, lwm.hasGroup, assignment.group),
+      Statement(assignment.group, lwm.hasScheduleAssociation, assocResource),
+      Statement(assocResource, lwm.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
+      Statement(assocResource, lwm.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
+      Statement(assocResource, lwm.hasAssignmentAssociation, assignment.assignmentAssoc)
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
@@ -54,16 +54,16 @@ object ScheduleAssociations {
     val assocResource = ResourceUtils.createResource(lwmNamespace, id)
 
     val statements = List(
-      Statement(assocResource, RDF.typ, LWM.ScheduleAssociation),
-      Statement(assocResource, RDF.typ, OWL.NamedIndividual),
-      Statement(assocResource, LWM.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
-      Statement(assignment.timetable, LWM.hasScheduleAssociation, assocResource),
-      Statement(assocResource, LWM.hasDueDate, DateLiteral(assignment.dueDate)),
-      Statement(assocResource, LWM.hasGroup, assignment.group),
-      Statement(student, LWM.hasScheduleAssociation, assocResource),
-      Statement(assocResource, LWM.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
-      Statement(assocResource, LWM.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
-      Statement(assocResource, LWM.hasAssignmentAssociation, assignment.assignmentAssoc)
+      Statement(assocResource, rdf.typ, lwm.ScheduleAssociation),
+      Statement(assocResource, rdf.typ, owl.NamedIndividual),
+      Statement(assocResource, lwm.hasAssignmentDate, DateLiteral(assignment.assignmentDate)),
+      Statement(assignment.timetable, lwm.hasScheduleAssociation, assocResource),
+      Statement(assocResource, lwm.hasDueDate, DateLiteral(assignment.dueDate)),
+      Statement(assocResource, lwm.hasGroup, assignment.group),
+      Statement(student, lwm.hasScheduleAssociation, assocResource),
+      Statement(assocResource, lwm.hasDueDateTimetableEntry, assignment.dueDateTimetableEntry),
+      Statement(assocResource, lwm.hasAssignmentDateTimetableEntry, assignment.assignmentDateTimetableEntry),
+      Statement(assocResource, lwm.hasAssignmentAssociation, assignment.assignmentAssoc)
     )
 
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(assocResource))
@@ -72,7 +72,7 @@ object ScheduleAssociations {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.ScheduleAssociation)) {
+    if (individual.props(rdf.typ).contains(lwm.ScheduleAssociation)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not an ScheduleAssociation"))
@@ -81,7 +81,7 @@ object ScheduleAssociations {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.ScheduleAssociation)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.ScheduleAssociation)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(course ⇒ Individual(course.s)).toList
     }
   }
@@ -89,19 +89,19 @@ object ScheduleAssociations {
   def dates(group: Resource, association: Resource): Option[(LocalDate, LocalDate)] = {
     val query1 =
       s"""
-        |SELECT ?s (${LWM.hasAssignmentDate} as ?p) ?o where {
-        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?s .
-        | ?s ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
-        | ?s ${LWM.hasAssignmentDate} ?o .
+        |SELECT ?s (${lwm.hasAssignmentDate} as ?p) ?o where {
+        | ${group.toQueryString} ${lwm.hasScheduleAssociation} ?s .
+        | ?s ${lwm.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?s ${lwm.hasAssignmentDate} ?o .
         |}
       """.stripMargin
 
     val query2 =
       s"""
-        |SELECT ?s (${LWM.hasDueDate} as ?p) ?o where {
-        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?s .
-        | ?s ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
-        | ?s ${LWM.hasDueDate} ?o .
+        |SELECT ?s (${lwm.hasDueDate} as ?p) ?o where {
+        | ${group.toQueryString} ${lwm.hasScheduleAssociation} ?s .
+        | ?s ${lwm.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?s ${lwm.hasDueDate} ?o .
         |}
       """.stripMargin
 
@@ -117,21 +117,21 @@ object ScheduleAssociations {
   def times(group: Resource, association: Resource): Option[(Time, Time)] = {
     val query1 =
       s"""
-        |SELECT ?s (${LWM.hasStartTime} as ?p) ?o where {
-        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?sca .
-        | ?sca ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
-        | ?sca ${LWM.hasAssignmentDateTimetableEntry} ?s .
-        | ?s ${LWM.hasStartTime} ?o .
+        |SELECT ?s (${lwm.hasStartTime} as ?p) ?o where {
+        | ${group.toQueryString} ${lwm.hasScheduleAssociation} ?sca .
+        | ?sca ${lwm.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?sca ${lwm.hasAssignmentDateTimetableEntry} ?s .
+        | ?s ${lwm.hasStartTime} ?o .
         |}
       """.stripMargin
 
     val query2 =
       s"""
-        |SELECT ?s (${LWM.hasStartTime} as ?p) ?o where {
-        | ${group.toQueryString} ${LWM.hasScheduleAssociation} ?sca .
-        | ?sca ${LWM.hasAssignmentAssociation} ${association.toQueryString} .
-        | ?sca ${LWM.hasDueDateTimetableEntry} ?s .
-        | ?s ${LWM.hasStartTime} ?o .
+        |SELECT ?s (${lwm.hasStartTime} as ?p) ?o where {
+        | ${group.toQueryString} ${lwm.hasScheduleAssociation} ?sca .
+        | ?sca ${lwm.hasAssignmentAssociation} ${association.toQueryString} .
+        | ?sca ${lwm.hasDueDateTimetableEntry} ?s .
+        | ?s ${lwm.hasStartTime} ?o .
         |}
       """.stripMargin
 
@@ -153,9 +153,9 @@ object ScheduleAssociations {
   def getSupervisorsFor(scheduleAssociation: Resource): List[Resource] = {
     val query =
       s"""
-         |select ($scheduleAssociation as ?s) (${LWM.hasSupervisor} as ?p) (?supervisor as ?o) where{
-         | $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
-         | ?entry ${LWM.hasSupervisor} ?supervisor .
+         |select ($scheduleAssociation as ?s) (${lwm.hasSupervisor} as ?p) (?supervisor as ?o) where{
+         | $scheduleAssociation ${lwm.hasAssignmentDateTimetableEntry} ?entry .
+         | ?entry ${lwm.hasSupervisor} ?supervisor .
          |}
        """.stripMargin
 
@@ -170,18 +170,18 @@ object ScheduleAssociations {
     def query2(scheduleAssociation: Resource) =
       s"""
          |select * where {
-         |  $scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
-         |  $scheduleAssociation ${LWM.hasDueDate} ?dueDate .
-         |  $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?assignmentDateEntry .
-         |  $scheduleAssociation ${LWM.hasDueDateTimetableEntry} ?dueDateEntry .
-         |  $scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?assignmentEntry .
-         |  $scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
-         |  ?timetable ${RDF.typ} ${LWM.Timetable} .
-         |  ?timetable ${LWM.hasScheduleAssociation} $scheduleAssociation
+         |  $scheduleAssociation ${lwm.hasAssignmentDate} ?assignmentDate .
+         |  $scheduleAssociation ${lwm.hasDueDate} ?dueDate .
+         |  $scheduleAssociation ${lwm.hasAssignmentDateTimetableEntry} ?assignmentDateEntry .
+         |  $scheduleAssociation ${lwm.hasDueDateTimetableEntry} ?dueDateEntry .
+         |  $scheduleAssociation ${lwm.hasAssignmentDateTimetableEntry} ?assignmentEntry .
+         |  $scheduleAssociation ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
+         |  ?timetable ${rdf.typ} ${lwm.Timetable} .
+         |  ?timetable ${lwm.hasScheduleAssociation} $scheduleAssociation
          |}
        """.stripMargin
 
-    val t = Individual(group).props.get(LWM.hasScheduleAssociation).map { schedules ⇒
+    val t = Individual(group).props.get(lwm.hasScheduleAssociation).map { schedules ⇒
       schedules.map { schedule ⇒
         val q = query2(schedule.asResource().get)
         val result = QueryExecutionFactory.sparqlService(queryHost, q).execSelect()
@@ -235,9 +235,54 @@ object ScheduleAssociations {
       val altGroupId = solution.getLiteral("groupId").getString
       val altDate = solution.getLiteral("date").getString
       val altTime = URLDecoder.decode(solution.getLiteral("time").getString, "UTF-8")
-      val groupMembers = Individual(Resource(solution.getResource("group").getURI)).props.getOrElse(LWM.hasMember, List(StringLiteral("")))
-      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId (${groupMembers.size})") :: alternates
+      val groupMembersSize = {
+        val newGroup = Resource(solution.getResource("group").getURI)
+        val groupCount = Individual(newGroup).props.getOrElse(lwm.hasMember, List(StringLiteral("")))
+        val normalizedGroupCount = getNormalizedCount(newGroup, altDate)
+        groupCount.size + normalizedGroupCount
+      }
+      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)") :: alternates
     }
     alternates
+  }
+
+  def getNormalizedCount(group: Resource, date: String): Int = {
+    import utils.Implicits._
+    val queryAlternate =
+      s"""
+          PREFIX owl: <http://www.w3.org/2002/07/owl#>
+          PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
+          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+        Select (count(?s) as ?count) where {
+          ?s lwm:memberOf ?group .
+          ?group lwm:hasLabWork <http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ff7> .
+          ?s lwm:hasScheduleAssociation ?sched .
+          ?sched lwm:hasAlternateScheduleAssociation ?alter .
+          ?alter lwm:hasAssignmentDate "$date" .
+          ?alter lwm:hasGroup ?g2 .
+          ?g2 lwm:hasLabWork <http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ff7>
+        }
+      """.stripMargin.execSelect().map(querys ⇒ querys.data.get("count")).head.map(s ⇒ s.asLiteral().getInt)
+
+    val queryHidden =
+      s"""
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+       Select (count(distinct ?s) as ?count) where {
+        ?s lwm:memberOf $group .
+        ?group lwm:hasLabWork ?labwork .
+        ?s lwm:hasHidingState ?state .
+        ?state lwm:hasHidingSubject ?labwork
+    }
+     """.stripMargin.execSelect().map(querys ⇒ querys.data.get("count")).head.map(s ⇒ s.asLiteral().getInt)
+
+    queryAlternate.getOrElse(0) - queryHidden.getOrElse(0)
   }
 }

@@ -1,6 +1,6 @@
 @(timeslots: List[Time], labwork: Individual, entries: List[Individual], rooms: List[Individual])
-@import utils.semantic.Vocabulary.RDFS
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.rdfs
+@import utils.semantic.Vocabulary.lwm
 @import utils.semantic.Individual
 <!--TODO Weekday -> List[Entry]-->
 
@@ -10,7 +10,7 @@
 <div class= "panel panel-default">
 
     <div class="panel-heading">
-        <h5>@labwork.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value @Individual(Resource(labwork.props(LWM.hasSemester).head.value)).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value</h5>
+        <h5>@labwork.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value @Individual(Resource(labwork.props(lwm.hasSemester).head.value)).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value</h5>
     </div>
     <table class="table table-bordered">
     <tbody>

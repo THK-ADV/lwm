@@ -1,14 +1,14 @@
 @(substitution: Resource)
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.lwm
 @import utils.semantic._
 @import utils.Global._
 
 @{
     val query =
        s"""
-          |select ($substitution as ?s) (${LWM.hasAssignmentDate} as ?p) (?date as ?o) where {
-          |  $substitution ${LWM.hasScheduleAssociation} ?schedule .
-          |  ?schedule ${LWM.hasAssignmentDate} ?date
+          |select ($substitution as ?s) (${lwm.hasAssignmentDate} as ?p) (?date as ?o) where {
+          |  $substitution ${lwm.hasScheduleAssociation} ?schedule .
+          |  ?schedule ${lwm.hasAssignmentDate} ?date
           |}
         """.stripMargin
 

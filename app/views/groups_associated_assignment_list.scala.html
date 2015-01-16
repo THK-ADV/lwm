@@ -2,12 +2,12 @@
 @import org.joda.time.LocalDate
 @import utils.semantic.DateLiteral
 @import utils.semantic.{Individual, Resource, StringLiteral}
-    @import utils.semantic.Vocabulary.{LWM, RDFS}
+    @import utils.semantic.Vocabulary.{lwm, rdfs}
     @import utils.Global._
     @import scala.concurrent.ExecutionContext.Implicits.global
 
     <div class="panel panel-default">
-        <div class="panel-heading">Staffelplan der Gruppe @group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.toString </div>
+        <div class="panel-heading">Staffelplan der Gruppe @group.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.toString </div>
         <div class="panel-body">
           @helpers.groupSchedule(group.uri)
         </div>

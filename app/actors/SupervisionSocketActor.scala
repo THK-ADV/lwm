@@ -8,7 +8,7 @@ import akka.actor.Actor.Receive
 import models.Students
 import play.api.libs.json.{ JsBoolean, JsString, JsObject, JsValue }
 import utils.TransactionSupport
-import utils.semantic.Vocabulary.LWM
+import utils.semantic.Vocabulary.lwm
 import utils.semantic.{ StringLiteral, Individual, Resource }
 
 object SupervisionSocketActor {
@@ -68,46 +68,46 @@ class SupervisionSocketActor(out: ActorRef) extends Actor with TransactionSuppor
 
   def handlePassed(association: Individual): Boolean = {
 
-    association.props.get(LWM.hasPassed) match {
+    association.props.get(lwm.hasPassed) match {
       case None ⇒
-        association.add(LWM.hasPassed, StringLiteral("true"))
+        association.add(lwm.hasPassed, StringLiteral("true"))
         true
       case Some(passedList) ⇒
         if (passedList.size > 1) {
           passedList.map { passed ⇒
-            association.remove(LWM.hasPassed, passed)
+            association.remove(lwm.hasPassed, passed)
           }
-          association.add(LWM.hasPassed, StringLiteral("false"))
+          association.add(lwm.hasPassed, StringLiteral("false"))
           false
         } else if (passedList.size == 0) {
-          association.add(LWM.hasPassed, StringLiteral("true"))
+          association.add(lwm.hasPassed, StringLiteral("true"))
           true
         } else {
           val passed = passedList.head.toString.toBoolean
-          association.update(LWM.hasPassed, StringLiteral(passed.toString.toLowerCase), StringLiteral((!passed).toString.toLowerCase))
+          association.update(lwm.hasPassed, StringLiteral(passed.toString.toLowerCase), StringLiteral((!passed).toString.toLowerCase))
           !passed
         }
     }
   }
 
   def handleAttendance(association: Individual): Boolean = {
-    association.props.get(LWM.hasAttended) match {
+    association.props.get(lwm.hasAttended) match {
       case None ⇒
-        association.add(LWM.hasAttended, StringLiteral("true"))
+        association.add(lwm.hasAttended, StringLiteral("true"))
         true
       case Some(attendingList) ⇒
         if (attendingList.size > 1) {
           attendingList.map { attends ⇒
-            association.remove(LWM.hasAttended, attends)
+            association.remove(lwm.hasAttended, attends)
           }
-          association.add(LWM.hasAttended, StringLiteral("false"))
+          association.add(lwm.hasAttended, StringLiteral("false"))
           false
         } else if (attendingList.size == 0) {
-          association.add(LWM.hasAttended, StringLiteral("true"))
+          association.add(lwm.hasAttended, StringLiteral("true"))
           true
         } else {
           val attended = attendingList.head.toString.toBoolean
-          association.update(LWM.hasAttended, StringLiteral(attended.toString.toLowerCase), StringLiteral((!attended).toString.toLowerCase))
+          association.update(lwm.hasAttended, StringLiteral(attended.toString.toLowerCase), StringLiteral((!attended).toString.toLowerCase))
           !attended
         }
     }

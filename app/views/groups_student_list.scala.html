@@ -1,15 +1,15 @@
 @(labwork: Individual, group: Individual, students: List[Individual], groups: List[Individual])
-@import utils.semantic.Vocabulary.{LWM, FOAF}
+@import utils.semantic.Vocabulary.{lwm, foaf}
 @import utils.semantic.{Individual, StringLiteral}
-
+@import utils.Global._
 <div class="panel panel-default">
     <div class="panel-heading">Studenten</div>
     <div class="panel-body"><table class="table table-bordered">
         <tbody>
             <tr><th>Kennung</th> <th>Nachname</th><th>Vorname</th> <th>Matrikelnummer</th> <th>Verschoben</th> <th>Fehl</th><th>Nicht best.</th></tr>
 
-            @for(s <- students; fn <- s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))) {
-                @defining(Students.isHidden(labwork.uri, s.uri)){hidden =>
+            @for(s <- students; fn <- s.props.getOrElse(foaf.firstName, List(StringLiteral(""))); ln <- s.props.getOrElse(foaf.lastName, List(StringLiteral(""))); gm <- s.props.getOrElse(lwm.hasGmId, List(StringLiteral(""))); m <- s.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral("")))) {
+                @defining(Students.isHidden(labwork.uri, s.uri)){ hidden =>
                     <script>
                         initHideState('@s.uri.value', @hidden);
                     </script>

@@ -7,7 +7,7 @@ import play.libs.Akka
 import utils.Security.Authentication
 import utils.TransactionSupport
 import utils.semantic._
-import utils.semantic.Vocabulary.{ RDF, LWM }
+import utils.semantic.Vocabulary.{ rdf, lwm }
 import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Promise, Future }
@@ -33,9 +33,9 @@ object StudentInformationController extends Controller with Authentication with 
 
       val schedule = Individual(Resource(os))
       val newSchedule = Resource(ns)
-      schedule.props.get(LWM.hasAlternateScheduleAssociation) match {
+      schedule.props.get(lwm.hasAlternateScheduleAssociation) match {
         case None ⇒
-          schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
+          schedule.add(lwm.hasAlternateScheduleAssociation, newSchedule)
           modifyTransaction(session.user, schedule.uri, s"Alternate Schedule entry added to ${schedule.uri} of Student $student by ${session.user}")
           p.success(Ok(JsObject(Seq(
             "status" -> JsString("ok")
@@ -43,14 +43,14 @@ object StudentInformationController extends Controller with Authentication with 
         case Some(list) ⇒
           if (list.size > 0) {
             list.map { l ⇒
-              schedule.remove(LWM.hasAlternateScheduleAssociation, l)
+              schedule.remove(lwm.hasAlternateScheduleAssociation, l)
             }
-            schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
+            schedule.add(lwm.hasAlternateScheduleAssociation, newSchedule)
             p.success(Ok(JsObject(Seq(
               "status" -> JsString("ok")
             ))))
           } else {
-            schedule.add(LWM.hasAlternateScheduleAssociation, newSchedule)
+            schedule.add(lwm.hasAlternateScheduleAssociation, newSchedule)
             p.success(Ok(JsObject(Seq(
               "status" -> JsString("ok")
             ))))

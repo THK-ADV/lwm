@@ -1,12 +1,12 @@
 @(assignment: Individual, form: Form[LiveAssignmentFormModel])
 
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.semantic.{Individual, Resource, StringLiteral}
 
-@defining(form.fill(LiveAssignmentFormModel(assignment.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value,
-                    assignment.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value,
-                    assignment.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value,
-                    assignment.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).mkString(",")))) {f=>
+@defining(form.fill(LiveAssignmentFormModel(assignment.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value,
+                    assignment.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value,
+                    assignment.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.value,
+                    assignment.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).mkString(",")))) {f=>
 
     @helper.form(action = routes.LiveAssignmentManagementController.assignmentEdit(
         assignment.uri.value)) {

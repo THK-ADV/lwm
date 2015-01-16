@@ -43,7 +43,7 @@
         val student = solution.getResource("student")
         val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
         val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
-        if(!Students.isHidden(Resource(labwork.getURI), Resource(student.getURI))){
+        if(!Students.isHidden(Resource(labwork.getURI), Resource(student.getURI))(utils.Global.query)){
             lines =
                     s"""
              |<tr>

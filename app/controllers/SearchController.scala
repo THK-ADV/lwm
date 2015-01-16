@@ -6,7 +6,7 @@ import utils.Implicits._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic.{ Resource, RDFNode, SPARQLTools }
-import utils.semantic.Vocabulary.{ LWM, RDFS, FOAF }
+import utils.semantic.Vocabulary.{ lwm, rdfs, foaf }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -18,9 +18,9 @@ object SearchController extends Controller with Authentication {
 
       val futureFirstName = {
         val q = s"""
-                Select ?s (${RDFS.label} as ?p) ?o where {
-                ?s ${FOAF.firstName} ?name .
-                ?s ${RDFS.label} ?o
+                Select ?s (${rdfs.label} as ?p) ?o where {
+                ?s ${foaf.firstName} ?name .
+                ?s ${rdfs.label} ?o
                 filter regex(?name, "$regex", "i")
                 } order by asc(?o)
               """.stripMargin
@@ -31,9 +31,9 @@ object SearchController extends Controller with Authentication {
 
       val futureLastName = {
         val q = s"""
-                Select ?s (${RDFS.label} as ?p) ?o where {
-                ?s ${FOAF.lastName} ?name .
-                ?s ${RDFS.label} ?o
+                Select ?s (${rdfs.label} as ?p) ?o where {
+                ?s ${foaf.lastName} ?name .
+                ?s ${rdfs.label} ?o
                 filter regex(?name, "$regex", "i")
                 } order by asc(?o)
               """.stripMargin
@@ -44,8 +44,8 @@ object SearchController extends Controller with Authentication {
 
       val futureLabel = {
         val q = s"""
-                Select ?s (${RDFS.label} as ?p) ?o where {
-                ?s ${RDFS.label} ?o
+                Select ?s (${rdfs.label} as ?p) ?o where {
+                ?s ${rdfs.label} ?o
                 filter regex(?o, "$regex", "i")
                 } order by asc(?o)
               """.stripMargin
@@ -56,9 +56,9 @@ object SearchController extends Controller with Authentication {
 
       val futureRegistrationId = {
         val q = s"""
-                Select ?s (${RDFS.label} as ?p) ?o where {
-                ?s ${LWM.hasRegistrationId} ?id .
-                ?s ${RDFS.label} ?o
+                Select ?s (${rdfs.label} as ?p) ?o where {
+                ?s ${lwm.hasRegistrationId} ?id .
+                ?s ${rdfs.label} ?o
                 filter regex(?id, "$regex", "i")
                 } order by asc(?o)
               """.stripMargin
@@ -69,9 +69,9 @@ object SearchController extends Controller with Authentication {
 
       val futureGmId = {
         val q = s"""
-                 Select ?s (${LWM.hasGmId} as ?p) ?o {
-                 ?s ${LWM.hasGmId} ?param .
-                 ?s ${RDFS.label} ?o
+                 Select ?s (${lwm.hasGmId} as ?p) ?o {
+                 ?s ${lwm.hasGmId} ?param .
+                 ?s ${rdfs.label} ?o
                  filter regex(?param, '^$param','i')
                  } order by asc(?o)
                """.stripMargin

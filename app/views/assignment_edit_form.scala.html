@@ -1,15 +1,15 @@
 @(assignment: Individual, courses: List[Individual], form: Form[AssignmentFormModel])
 @import utils.semantic.{Individual, Resource, StringLiteral}
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.Global._
 
-    @defining(form.fill(AssignmentFormModel(assignment.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value,
-                                            assignment.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value,
-                                            assignment.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value,
-                                            assignment.props.getOrElse(LWM.hasLearningGoals, List(StringLiteral(""))).head.value,
-                                            assignment.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value,
-                                            assignment.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).map(_.value).mkString(","),
-                                            assignment.props.getOrElse(LWM.hasCourse, List(StringLiteral(""))).map(_.value)))) {f=>
+    @defining(form.fill(AssignmentFormModel(assignment.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value,
+                                            assignment.props.getOrElse(lwm.hasDescription, List(StringLiteral(""))).head.value,
+                                            assignment.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value,
+                                            assignment.props.getOrElse(lwm.hasLearningGoals, List(StringLiteral(""))).head.value,
+                                            assignment.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.value,
+                                            assignment.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).map(_.value).mkString(","),
+                                            assignment.props.getOrElse(lwm.hasCourse, List(StringLiteral(""))).map(_.value)))) {f=>
 
         @helper.form(action = routes.AssignmentManagementController.assignmentEdit(assignment.uri.value)) {
             @helper.inputText(f("heading"), '_label -> "Titel:")
@@ -19,8 +19,8 @@
             @helper.textarea(f("hints"), 'rows -> 10, 'cols -> 65, '_label -> "Lösungshinweise (Plaintext oder Markdown)")
             @helper.inputText(f("topics"), '_label -> "Themen (Mehrfachangaben mit Komma trennen):")
             <label>Veranstaltungen:</label> <br />
-            @for((c, index) <- courses.zipWithIndex; l <- c.props(RDFS.label); d <- c.props(LWM.hasDegree); i = Individual(Resource(d.value))) {
-                <input type="checkbox" name="courses[@index]" value="@c.uri.value"> @l - @i.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value <br />
+            @for((c, index) <- courses.zipWithIndex; l <- c.props(rdfs.label); d <- c.props(lwm.hasDegree); i = Individual(Resource(d.value))) {
+                <input type="checkbox" name="courses[@index]" value="@c.uri.value"> @l - @i.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value <br />
             }
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>

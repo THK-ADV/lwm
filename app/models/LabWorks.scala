@@ -56,33 +56,37 @@ object LabWorks {
 
   def create(labWork: LabWork): Future[Individual] = {
     val semesterIndividual = Individual(labWork.semester)
-    val startDate = semesterIndividual.props.getOrElse(LWM.hasStartDate, List(new DateLiteral(LocalDate.now()))).head
-    val endDate = semesterIndividual.props.getOrElse(LWM.hasEndDate, List(new DateLiteral(LocalDate.now()))).head
+    val startDate = semesterIndividual.props.getOrElse(lwm.hasStartDate, List(new DateLiteral(LocalDate.now()))).head
+    val endDate = semesterIndividual.props.getOrElse(lwm.hasEndDate, List(new DateLiteral(LocalDate.now()))).head
 
     val courseIndividual = Individual(labWork.course)
 
     val resource = ResourceUtils.createResource(lwmNamespace)
-    val timetable = Timetables.create(Timetable(resource))
+    val futureTimetable = Timetables.create(Timetable(resource))
     val labworkApplicationList = LabworkApplicationLists.create(LabworkApplicationList(resource))
 
-    val label = courseIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.asLiteral().get
+    val label = courseIndividual.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.asLiteral().get
 
-    val statements = List(
-      Statement(resource, RDF.typ, LWM.LabWork),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, RDFS.label, label),
-      Statement(resource, LWM.hasTimetable, timetable.uri),
-      Statement(resource, LWM.hasCourse, labWork.course),
-      Statement(resource, LWM.hasStartDate, startDate),
-      Statement(resource, LWM.hasEndDate, endDate),
-      Statement(resource, LWM.allowsApplications, StringLiteral("false")),
-      Statement(resource, LWM.isClosed, StringLiteral("false")),
-      Statement(resource, LWM.hasSemester, labWork.semester)
-    )
+    val futureStatements = futureTimetable.map { timetable ⇒
+      List(
+        Statement(resource, rdf.typ, lwm.LabWork),
+        Statement(resource, rdf.typ, owl.NamedIndividual),
+        Statement(resource, rdfs.label, label),
+        Statement(resource, lwm.hasTimetable, timetable),
+        Statement(resource, lwm.hasCourse, labWork.course),
+        Statement(resource, lwm.hasStartDate, startDate),
+        Statement(resource, lwm.hasEndDate, endDate),
+        Statement(resource, lwm.allowsApplications, StringLiteral("false")),
+        Statement(resource, lwm.isClosed, StringLiteral("false")),
+        Statement(resource, lwm.hasSemester, labWork.semester)
+      )
+    }
 
     labworkApplicationList.flatMap { list ⇒
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
-        Individual(resource)
+      futureStatements.flatMap { statements ⇒
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
+          Individual(resource)
+        }
       }
     }
   }
@@ -90,14 +94,14 @@ object LabWorks {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.LabWork)) {
+    if (individual.props(rdf.typ).contains(lwm.LabWork)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabWork)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.LabWork)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(labwork ⇒ Individual(labwork.s)).toList
     }
   }
@@ -106,8 +110,8 @@ object LabWorks {
     val query =
       s"""
          |select * where {
-         |$labwork ${Vocabulary.LWM.hasGroup} ?group .
-         |?group ${Vocabulary.LWM.hasGroupId} ?id .
+         |$labwork ${Vocabulary.lwm.hasGroup} ?group .
+         |?group ${Vocabulary.lwm.hasGroupId} ?id .
          |} order by desc(?id)
        """.stripMargin
 
@@ -126,24 +130,24 @@ object LabWorks {
     val query =
       s"""
         select ?course ?group ?groupId ?startTime ?endTime ?name ?courseName ?roomId ?degreeName ?orderId where {
-          ?group ${RDF.typ} ${LWM.Group} .
-          ?group ${LWM.hasGroupId} ?groupId .
-          ?group ${LWM.hasScheduleAssociation} ?schedule .
-          ?schedule ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
-          ?assignmentAssociation ${LWM.hasOrderId} ?orderId .
-          ?schedule ${LWM.hasAssignmentDateTimetableEntry} ?entry .
-          ?entry ${LWM.hasRoom} ?room .
-          ?entry ${LWM.hasStartTime} ?startTime .
-          ?entry ${LWM.hasEndTime} ?endTime .
-          ?entry ${LWM.hasSupervisor} ?supervisor .
-          ?group ${LWM.hasLabWork} ?labwork .
-          ?labwork ${LWM.hasCourse} ?course .
-          ?course ${LWM.hasId} ?courseName .
-          ?course ${LWM.hasDegree} ?degree .
-          ?degree ${LWM.hasId} ?degreeName .
-          ?supervisor ${RDFS.label} ?name .
-          ?room ${LWM.hasRoomId} ?roomId .
-          ?schedule ${LWM.hasAssignmentDate} "${date.toString("yyyy-MM-dd")}" .
+          ?group ${rdf.typ} ${lwm.Group} .
+          ?group ${lwm.hasGroupId} ?groupId .
+          ?group ${lwm.hasScheduleAssociation} ?schedule .
+          ?schedule ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
+          ?assignmentAssociation ${lwm.hasOrderId} ?orderId .
+          ?schedule ${lwm.hasAssignmentDateTimetableEntry} ?entry .
+          ?entry ${lwm.hasRoom} ?room .
+          ?entry ${lwm.hasStartTime} ?startTime .
+          ?entry ${lwm.hasEndTime} ?endTime .
+          ?entry ${lwm.hasSupervisor} ?supervisor .
+          ?group ${lwm.hasLabWork} ?labwork .
+          ?labwork ${lwm.hasCourse} ?course .
+          ?course ${lwm.hasId} ?courseName .
+          ?course ${lwm.hasDegree} ?degree .
+          ?degree ${lwm.hasId} ?degreeName .
+          ?supervisor ${rdfs.label} ?name .
+          ?room ${lwm.hasRoomId} ?roomId .
+          ?schedule ${lwm.hasAssignmentDate} "${date.toString("yyyy-MM-dd")}" .
         }
       """.stripMargin
 
@@ -185,12 +189,12 @@ object LabworkGroups {
   def create(group: LabWorkGroup): Future[Individual] = {
     val resource = ResourceUtils.createResource(lwmNamespace)
     val statements = List(
-      Statement(resource, RDF.typ, LWM.Group),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGroupId, StringLiteral(group.id)),
-      Statement(resource, RDFS.label, StringLiteral(group.id)),
-      Statement(resource, LWM.hasLabWork, group.labwork),
-      Statement(group.labwork, LWM.hasGroup, resource)
+      Statement(resource, rdf.typ, lwm.Group),
+      Statement(resource, rdf.typ, owl.NamedIndividual),
+      Statement(resource, lwm.hasGroupId, StringLiteral(group.id)),
+      Statement(resource, rdfs.label, StringLiteral(group.id)),
+      Statement(resource, lwm.hasLabWork, group.labwork),
+      Statement(group.labwork, lwm.hasGroup, resource)
     )
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(resource)
@@ -198,7 +202,7 @@ object LabworkGroups {
   }
 
   def delete(group: LabWorkGroup): Future[LabWorkGroup] = {
-    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Group, Vocabulary.LWM.hasId, StringLiteral(group.id))
+    val maybeGroup = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.Group, Vocabulary.lwm.hasId, StringLiteral(group.id))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeGroup)
     val p = Promise[LabWorkGroup]()
     resultFuture.map { result ⇒
@@ -213,17 +217,17 @@ object LabworkGroups {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.Group)) {
+    if (individual.props(rdf.typ).contains(lwm.Group)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     }
     p.future
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.Group)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.Group)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(labwork ⇒ Individual(labwork.s)).toList
     }
   }
 
-  def isLabWorkGroup(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Group}}")
+  def isLabWorkGroup(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.rdf.typ} ${lwm.Group}}")
 }

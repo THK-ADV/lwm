@@ -12,6 +12,7 @@ class UserSpec extends SemanticFeatureSpec {
   val user1 = User("test_id_1", "test_firstname", "test_lastname", "test_email", "test_phone")
   val user2 = User("test_id_2", "test_firstname", "test_lastname", "test_email", "test_phone")
   val user3 = User("test_id_3", "test_firstname", "test_lastname", "test_email", "test_phone")
+
   val expectedResource1 = Resource("http://lwm.gm.fh-koeln.de/users/test_id_1")
   val expectedResource2 = Resource("http://lwm.gm.fh-koeln.de/users/test_id_2")
   val expectedResource3 = Resource("http://lwm.gm.fh-koeln.de/users/test_id_3")
@@ -70,6 +71,17 @@ class UserSpec extends SemanticFeatureSpec {
       whenReady(futureResource) { deleted ⇒
         deleted should be(expectedResource1)
         Users.size should be(0)
+      }
+    }
+
+    "delete one particuluar user" in {
+      "drop all".execUpdate()
+      val futureUsers = Users.create(user1) :: Users.create(user2) :: Nil
+
+      whenReady(Future.sequence(futureUsers)) { users ⇒
+        whenReady(Users.delete(user2)) { user ⇒
+          user should be(expectedResource2)
+        }
       }
     }
 

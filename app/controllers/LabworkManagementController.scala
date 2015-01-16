@@ -36,9 +36,11 @@ object LabworkManagementController extends Controller with Authentication with T
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       for {
-        courses ← Courses.all()
+        courseResources ← Courses.all()
         labworks ← LabWorks.all()
-        semesters ← Semesters.all()
+        semesterResources ← Semesters.all()
+        courses = courseResources.map(c ⇒ Individual(c))
+        semesters = semesterResources.map(s ⇒ Individual(s))
       } yield {
         Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
       }
@@ -75,40 +77,40 @@ object LabworkManagementController extends Controller with Authentication with T
 
       val labworkDegreeQuery =
         s"""
-          |select (<$labworkid> as ?s) (${LWM.hasDegree} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasCourse} ?course .
-          |  ?course ${LWM.hasDegree} ?o .
+          |select (<$labworkid> as ?s) (${lwm.hasDegree} as ?p) ?o where {
+          | <$labworkid> ${lwm.hasCourse} ?course .
+          |  ?course ${lwm.hasDegree} ?o .
           |}
         """.stripMargin
 
       val labworkCourseQuery =
         s"""
-          |select (<$labworkid> as ?s) (${LWM.hasCourse} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasCourse} ?o .
+          |select (<$labworkid> as ?s) (${lwm.hasCourse} as ?p) ?o where {
+          | <$labworkid> ${lwm.hasCourse} ?o .
           |}
         """.stripMargin
 
       val groupQuery =
         s"""
-          |select (<$labworkid> as ?s) (${LWM.hasGroup} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasGroup} ?o .
-          | ?o ${LWM.hasGroupId} ?id
+          |select (<$labworkid> as ?s) (${lwm.hasGroup} as ?p) ?o where {
+          | <$labworkid> ${lwm.hasGroup} ?o .
+          | ?o ${lwm.hasGroupId} ?id
           |} order by asc(?id)
         """.stripMargin
 
       val associationsQuery =
         s"""
-          |select (<$labworkid> as ?s) (${LWM.hasAssignmentAssociation} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasAssignmentAssociation} ?o .
-          | ?o ${LWM.hasOrderId} ?id .
+          |select (<$labworkid> as ?s) (${lwm.hasAssignmentAssociation} as ?p) ?o where {
+          | <$labworkid> ${lwm.hasAssignmentAssociation} ?o .
+          | ?o ${lwm.hasOrderId} ?id .
           |} order by asc(?id)
         """.stripMargin
 
       def allowedAssociationsQuery(course: Resource) =
         s"""
-          |select ?s (${RDF.typ} as ?p) (${LWM.Assignment} as ?o) where {
-          | ?s ${RDF.typ} ${LWM.Assignment} .
-          | ?s ${LWM.hasCourse} $course .
+          |select ?s (${rdf.typ} as ?p) (${lwm.Assignment} as ?o) where {
+          | ?s ${rdf.typ} ${lwm.Assignment} .
+          | ?s ${lwm.hasCourse} $course .
           |}
         """.stripMargin
 
@@ -150,7 +152,7 @@ object LabworkManagementController extends Controller with Authentication with T
         allowedAssociationsFuture ← allowedAssociationsFutureFuture
         allowedAssociations ← allowedAssociationsFuture
       } yield {
-        val applications = allApplications.filter(r ⇒ r.props.getOrElse(LWM.hasLabWork, List(Resource(""))).head.value == labworkid)
+        val applications = allApplications.filter(r ⇒ r.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head.value == labworkid)
 
         Ok(views.html.labwork_information(
           labworkIndividual,
@@ -158,7 +160,7 @@ object LabworkManagementController extends Controller with Authentication with T
           associations.toList.map(node ⇒ Individual(node.asResource().get)),
           applications,
           allowedAssociations.toList.map(node ⇒ Individual(node.asResource().get)),
-          semesters, courses,
+          semesters.map(s ⇒ Individual(s)), courses.map(c ⇒ Individual(c)),
           AssignmentForms.assignmentAssociationForm,
           LabWorkForms.labworkUpdateForm))
       }
@@ -170,9 +172,11 @@ object LabworkManagementController extends Controller with Authentication with T
       LabWorkForms.labworkForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
+            courseResources ← Courses.all()
             labworks ← LabWorks.all()
-            courses ← Courses.all()
-            semesters ← Semesters.all()
+            semesterResources ← Semesters.all()
+            courses = courseResources.map(c ⇒ Individual(c))
+            semesters = semesterResources.map(s ⇒ Individual(s))
           } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, formWithErrors))
         },
         labwork ⇒ {
@@ -203,18 +207,18 @@ object LabworkManagementController extends Controller with Authentication with T
           val id = (request.body \ "id").as[String]
           val li = Individual(Resource(id))
 
-          li.props.get(LWM.isVisibleToStudents) match {
-            case None ⇒ li.add(LWM.isVisibleToStudents, StringLiteral("true"))
+          li.props.get(lwm.isVisibleToStudents) match {
+            case None ⇒ li.add(lwm.isVisibleToStudents, StringLiteral("true"))
             case Some(list) ⇒
               list.headOption match {
-                case None ⇒ li.add(LWM.isVisibleToStudents, StringLiteral("true"))
+                case None ⇒ li.add(lwm.isVisibleToStudents, StringLiteral("true"))
                 case Some(head) ⇒
                   head.value match {
                     case "true" ⇒
-                      li.update(LWM.isVisibleToStudents, head, StringLiteral("false"))
+                      li.update(lwm.isVisibleToStudents, head, StringLiteral("false"))
                       modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to false")
                     case "false" ⇒
-                      li.update(LWM.isVisibleToStudents, head, StringLiteral("true"))
+                      li.update(lwm.isVisibleToStudents, head, StringLiteral("true"))
                       modifyTransaction(session.user, li.uri, s"Labwork ${li.uri} visibility changed to true")
                   }
               }
@@ -231,26 +235,28 @@ object LabworkManagementController extends Controller with Authentication with T
           LabWorkForms.labworkUpdateForm.bindFromRequest.fold(
             formWithErrors ⇒ {
               for {
+                courseResources ← Courses.all()
                 labworks ← LabWorks.all()
-                courses ← Courses.all()
-                semesters ← Semesters.all()
+                semesterResources ← Semesters.all()
+                courses = courseResources.map(c ⇒ Individual(c))
+                semesters = semesterResources.map(s ⇒ Individual(s))
               } yield BadRequest(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
             },
             labwork ⇒ {
               val i = Individual(Resource(id))
               for {
-                course ← i.props(LWM.hasCourse)
-                sD ← i.props(LWM.hasStartDate)
-                eD ← i.props(LWM.hasEndDate)
-                semester ← i.props(LWM.hasSemester)
+                course ← i.props(lwm.hasCourse)
+                sD ← i.props(lwm.hasStartDate)
+                eD ← i.props(lwm.hasEndDate)
+                semester ← i.props(lwm.hasSemester)
                 oC = Individual(course.asResource().get)
                 nC = Individual(Resource(labwork.courseId))
               } yield {
-                i.update(LWM.hasCourse, course, Resource(labwork.courseId))
-                i.update(LWM.hasStartDate, sD, DateLiteral(new LocalDate(labwork.startDate)))
-                i.update(LWM.hasEndDate, eD, DateLiteral(new LocalDate(labwork.endDate)))
-                i.update(LWM.hasSemester, semester, Resource(labwork.semester))
-                i.update(RDFS.label, oC.props.getOrElse(RDFS.label, List(StringLiteral(""))).head, nC.props.getOrElse(RDFS.label, List(StringLiteral(""))).head)
+                i.update(lwm.hasCourse, course, Resource(labwork.courseId))
+                i.update(lwm.hasStartDate, sD, DateLiteral(new LocalDate(labwork.startDate)))
+                i.update(lwm.hasEndDate, eD, DateLiteral(new LocalDate(labwork.endDate)))
+                i.update(lwm.hasSemester, semester, Resource(labwork.semester))
+                i.update(rdfs.label, oC.props.getOrElse(rdfs.label, List(StringLiteral(""))).head, nC.props.getOrElse(rdfs.label, List(StringLiteral(""))).head)
                 modifyTransaction(session.user, i.uri, s"Labworl ${i.uri} edited by ${session.user}")
               }
               Future.successful(Redirect(routes.LabworkManagementController.edit(id)))
@@ -266,9 +272,9 @@ object LabworkManagementController extends Controller with Authentication with T
 
         def groupsFuture(labwork: Resource) = {
           val q = s"""
-          |select ?s (${LWM.hasGroupId} as ?p) ?o where {
-          | <$labworkid> ${LWM.hasGroup} ?s .
-          | ?s ${LWM.hasGroupId} ?o }
+          |select ?s (${lwm.hasGroupId} as ?p) ?o where {
+          | <$labworkid> ${lwm.hasGroup} ?s .
+          | ?s ${lwm.hasGroupId} ?o }
           | ORDER BY ASC(?o)
         """.stripMargin
 
@@ -280,15 +286,15 @@ object LabworkManagementController extends Controller with Authentication with T
         def assessmentsFuture(labwork: Resource) = {
           val q = s"""
         Select ?s ?p ?o where {
-        $labwork ${LWM.hasGroup} ?group .
-        ?group ${LWM.hasMember} ?s .
-        ?s ${LWM.hasScheduleAssociation} ?schedule .
-        ?schedule ${LWM.hasGroup} ?group .
-        ?group ${LWM.hasLabWork} $labwork .
-        ?schedule ${LWM.hasAssignmentDate} ?date .
+        $labwork ${lwm.hasGroup} ?group .
+        ?group ${lwm.hasMember} ?s .
+        ?s ${lwm.hasScheduleAssociation} ?schedule .
+        ?schedule ${lwm.hasGroup} ?group .
+        ?group ${lwm.hasLabWork} $labwork .
+        ?schedule ${lwm.hasAssignmentDate} ?date .
         ?schedule ?p ?o
         filter(?date < '${DateTime.now().toLocalDate.toString}')
-        filter((?p = ${LWM.hasPassed} && ?o = "false") || (?p = ${LWM.hasAttended} && ?o = "false") || ?p = ${LWM.hasAlternateScheduleAssociation})
+        filter((?p = ${lwm.hasPassed} && ?o = "false") || (?p = ${lwm.hasAttended} && ?o = "false") || ?p = ${lwm.hasAlternateScheduleAssociation})
         } order by asc(?s)
         """.stripMargin
           println(q)
@@ -300,13 +306,13 @@ object LabworkManagementController extends Controller with Authentication with T
           groups ← groupsFuture(labwork.uri)
           assessments ← assessmentsFuture(labwork.uri)
         } yield {
-          val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
-          val countedData = assessments.groupBy(_._1).map(e ⇒ (Individual(e._1), e._2.count(s ⇒ s._2 == LWM.hasAttended), e._2.count(s ⇒ s._2 == LWM.hasPassed), e._2.count(s ⇒ s._2 == LWM.hasAlternateScheduleAssociation))).toList
+          val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(lwm.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
+          val countedData = assessments.groupBy(_._1).map(e ⇒ (Individual(e._1), e._2.count(s ⇒ s._2 == lwm.hasAttended), e._2.count(s ⇒ s._2 == lwm.hasPassed), e._2.count(s ⇒ s._2 == lwm.hasAlternateScheduleAssociation))).toList
           typ match {
             case LabworkExportModes.InternalSchedule        ⇒ Ok(views.html.labwork_exported_groups(labwork, groupsWithStudents.toList))
             case LabworkExportModes.PublicGroupMembersTable ⇒ Ok(views.html.labwork_partial_exported_groups(labwork, groupsWithStudents.toList))
             case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(labwork.uri))
-            case LabworkExportModes.AssessmentSchedule      ⇒ Ok(views.html.labwork_exported_assessments(countedData.sortBy(s ⇒ s._1.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)))
+            case LabworkExportModes.AssessmentSchedule      ⇒ Ok(views.html.labwork_exported_assessments(countedData.sortBy(s ⇒ s._1.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)))
           }
         }).recover {
           case NonFatal(e) ⇒
@@ -325,9 +331,9 @@ object LabworkManagementController extends Controller with Authentication with T
 
         def courselabelFuture(labwork: Resource) = {
           val query = s"""
-          |select ($labwork as ?s) (${LWM.hasCourse} as ?p) ?o where {
-          | $labwork ${LWM.hasCourse} ?course .
-          | ?course ${LWM.hasId} ?o }
+          |select ($labwork as ?s) (${lwm.hasCourse} as ?p) ?o where {
+          | $labwork ${lwm.hasCourse} ?course .
+          | ?course ${lwm.hasId} ?o }
         """.stripMargin
           sparqlExecutionContext.executeQuery(query).map { result ⇒
             SPARQLTools.statementsFromString(result).map(_.o)
@@ -336,10 +342,10 @@ object LabworkManagementController extends Controller with Authentication with T
 
         def degreelabelFuture(labwork: Resource) = {
           val query = s"""
-          |select ($labwork as ?s) (${LWM.hasDegree} as ?p) ?o where {
-          | $labwork ${LWM.hasCourse} ?course .
-          | ?course ${LWM.hasDegree} ?degree .
-          | ?degree ${LWM.hasId} ?o
+          |select ($labwork as ?s) (${lwm.hasDegree} as ?p) ?o where {
+          | $labwork ${lwm.hasCourse} ?course .
+          | ?course ${lwm.hasDegree} ?degree .
+          | ?degree ${lwm.hasId} ?o
           | }
         """.stripMargin
           sparqlExecutionContext.executeQuery(query).map { result ⇒
@@ -349,9 +355,9 @@ object LabworkManagementController extends Controller with Authentication with T
 
         def groupsFuture(labwork: Resource) = {
           val groupQuery = s"""
-          |select ?s (${LWM.hasGroupId} as ?p) ?o where {
-          | $labwork ${LWM.hasGroup} ?s .
-          | ?s ${LWM.hasGroupId} ?o }
+          |select ?s (${lwm.hasGroupId} as ?p) ?o where {
+          | $labwork ${lwm.hasGroup} ?s .
+          | ?s ${lwm.hasGroupId} ?o }
           | ORDER BY ASC(?o)
         """.stripMargin
 
@@ -373,11 +379,11 @@ object LabworkManagementController extends Controller with Authentication with T
               new PrintWriter(new File(s"./csv/${courseLabel.head}_${degreeLabel.head}.csv"))
             }
           }
-          val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(LWM.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
+          val groupsWithStudents = groups.map(r ⇒ Individual(r)).map(e ⇒ (e, e.props.getOrElse(lwm.hasMember, Nil).map(r ⇒ Individual(Resource(r.value)))))
 
           for (g ← groupsWithStudents) {
             for (s ← g._2) {
-              builder.append(s"${g._1.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value},${s.props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value},${s.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.value},${s.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.value},${s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.value} \n")
+              builder.append(s"${g._1.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value},${s.props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value},${s.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.value},${s.props.getOrElse(foaf.firstName, List(StringLiteral(""))).head.value},${s.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral(""))).head.value} \n")
             }
           }
           writer.write(builder.toString())
@@ -394,8 +400,8 @@ object LabworkManagementController extends Controller with Authentication with T
 
         val assignmentQuery =
           s"""
-          |select (${assI.uri} as ?s) (${LWM.hasAssignment} as ?p) ?o where {
-          | ${assI.uri} ${LWM.hasAssignment} ?o
+          |select (${assI.uri} as ?s) (${lwm.hasAssignment} as ?p) ?o where {
+          | ${assI.uri} ${lwm.hasAssignment} ?o
           | }
         """.stripMargin
         val assignmentFuture = sparqlExecutionContext.executeQuery(assignmentQuery).map { result ⇒
@@ -404,9 +410,9 @@ object LabworkManagementController extends Controller with Authentication with T
 
         val semesterQuery =
           s"""
-          |select (<$labwork> as ?s) (${LWM.hasSemester} as ?p) ?o where {
-          | <$labwork> ${LWM.hasSemester} ?sem .
-          | ?sem ${RDFS.label} ?o
+          |select (<$labwork> as ?s) (${lwm.hasSemester} as ?p) ?o where {
+          | <$labwork> ${lwm.hasSemester} ?sem .
+          | ?sem ${rdfs.label} ?o
           | }
         """.stripMargin
         val semesterFuture = sparqlExecutionContext.executeQuery(semesterQuery).map { result ⇒
@@ -415,8 +421,8 @@ object LabworkManagementController extends Controller with Authentication with T
 
         val labQuery =
           s"""
-          |select (<$labwork> as ?s) (${RDFS.label} as ?p) ?o where {
-          | <$labwork> ${RDFS.label} ?o
+          |select (<$labwork> as ?s) (${rdfs.label} as ?p) ?o where {
+          | <$labwork> ${rdfs.label} ?o
           | }
         """.stripMargin
         val labFuture = sparqlExecutionContext.executeQuery(labQuery).map { result ⇒
@@ -430,13 +436,13 @@ object LabworkManagementController extends Controller with Authentication with T
           assignment ← assignmentFuture
           a = Individual(assignment.head.asResource().get)
         } yield {
-          val orderId = assI.props.getOrElse(LWM.hasOrderId, List(StringLiteral(""))).head.value
-          val text = p.markdownToHtml(a.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value)
-          val hints = p.markdownToHtml(a.props.getOrElse(LWM.hasHints, List(StringLiteral(""))).head.value)
-          val goals = p.markdownToHtml(a.props.getOrElse(LWM.hasLearningGoals, List(StringLiteral(""))).head.value)
-          val description = p.markdownToHtml(a.props.getOrElse(LWM.hasDescription, List(StringLiteral(""))).head.value)
-          val label = a.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
-          val topics = a.props.getOrElse(LWM.hasTopic, List(StringLiteral(""))).head.value
+          val orderId = assI.props.getOrElse(lwm.hasOrderId, List(StringLiteral(""))).head.value
+          val text = p.markdownToHtml(a.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value)
+          val hints = p.markdownToHtml(a.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.value)
+          val goals = p.markdownToHtml(a.props.getOrElse(lwm.hasLearningGoals, List(StringLiteral(""))).head.value)
+          val description = p.markdownToHtml(a.props.getOrElse(lwm.hasDescription, List(StringLiteral(""))).head.value)
+          val label = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
+          val topics = a.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).head.value
           Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html(label), Html(description), Html(text), Html(hints), Html(goals), topics))
         }
     }

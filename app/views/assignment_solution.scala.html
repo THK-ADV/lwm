@@ -1,13 +1,13 @@
 @(assignment: Individual, solution: Individual, form: Form[AssignmentSolutionFormModel])
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.lwm
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.Global._
 
 
 
 <label>Aufgabe: <a href="@routes.AssignmentManagementController.exportAssignment(assignment.uri.value)"><h3><span class="glyphicon glyphicon-export"></span></h3></a></label>
-@defining(form.fill(AssignmentSolutionFormModel(solution.props.getOrElse(LWM.hasFileName, List(StringLiteral(""))).head.value,
-                                                solution.props.getOrElse(LWM.hasText, List(StringLiteral(""))).head.value))) { f =>
+@defining(form.fill(AssignmentSolutionFormModel(solution.props.getOrElse(lwm.hasFileName, List(StringLiteral(""))).head.value,
+                                                solution.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value))) { f =>
 
     @helper.form(action = routes.AssignmentManagementController.assignmentSolutionPost(assignment.uri.value)) {
         @helper.inputText(f("filename"), '_label -> "Name:")

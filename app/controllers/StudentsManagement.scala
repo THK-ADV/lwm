@@ -8,7 +8,7 @@ import play.libs.Akka
 import utils.Security.Authentication
 import utils.TransactionSupport
 import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
-import utils.semantic.Vocabulary.{ LWM, RDFS, NCO, FOAF }
+import utils.semantic.Vocabulary.{ lwm, rdfs, nco, foaf }
 import utils.Global._
 import scala.concurrent.{ Promise, Future }
 import scala.util.control.NonFatal
@@ -23,10 +23,12 @@ object StudentsManagement extends Controller with Authentication with Transactio
   def index(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
       for {
-        students ← Students.all()
-        degrees ← Degrees.all()
+        studentResources ← Students.all()
+        degreeResources ← Degrees.all()
+        students = studentResources.map(s ⇒ Individual(s))
+        degrees = degreeResources.map(d ⇒ Individual(d))
       } yield {
-        val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
+        val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value)).sortBy(_._2)
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round + 1
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
@@ -39,14 +41,16 @@ object StudentsManagement extends Controller with Authentication with Transactio
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            degrees ← Degrees.all()
+            degreeResources ← Degrees.all()
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield BadRequest(views.html.firstTimeInputStudents(degrees, formWithErrors))
         },
         student ⇒ {
           val user = session.user
           val promise = Promise[Result]()
 
-          Students.exists(user).map { exists ⇒
+          Future {
+            val exists = Students.exists(user)
             if (exists) {
               promise.success(Redirect(routes.StudentDashboardController.dashboard()))
             } else {
@@ -54,7 +58,7 @@ object StudentsManagement extends Controller with Authentication with Transactio
                 promise.success(Redirect(routes.FirstTimeSetupController.setupStudent()))
               } else {
                 Students.create(student).map { s ⇒
-                  createTransaction(session.user, s.uri, s"New Student ${s.uri} created by ${session.user}")
+                  createTransaction(session.user, s, s"New Student $s created by ${session.user}")
                   promise.success(Redirect(routes.StudentDashboardController.dashboard()))
                 }
               }
@@ -74,17 +78,19 @@ object StudentsManagement extends Controller with Authentication with Transactio
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            students ← Students.all()
-            degrees ← Degrees.all()
+            studentResources ← Students.all()
+            degreeResources ← Degrees.all()
+            students = studentResources.map(s ⇒ Individual(s))
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
-            val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))
+            val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
             BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
           }
         },
         student ⇒ {
           Students.create(student).map { s ⇒
-            createTransaction(session.user, s.uri, s"New Student ${s.uri} created by ${session.user}")
+            createTransaction(session.user, s, s"New Student $s created by ${session.user}")
             Redirect(routes.StudentsManagement.index("1"))
           }
         }
@@ -98,8 +104,8 @@ object StudentsManagement extends Controller with Authentication with Transactio
 
       val applicationQuery =
         s"""
-          |select ?s (${LWM.hasApplicant} as ?p) (<$id> as ?o) where {
-          | ?s ${LWM.hasApplicant} <$id>
+          |select ?s (${lwm.hasApplicant} as ?p) (<$id> as ?o) where {
+          | ?s ${lwm.hasApplicant} <$id>
           |}
         """.stripMargin
 
@@ -136,7 +142,7 @@ object StudentsManagement extends Controller with Authentication with Transactio
 
   def studentSearch(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d))).recover {
+      Degrees.all().map(d ⇒ Ok(views.html.search_result_page(Individual(Resource(id)), d.map(e ⇒ Individual(e))))).recover {
         case NonFatal(t) ⇒ Redirect(routes.LabworkManagementController.index())
       }
 
@@ -148,10 +154,12 @@ object StudentsManagement extends Controller with Authentication with Transactio
       UserForms.studentForm.bindFromRequest.fold(
         formWithErrors ⇒ {
           for {
-            students ← Students.all()
-            degrees ← Degrees.all()
+            studentResources ← Students.all()
+            degreeResources ← Degrees.all()
+            students = studentResources.map(s ⇒ Individual(s))
+            degrees = degreeResources.map(d ⇒ Individual(d))
           } yield {
-            val sorted = students.map(e ⇒ (e, e.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head.value))
+            val sorted = students.map(e ⇒ (e, e.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head.value))
             val nrPages = (students.size / 50.0).round
             BadRequest(views.html.studentManagement(sorted, degrees, nrPages.toInt, formWithErrors))
           }
@@ -159,23 +167,23 @@ object StudentsManagement extends Controller with Authentication with Transactio
         student ⇒ {
           val s = Individual(Resource(id))
           for {
-            id ← s.props.getOrElse(LWM.hasGmId, List(StringLiteral("")))
-            firstName ← s.props.getOrElse(FOAF.firstName, List(StringLiteral("")))
-            lastName ← s.props.getOrElse(FOAF.lastName, List(StringLiteral("")))
-            regId ← s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))
-            email ← s.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
-            phone ← s.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
-            degree ← s.props.getOrElse(LWM.hasEnrollment, List(Resource("")))
-            label ← s.props.getOrElse(RDFS.label, List(StringLiteral("")))
+            id ← s.props.getOrElse(lwm.hasGmId, List(StringLiteral("")))
+            firstName ← s.props.getOrElse(foaf.firstName, List(StringLiteral("")))
+            lastName ← s.props.getOrElse(foaf.lastName, List(StringLiteral("")))
+            regId ← s.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral("")))
+            email ← s.props.getOrElse(foaf.mbox, List(StringLiteral("")))
+            phone ← s.props.getOrElse(nco.phoneNumber, List(StringLiteral("")))
+            degree ← s.props.getOrElse(lwm.hasEnrollment, List(Resource("")))
+            label ← s.props.getOrElse(rdfs.label, List(StringLiteral("")))
           } yield {
-            s.update(LWM.hasGmId, id, StringLiteral(student.gmId))
-            s.update(FOAF.firstName, firstName, StringLiteral(student.firstname))
-            s.update(FOAF.lastName, lastName, StringLiteral(student.lastname))
-            s.update(LWM.hasRegistrationId, regId, StringLiteral(student.registrationNumber))
-            s.update(FOAF.mbox, email, StringLiteral(student.email))
-            s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
-            s.update(LWM.hasEnrollment, degree, Resource(student.degree))
-            s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
+            s.update(lwm.hasGmId, id, StringLiteral(student.gmId))
+            s.update(foaf.firstName, firstName, StringLiteral(student.firstname))
+            s.update(foaf.lastName, lastName, StringLiteral(student.lastname))
+            s.update(lwm.hasRegistrationId, regId, StringLiteral(student.registrationNumber))
+            s.update(foaf.mbox, email, StringLiteral(student.email))
+            s.update(nco.phoneNumber, phone, StringLiteral(student.phone))
+            s.update(lwm.hasEnrollment, degree, Resource(student.degree))
+            s.update(rdfs.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
             modifyTransaction(session.user, s.uri, s"Student ${s.uri} modified by ${session.user}")
           }
           Future.successful(Redirect(routes.StudentsManagement.index("1")))
@@ -192,7 +200,8 @@ object StudentsManagement extends Controller with Authentication with Transactio
           UserForms.studentForm.bindFromRequest.fold(
             formWithErrors ⇒ {
               for {
-                degrees ← Degrees.all()
+                degreeResources ← Degrees.all()
+                degrees = degreeResources.map(d ⇒ Individual(d))
               } yield {
                 BadRequest(views.html.dashboard_student_edit_details(s, degrees, formWithErrors))
               }
@@ -200,8 +209,8 @@ object StudentsManagement extends Controller with Authentication with Transactio
             student ⇒ {
               val applicationQuery =
                 s"""
-                  |select ?s (${LWM.hasApplicant} as ?p) (<$id> as ?o) where {
-                  | ?s ${LWM.hasApplicant} <$id>
+                  |select ?s (${lwm.hasApplicant} as ?p) (<$id> as ?o) where {
+                  | ?s ${lwm.hasApplicant} <$id>
                   |}
                   """.stripMargin
 
@@ -209,24 +218,24 @@ object StudentsManagement extends Controller with Authentication with Transactio
                 SPARQLTools.statementsFromString(result).map(_.s)
               }
 
-              val degree = s.props.getOrElse(LWM.hasEnrollment, List(Resource(""))).head
+              val degree = s.props.getOrElse(lwm.hasEnrollment, List(Resource(""))).head
               for {
-                id ← s.props.getOrElse(LWM.hasGmId, List(StringLiteral("")))
-                firstName ← s.props.getOrElse(FOAF.firstName, List(StringLiteral("")))
-                lastName ← s.props.getOrElse(FOAF.lastName, List(StringLiteral("")))
-                regId ← s.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral("")))
-                email ← s.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
-                phone ← s.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
-                label ← s.props.getOrElse(RDFS.label, List(StringLiteral("")))
+                id ← s.props.getOrElse(lwm.hasGmId, List(StringLiteral("")))
+                firstName ← s.props.getOrElse(foaf.firstName, List(StringLiteral("")))
+                lastName ← s.props.getOrElse(foaf.lastName, List(StringLiteral("")))
+                regId ← s.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral("")))
+                email ← s.props.getOrElse(foaf.mbox, List(StringLiteral("")))
+                phone ← s.props.getOrElse(nco.phoneNumber, List(StringLiteral("")))
+                label ← s.props.getOrElse(rdfs.label, List(StringLiteral("")))
               } yield {
-                s.update(LWM.hasGmId, id, StringLiteral(student.gmId))
-                s.update(FOAF.firstName, firstName, StringLiteral(student.firstname))
-                s.update(FOAF.lastName, lastName, StringLiteral(student.lastname))
-                s.update(LWM.hasRegistrationId, regId, StringLiteral(student.registrationNumber))
-                s.update(FOAF.mbox, email, StringLiteral(student.email))
-                s.update(NCO.phoneNumber, phone, StringLiteral(student.phone))
-                s.update(LWM.hasEnrollment, degree, Resource(student.degree))
-                s.update(RDFS.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
+                s.update(lwm.hasGmId, id, StringLiteral(student.gmId))
+                s.update(foaf.firstName, firstName, StringLiteral(student.firstname))
+                s.update(foaf.lastName, lastName, StringLiteral(student.lastname))
+                s.update(lwm.hasRegistrationId, regId, StringLiteral(student.registrationNumber))
+                s.update(foaf.mbox, email, StringLiteral(student.email))
+                s.update(nco.phoneNumber, phone, StringLiteral(student.phone))
+                s.update(lwm.hasEnrollment, degree, Resource(student.degree))
+                s.update(rdfs.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
                 modifyTransaction(session.user, s.uri, s"Student ${s.uri} modified by ${session.user}")
               }
               if (degree.value != student.degree) {

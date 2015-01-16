@@ -3,7 +3,7 @@
 @import utils.BreadCrumbKeeper.UrlReference
 @import utils.semantic.{Individual, StringLiteral, Resource}
 @import utils.Global._
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.lwm
 <!DOCTYPE html>
 <html>
     @head("Informationen zu ...")
@@ -23,17 +23,17 @@
 
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(Individual(student).props.getOrElse(LWM.hasGmId, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(Individual(student).props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
                     <h3>Übersicht für @helpers.students.studentName(student)</h3>
-                    @Students.labworksForStudent(student).map{labwork =>
-                        <h3> <a href="@routes.LabworkManagementController.edit(labwork._1.value)"> @helpers.labworks.labworkName(labwork._1)</a>
-                            @helpers.students.groupForStudent(student, labwork._1)
+                    @Students.labworksForStudent(student).map{ labwork =>
+                        <h3> <a href="@routes.LabworkManagementController.edit(labwork.value)"> @helpers.labworks.labworkName(labwork)</a>
+                            @helpers.students.groupForStudent(student, labwork)
                         </h3>
-                        @helpers.students.detailedStudentSchedule(student, labwork._1, form)
+                        @helpers.students.detailedStudentSchedule(student, labwork, form)
                     }
                 </div>
             </div>

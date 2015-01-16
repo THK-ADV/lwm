@@ -48,6 +48,7 @@ case class User(id: String,
 
 object Users extends CheckedDelete {
 
+  import utils.semantic.Vocabulary._
   import utils.Global.lwmNamespace
   import utils.semantic.Vocabulary._
 
@@ -61,12 +62,7 @@ object Users extends CheckedDelete {
 
     blocking {
       s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      |prefix owl: <http://www.w3.org/2002/07/owl#>
-      |prefix foaf: <http://xmlns.com/foaf/0.1/>
-      |prefix nco: <http://www.semanticdesktop.org/ontologies/nco#>
+      |${Vocabulary.defaulPrefixes}
       |
       |
       |insert data {
@@ -125,11 +121,13 @@ object Users extends CheckedDelete {
 
   def possibleSubstitutes(userId: String)(implicit queryHost: QueryHost) = {
     s"""
-          |select ?user ?name where {
-          |  ?user ${RDF.typ} ${LWM.User} .
-          |  ?user ${RDFS.label} ?name .
-          |  filter not exists {?user ${LWM.hasGmId} "$userId"}
-          |}
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select ?user ?name where {
+          |    ?user rdf:type lwm:User .
+          |    ?user rdfs:label ?name .
+          |  filter not exists {?user lwm:hasGmId "$userId"}
+          | }
         """.stripMargin.execSelect().map { solution ⇒
       val resource = solution.data("user").toString
       val name = solution.data("name").toString
@@ -139,10 +137,12 @@ object Users extends CheckedDelete {
 
   def userMapping()(implicit queryHost: QueryHost) = {
     s"""
-          |select ?user ?name where {
-          |  ?user ${RDF.typ} ${LWM.User} .
-          |  ?user ${RDFS.label} ?name
-          |}
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select ?user ?name where {
+          |    ?user rdf:type lwm:User .
+          |    ?user rdfs:label ?name
+          | }
         """.stripMargin.execSelect().map { solution ⇒
       val resource = solution.data("user").toString
       val name = solution.data("name").toString
@@ -151,10 +151,8 @@ object Users extends CheckedDelete {
   }
 
   def size()(implicit queryHost: QueryHost): Int = {
-    import utils.Implicits._
-    """
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    s"""
+      |${Vocabulary.defaulPrefixes}
       |
       |select (count(distinct ?user) as ?count) {
       |   ?user rdf:type lwm:User

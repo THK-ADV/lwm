@@ -1,6 +1,6 @@
 @(labwork: Individual, group: Individual, students: List[Individual], groups: List[Individual], associations: List[Individual])(implicit request: RequestHeader)
 @import utils.semantic.{Individual, StringLiteral}
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.lwm
 @import utils.Global._
 @import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
@@ -9,12 +9,12 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(group.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    <h4>Gruppe @{group.props.getOrElse(LWM.hasGroupId, List(StringLiteral(""))).head.value} Detailverwaltung</h4>
+                    <h4>Gruppe @{group.props.getOrElse(lwm.hasGroupId, List(StringLiteral(""))).head.value} Detailverwaltung</h4>
                     <div class="row">
                     @groups_student_list(labwork, group, students, groups)
                     </div>

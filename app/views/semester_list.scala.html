@@ -1,5 +1,5 @@
 @(semesters: List[Individual])
-@import utils.semantic.Vocabulary.{RDFS, LWM}
+@import utils.semantic.Vocabulary.{rdfs, lwm}
 
 @import utils.semantic.Individual
 
@@ -12,7 +12,7 @@
         </tr>
         @for(semester<- semesters) {
             <tr>
-                <td>@semester.props(RDFS.label)</td>
+                <td>@semester.props(rdfs.label)</td>
                 <td><h3><a href="javascript: if(confirmed()) deleteSemester('@semester.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td></tr>
         }
     </table>

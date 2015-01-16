@@ -8,7 +8,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc._
 import play.libs.Akka
 import play.api.Play.current
-
+import utils.Global._
 import scala.concurrent.{ Promise, Await, Future }
 
 /**
@@ -79,7 +79,7 @@ object SessionManagement extends Controller {
 
   }
 
-  def firstTimeCheck(user: String): Future[Boolean] = Students.exists(user).map { b ⇒ !b }
+  def firstTimeCheck(user: String): Future[Boolean] = Future { Students.exists(user) }
 
   def logout() = Action { request ⇒
     import play.api.libs.json._

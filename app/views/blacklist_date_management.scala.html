@@ -1,6 +1,6 @@
 @(semester: String, semesterIndividual: Individual, dates: List[Individual], blacklist: Individual, dateForm: Form[BlacklistDateFormModel], rangeForm: Form[BlacklistDateRangeFormModel])(implicit request: RequestHeader)
     @import utils.semantic.{Individual, StringLiteral}
-    @import utils.semantic.Vocabulary.RDFS
+    @import utils.semantic.Vocabulary.rdfs
     @import utils.BreadCrumbKeeper.UrlReference
 <!DOCTYPE html>
 
@@ -9,7 +9,7 @@
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(semesterIndividual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(semesterIndividual.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()

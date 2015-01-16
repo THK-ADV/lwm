@@ -1,15 +1,15 @@
 @(substitution: Resource)
-@import utils.semantic.Vocabulary.RDFS
-@import utils.semantic.Vocabulary.LWM
+@import utils.semantic.Vocabulary.rdfs
+@import utils.semantic.Vocabulary.lwm
 @import utils.semantic._
 @import utils.Global._
 
 @{
     val query =
         s"""
-          |select ($substitution as ?s) (${LWM.hasSubstitute} as ?p) (?name as ?o) where {
-          |  $substitution ${LWM.hasSubstitute} ?sub .
-          |  ?sub ${RDFS.label} ?name
+          |select ($substitution as ?s) (${lwm.hasSubstitute} as ?p) (?name as ?o) where {
+          |  $substitution ${lwm.hasSubstitute} ?sub .
+          |  ?sub ${rdfs.label} ?name
           |}
         """.stripMargin
 

@@ -1,7 +1,7 @@
 @(blacklist: Individual, semester: Individual, form: Form[BlacklistDateFormModel])
 @import java.util.Date
 @import utils.semantic.Individual
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.rdfs
 @import org.joda.time.LocalDate
 <div>
     @defining(form.fill(BlacklistDateFormModel(blacklist.uri.value, semester.uri.value, LocalDate.now()))){ f =>

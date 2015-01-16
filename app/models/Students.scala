@@ -1,12 +1,13 @@
 package models
 
-import java.net.URLDecoder
+import java.net.{ URLEncoder, URLDecoder }
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
 import org.joda.time.LocalDate
+import utils.{ UpdateHost, QueryHost }
 import utils.semantic._
 
-import scala.concurrent.{ Promise, Future }
+import scala.concurrent.{ Promise, Future, blocking }
 
 case class Student(
   gmId: String,
@@ -15,89 +16,258 @@ case class Student(
   email: String,
   phone: String, degree: String)
 
-object Students {
-
-  import utils.Global._
-  import utils.semantic.Vocabulary._
+object Students extends CheckedDelete {
 
   import scala.concurrent.ExecutionContext.Implicits.global
   import utils.Implicits._
 
-  def create(student: Student): Future[Individual] = {
-    val resource = ResourceUtils.createResource(lwmNamespace)
-    val statements = List(
-      Statement(resource, RDF.typ, LWM.Student),
-      Statement(resource, RDF.typ, OWL.NamedIndividual),
-      Statement(resource, LWM.hasGmId, StringLiteral(student.gmId.toLowerCase)),
-      Statement(resource, FOAF.firstName, StringLiteral(student.firstname)),
-      Statement(resource, FOAF.lastName, StringLiteral(student.lastname)),
-      Statement(resource, RDFS.label, StringLiteral(s"${student.firstname} ${student.lastname}")),
-      Statement(resource, NCO.phoneNumber, StringLiteral(student.phone)),
-      Statement(resource, FOAF.mbox, StringLiteral(student.email)),
-      Statement(resource, LWM.hasEnrollment, Resource(student.degree)),
-      Statement(resource, LWM.hasRegistrationId, StringLiteral(student.registrationNumber))
-    )
+  def create(student: Student)(implicit updateHost: UpdateHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}students/${student.gmId}")
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
-      Individual(resource)
-    }
-  }
-
-  def delete(student: Student): Future[Student] = {
-    val maybeStudent = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, Vocabulary.LWM.hasGmId, StringLiteral(student.gmId))
-    val resultFuture = sparqlExecutionContext.executeQuery(maybeStudent)
-    val p = Promise[Student]()
-    resultFuture.map { result ⇒
-      val resources = SPARQLTools.statementsFromString(result).map(student ⇒ student.s)
-      resources.map { resource ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { _ ⇒ p.success(student) }
-      }
-    }
-    p.future
-  }
-
-  def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
-    val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.Student)) {
-      sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
-    } else {
-      p.failure(new IllegalArgumentException("Resource is not a Student"))
-    }
-    p.future
-  }
-
-  def all(): Future[List[Individual]] = {
-    val query =
+    blocking {
       s"""
-         |select ?s (${RDF.typ} as ?p) (${LWM.Student} as ?o) where {
-         | ?s ${RDF.typ} ${LWM.Student} .
-         | optional {?s ${FOAF.lastName} ?lastname}
-         |}order by asc(?lastname)
-       """.stripMargin
-    sparqlExecutionContext.executeQuery(query).map { stringResult ⇒
-      SPARQLTools.statementsFromString(stringResult).map(student ⇒ Individual(student.s)).toList
-    }
-  }
-
-  def get(gmId: String): Future[Resource] = {
-    val p = Promise[Resource]()
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.Student, LWM.hasGmId, StringLiteral(gmId))).map { result ⇒
-      val resource = SPARQLTools.statementsFromString(result).map(student ⇒ student.s)
-      if (resource.nonEmpty) {
-        p.success(resource.head)
-      } else {
-        p.failure(new NoSuchElementException(s"There is no student with ID $gmId"))
-      }
+           |${Vocabulary.defaulPrefixes}
+           |
+           | Insert data {
+           |
+           |    $resource rdf:type lwm:Student .
+           |    $resource lwm:hasGmId "${student.gmId}" .
+           |    $resource lwm:hasEnrollment <${student.degree}> .
+           |    $resource lwm:hasRegistrationId "${student.registrationNumber}" .
+           |    $resource foaf:firstName "${student.firstname}" .
+           |    $resource foaf:lastName "${student.lastname}" .
+           |    $resource foaf:mbox "${student.email}" .
+           |    $resource nco:phoneNumber "${student.phone}" .
+           |    $resource rdfs:label "${student.firstname} ${student.lastname}" .
+           |
+           | }
+   """.stripMargin.execUpdate()
+      p.success(resource)
     }
     p.future
   }
 
-  private def search(query: String): Future[List[(String, String, String)]] = {
+  def delete(gmId: String)(implicit updateHost: UpdateHost, queryHost: QueryHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}students/$gmId")
+    delete(resource)
+  }
+
+  def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select ?s (rdf:type as ?p) (lwm:Student as ?o) where {
+         |     ?s rdf:type lwm:Student .
+         |     optional { ?s foaf:lastName ?lastname }
+         | } order by asc(?lastname)
+         |
+       """.stripMargin.execSelect().map(s ⇒ Resource(s.data("s").toString))
+  }
+
+  def get(gmId: String)(implicit queryHost: QueryHost): Future[Resource] = {
+    val resource = Resource(s"${utils.Global.lwmNamespace}students/$gmId")
+
+    val p = Promise[Resource]()
+
+    if (exists(gmId)) {
+      p.success(resource)
+    } else {
+      p.failure(new NoSuchElementException(s"There is no student with ID $gmId"))
+    }
+
+    p.future
+  }
+
+  def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Ask {
+         |  ?s lwm:hasGmId "$uid"
+         | }
+    """.stripMargin.executeAsk()
+  }
+
+  override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | ASK {
+         |  $resource rdf:type lwm:Student
+         | }
+     """.stripMargin.executeAsk()
+  }
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select (count(distinct ?s) as ?count) where {
+         |    ?s rdf:type lwm:Student
+         | }
+     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+  }
+
+  def dateCountMissed(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select (count(?attended) as ?count) where {
+          |
+          |     $student lwm:hasScheduleAssociation ?association .
+          |     ?association lwm:hasAssignmentDate ?date .
+          |     ?association lwm:hasGroup $group .
+          |     optional{ ?association lwm:hasAttended ?attended } .
+          |
+          |     optional{
+          |       ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          |       ?alternate lwm:hasAssignmentDate ?alternateDate .
+          | } .
+          |   filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
+          |   filter(?attended = "false")
+          |   optional{ filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}") }
+          | }
+          """.stripMargin.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
+
+  def dateCountNotPassed(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select (count(?notPassed) as ?count) where {
+          | {
+          |  ### not passed dates
+          |     Select ?notPassed where {
+          |         $student lwm:hasScheduleAssociation ?association .
+          |         ?association lwm:hasGroup $group .
+          |         ?association lwm:hasAssignmentDate ?date .
+          |
+          |         optional{ ?association lwm:hasPassed ?notPassed } .
+          |
+          |     filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}") .
+          |     filter(?notPassed = "false") .
+          |     filter not exists {?association lwm:hasAlternateScheduleAssociation ?alternate } .
+          |    }
+          | } union {
+          |  ### Alternate dates that are not passed
+          |     Select ?notPassed where {
+          |          $student lwm:hasScheduleAssociation ?association .
+          |          ?association lwm:hasGroup $group .
+          |          ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          |          ?alternate lwm:hasAssignmentDate ?alternatedate .
+          |          optional{ ?association lwm:hasPassed ?notPassed } .
+          |
+          |     filter(?notPassed = "false") .
+          |     filter exists {
+          |          ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          |          ?alternate lwm:hasAssignmentDate ?alternatedate .
+          |     } .
+          |     filter(?alternatedate < "${LocalDate.now().toString("yyyy-MM-dd")}") .
+          |   }
+          |  }
+          | }
+        """.stripMargin.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
+
+  def dateCountAlternate(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select (count(?alternate) as ?count) where {
+          |      $student lwm:hasScheduleAssociation ?association .
+          |      ?association lwm:hasAlternateScheduleAssociation ?alternate .
+          |      ?association lwm:hasGroup $group .
+          |      ?association lwm:hasAssignmentDate ?date .
+          |   filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
+          | }
+     """.stripMargin.execSelect().headOption.map { solution ⇒
+      solution.data.get("count").map(_.asLiteral().getInt)
+    }.flatten.getOrElse(0)
+  }
+
+  def studentForLabworkAssociation(labworkAssociation: Resource)(implicit queryHost: QueryHost) = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select ?student ?id where {
+          |     ?student lwm:hasScheduleAssociation $labworkAssociation .
+          |     ?student rdf:type lwm:Student .
+          |     ?student lwm:hasGmId ?id .
+          | }
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("id").asLiteral().getString
+    }.take(1)
+  }
+
+  def isHidden(labwork: Resource, student: Resource)(implicit queryHost: QueryHost) = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Select (count(?state) as ?count) where {
+          |    $student lwm:hasHidingState ?state .
+          |    ?state lwm:hasHidingSubject $labwork .
+          | }
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("count").asLiteral().getInt > 0
+    }.head
+  }
+
+  def removeHideState(labwork: Resource, student: Resource)(implicit updateHost: UpdateHost) = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Delete {
+          |     ?state ?p ?o .
+          |     $student lwm:hasHidingState ?state
+          | } where {
+          |   Select * where{
+          |     $student lwm:hasHidingState ?state .
+          |     ?state lwm:hasHidingSubject $labwork
+          |   }
+          | }
+    """.stripMargin.execUpdate()
+  }
+
+  def addHideState(labwork: Resource, student: Resource)(implicit updateHost: UpdateHost) = {
+    s"""
+          |${Vocabulary.defaulPrefixes}
+          |
+          | Insert data {
+          |    $student lwm:hasHidingState [
+          |    lwm:hasHidingSubject $labwork
+          |   ]
+          | }
+    """.stripMargin.execUpdate()
+  }
+
+  def labworksForStudent(student: Resource)(implicit queryHost: QueryHost): List[Resource] = {
+    s"""
+         |${Vocabulary.defaulPrefixes}
+         |
+         | Select ?s (lwm:memberOf as ?p) ?labwork {
+         |     $student lwm:memberOf ?group .
+         |     ?group lwm:hasLabWork ?labwork .
+         |     optional { ?labwork rdfs:label ?name } .
+         |
+         | } order by desc(?name)
+       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("s").toString))
+  }
+
+  //------------------ UNREFACTORED ---------------
+
+  private def search(inputQuery: String): Future[List[(String, String, String)]] = {
+    import utils.Global._
+    import utils.semantic.Vocabulary._
+
     val sparqlQuery =
       s"""
-        |SELECT ?s (${LWM.hasGmId} as ?p) ?o where {?s ${LWM.hasGmId} ?o
-        |FILTER regex(?o, "^$query")
+        |SELECT ?s (${lwm.hasGmId} as ?p) ?o where {?s ${lwm.hasGmId} ?o
+        |FILTER regex(?o, "^$inputQuery")
         |}
       """.stripMargin
 
@@ -107,7 +277,7 @@ object Students {
       val statements = SPARQLTools.statementsFromString(result)
       statements.map { statement ⇒
         val individual = Individual(statement.s)
-        val name = individual.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value
+        val name = individual.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
         (statement.o.value, name, statement.s.value)
       }
     }
@@ -116,183 +286,12 @@ object Students {
 
   def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
-  def exists(uid: String): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {?s ${Vocabulary.LWM.hasGmId} ${StringLiteral(uid.toLowerCase).toQueryString}}")
-
-  def isStudent(resource: Resource): Future[Boolean] = sparqlExecutionContext.executeBooleanQuery(s"ASK {$resource ${Vocabulary.RDF.typ} ${LWM.Student}}")
-
-  def labworksForStudent(student: Resource) = {
-    val query1 =
-      s"""
-         |select * where {
-         | $student ${LWM.memberOf} ?group .
-         | ?group ${LWM.hasLabWork} ?labwork.
-         | ?labwork ${RDFS.label} ?labworkName .
-         |}order by desc(?labworkName)
-       """.stripMargin
-    val results = QueryExecutionFactory.sparqlService(queryHost, query1).execSelect()
-    var mapping = List.empty[(Resource, String)]
-    while (results.hasNext) {
-      val solution = results.nextSolution()
-      val labworkResource = solution.getResource("labwork")
-      val name = if (solution.getLiteral("labworkName") == null) "" else URLDecoder.decode(solution.getLiteral("labworkName").getString, "UTF-8")
-      if (labworkResource != null) {
-        mapping = (Resource(labworkResource.getURI), name) :: mapping
-      }
-    }
-    mapping
-  }
-
-  def dateCountMissed(student: Resource, group: Resource): Int = {
-    import utils.Implicits._
-    val q = s"""
-        prefix lwm: <http://lwm.gm.fh-koeln.de/>
-
-        select (count(?attended) as ?count) where {
-          $student lwm:hasScheduleAssociation ?association .
-          ?association lwm:hasAssignmentDate ?date .
-          ?association lwm:hasGroup $group .
-          optional{?association lwm:hasAttended ?attended} .
-          optional{
-              ?association lwm:hasAlternateScheduleAssociation ?alternate .
-              ?alternate lwm:hasAssignmentDate ?alternateDate .
-            } .
-          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
-          filter(?attended = "false")
-          optional{filter(?alternateDate < "${LocalDate.now().toString("yyyy-MM-dd")}")}
-        }
-     """.stripMargin
-
-    q.execSelect().headOption.map { solution ⇒
-      solution.data.get("count").map(_.asLiteral().getInt)
-    }.flatten.getOrElse(0)
-  }
-
-  def dateCountNotPassed(student: Resource, group: Resource): Int = {
-
-    s"""
-       prefix lwm: <http://lwm.gm.fh-koeln.de/>
-
-       select (count(?notPassed) as ?count) where {
-         {
-         ### not passed dates
-           select ?notPassed where {
-              $student lwm:hasScheduleAssociation ?association .
-              ?association lwm:hasGroup $group .
-              ?association lwm:hasAssignmentDate ?date .
-
-              optional{?association lwm:hasPassed ?notPassed} .
-              filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}") .
-              filter(?notPassed = "false") .
-              filter not exists {?association lwm:hasAlternateScheduleAssociation ?alternate } .
-            }
-         } union {
-         ### Alternate dates that are not passed
-           select ?notPassed where {
-                  $student lwm:hasScheduleAssociation ?association .
-                  ?association lwm:hasGroup $group .
-                  ?association lwm:hasAlternateScheduleAssociation ?alternate .
-                  ?alternate lwm:hasAssignmentDate ?alternatedate .
-                  optional{?association lwm:hasPassed ?notPassed} .
-
-                  filter(?notPassed = "false") .
-                  filter exists {
-                     ?association lwm:hasAlternateScheduleAssociation ?alternate .
-                     ?alternate lwm:hasAssignmentDate ?alternatedate .
-                  } .
-                  filter(?alternatedate < "${LocalDate.now().toString("yyyy-MM-dd")}") .
-           }
-           }
-         }
-
-     """.stripMargin.execSelect().headOption.map { solution ⇒
-      solution.data.get("count").map(_.asLiteral().getInt)
-    }.flatten.getOrElse(0)
-  }
-
-  def dateCountAlternate(student: Resource, group: Resource): Int = {
-
-    s"""
-        prefix lwm: <http://lwm.gm.fh-koeln.de/>
-
-        select (count(?alternate) as ?count) where {
-          $student lwm:hasScheduleAssociation ?association .
-          ?association lwm:hasAlternateScheduleAssociation ?alternate .
-          ?association lwm:hasGroup $group .
-          ?association lwm:hasAssignmentDate ?date .
-          filter(?date < "${LocalDate.now().toString("yyyy-MM-dd")}")
-        }
-     """.stripMargin.execSelect().headOption.map { solution ⇒
-      solution.data.get("count").map(_.asLiteral().getInt)
-    }.flatten.getOrElse(0)
-  }
-
-  def studentForLabworkAssociation(labworkAssociation: Resource) = {
-    s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      |
-      |select ?student ?id where {
-      |    ?student lwm:hasScheduleAssociation $labworkAssociation .
-      |    ?student rdf:type lwm:Student .
-      |    ?student lwm:hasGmId ?id .
-      |}
-    """.stripMargin.execSelect().map { solution ⇒
-      solution.data("id").asLiteral().getString
-    }.take(1)
-  }
-
-  def isHidden(labwork: Resource, student: Resource) = {
-    s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      |
-      |select (count(?state) as ?count) where {
-      |    $student lwm:hasHidingState ?state .
-      |    ?state lwm:hasHidingSubject $labwork .
-      |}
-    """.stripMargin.execSelect().map { solution ⇒
-      solution.data("count").asLiteral().getInt > 0
-    }.head
-  }
-
-  def removeHideState(labwork: Resource, student: Resource) = {
-    s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      |
-      |delete {
-      |  ?state ?p ?o .
-      |  $student lwm:hasHidingState ?state
-      |} where {
-      |  select * where{
-      |    $student lwm:hasHidingState ?state .
-      |    ?state lwm:hasHidingSubject $labwork
-      |  }
-      |}
-    """.stripMargin.execUpdate()
-  }
-
-  def addHideState(labwork: Resource, student: Resource) = {
-    s"""
-      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      |
-      |insert data {
-      | $student lwm:hasHidingState [
-      |   lwm:hasHidingSubject $labwork
-      | ]
-      |}
-    """.stripMargin.execUpdate()
-  }
-
 }
 
 object StudentForms {
+
   import play.api.data.Forms._
   import play.api.data._
+
 }
 

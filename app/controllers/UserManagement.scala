@@ -5,7 +5,7 @@ import models.{ UserForms, Users }
 import play.api.mvc.{ Action, Controller, Result }
 import utils.Global._
 import utils.Security.Authentication
-import utils.semantic.Vocabulary.{ RDFS, FOAF, LWM, NCO }
+import utils.semantic.Vocabulary.{ rdfs, foaf, lwm, nco }
 import utils.semantic.{ SPARQLTools, Individual, Resource, StringLiteral }
 
 import scala.concurrent.{ Future, Promise }
@@ -88,19 +88,19 @@ object UserManagement extends Controller with Authentication {
         user ⇒ {
           val u = Individual(Resource(id))
           for {
-            id ← u.props.getOrElse(LWM.hasGmId, List(StringLiteral("")))
-            firstName ← u.props.getOrElse(FOAF.firstName, List(StringLiteral("")))
-            lastName ← u.props.getOrElse(FOAF.lastName, List(StringLiteral("")))
-            email ← u.props.getOrElse(FOAF.mbox, List(StringLiteral("")))
-            phone ← u.props.getOrElse(NCO.phoneNumber, List(StringLiteral("")))
-            label ← u.props.getOrElse(RDFS.label, List(StringLiteral("")))
+            id ← u.props.getOrElse(lwm.hasGmId, List(StringLiteral("")))
+            firstName ← u.props.getOrElse(foaf.firstName, List(StringLiteral("")))
+            lastName ← u.props.getOrElse(foaf.lastName, List(StringLiteral("")))
+            email ← u.props.getOrElse(foaf.mbox, List(StringLiteral("")))
+            phone ← u.props.getOrElse(nco.phoneNumber, List(StringLiteral("")))
+            label ← u.props.getOrElse(rdfs.label, List(StringLiteral("")))
           } yield {
-            u.update(LWM.hasGmId, id, StringLiteral(user.id))
-            u.update(FOAF.firstName, firstName, StringLiteral(user.firstname))
-            u.update(FOAF.lastName, lastName, StringLiteral(user.lastname))
-            u.update(FOAF.mbox, email, StringLiteral(user.email))
-            u.update(NCO.phoneNumber, phone, StringLiteral(user.phone))
-            u.update(RDFS.label, label, StringLiteral(s"${user.firstname} ${user.lastname}"))
+            u.update(lwm.hasGmId, id, StringLiteral(user.id))
+            u.update(foaf.firstName, firstName, StringLiteral(user.firstname))
+            u.update(foaf.lastName, lastName, StringLiteral(user.lastname))
+            u.update(foaf.mbox, email, StringLiteral(user.email))
+            u.update(nco.phoneNumber, phone, StringLiteral(user.phone))
+            u.update(rdfs.label, label, StringLiteral(s"${user.firstname} ${user.lastname}"))
           }
           Future.successful(Redirect(routes.UserManagement.index()))
         }

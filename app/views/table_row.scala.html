@@ -1,24 +1,24 @@
 @(startTime: Time, dayId: String, labwork: Individual, entries: List[Individual], rooms: List[Individual])
-@import utils.semantic.Vocabulary.{LWM, RDFS}
+@import utils.semantic.Vocabulary.{lwm, rdfs}
 @import utils.semantic.Individual
 @import utils.semantic.{Resource, StringLiteral}
 @import utils.Global._
 
 
 @defining(entries.filter(e => {
-    (e.props(LWM.hasWeekday).head.value == dayId) && (e.props(LWM.hasStartTime).head.value == startTime.toString)
+    (e.props(lwm.hasWeekday).head.value == dayId) && (e.props(lwm.hasStartTime).head.value == startTime.toString)
 })) { list =>
 
     @if(list.nonEmpty) {
         <td class="success">
-        @for(e <- list; t <- e.props.getOrElse(LWM.hasTimetable, List(Resource(""))); et = e.props.getOrElse(LWM.hasEndTime, List(StringLiteral(""))); id <- e.props.getOrElse(LWM.hasId, List(StringLiteral("")))) {
+        @for(e <- list; t <- e.props.getOrElse(lwm.hasTimetable, List(Resource(""))); et = e.props.getOrElse(lwm.hasEndTime, List(StringLiteral(""))); id <- e.props.getOrElse(lwm.hasId, List(StringLiteral("")))) {
                 <h6><b>Betreuer:</b>
-                    @for(s <- e.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
-                    @(Individual(s).props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+                    @for(s <- e.props.getOrElse(lwm.hasSupervisor, List(Resource(""))).map(_.asResource().get)) {
+                    @(Individual(s).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)
                 }
                 </h6>
 
-                <h6><b>Raum:</b> @Individual(Resource(e.props.getOrElse(LWM.hasRoom, List(Resource(""))).head.value)).props.getOrElse(LWM.hasRoomId, List(StringLiteral(""))).head.value</h6>
+                <h6><b>Raum:</b> @Individual(Resource(e.props.getOrElse(lwm.hasRoom, List(Resource(""))).head.value)).props.getOrElse(lwm.hasRoomId, List(StringLiteral(""))).head.value</h6>
                 <h6><b>Endzeit:</b> @et.head.toString</h6>
 
                 <h3><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#@id"></a></h3>
@@ -32,7 +32,7 @@
                             <h4 class="modal-title" id="myModalLabel">Eintrag bearbeiten</h4>
                         </div>
                         <div class="modal-body">
-                        @timetable_entry_edit_form(e, Resource(t.value), e.props.getOrElse(LWM.hasSupervisor, List(Resource(""))).map(r=> Individual(Resource(r.value))), rooms, TimeTableForm.timetableEditForm)
+                        @timetable_entry_edit_form(e, Resource(t.value), e.props.getOrElse(lwm.hasSupervisor, List(Resource(""))).map(r=> Individual(Resource(r.value))), rooms, TimeTableForm.timetableEditForm)
                         </div>
 
                     </div>
@@ -41,7 +41,7 @@
         }
         </td>
     } else {
-        @if(entries.filter(e => (e.props(LWM.hasWeekday).head.value == dayId) && (startTime <= Time(e.props(LWM.hasEndTime).head.value.split(":")(0).toInt, e.props(LWM.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(e.props(LWM.hasStartTime).head.value.split(":")(0).toInt, e.props(LWM.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
+        @if(entries.filter(e => (e.props(lwm.hasWeekday).head.value == dayId) && (startTime <= Time(e.props(lwm.hasEndTime).head.value.split(":")(0).toInt, e.props(lwm.hasEndTime).head.value.split(":")(1).toInt)) && (startTime >= Time(e.props(lwm.hasStartTime).head.value.split(":")(0).toInt, e.props(lwm.hasStartTime).head.value.split(":")(1).toInt))).nonEmpty) {
             <td class="success"></td>
         } else {
             <td></td>

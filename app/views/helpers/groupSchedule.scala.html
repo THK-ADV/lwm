@@ -10,16 +10,16 @@
     val query =
         s"""
          |select * where {
-         | $group ${LWM.hasScheduleAssociation} ?scheduleAssociation .
-         | ?scheduleAssociation ${LWM.hasAssignmentAssociation} ?assignmentAssociation .
-         | ?scheduleAssociation ${LWM.hasAssignmentDate} ?assignmentDate .
-         | ?scheduleAssociation ${LWM.hasAssignmentDateTimetableEntry} ?entry .
-         | ?entry ${LWM.hasRoom} ?room .
-         | ?entry ${LWM.hasStartTime} ?startTime .
-         | ?room ${LWM.hasRoomId} ?roomId .
-         | ?entry ${LWM.hasSupervisor} ?supervisor .
-         | ?supervisor ${RDFS.label} ?supervisorName .
-         | ?assignmentAssociation ${LWM.hasOrderId} ?id .
+         | $group ${lwm.hasScheduleAssociation} ?scheduleAssociation .
+         | ?scheduleAssociation ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
+         | ?scheduleAssociation ${lwm.hasAssignmentDate} ?assignmentDate .
+         | ?scheduleAssociation ${lwm.hasAssignmentDateTimetableEntry} ?entry .
+         | ?entry ${lwm.hasRoom} ?room .
+         | ?entry ${lwm.hasStartTime} ?startTime .
+         | ?room ${lwm.hasRoomId} ?roomId .
+         | ?entry ${lwm.hasSupervisor} ?supervisor .
+         | ?supervisor ${rdfs.label} ?supervisorName .
+         | ?assignmentAssociation ${lwm.hasOrderId} ?id .
          |} order by asc(?id)
        """.stripMargin
 

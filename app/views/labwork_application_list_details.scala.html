@@ -1,27 +1,27 @@
 @(openLabworks: List[(Individual, String)], applicationList: Individual, appsAndApplicants: List[(Individual, Individual)])(implicit request: RequestHeader)
-@import utils.semantic.Vocabulary.FOAF
+@import utils.semantic.Vocabulary.foaf
 @import utils.semantic.StringLiteral
 @import utils.semantic.Individual
-@import utils.semantic.Vocabulary.LWM
-@import utils.semantic.Vocabulary.RDFS
+@import utils.semantic.Vocabulary.lwm
+@import utils.semantic.Vocabulary.rdfs
 @import utils.BreadCrumbKeeper.UrlReference
 @import utils.Global._
 
 <!DOCTYPE html>
 
 <html>
-    @head(s"Anmeldungen: ${applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString)))).flatten.flatten.flatten.get}")
+    @head(s"Anmeldungen: ${applicationList.props.get(lwm.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(rdfs.label).map(y => y.headOption.map(_.toString)))).flatten.flatten.flatten.get}")
     <body>
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(applicationList.props.get(LWM.hasLabWork).head.map(s => Individual(s.asResource().get)).head.props.getOrElse(RDFS.label, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(applicationList.props.get(lwm.hasLabWork).head.map(s => Individual(s.asResource().get)).head.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)
             </div>
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
                     <div class="panel panel-default">
                         <div class="panel-heading">Anmeldungen für @{
-                            applicationList.props.get(LWM.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(RDFS.label).map(y => y.headOption.map(_.toString))))
+                            applicationList.props.get(lwm.hasLabWork).map(list => list.head.asResource().map(r => Individual(r).props.get(rdfs.label).map(y => y.headOption.map(_.toString))))
                         }</div>
 
                         <table class="table">
@@ -34,9 +34,9 @@
                                 @defining(aa._1) { application =>
                                     @defining(aa._2) { applicant =>
                                         <tr>
-                                            <td>@applicant.props.getOrElse(FOAF.lastName, List(StringLiteral(""))).head.toString</td>
-                                            <td>@applicant.props.getOrElse(FOAF.firstName, List(StringLiteral(""))).head.toString</td>
-                                            <td>@applicant.props.getOrElse(LWM.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
+                                            <td>@applicant.props.getOrElse(foaf.lastName, List(StringLiteral(""))).head.toString</td>
+                                            <td>@applicant.props.getOrElse(foaf.firstName, List(StringLiteral(""))).head.toString</td>
+                                            <td>@applicant.props.getOrElse(lwm.hasRegistrationId, List(StringLiteral(""))).head.toString</td>
                                             <td><h3><a href="#" data-toggle="modal" data-target="#@index" class="glyphicon glyphicon-pencil"></a></h3></td>
                                             <td><h3><a href="javascript: if(confirmed()) deleteApplication('@application.uri.value', '@applicationList.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
 

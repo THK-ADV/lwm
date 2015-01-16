@@ -43,8 +43,8 @@ object LabworkApplications {
     def applicationList(labwork: Resource) = {
       val query =
         s"""
-             |select ($labwork as ?s) (${LWM.hasApplicationList} as ?p) ?o where {
-             | $labwork ${LWM.hasApplicationList} ?o .
+             |select ($labwork as ?s) (${lwm.hasApplicationList} as ?p) ?o where {
+             | $labwork ${lwm.hasApplicationList} ?o .
              |}
            """.stripMargin
 
@@ -56,24 +56,24 @@ object LabworkApplications {
     val list = applicationList(application.labwork)
 
     val statements = List(
-      Statement(applicationResource, RDF.typ, LWM.LabworkApplication),
-      Statement(applicationResource, RDF.typ, OWL.NamedIndividual),
-      Statement(applicationResource, LWM.hasId, StringLiteral(application.id.toString)),
-      Statement(applicationResource, LWM.hasApplicant, application.applicant),
-      Statement(application.applicant, LWM.hasPendingApplication, applicationResource),
-      Statement(applicationResource, LWM.hasLabWork, application.labwork)
-    ) ++ application.partners.map(p ⇒ Statement(applicationResource, LWM.hasPartner, p))
+      Statement(applicationResource, rdf.typ, lwm.LabworkApplication),
+      Statement(applicationResource, rdf.typ, owl.NamedIndividual),
+      Statement(applicationResource, lwm.hasId, StringLiteral(application.id.toString)),
+      Statement(applicationResource, lwm.hasApplicant, application.applicant),
+      Statement(application.applicant, lwm.hasPendingApplication, applicationResource),
+      Statement(applicationResource, lwm.hasLabWork, application.labwork)
+    ) ++ application.partners.map(p ⇒ Statement(applicationResource, lwm.hasPartner, p))
 
     list.flatMap { al ⇒
       al.headOption.fold(sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map(b ⇒ Individual(applicationResource))) { r ⇒
-        sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(Statement(r, LWM.hasApplication, applicationResource) :: statements: _*)).map(b ⇒ Individual(applicationResource))
+        sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(Statement(r, lwm.hasApplication, applicationResource) :: statements: _*)).map(b ⇒ Individual(applicationResource))
       }
 
     }
   }
 
   def delete(application: LabworkApplication): Future[LabworkApplication] = {
-    val maybeApplication = SPARQLBuilder.listIndividualsWithClassAndProperty(LWM.LabworkApplication, Vocabulary.LWM.hasId, StringLiteral(application.id.toString))
+    val maybeApplication = SPARQLBuilder.listIndividualsWithClassAndProperty(lwm.LabworkApplication, Vocabulary.lwm.hasId, StringLiteral(application.id.toString))
     val resultFuture = sparqlExecutionContext.executeQuery(maybeApplication)
     val p = Promise[LabworkApplication]()
     resultFuture.map { result ⇒
@@ -88,7 +88,7 @@ object LabworkApplications {
   def delete(resource: Resource): Future[Resource] = {
     val p = Promise[Resource]()
     val individual = Individual(resource)
-    if (individual.props(RDF.typ).contains(LWM.LabworkApplication)) {
+    if (individual.props(rdf.typ).contains(lwm.LabworkApplication)) {
       sparqlExecutionContext.executeUpdate(SPARQLBuilder.removeIndividual(resource)).map { b ⇒ p.success(resource) }
     } else {
       p.failure(new IllegalArgumentException("Resource is not a LabworkApplication"))
@@ -97,7 +97,7 @@ object LabworkApplications {
   }
 
   def all(): Future[List[Individual]] = {
-    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(LWM.LabworkApplication)).map { stringResult ⇒
+    sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.LabworkApplication)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(labworkApplication ⇒ Individual(labworkApplication.s)).toList
     }
   }
