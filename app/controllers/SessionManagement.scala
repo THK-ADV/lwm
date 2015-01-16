@@ -2,7 +2,7 @@ package controllers
 
 import actors.{ UserCountSocketActor, SessionHandler }
 import akka.util.Timeout
-import models.{ Students, UserForms }
+import models.{ Users, Students, UserForms }
 import play.api.libs.concurrent.{ Promise ⇒ PlayPromise }
 import play.api.libs.json.JsValue
 import play.api.mvc._
@@ -28,7 +28,6 @@ object SessionManagement extends Controller {
 
     val loginData = UserForms.loginForm.bindFromRequest.fold(
       formWithErrors ⇒ {
-        println(formWithErrors)
         None
       },
       login ⇒ {
@@ -46,7 +45,7 @@ object SessionManagement extends Controller {
           case Left(message: String) ⇒
             Redirect(routes.Application.index()).withNewSession
           case Right(session: SessionHandler.Session) ⇒
-            val firstTime = Await.result(firstTimeCheck(session.user), atMost = 20.seconds)
+            val firstTime = firstTimeCheck(session.user)
             session.role match {
               case Permissions.AdminRole ⇒
                 if (firstTime) {
@@ -79,7 +78,7 @@ object SessionManagement extends Controller {
 
   }
 
-  def firstTimeCheck(user: String): Future[Boolean] = Future { Students.exists(user) }
+  def firstTimeCheck(user: String): Boolean = !(Students.exists(user) || Users.exists(user))
 
   def logout() = Action { request ⇒
     import play.api.libs.json._

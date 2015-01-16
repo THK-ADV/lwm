@@ -316,7 +316,6 @@ object LabworkManagementController extends Controller with Authentication with T
         filter((?p = ${lwm.hasPassed} && ?o = "false") || (?p = ${lwm.hasAttended} && ?o = "false") || ?p = ${lwm.hasAlternateScheduleAssociation})
         } order by asc(?s)
         """.stripMargin
-          println(q)
           sparqlExecutionContext.executeQuery(q).map { result ⇒
             SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p))
           }

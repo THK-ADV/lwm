@@ -111,6 +111,7 @@ object Users extends CheckedDelete {
       |${Vocabulary.defaultPrefixes}
       |
       |ask {
+      |   ?s rdf:type lwm:User .
       |   ?s lwm:hasGmId "$uid"
       |}
     """.stripMargin.executeAsk()

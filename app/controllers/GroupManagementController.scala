@@ -155,7 +155,6 @@ object GroupManagementController extends Controller with Authentication with Tra
           def procure(id: Option[String]): String = {
             Individual(Resource(id.get)).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
           }
-          println(s"P: ${procure(student)} - ${student.get}\nO: ${procure(oldGroup)} - ${oldGroup.get}\nN: ${procure(newGroup)} - ${newGroup.get}")
 
           def assData(entryWithSchedule: Resource) = {
             val q =

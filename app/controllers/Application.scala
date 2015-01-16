@@ -35,7 +35,6 @@ object Application extends Controller with Authentication {
         case Permissions.AdminRole ⇒
           Redirect(routes.AdministrationDashboardController.dashboard(DefaultBounds.min, DefaultBounds.max))
         case Permissions.DefaultRole ⇒
-          println("routing to dashboard")
           Redirect(routes.StudentDashboardController.dashboard())
       }
     }
@@ -52,10 +51,8 @@ object Application extends Controller with Authentication {
         } yield {
           response match {
             case Valid(session) ⇒
-              println(session)
               Redirect(routes.Application.index())
             case _ ⇒
-              println("error")
               Ok(views.html.login(UserForms.loginForm))
           }
         }
