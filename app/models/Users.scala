@@ -2,11 +2,11 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
-import utils.{ Global, QueryHost, UpdateHost }
-import utils.semantic._
 import utils.Implicits._
+import utils.semantic._
+import utils.{QueryHost, UpdateHost}
 
-import scala.concurrent.{ Promise, Future, blocking }
+import scala.concurrent.{Future, Promise, blocking}
 
 object UserForms {
   val loginForm = Form(
@@ -48,8 +48,8 @@ case class User(id: String,
 
 object Users extends CheckedDelete {
 
-  import utils.semantic.Vocabulary._
   import utils.Global.lwmNamespace
+  import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -83,7 +83,6 @@ object Users extends CheckedDelete {
     }
 
     p.future
-
   }
 
   def delete(userId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {

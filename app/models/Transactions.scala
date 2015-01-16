@@ -1,13 +1,15 @@
 package models
 
+import java.util.UUID
+
 import actors.TransactionsLoggerActor.Transaction
 import com.hp.hpl.jena.query.ParameterizedSparqlString
-import utils.Global._
-import utils.QuerySolution
+
+import utils.{UpdateHost, QueryHost, QuerySolution}
 import utils.semantic.Vocabulary._
 import utils.semantic._
 
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 
 sealed trait Action {
   def actionObject: Resource
@@ -19,9 +21,30 @@ case class DeleteAction(actionObject: Resource, description: String) extends Act
 case class ModifyAction(actionObject: Resource, description: String) extends Action
 
 object Transactions {
+
   import scala.concurrent.ExecutionContext.Implicits.global
+  import utils.Implicits._
+
+  def size()(implicit queryHost: QueryHost): Int = {
+    import utils.Implicits._
+    """
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |
+      |select (count(distinct ?transaction) as ?count) {
+      |   ?transaction rdf:type lwm:Transaction
+      |}
+    """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+  }
+
+    def create(transaction: Transaction)(implicit updateHost: UpdateHost) = {
+      import utils.Global.lwmNamespace
+      val resource = Resource(s"${lwmNamespace}transactions/${UUID.randomUUID()}")
+
+    }
 
   def create(transaction: Transaction): Future[Individual] = {
+    import utils.Global._
     val transactionResource = ResourceUtils.createResource(lwmNamespace)
 
     Actions.create(transaction.action).flatMap { action ⇒
@@ -61,8 +84,12 @@ object Transactions {
 object Actions {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def create(action: Action): Future[Individual] = {
-    val resource = ResourceUtils.createResource(lwmNamespace)
+  def create(action: Action)(implicit updateHost: UpdateHost): Future[Resource] = {
+    import utils.Global.lwmNamespace
+    import utils.Implicits._
+    import scala.concurrent.blocking
+
+    val resource = Resource(s"${lwmNamespace}actions/${UUID.randomUUID()}")
 
     val typeStatements = action match {
       case ca: CreateAction ⇒
@@ -79,8 +106,12 @@ object Actions {
       Statement(resource, LWM.actionObject, action.actionObject)
     )
 
-    sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements ::: typeStatements: _*)).map { r ⇒
-      Individual(resource)
+    val p = Promise[Resource]()
+
+    blocking {
+      SPARQLBuilder.insertStatements(statements ::: typeStatements: _*).execUpdate()
     }
+    
+    p.future
   }
 }
