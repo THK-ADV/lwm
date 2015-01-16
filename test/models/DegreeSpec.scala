@@ -35,7 +35,7 @@ class DegreeSpec extends SemanticFeatureSpec {
         Degrees.size should be(1)
 
         s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           |select * where {
           |    $expectedResource1 rdf:type lwm:Degree .
@@ -58,17 +58,6 @@ class DegreeSpec extends SemanticFeatureSpec {
       whenReady(futureResource) { deleted ⇒
         deleted should be(expectedResource1)
         Degrees.size should be(0)
-      }
-    }
-
-    "delete one particuluar degree" in {
-      "drop all".execUpdate()
-      val futureDegrees = Degrees.create(degree1) :: Degrees.create(degree2) :: Nil
-
-      whenReady(Future.sequence(futureDegrees)) { degrees ⇒
-        whenReady(Degrees.delete(degree2)) { degree ⇒
-          degree should be(expectedResource2)
-        }
       }
     }
 

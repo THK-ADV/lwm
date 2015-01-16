@@ -45,7 +45,7 @@ object Semesters extends CheckedDelete {
 
         blocking {
           s"""
-             |${Vocabulary.defaulPrefixes}
+             |${Vocabulary.defaultPrefixes}
              |
              | Insert data {
              |
@@ -70,7 +70,7 @@ object Semesters extends CheckedDelete {
 
         blocking {
           s"""
-             |${Vocabulary.defaulPrefixes}
+             |${Vocabulary.defaultPrefixes}
              |
              | Insert data {
              |
@@ -109,7 +109,7 @@ object Semesters extends CheckedDelete {
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        | Select ?s (rdf:type as ?p) (lwm:Semester as ?o) where {
        |     ?s rdf:type lwm:Semester .
@@ -121,7 +121,7 @@ object Semesters extends CheckedDelete {
 
   override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        | ASK {
        |  $resource rdf:type lwm:Semester
@@ -131,7 +131,7 @@ object Semesters extends CheckedDelete {
 
   def size()(implicit queryHost: QueryHost): Int = {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        | Select (count(distinct ?s) as ?count) where {
        |
@@ -144,7 +144,7 @@ object Semesters extends CheckedDelete {
 
     def semesterQuery(semesterSeason: String) = {
       s"""
-           |${Vocabulary.defaulPrefixes}
+           |${Vocabulary.defaultPrefixes}
            |
            | ASK {
            |  ?s rdf:type lwm:Semester .

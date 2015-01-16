@@ -1,5 +1,6 @@
 package controllers
 
+import com.hp.hpl.jena.tdb.assembler.Vocab
 import controllers.SemesterManagementController._
 import models._
 import play.api.libs.json.{ JsArray, JsString, Json }
@@ -7,11 +8,12 @@ import play.api.mvc.{ Result, Action, Controller }
 import play.libs.Akka
 import utils.Security.Authentication
 import utils.TransactionSupport
-import utils.semantic.{ SPARQLTools, StringLiteral, Individual, Resource }
+import utils.semantic._
 import utils.semantic.Vocabulary.{ lwm, rdfs, nco, foaf }
 import utils.Global._
 import scala.concurrent.{ Promise, Future }
 import scala.util.control.NonFatal
+import utils.Implicits._
 
 object StudentsManagement extends Controller with Authentication with TransactionSupport {
 

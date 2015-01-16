@@ -60,7 +60,7 @@ object Users extends CheckedDelete {
 
     blocking {
       s"""
-      |${Vocabulary.defaulPrefixes}
+      |${Vocabulary.defaultPrefixes}
       |
       |
       |insert data {
@@ -86,7 +86,7 @@ object Users extends CheckedDelete {
 
   def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-      |${Vocabulary.defaulPrefixes}
+      |${Vocabulary.defaultPrefixes}
       |
       |ask {
       |   $resource rdf:type lwm:User
@@ -96,7 +96,7 @@ object Users extends CheckedDelete {
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |select ?s (rdf:type as ?p) (lwm:User as ?o) where {
          | ?s rdf:type lwm:User .
          | optional {?s foaf:lastName ?lastname}
@@ -108,7 +108,7 @@ object Users extends CheckedDelete {
 
   def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
     s"""
-      |${Vocabulary.defaulPrefixes}
+      |${Vocabulary.defaultPrefixes}
       |
       |ask {
       |   ?s lwm:hasGmId "$uid"
@@ -118,7 +118,7 @@ object Users extends CheckedDelete {
 
   def possibleSubstitutes(userId: String)(implicit queryHost: QueryHost) = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select ?user ?name where {
           |    ?user rdf:type lwm:User .
@@ -134,7 +134,7 @@ object Users extends CheckedDelete {
 
   def userMapping()(implicit queryHost: QueryHost) = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select ?user ?name where {
           |    ?user rdf:type lwm:User .
@@ -149,7 +149,7 @@ object Users extends CheckedDelete {
 
   def size()(implicit queryHost: QueryHost): Int = {
     s"""
-      |${Vocabulary.defaulPrefixes}
+      |${Vocabulary.defaultPrefixes}
       |
       |select (count(distinct ?user) as ?count) {
       |   ?user rdf:type lwm:User

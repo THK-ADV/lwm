@@ -34,7 +34,7 @@ class CourseSpec extends SemanticFeatureSpec {
         Courses.size should be(1)
 
         s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           |select * where {
           |    $expectedResource1 rdf:type lwm:Course .
@@ -59,17 +59,6 @@ class CourseSpec extends SemanticFeatureSpec {
       whenReady(futureResource) { deleted ⇒
         deleted should be(expectedResource1)
         Courses.size should be(0)
-      }
-    }
-
-    "delete one particuluar course" in {
-      "drop all".execUpdate()
-      val futureCourses = Courses.create(course1) :: Courses.create(course2) :: Nil
-
-      whenReady(Future.sequence(futureCourses)) { courses ⇒
-        whenReady(Courses.delete(course2)) { course ⇒
-          course should be(expectedResource2)
-        }
       }
     }
 

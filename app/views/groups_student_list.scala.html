@@ -13,7 +13,15 @@
                     <script>
                         initHideState('@s.uri.value', @hidden);
                     </script>
-                <tr @if(hidden)("class=danger") id="@s.uri.hashCode()">
+                <tr class="@{
+                            if(hidden) "danger"
+                            else {
+                            Students.getLabworkApprovalProperty(s.uri, labwork.uri) match {
+                                case None => ""
+                                case Some(property) => if(property == lwm.hasLabworkApproval.value) "success" else "danger"
+                            }
+                            }
+                    }" id="@s.uri.hashCode()">
                     <td><a href="@routes.StudentInformationController.showInformation(s.uri.value)">@gm.value</a> </td>
                     <td>@ln.value</td>
                     <td>@fn.value</td>
@@ -30,29 +38,22 @@
                             }
                         }
                     }
-                    @defining(Students.dateCountMissed(s.uri, group.uri)){missed =>
-                        @if(missed == 1) {
-                            <td class="bg-warning">@missed</td>
-                        }else {
-                            @if(missed > 1){
-                                <td class="bg-danger">@missed</td>
-                            }else{
-                                <td>@missed</td>
-                            }
-                        }
-                    }
 
-                    @defining(Students.dateCountNotPassed(s.uri, group.uri)){notPassed =>
-                        @if(notPassed == 1) {
-                            <td class="bg-warning">@notPassed</td>
-                        }else {
-                            @if(notPassed > 1){
-                                <td class="bg-danger">@notPassed</td>
-                            }else{
-                                <td>@notPassed</td>
-                            }
-                        }
+                    @defining(Students.dateCountMissed(s.uri, group.uri)) { missed =>
+                        @defining(Students.dateCountNotPassed(s.uri, group.uri)) { notPassed =>
 
+                            @{
+                                val max = if(missed > notPassed) missed else notPassed
+                                val color = max match {
+                                    case 0 => ""
+                                    case 1 => "bg-warning"
+                                    case 2 => "bg-alert"
+                                    case _ => "bg-danger"
+                                }
+                                Html(s"<td class='$color'> $missed </td> <td class='$color'> $notPassed </td>")
+                            }
+
+                        }
                     }
 
                     <td><h3><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@s.hashCode()"></a></h3></td>
@@ -73,11 +74,20 @@
                         }">
                             </a>
                             </h3></td>
+                    <td><h3>
 
+                    @defining(s.props.get(lwm.hasLabworkApproval)) { approval =>
+                        @defining(s.props.get(lwm.hasLabworkDisapproval)) { disapproval =>
+                                <a class="@{
+                                    approval.headOption match {
+                                        case None => "glyphicon glyphicon-fire"
+                                        case Some(item) => "glyphicon glyphicon-check"
+                                    }
+                                }" id="approval@s.uri.hashCode()" href="javascript: setApproval('@labwork.uri.value', '@s.uri.value')"> </a>
+                            }
+                    }
 
-
-
-
+                    </h3></td>
                 </tr>
             }
                 <div class="modal fade" id="@s.hashCode()" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

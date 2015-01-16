@@ -11,7 +11,7 @@ object Vocabulary {
     def property(localName: String) = Property(s"$ns$localName")
   }
 
-  val defaulPrefixes =
+  val defaultPrefixes =
     s"""
       |prefix lwm: <http://lwm.gm.fh-koeln.de/>
       |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -157,6 +157,8 @@ object Vocabulary {
     val hasAlternateScheduleAssociation = property("hasAlternateScheduleAssociation")
     val hasAttended = property("hasAttended")
     val hasPassed = property("hasPassed")
+    val hasLabworkApproval = property("hasLabworkApproval")
+    val hasLabworkDisapproval = property("hasLabworkDisapproval")
 
     val Transaction = resource("Transaction")
     val hasActor = property("hasActor")

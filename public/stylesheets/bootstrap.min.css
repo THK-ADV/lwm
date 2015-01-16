@@ -1420,6 +1420,14 @@ a.bg-danger:hover {
     background-color: #e4b9b9
 }
 
+.bg-alert {
+    background-color: #FAD4AF;
+}
+
+a.bg-alert:hover {
+    background-color: #FCC48B;
+}
+
 .page-header {
     padding-bottom: 9px;
     margin: 40px 0 20px;

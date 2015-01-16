@@ -4,7 +4,7 @@ import java.net.{ URLEncoder, URLDecoder }
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
 import org.joda.time.LocalDate
-import utils.{ UpdateHost, QueryHost }
+import utils.{ QuerySolution, UpdateHost, QueryHost }
 import utils.semantic._
 
 import scala.concurrent.{ Promise, Future, blocking }
@@ -27,7 +27,7 @@ object Students extends CheckedDelete {
     val p = Promise[Resource]()
     blocking {
       s"""
-           |${Vocabulary.defaulPrefixes}
+           |${Vocabulary.defaultPrefixes}
            |
            | Insert data {
            |
@@ -55,7 +55,7 @@ object Students extends CheckedDelete {
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | Select ?s (rdf:type as ?p) (lwm:Student as ?o) where {
          |     ?s rdf:type lwm:Student .
@@ -81,7 +81,7 @@ object Students extends CheckedDelete {
 
   def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | Ask {
          |  ?s lwm:hasGmId "$uid"
@@ -91,7 +91,7 @@ object Students extends CheckedDelete {
 
   override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | ASK {
          |  $resource rdf:type lwm:Student
@@ -101,7 +101,7 @@ object Students extends CheckedDelete {
 
   def size()(implicit queryHost: QueryHost): Int = {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | Select (count(distinct ?s) as ?count) where {
          |    ?s rdf:type lwm:Student
@@ -111,7 +111,7 @@ object Students extends CheckedDelete {
 
   def dateCountMissed(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select (count(?attended) as ?count) where {
           |
@@ -135,7 +135,7 @@ object Students extends CheckedDelete {
 
   def dateCountNotPassed(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select (count(?notPassed) as ?count) where {
           | {
@@ -176,7 +176,7 @@ object Students extends CheckedDelete {
 
   def dateCountAlternate(student: Resource, group: Resource)(implicit queryHost: QueryHost): Int = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select (count(?alternate) as ?count) where {
           |      $student lwm:hasScheduleAssociation ?association .
@@ -192,7 +192,7 @@ object Students extends CheckedDelete {
 
   def studentForLabworkAssociation(labworkAssociation: Resource)(implicit queryHost: QueryHost) = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select ?student ?id where {
           |     ?student lwm:hasScheduleAssociation $labworkAssociation .
@@ -206,7 +206,7 @@ object Students extends CheckedDelete {
 
   def isHidden(labwork: Resource, student: Resource)(implicit queryHost: QueryHost) = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Select (count(?state) as ?count) where {
           |    $student lwm:hasHidingState ?state .
@@ -219,7 +219,7 @@ object Students extends CheckedDelete {
 
   def removeHideState(labwork: Resource, student: Resource)(implicit updateHost: UpdateHost) = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Delete {
           |     ?state ?p ?o .
@@ -235,7 +235,7 @@ object Students extends CheckedDelete {
 
   def addHideState(labwork: Resource, student: Resource)(implicit updateHost: UpdateHost) = {
     s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           | Insert data {
           |    $student lwm:hasHidingState [
@@ -247,15 +247,25 @@ object Students extends CheckedDelete {
 
   def labworksForStudent(student: Resource)(implicit queryHost: QueryHost): List[Resource] = {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
-         | Select ?s (lwm:memberOf as ?p) ?labwork {
+         | Select ($student as ?s) (lwm:memberOf as ?p) ?labwork {
          |     $student lwm:memberOf ?group .
          |     ?group lwm:hasLabWork ?labwork .
          |     optional { ?labwork rdfs:label ?name } .
          |
          | } order by desc(?name)
-       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("s").toString))
+       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString))
+  }
+
+  def getLabworkApprovalProperty(student: Resource, labwork: Resource)(implicit queryHost: QueryHost): Option[String] = {
+    s"""
+             |${Vocabulary.defaultPrefixes}
+             |
+             | Select ($student as ?s) ?p ($labwork as ?o) {
+             |  $student ?p $labwork
+             | }
+           """.stripMargin.execSelect().map(qs ⇒ qs.data("p").toString).headOption
   }
 
   //------------------ UNREFACTORED ---------------

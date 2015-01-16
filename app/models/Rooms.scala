@@ -34,7 +34,7 @@ object Rooms extends CheckedDelete {
 
     blocking {
       s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | Insert data {
          |    $resource rdf:type lwm:Room .
@@ -57,7 +57,7 @@ object Rooms extends CheckedDelete {
 
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | Select ?s (rdf:type as ?p) (lwm:Room as ?o) {
          |    ?s rdf:type lwm:Room
@@ -67,7 +67,7 @@ object Rooms extends CheckedDelete {
 
   override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-         |${Vocabulary.defaulPrefixes}
+         |${Vocabulary.defaultPrefixes}
          |
          | ASK {
          |  $resource rdf:type lwm:Room
@@ -77,7 +77,7 @@ object Rooms extends CheckedDelete {
 
   def size()(implicit queryHost: QueryHost): Int = {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        | Select (count(distinct ?s) as ?count) {
        |    ?s rdf:type lwm:Room
