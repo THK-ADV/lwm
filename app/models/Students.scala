@@ -249,13 +249,13 @@ object Students extends CheckedDelete {
     s"""
          |${Vocabulary.defaulPrefixes}
          |
-         | Select ?s (lwm:memberOf as ?p) ?labwork {
+         | Select ?labwork where {
          |     $student lwm:memberOf ?group .
          |     ?group lwm:hasLabWork ?labwork .
          |     optional { ?labwork rdfs:label ?name } .
          |
          | } order by desc(?name)
-       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("s").toString))
+       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString))
   }
 
   //------------------ UNREFACTORED ---------------
