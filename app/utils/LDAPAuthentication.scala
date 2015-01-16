@@ -40,7 +40,6 @@ object LDAPAuthentication {
           if (bindResult.getResultCode == ResultCode.SUCCESS) Right(true) else Left("invalid credentials")
         } catch {
           case e: LDAPException ⇒
-            println(e)
             Left(e.getMessage)
         } finally {
           connection.close()

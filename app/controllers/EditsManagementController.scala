@@ -5,7 +5,7 @@ import actors.TransactionsLoggerActor.Transaction
 import com.google.common.primitives.Doubles
 import models._
 import org.joda.time.{ LocalDateTime, LocalDate }
-import play.api.Play
+import play.api.{Logger, Play}
 import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
@@ -322,7 +322,7 @@ case object Synchronize {
         case foaf.lastName.value                       ⇒ newMap += foaf.lastName -> StringLiteral(e._2.toString)
         case rdfs.label.value                          ⇒ newMap += rdfs.label -> StringLiteral(e._2.toString)
         case deletion.value                            ⇒ newMap += deletion -> Resource(e._2.toString)
-        case _: String                                 ⇒ println("False match")
+        case _: String                                 ⇒
       }
     }
     newMap
