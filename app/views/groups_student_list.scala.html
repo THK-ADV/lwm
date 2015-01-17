@@ -18,7 +18,7 @@
                             else {
                             Students.getLabworkApprovalProperty(s.uri, labwork.uri) match {
                                 case None => ""
-                                case Some(property) => if(property == lwm.hasLabworkApproval.value) "success" else "danger"
+                                case Some(property) => if(property == lwm.hasLabworkApproval) "success" else "danger"
                             }
                             }
                     }" id="@s.uri.hashCode()">
@@ -83,7 +83,7 @@
                                         case None => "glyphicon glyphicon-fire"
                                         case Some(item) => "glyphicon glyphicon-check"
                                     }
-                                }" id="approval@s.uri.hashCode()" href="javascript: setApproval('@labwork.uri.value', '@s.uri.value')"> </a>
+                                }" id="approval@s.uri.hashCode()" href="javascript: if(confirmed()) setApproval('@labwork.uri.value', '@s.uri.value')"> </a>
                             }
                     }
 

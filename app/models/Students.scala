@@ -259,14 +259,14 @@ object Students extends CheckedDelete {
        """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString))
   }
 
-  def getLabworkApprovalProperty(student: Resource, labwork: Resource)(implicit queryHost: QueryHost): Option[String] = {
+  def getLabworkApprovalProperty(student: Resource, labwork: Resource)(implicit queryHost: QueryHost): Option[Property] = {
     s"""
              |${Vocabulary.defaultPrefixes}
              |
              | Select ($student as ?s) ?p ($labwork as ?o) {
              |  $student ?p $labwork
              | }
-           """.stripMargin.execSelect().map(qs ⇒ qs.data("p").toString).headOption
+           """.stripMargin.execSelect().map(qs ⇒ Property(qs.data("p").asResource().getURI)).headOption
 
   }
 

@@ -1,14 +1,15 @@
 @(individual: Individual, labworks: List[(Individual, Seq[String])])
 @import utils.semantic.StringLiteral
-@import utils.semantic.Vocabulary.rdfs
+@import utils.semantic.Vocabulary.{rdfs, lwm}
 @import utils.semantic.{Individual, Resource}
+@import utils.Global._
 
 <div class="panel panel-default">
     <div class="panel-heading">Ihre Praktika in diesem Semester</div>
     <div class="panel-body">
         @for(a <- labworks) {
-            @a._2.map{group =>
-        <div class="panel panel-default">
+            @a._2.map{ group =>
+        <div class="panel @{helpers.students.labworkApproval(individual.uri, a._1.uri)}">
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-md-10">
@@ -25,7 +26,18 @@
 
             </div>
             <div class="panel-body">
-                @helpers.personSchedule(individual.uri, a._1.uri)
+                @Students.getLabworkApprovalProperty(individual.uri, a._1.uri) match {
+                    case None => { @helpers.personSchedule(individual.uri, a._1.uri) }
+                    case Some(approval) => {
+                        <td> <h4 class="text-center">
+                        @if(approval == lwm.hasLabworkApproval) {
+                            Praktikum bestaden
+                        }else{
+                            Praktikum nicht bestanden
+                        }
+                        </h4></td>
+                    }
+                }
             </div>
 
         </div>

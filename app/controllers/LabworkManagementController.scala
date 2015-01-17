@@ -490,7 +490,7 @@ object LabworkManagementController extends Controller with Authentication with T
           Students.getLabworkApprovalProperty(student.uri, labwork) match {
 
             case None ⇒ student.add(lwm.hasLabworkApproval, labwork)
-            case Some(qs) ⇒
+            case Some(property) ⇒
               if (askForApproval(student.uri, labwork)) {
                 student.remove(lwm.hasLabworkApproval, labwork)
                 student.add(lwm.hasLabworkDisapproval, labwork)
