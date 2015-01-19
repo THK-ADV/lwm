@@ -16,79 +16,15 @@ object StudentDashboardController extends Controller {
 
   def dashboard = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      def availableLabworks(student: Resource) = {
-        val query =
-          s"""
-                   select ($student as ?s) (${lwm.allowsApplications} as ?p) ?o where {
-                     $student ${lwm.hasEnrollment} ?degree .
-                     ?course ${lwm.hasDegree} ?degree .
-                     ?o ${lwm.hasCourse} ?course .
-                     ?o ${lwm.allowsApplications} "true" .
-                   }
-                 """.stripMargin
-
-        sparqlExecutionContext.executeQuery(query).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
-        }
-      }
-
-      def pendingLabworkApplications(student: Resource) = {
-        val query =
-          s"""
-                   select ($student as ?s) (${lwm.hasPendingApplication} as ?p) ?o where {
-                     $student ${lwm.hasPendingApplication} ?application .
-                     ?application ${lwm.hasLabWork} ?o .
-                   }
-                 """.stripMargin
-
-        sparqlExecutionContext.executeQuery(query).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
-        }
-      }
-
-      def studentLabworks(student: Resource) = {
-        val query =
-          s"""
-                   select ($student as ?s) (${lwm.hasLabWork} as ?p) ?o where {
-                     $student ${lwm.memberOf} ?group .
-                     ?group ${lwm.hasLabWork} ?o .
-                   }
-                 """.stripMargin
-
-        sparqlExecutionContext.executeQuery(query).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.o.asResource()).flatten
-        }
-      }
-
-      def studentLabworkGroup(student: Resource, labwork: Resource) = {
-        val query =
-          s"""
-                   select ($student as ?s) (${lwm.memberOf} as ?p) ?o where {
-                     $labwork ${lwm.hasGroup} ?group .
-                     ?group ${lwm.hasMember} $student .
-                     ?group ${rdfs.label} ?o .
-                   }
-                 """.stripMargin
-
-        sparqlExecutionContext.executeQuery(query).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.o.asLiteral()).flatten
-        }
-      }
-      import utils.Global._
-      (for {
+      for {
         student ← Students.get(session.user)
-        availableLabworks ← availableLabworks(student)
-        labworkList = availableLabworks.map(r ⇒ Individual(r)).toList
-        pendingLabworks ← pendingLabworkApplications(student)
-        pendingLabworkList = pendingLabworks.map(r ⇒ Individual(r)).toList
-        studentLabworks ← studentLabworks(student)
-        studentLabworkList = studentLabworks.map(r ⇒ Individual(r)).toList
-        labworkGroupAssocs ← Future.sequence(studentLabworks.map(r ⇒ studentLabworkGroup(student, r).map(l ⇒ Individual(r) -> l.map(_.decodedString))))
+        degree ← Students.getDegree(student)
       } yield {
-        Ok(views.html.dashboard_student(Individual(student), (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, labworkGroupAssocs.toList, LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
-      }).recover {
-        case NonFatal(t) ⇒
-          Ok(views.html.login(UserForms.loginForm)).withNewSession
+        val pendingLabworkList = LabWorks.pendingApplications(student).map(Individual(_))
+        val labworkList = LabWorks.openForDegree(degree).map(Individual(_))
+        println(labworkList)
+        val studentLabworkList = Students.labworksForStudent(student).toMap.keys.map(Individual(_)).toList
+        Ok(views.html.dashboard_student(Individual(student), (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, Students.labworksForStudent(student).map(e ⇒ Individual(e._1) -> Seq(e._2)), LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
       }
     }
   }
@@ -106,28 +42,21 @@ object StudentDashboardController extends Controller {
     Action.async {
       implicit request ⇒
 
-        val studentFuture = for (s ← Students.get(session.user)(utils.Global.query)) yield s
+        Students.get(session.user).map { student ⇒
+          val query =
+            s"""
+               |select ?s (${lwm.hasLabWork} as ?p) (<$labid> as ?o) where {
+               | ?s ${rdf.typ} ${lwm.AssignmentAssociation} .
+               | ?s ${lwm.hasOrderId} ?orderId .
+               | ?s ${lwm.hasLabWork} <$labid> .
+               | ?s ${lwm.isVisibleToStudents} "true"
+               | } order by asc(?orderId)
+              """.stripMargin
 
-        val query =
-          s"""
-         |select ?s (${lwm.hasLabWork} as ?p) (<$labid> as ?o) where {
-         | ?s ${rdf.typ} ${lwm.AssignmentAssociation} .
-         | ?s ${lwm.hasOrderId} ?orderId .
-         | ?s ${lwm.hasLabWork} <$labid> .
-         | ?s ${lwm.isVisibleToStudents} "true"
-         | } order by asc(?orderId)
-       """.stripMargin
+          val result = sparqlExecutionContext.executeQueryBlocking(query)
+          val associations = SPARQLTools.statementsFromString(result).map(_.s)
 
-        val assocFuture = sparqlExecutionContext.executeQuery(query).map { result ⇒
-          SPARQLTools.statementsFromString(result).map(_.s)
-        }
-        (for {
-          student ← studentFuture
-          associations ← assocFuture
-        } yield {
           Ok(views.html.students_assignment_view(Individual(student), Individual(Resource(labid)), associations.toList))
-        }).recover {
-          case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard())
         }
     }
   }
