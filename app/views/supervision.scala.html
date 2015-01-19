@@ -1,5 +1,7 @@
-@(group: Resource, date: LocalDate)(implicit request: RequestHeader)
+
+@(group: Resource, date: LocalDate, startTime: LocalTime)(implicit request: RequestHeader)
 @import org.joda.time.LocalDate
+@import org.joda.time.LocalTime
 @import utils.semantic.Vocabulary.lwm
 @import utils.semantic.{Individual, Resource, StringLiteral}
 @import utils.BreadCrumbKeeper.UrlReference
@@ -16,7 +18,7 @@
             <div class="row">
                 @navigation_admin()
                 <div class="col-md-9">
-                    @helpers.labworks.labworkAttendanceTable(group, date)
+                    @helpers.labworks.labworkAttendanceTable(group, date, startTime)
                 </div>
             </div>
             <div class="row">@footerAdmin()</div>

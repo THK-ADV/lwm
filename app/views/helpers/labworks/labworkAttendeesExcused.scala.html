@@ -1,10 +1,13 @@
-@(group: Resource, date: LocalDate)(implicit request: RequestHeader)
+
+
+@(group: Resource, date: LocalDate, startTime: LocalTime)(implicit request: RequestHeader)
 @import java.net.URLEncoder
 @import java.net.URLDecoder
 @import org.joda.time.LocalDate
 @import utils.semantic._
 @import com.hp.hpl.jena.query.QueryExecutionFactory
 @import utils.Global._
+@import org.joda.time.LocalTime
 
 @{
     val query =
@@ -22,6 +25,8 @@
           ?student lwm:hasGmId ?gmId .
           ?association lwm:hasGroup ${group.toQueryString} .
           ?association lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
+          ?association lwm:hasAssignmentDateTimetableEntry ?entry .
+          ?entry lwm:hasStartTime "${if(startTime.getHourOfDay < 10) URLEncoder.encode(startTime.toString("H:mm"), "UTF-8") else URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}" .
           ?association lwm:hasAssignmentAssociation ?assignment .
           ?assignment lwm:hasLabWork ?labwork .
           optional {?association lwm:hasPassed ?passed } .

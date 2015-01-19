@@ -32,7 +32,7 @@
         val room = solution.getLiteral("roomId").getString
         val time = URLDecoder.decode(solution.getLiteral("startTime").getString, "UTF-8")
         val supervisor = URLDecoder.decode(solution.getLiteral("supervisorName").getString, "UTF-8")
-        val row = s"""<tr><td><a href="${routes.SupervisionController.supervise(group.value, date)}">$date, $time Uhr</a></td><td>$room</td><td>$supervisor</td></tr>"""
+        val row = s"""<tr><td><a href="${routes.SupervisionController.supervise(group.value, date, time)}">$date, $time Uhr</a></td><td>$room</td><td>$supervisor</td></tr>"""
         lines = lines :+ row
     }
     lines = lines :+ "</table>"

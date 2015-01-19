@@ -123,7 +123,7 @@ POST          /administration/substitutions                           controller
 GET           /administration/supervision-socket                      controllers.SupervisionController.superviseSocket
 POST          /administration/supervision                             controllers.SupervisionController.supervisionPost
 
-GET           /administration/supervision/:id/:date                   controllers.SupervisionController.supervise(id, date)
+GET           /administration/supervision/:id/:date/:time                   controllers.SupervisionController.supervise(id, date, time)
 
 GET           /students/:id/information                               controllers.StudentDashboardController.informationPage(id)
 POST          /students/:id/information                               controllers.StudentsManagement.changeInformation(id)
