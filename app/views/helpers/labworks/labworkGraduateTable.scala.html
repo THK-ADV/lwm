@@ -1,0 +1,37 @@
+@(labwork: Resource)
+@import java.net.URLDecoder
+@import utils.semantic.Resource
+@import utils.Global._
+@import utils.semantic.Vocabulary
+@import com.hp.hpl.jena.query.QueryExecutionFactory
+
+@{
+    val query =
+        s"""
+       |${Vocabulary.defaultPrefixes}
+       |
+       | Select ?lastname ?firstname ?regId ?gmId {
+       |
+       |    ?student lwm:hasLabworkApproval $labwork .
+       |    ?student lwm:hasRegistrationId ?regId .
+       |    ?student foaf:firstName ?firstname .
+       |    ?student foaf:lastName ?lastname .
+       |    ?student lwm:hasGmId ?gmId .
+       |
+       | } order by asc(?lastname)
+           """.stripMargin
+
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    val builder = StringBuilder.newBuilder
+    while(result.hasNext) {
+        val solution = result.next()
+
+        val lastname = URLDecoder.decode(solution.getLiteral("lastname").getString, "UTF-8")
+        val firstname = URLDecoder.decode(solution.getLiteral("firstname").getString, "UTF-8")
+        val regId = solution.getLiteral("regId").getString
+        val gmId = solution.getLiteral("gmId").getString
+
+        builder.append(s"<tr><td>$lastname</td> <td>$firstname</td> <td>$regId</td> <td>$gmId</td></tr>")
+    }
+    Html(builder.toString())
+}

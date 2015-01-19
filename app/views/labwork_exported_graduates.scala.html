@@ -1,4 +1,4 @@
-@(graduates: Map[String, List[(String, String, String)]])(implicit requestHeader: RequestHeader)
+@(labwork: Resource)(implicit requestHeader: RequestHeader)
 @import utils.semantic.Resource
 
 
@@ -7,19 +7,14 @@
     @head("Praktikum Absolventen")
     <body>
         <div class="container" id="everything">
-
-        @for(group <- graduates) {
             <section>
                 <table class="table table-bordered">
-                    <tr> <th>Gruppe @group._1 </th> <th>Name</th> <th>Matrikelnummer</th></tr>
+                    <tr> <th>Nachname</th> <th>Vorname</th> <th>Matrikelnummer</th> <th>ADV-Kennung</th></tr>
                     <tbody>
-                    @for(person <- group._2) {
-                        <tr> <td></td> <td> @person._2 </td> <td> @person._3 </td></tr>
-                    }
+                    @helpers.labworks.labworkGraduateTable(labwork)
                     </tbody>
                 </table>
             </section>
-        }
         </div>
     </body>
 </html>

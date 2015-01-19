@@ -129,9 +129,10 @@ function applyEdit(q, uri) {
     ajaxHO("/administration/edits", "POST", "application/json", {query: q, redirect: uri}, reload);
 }
 
-function groupList(uri) {
-    var min = $("#min").val();
-    var max = $("#max").val();
+function groupList(uri, hash) {
+    var min = $("#min"+ hash).val();
+    var max = $("#max"+ hash).val();
+
     if(min !== '' && max !== '') {
         ajaxHO("/administration/labworkApplications/" + encodeURIComponent(uri), "POST", "application/json", {min: min, max: max}, reload);
     }
