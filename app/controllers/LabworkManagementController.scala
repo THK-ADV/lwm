@@ -320,7 +320,6 @@ object LabworkManagementController extends Controller with Authentication with T
             SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p))
           }
         }
-        val graduates = LabWorks.labworkGraduates(labwork.uri).groupBy(_._1)
         (for {
           groups ← groupsFuture(labwork.uri)
           assessments ← assessmentsFuture(labwork.uri)
@@ -332,7 +331,7 @@ object LabworkManagementController extends Controller with Authentication with T
             case LabworkExportModes.PublicGroupMembersTable ⇒ Ok(views.html.labwork_partial_exported_groups(labwork, groupsWithStudents.toList))
             case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(labwork.uri))
             case LabworkExportModes.AssessmentSchedule      ⇒ Ok(views.html.labwork_exported_assessments(countedData.sortBy(s ⇒ s._1.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)))
-            case LabworkExportModes.LabworkGraduates        ⇒ Ok(views.html.labwork_exported_graduates(graduates))
+            case LabworkExportModes.LabworkGraduates        ⇒ Ok(views.html.labwork_exported_graduates(labwork.uri))
           }
         }).recover {
           case NonFatal(e) ⇒

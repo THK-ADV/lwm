@@ -171,30 +171,6 @@ object LabWorks {
     }
     dates.sortBy(_._1)
   }
-
-  def labworkGraduates(labwork: Resource): List[(String, String, String)] = {
-    s"""
-       |${Vocabulary.defaultPrefixes}
-       |
-       | Select ?name ?regId ?groupId {
-       |
-       |    ?student lwm:memberOf ?group .
-       |    ?group lwm:hasLabWork $labwork .
-       |    ?group lwm:hasGroupId ?groupId .
-       |    ?student lwm:hasLabworkApproval $labwork .
-       |    ?student lwm:hasRegistrationId ?regId .
-       |    ?student rdfs:label ?name
-       |
-       | } order by desc(?groupId)
-     """.stripMargin.execSelect().map { qs ⇒
-
-      val name = URLDecoder.decode(qs.data("name").asLiteral().getString, "UTF-8")
-      val regId = qs.data("regId").asLiteral().getString
-      val groupId = qs.data("groupId").asLiteral().getString
-
-      (groupId, name, regId)
-    }
-  }
 }
 
 /**

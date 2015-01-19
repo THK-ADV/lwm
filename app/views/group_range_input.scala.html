@@ -2,10 +2,10 @@
 @import utils.semantic.Individual
 
 <div class="input-group">
-<label>Minimum Gruppenanzahl:</label><input type="number" class="form-control" id="min"> <br />
-<label>Maxmium Gruppenanzahl:</label><input type="number" class="form-control" id="max">
+<label>Minimum Gruppenanzahl:</label><input type="number" class="form-control" id="min@applicationList.hashCode()"> <br />
+<label>Maxmium Gruppenanzahl:</label><input type="number" class="form-control" id="max@applicationList.hashCode()">
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-    <a href="javascript: groupList('@applicationList.uri.value')" class="btn btn-primary">Erzeugen</a>
+    <a href="javascript: groupList('@applicationList.uri.value', '@applicationList.hashCode()')" class="btn btn-primary">Erzeugen</a>
 </div>
