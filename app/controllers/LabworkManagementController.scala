@@ -1,5 +1,7 @@
 package controllers
 
+import java.net.URLDecoder
+
 import controllers.AssignmentManagementController._
 import controllers.StudentsManagement._
 import models._
@@ -7,11 +9,11 @@ import org.joda.time.{ LocalDate, DateTime }
 import org.pegdown.PegDownProcessor
 import play.api.Play
 import play.api.libs.concurrent.Akka
-import play.api.libs.json.{ JsBoolean, JsObject }
+import play.api.libs.json.{ JsString, JsBoolean, JsObject }
 import play.api.mvc.{ Action, Controller }
 import play.twirl.api.Html
 import utils.Security.Authentication
-import utils.TransactionSupport
+import utils.{ QueryHost, TransactionSupport }
 import utils.semantic.Vocabulary._
 import utils.semantic._
 import utils.Global._
@@ -320,6 +322,7 @@ object LabworkManagementController extends Controller with Authentication with T
             SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p))
           }
         }
+        val emails = createFile(labwork.uri)
         (for {
           groups ← groupsFuture(labwork.uri)
           assessments ← assessmentsFuture(labwork.uri)
@@ -332,12 +335,46 @@ object LabworkManagementController extends Controller with Authentication with T
             case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(labwork.uri))
             case LabworkExportModes.AssessmentSchedule      ⇒ Ok(views.html.labwork_exported_assessments(countedData.sortBy(s ⇒ s._1.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)))
             case LabworkExportModes.LabworkGraduates        ⇒ Ok(views.html.labwork_exported_graduates(labwork.uri))
+            case LabworkExportModes.EmailList               ⇒ Ok.sendFile(emails).withHeaders(CACHE_CONTROL -> "max-age=3600", CONTENT_DISPOSITION -> "attachment; filename=emails.csv", CONTENT_TYPE -> "application/x-download")
           }
         }).recover {
           case NonFatal(e) ⇒
             Redirect(routes.LabworkManagementController.edit(labworkid))
         }
     }
+  }
+
+  private def createFile(labwork: Resource): File = {
+    val path = "./csv/emails.csv"
+    val writer = {
+      val f = new File("./csv")
+      if (f.exists()) new PrintWriter(new File(path))
+      else {
+        f.mkdir()
+        new PrintWriter(new File(path))
+      }
+    }
+
+    val emails = s"""
+       |${Vocabulary.defaultPrefixes}
+       |
+       | Select ?email ?gmId {
+       | ?student lwm:memberOf ?group .
+       | ?group lwm:hasLabWork $labwork .
+       | optional { ?student foaf:mbox ?email }
+       | ?student lwm:hasGmId ?gmId
+       |
+       | }
+     """.stripMargin.execSelect().map { qs ⇒
+
+      val gmId = qs.data("gmId").asLiteral().getString
+      val email = URLDecoder.decode(qs.data("email").asLiteral().getString, "UTF-8")
+
+      s"$gmId@gm.fh-koeln.de" :: email :: Nil
+    }.flatten.mkString("\n")
+    writer.write(emails)
+    writer.close()
+    new File(path)
   }
 
   def exportCSV(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
