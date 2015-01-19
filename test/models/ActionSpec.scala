@@ -6,8 +6,8 @@ import org.scalatest.Pending
 class ActionSpec extends SemanticFeatureSpec {
   "Actions" should {
     "return the number of Actions" in {
-      eventually{
-        Actions.size should be (0)
+      eventually {
+        Actions.size should be(0)
       }
     }
     "create a new Action" in Pending

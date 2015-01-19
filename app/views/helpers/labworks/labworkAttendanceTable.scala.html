@@ -1,8 +1,11 @@
-@(group: Resource, date: LocalDate)(implicit request: RequestHeader)
+
+
+@(group: Resource, date: LocalDate, startTime: LocalTime)(implicit request: RequestHeader)
 @import play.api.Play
 @import org.joda.time.LocalDate
 @import utils.semantic._
 @import utils.semantic.Resource
+@import org.joda.time.LocalTime
 
 
 
@@ -18,11 +21,11 @@
 </div>
 
 
-@helpers.labworks.labworkAttendees(group, date)
+@helpers.labworks.labworkAttendees(group, date, startTime)
 
-@helpers.labworks.labworkAttendeesExcused(group, date)
+@helpers.labworks.labworkAttendeesExcused(group, date, startTime)
 
-@helpers.labworks.labworkAlternateAttendees(group, date)
+@helpers.labworks.labworkAlternateAttendees(group, date, startTime)
 
 
 <script>

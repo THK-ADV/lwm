@@ -5,7 +5,8 @@ import actors.{ SessionHandler, SupervisionSocketActor }
 import akka.util.Timeout
 import controllers.SupervisionChangeWrites.SupervisionChange
 import models.Students
-import org.joda.time.LocalDate
+import org.joda.time.format.{ DateTimeFormat, DateTimeFormatter }
+import org.joda.time.{ LocalTime, LocalDate }
 import play.api.libs.json.{ Reads, JsValue }
 import play.api.mvc._
 import play.libs.Akka
@@ -66,10 +67,9 @@ object SupervisionController extends Controller with Authentication with Transac
     p.future
   }
 
-  def supervise(id: String, date: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+  def supervise(id: String, date: String, time: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-
-      Future.successful(Ok(views.html.supervision(Resource(id), LocalDate.parse(date))))
+      Future.successful(Ok(views.html.supervision(Resource(id), LocalDate.parse(date), LocalTime.parse(time, DateTimeFormat.forPattern("HH:mm")))))
     }
   }
 

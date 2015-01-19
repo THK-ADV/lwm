@@ -151,7 +151,6 @@ object LabWorks {
           ?schedule ${lwm.hasAssignmentDate} "${date.toString("yyyy-MM-dd")}" .
         }
       """.stripMargin
-
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
     var dates = List.empty[(Time, (Resource, String, String, String, String, String, Time, Time, Int))]
     while (result.hasNext) {
