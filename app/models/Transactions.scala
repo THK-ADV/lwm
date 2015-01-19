@@ -83,6 +83,18 @@ object Transactions {
 
 object Actions {
 
+  def size()(implicit queryHost: QueryHost): Int = {
+    import utils.Global.lwmNamespace
+    import utils.Implicits._
+    s"""
+       |${Vocabulary.defaultPrefixes}
+        |
+        | Select (count(distinct ?s) as ?count) where {
+        |    ?s rdf:type lwm:Action
+        | }
+     """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+  }
+
   def create(action: Action)(implicit updateHost: UpdateHost): Future[Resource] = {
     import utils.Global.lwmNamespace
     import utils.Implicits._
