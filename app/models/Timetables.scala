@@ -241,7 +241,7 @@ object TimetableEntries {
       Statement(timetableEntryResource, lwm.hasTimetable, timetableEntry.timetable),
       Statement(timetableEntry.timetable, lwm.hasTimetableEntry, timetableEntryResource),
       Statement(timetableEntryResource, lwm.hasWeekday, timetableEntry.day.uri),
-      Statement(timetableEntryResource, lwm.hasRoom, timetableEntry.room) // TODO das ist wahrscheinlich was falsch
+      Statement(timetableEntryResource, lwm.hasRoom, timetableEntry.room) // TODO das ist wahrscheinlich was falsches
     ) ::: timetableEntry.supervisors.map(supervisor ⇒ List(Statement(timetableEntryResource, lwm.hasSupervisor, supervisor), Statement(supervisor, lwm.isSupervisorFor, timetableEntryResource))).flatten
     sparqlExecutionContext.executeUpdate(SPARQLBuilder.insertStatements(statements: _*)).map { r ⇒
       Individual(timetableEntryResource)

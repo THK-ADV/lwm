@@ -128,14 +128,17 @@ object LabWorks {
   }
 
   def labworksForDate(date: LocalDate) = {
+    println(date.toString("yyyy-MM-dd"))
     val query =
       s"""
         select ?course ?group ?groupId ?startTime ?endTime ?name ?courseName ?roomId ?degreeName ?orderId where {
           ?group ${rdf.typ} ${lwm.Group} .
           ?group ${lwm.hasGroupId} ?groupId .
           ?group ${lwm.hasScheduleAssociation} ?schedule .
+          optional {
           ?schedule ${lwm.hasAssignmentAssociation} ?assignmentAssociation .
           ?assignmentAssociation ${lwm.hasOrderId} ?orderId .
+          }
           ?schedule ${lwm.hasAssignmentDateTimetableEntry} ?entry .
           ?entry ${lwm.hasRoom} ?room .
           ?entry ${lwm.hasStartTime} ?startTime .
@@ -165,10 +168,11 @@ object LabWorks {
       val course = URLDecoder.decode(n.getLiteral("courseName").toString, "UTF-8")
       val degree = URLDecoder.decode(n.getLiteral("degreeName").toString, "UTF-8")
       val roomId = URLDecoder.decode(n.getLiteral("roomId").toString, "UTF-8")
-      val orderId = URLDecoder.decode(n.getLiteral("orderId").toString, "UTF-8").toInt + 1
+      val orderId = if (n.contains("orderId")) URLDecoder.decode(n.getLiteral("orderId").toString, "UTF-8").toInt + 1 else 0
       val groupResource = Resource(n.getResource("group").toString)
       dates = (startTime, (groupResource, course, degree, groupId, roomId, name, startTime, endTime, orderId)) :: dates
     }
+    println(dates.size)
     dates.sortBy(_._1)
   }
 }

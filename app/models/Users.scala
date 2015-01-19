@@ -1,5 +1,7 @@
 package models
 
+import java.net.URLDecoder
+
 import play.api.data.Forms._
 import play.api.data._
 import utils.Implicits._
@@ -143,7 +145,7 @@ object Users extends CheckedDelete {
           | }
         """.stripMargin.execSelect().map { solution ⇒
       val resource = solution.data("user").toString
-      val name = solution.data("name").toString
+      val name = URLDecoder.decode(solution.data("name").toString, "UTF-8")
       resource -> name
     }
   }
