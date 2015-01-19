@@ -28,8 +28,7 @@
           ?assignment lwm:hasLabWork ?labwork .
           ?association lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
           ?association lwm:hasAssignmentDateTimetableEntry ?entry .
-          optional {?entry lwm:hasStartTime "${URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}"} .
-          optional {?entry lwm:hasStartTime "${URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}"} .
+          ?entry lwm:hasStartTime "${if(startTime.getHourOfDay < 10) URLEncoder.encode(startTime.toString("H:mm"), "UTF-8") else URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}" .
           optional {?association lwm:hasPassed ?passed } .
           optional {?association lwm:hasAttended ?attended} .
           filter not exists {?association lwm:hasAlternateScheduleAssociation ?alternate}
@@ -72,7 +71,7 @@
             Html{
                 s"""
                     <div class="panel panel-default top-buffer">
-                        <div class="panel-heading">${helpers.labworkHeader(group, date)}</div>
+                        <div class="panel-heading">${helpers.labworkHeader(group, date, startTime)}</div>
                         <div class="panel-body">
                             <div class="row">
                     <div class="col-md-12">

@@ -174,7 +174,6 @@ object LabworkApplicationController extends Controller with Authentication with 
       val min = (request.body \ "min").asOpt[String]
       val max = (request.body \ "max").asOpt[String]
       if (min.isDefined && max.isDefined) {
-        println("YES")
         val applicationlist = Individual(Resource(id))
         val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
         applicationsFuture.map { applications ⇒

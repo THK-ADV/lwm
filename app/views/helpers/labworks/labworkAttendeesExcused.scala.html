@@ -26,8 +26,7 @@
           ?association lwm:hasGroup ${group.toQueryString} .
           ?association lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
           ?association lwm:hasAssignmentDateTimetableEntry ?entry .
-          optional {?entry lwm:hasStartTime "${URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}"} .
-          optional {?entry lwm:hasStartTime "${URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}"} .
+          ?entry lwm:hasStartTime "${if(startTime.getHourOfDay < 10) URLEncoder.encode(startTime.toString("H:mm"), "UTF-8") else URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}" .
           ?association lwm:hasAssignmentAssociation ?assignment .
           ?assignment lwm:hasLabWork ?labwork .
           optional {?association lwm:hasPassed ?passed } .

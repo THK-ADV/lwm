@@ -128,10 +128,9 @@ object LabWorks {
   }
 
   def labworksForDate(date: LocalDate) = {
-    println(date.toString("yyyy-MM-dd"))
     val query =
       s"""
-        select ?course ?group ?groupId ?startTime ?endTime ?name ?courseName ?roomId ?degreeName ?orderId where {
+        select * where {
           ?group ${rdf.typ} ${lwm.Group} .
           ?group ${lwm.hasGroupId} ?groupId .
           ?group ${lwm.hasScheduleAssociation} ?schedule .
@@ -169,9 +168,9 @@ object LabWorks {
       val roomId = URLDecoder.decode(n.getLiteral("roomId").toString, "UTF-8")
       val orderId = if (n.contains("orderId")) URLDecoder.decode(n.getLiteral("orderId").toString, "UTF-8").toInt + 1 else 0
       val groupResource = Resource(n.getResource("group").toString)
-      dates = (startTime, (groupResource, course, degree, groupId, roomId, name, startTime, endTime, orderId)) :: dates
+      val newDate = if (n.getResource("assignmentAssociation") == null) Nil else List((startTime, (groupResource, course, degree, groupId, roomId, name, startTime, endTime, orderId)))
+      dates = newDate ::: dates
     }
-    println(dates.size)
     dates.sortBy(_._1)
   }
 }

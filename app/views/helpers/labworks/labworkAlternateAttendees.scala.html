@@ -26,8 +26,7 @@
               ?association lwm:hasGroup ?origGroup .
               ?association lwm:hasAssignmentAssociation ?assignment .
               ?association lwm:hasAssignmentDateTimetableEntry ?entry .
-              optional {?entry lwm:hasStartTime "${URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}"} .
-              optional {?entry lwm:hasStartTime "${URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}"} .
+              ?entry lwm:hasStartTime "${if(startTime.getHourOfDay < 10) URLEncoder.encode(startTime.toString("H:mm"), "UTF-8") else URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}" .
               ?assignment lwm:hasLabWork ?labwork .
               ?origGroup lwm:hasGroupId ?origGroupId .
               ?association lwm:hasAlternateScheduleAssociation ?alternate .
