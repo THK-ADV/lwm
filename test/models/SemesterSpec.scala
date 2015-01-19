@@ -33,7 +33,7 @@ class SemesterSpec extends SemanticFeatureSpec {
         Semesters.size should be(1)
 
         s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           |select * where {
           |    $expectedResource1 rdf:type lwm:Semester .

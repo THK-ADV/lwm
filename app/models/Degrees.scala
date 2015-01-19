@@ -26,7 +26,7 @@ object Degrees extends CheckedDelete {
 
     blocking {
       s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        |Insert data {
        |
@@ -47,14 +47,9 @@ object Degrees extends CheckedDelete {
     delete(resource)
   }
 
-  def delete(degree: Degree)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
-    val resource = Resource(s"${utils.Global.lwmNamespace}degrees/${degree.id}")
-    delete(resource)
-  }
-
   def all()(implicit queryHost: QueryHost): Future[List[Resource]] = Future {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        |Select ?s (rdf:type as ?p) (lwm:Degree as ?o) where {
        |    ?s rdf:type lwm:Degree
@@ -66,7 +61,7 @@ object Degrees extends CheckedDelete {
 
   def exists(degree: Degree)(implicit queryHost: QueryHost): Boolean = {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        |ASK {
        |    ?s lwm:hasId "${degree.id}" .
@@ -79,7 +74,7 @@ object Degrees extends CheckedDelete {
 
   override def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        |ASK {
        |    $resource rdf:type lwm:Degree
@@ -89,7 +84,7 @@ object Degrees extends CheckedDelete {
 
   def size()(implicit queryHost: QueryHost): Int = {
     s"""
-       |${Vocabulary.defaulPrefixes}
+       |${Vocabulary.defaultPrefixes}
        |
        |Select (count(distinct ?s) as ?count) where {
        |    ?s rdf:type lwm:Degree

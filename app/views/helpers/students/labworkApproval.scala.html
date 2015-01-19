@@ -1,0 +1,13 @@
+@(student: Resource, labwork: Resource)
+@import utils.semantic.Vocabulary
+@import utils.semantic.Resource
+@import utils.Global._
+@import utils.semantic.Vocabulary.lwm
+
+@{
+    Students.getLabworkApprovalProperty(student, labwork) match {
+        case None => "panel-default"
+        case Some(approval) => if(approval == lwm.hasLabworkApproval) "panel-success" else "panel-danger"
+    }
+
+}

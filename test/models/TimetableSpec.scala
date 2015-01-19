@@ -33,7 +33,7 @@ class TimetableSpec extends SemanticFeatureSpec {
         Timetables.size should be(1)
 
         s"""
-          |${Vocabulary.defaulPrefixes}
+          |${Vocabulary.defaultPrefixes}
           |
           |select * where {
           |

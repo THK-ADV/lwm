@@ -32,6 +32,7 @@ object LabworkManagementController extends Controller with Authentication with T
   import scala.concurrent.duration._
 
   import Play.current
+
   override val system = Akka.system
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
@@ -210,7 +211,7 @@ object LabworkManagementController extends Controller with Authentication with T
 
           val typ =
             s"""
-               |${Vocabulary.defaulPrefixes}
+               |${Vocabulary.defaultPrefixes}
                |
                | Select (${li.uri} as ?s) (rdf:type as ?p) ?o where {
                |     ${li.uri} rdf:type ?o .
@@ -319,6 +320,7 @@ object LabworkManagementController extends Controller with Authentication with T
             SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p))
           }
         }
+        val graduates = LabWorks.labworkGraduates(labwork.uri).groupBy(_._1)
         (for {
           groups ← groupsFuture(labwork.uri)
           assessments ← assessmentsFuture(labwork.uri)
@@ -330,6 +332,7 @@ object LabworkManagementController extends Controller with Authentication with T
             case LabworkExportModes.PublicGroupMembersTable ⇒ Ok(views.html.labwork_partial_exported_groups(labwork, groupsWithStudents.toList))
             case LabworkExportModes.PublicSchedule          ⇒ Ok(views.html.labwork_export_publicSchedules(labwork.uri))
             case LabworkExportModes.AssessmentSchedule      ⇒ Ok(views.html.labwork_exported_assessments(countedData.sortBy(s ⇒ s._1.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value)))
+            case LabworkExportModes.LabworkGraduates        ⇒ Ok(views.html.labwork_exported_graduates(graduates))
           }
         }).recover {
           case NonFatal(e) ⇒
@@ -461,6 +464,52 @@ object LabworkManagementController extends Controller with Authentication with T
           val label = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
           val topics = a.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).head.value
           Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html(label), Html(description), Html(text), Html(hints), Html(goals), topics))
+        }
+    }
+  }
+
+  def labworkApproval(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+
+    Action.async(parse.json) {
+      implicit request ⇒
+        import play.api.libs.json._
+
+        val labwork = Resource(labworkid)
+        val maybeStudent = (request.body \ "student").asOpt[String]
+
+        def askForApproval(student: Resource, labwork: Resource) = {
+          s"""
+            |${Vocabulary.defaultPrefixes}
+            |
+            | ASK {
+            |  $student lwm:hasLabworkApproval $labwork
+            | }
+          """.stripMargin.executeAsk()
+        }
+
+        if (maybeStudent.isDefined) {
+          val student = Individual(Resource(maybeStudent.get))
+          Students.getLabworkApprovalProperty(student.uri, labwork) match {
+
+            case None ⇒ student.add(lwm.hasLabworkApproval, labwork)
+            case Some(property) ⇒
+              if (askForApproval(student.uri, labwork)) {
+                student.remove(lwm.hasLabworkApproval, labwork)
+                student.add(lwm.hasLabworkDisapproval, labwork)
+              } else {
+                student.remove(lwm.hasLabworkDisapproval, labwork)
+                student.add(lwm.hasLabworkApproval, labwork)
+              }
+          }
+
+          val json = JsObject(Seq(
+            ("id", JsNumber(student.uri.hashCode())),
+            ("approvedState", JsBoolean(askForApproval(student.uri, labwork)))
+          ))
+
+          Future.successful(Ok(json))
+        } else {
+          Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
         }
     }
   }

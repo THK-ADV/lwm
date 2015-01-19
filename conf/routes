@@ -35,7 +35,8 @@ DELETE        /administration/labworks                                controller
 DELETE        /administration/labworks/:id                            controllers.GroupManagementController.studentRemoval(id)
 GET           /administration/labworks/:id/export/:e                  controllers.LabworkManagementController.export(id,e)
 GET           /administration/labworks/:id/exportAssignment/:a        controllers.LabworkManagementController.exportAssignment(id, a)
-#GET           /administration/labworks/:id/exportCSV                  controllers.LabworkManagementController.exportCSV(id)
+#GET           /administration/labworks/:id/exportCSV                 controllers.LabworkManagementController.exportCSV(id)
+POST          /administration/labworks/:id/approvals                  controllers.LabworkManagementController.labworkApproval(id)
 
 GET           /administration/labworkApplications                     controllers.LabworkApplicationController.index()
 GET           /administration/labworkApplications/:id                 controllers.LabworkApplicationController.applicationListEdit(id)

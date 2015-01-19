@@ -36,8 +36,9 @@
         val degreeName = URLDecoder.decode(solution.getLiteral("degreeName").getString, "UTF-8")
         val groupId = solution.getLiteral("groupId").getString
         val orderId = solution.getLiteral("orderId").getString.toInt + 1
+        val labwork = solution.getResource("labwork").getURI
 
-        lines = s"<h3>Praktikum $orderId, Gruppe $groupId <br /> $courseName <br /> $degreeName <br />${date.toString("dd.MM.yyyy")}</h3>" :: lines
+        lines = s"<h3>Praktikum $orderId, <a href='${routes.GroupManagementController.index(labwork, group.value)}'> Gruppe $groupId </a> <br /> $courseName <br /> $degreeName <br />${date.toString("dd.MM.yyyy")}</h3>" :: lines
     }
     Html(lines.mkString("\n"))
 }
