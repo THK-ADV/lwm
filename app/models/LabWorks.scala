@@ -21,6 +21,7 @@ object LabworkExportModes {
   val InternalSchedule = "internalSchedule"
   val AssessmentSchedule = "assessmentSchedule"
   val LabworkGraduates = "labworkGraduates"
+  val EmailList = "emailList"
 }
 
 object LabWorkForms {
