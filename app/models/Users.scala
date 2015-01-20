@@ -81,9 +81,18 @@ object Users extends CheckedDelete {
     p.future
   }
 
-  def delete(userId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = {
-    val resource = Resource(s"${lwmNamespace}users/$userId")
-    delete(resource)
+  def delete(userId: String)(implicit queryHost: QueryHost, updateHost: UpdateHost): Future[Resource] = Future {
+    s"""
+      |${Vocabulary.defaultPrefixes}
+      |select ?user where {
+      | ?user lwm:hasGmId "$userId" .
+      | ?user rdf:type lwm:User
+      |}
+    """.stripMargin.execSelect().map { solution ⇒
+      val r = Resource(solution.data("user").toString)
+      delete(r)
+      r
+    }.head
   }
 
   def check(resource: Resource)(implicit queryHost: QueryHost): Boolean = {

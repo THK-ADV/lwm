@@ -311,6 +311,16 @@ object Students extends CheckedDelete {
 
   def search(query: String, maxCount: Int): Future[List[(String, String, String)]] = if (maxCount > 0) search(query).map(_.sortBy(_._1).take(maxCount)) else search(query).map(_.sortBy(_._1))
 
+  def getId(studentResource: Resource)(implicit queryHost: QueryHost) = {
+    s"""
+       |${Vocabulary.defaultPrefixes}
+        |select ?id where {
+        | $studentResource lwm:hasGmId ?id
+        |}
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("id").toString
+    }.headOption.getOrElse("")
+  }
 }
 
 object StudentForms {

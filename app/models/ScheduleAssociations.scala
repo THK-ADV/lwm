@@ -208,6 +208,7 @@ object ScheduleAssociations {
   }
 
   def getAlternateDates(oldSchedule: Resource, group: Resource, groupId: String, orderId: String) = {
+
     val query =
       s"""
          prefix lwm: <http://lwm.gm.fh-koeln.de/>
@@ -229,6 +230,7 @@ object ScheduleAssociations {
        """.stripMargin
     val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
     var alternates = List.empty[(String, String)]
+
     while (results.hasNext) {
       val solution = results.nextSolution()
       val altSchedule = solution.getResource("association").getURI
@@ -238,15 +240,17 @@ object ScheduleAssociations {
       val groupMembersSize = {
         val newGroup = Resource(solution.getResource("group").getURI)
         val groupCount = Individual(newGroup).props.getOrElse(lwm.hasMember, List(StringLiteral("")))
-        val normalizedGroupCount = getNormalizedCount(newGroup, altDate)
+        val normalizedGroupCount = 0 //getNormalizedCount(newGroup, altDate)
         groupCount.size + normalizedGroupCount
       }
       alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)") :: alternates
     }
+
     alternates
   }
 
   def getNormalizedCount(group: Resource, date: String): Int = {
+    val start = System.nanoTime()
     import utils.Implicits._
     val queryAlternate =
       s"""
@@ -256,17 +260,19 @@ object ScheduleAssociations {
           PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-        Select (count(?s) as ?count) where {
-          ?s lwm:memberOf ?group .
-          ?group lwm:hasLabWork <http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ff7> .
+        Select ?s where {
+          ?s lwm:memberOf $group .
+          ?group lwm:hasLabWork ?labwork .
           ?s lwm:hasScheduleAssociation ?sched .
           ?sched lwm:hasAlternateScheduleAssociation ?alter .
           ?alter lwm:hasAssignmentDate "$date" .
           ?alter lwm:hasGroup ?g2 .
-          ?g2 lwm:hasLabWork <http://lwm.gm.fh-koeln.de/234ae1e6:148e0cf4878:-7ff7>
+          ?g2 lwm:hasLabWork ?labwork
         }
-      """.stripMargin.execSelect().map(querys ⇒ querys.data.get("count")).head.map(s ⇒ s.asLiteral().getInt)
+      """.stripMargin.execSelect().size
 
+    val duration = (System.nanoTime() - start) / 1000000
+    println(duration)
     val queryHidden =
       s"""
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -275,14 +281,14 @@ object ScheduleAssociations {
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-       Select (count(distinct ?s) as ?count) where {
+       Select ?s where {
         ?s lwm:memberOf $group .
         ?group lwm:hasLabWork ?labwork .
         ?s lwm:hasHidingState ?state .
         ?state lwm:hasHidingSubject ?labwork
     }
-     """.stripMargin.execSelect().map(querys ⇒ querys.data.get("count")).head.map(s ⇒ s.asLiteral().getInt)
+     """.stripMargin.execSelect().size
 
-    queryAlternate.getOrElse(0) - queryHidden.getOrElse(0)
+    queryAlternate - queryHidden
   }
 }
