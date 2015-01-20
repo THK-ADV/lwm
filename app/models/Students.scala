@@ -65,18 +65,31 @@ object Students extends CheckedDelete {
        """.stripMargin.execSelect().map(s ⇒ Resource(s.data("s").toString))
   }
 
-  def get(gmId: String)(implicit queryHost: QueryHost): Future[Resource] = {
-    val resource = Resource(s"${utils.Global.lwmNamespace}students/$gmId")
+  def getDegree(student: Resource)(implicit queryHost: QueryHost) = Future {
+    val h = s"""
+       |${Vocabulary.defaultPrefixes}
+       |select * where {
+       |  $student lwm:hasEnrollment ?degree
+       |}
+     """.stripMargin.execSelect().map { solution ⇒
+      solution.data("degree").toString
+    }.head
 
-    val p = Promise[Resource]()
+    Resource(h.toString)
+  }
 
-    if (exists(gmId)) {
-      p.success(resource)
-    } else {
-      p.failure(new NoSuchElementException(s"There is no student with ID $gmId"))
-    }
-
-    p.future
+  def get(gmId: String)(implicit queryHost: QueryHost): Future[Resource] = Future {
+    val h = s"""
+      |${Vocabulary.defaultPrefixes}
+      |
+      |select * where {
+      | ?student rdf:type lwm:Student .
+      | ?student lwm:hasGmId "$gmId"
+      | }
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("student")
+    }.head
+    Resource(h.toString)
   }
 
   def exists(uid: String)(implicit queryHost: QueryHost): Boolean = {
@@ -246,17 +259,17 @@ object Students extends CheckedDelete {
     """.stripMargin.execUpdate()
   }
 
-  def labworksForStudent(student: Resource)(implicit queryHost: QueryHost): List[Resource] = {
+  def labworksForStudent(student: Resource)(implicit queryHost: QueryHost) = {
     s"""
          |${Vocabulary.defaultPrefixes}
          |
-         | Select ($student as ?s) (lwm:memberOf as ?p) ?labwork {
+         | Select * {
          |     $student lwm:memberOf ?group .
          |     ?group lwm:hasLabWork ?labwork .
-         |     optional { ?labwork rdfs:label ?name } .
+         |     optional { ?group rdfs:label ?name } .
          |
          | } order by desc(?name)
-       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString))
+       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString) -> qs.data.get("name").map(_.toString).getOrElse("No Group"))
   }
 
   def getLabworkApprovalProperty(student: Resource, labwork: Resource)(implicit queryHost: QueryHost): Option[Property] = {

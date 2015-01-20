@@ -4,10 +4,12 @@ import java.net.URLDecoder
 import java.util.Date
 
 import com.hp.hpl.jena.query.QueryExecutionFactory
-import org.joda.time.{ LocalDate, DateTime }
-import utils.semantic._
+import org.joda.time.LocalDate
 import utils.Implicits._
-import scala.concurrent.{ Promise, Future }
+import utils.QueryHost
+import utils.semantic._
+
+import scala.concurrent.{ Future, Promise }
 
 case class LabWork(course: Resource, semester: Resource)
 
@@ -51,12 +53,12 @@ object LabWorkForms {
   */
 object LabWorks {
 
-  import utils.Global._
   import utils.semantic.Vocabulary._
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(labWork: LabWork): Future[Individual] = {
+    import utils.Global._
     val semesterIndividual = Individual(labWork.semester)
     val startDate = semesterIndividual.props.getOrElse(lwm.hasStartDate, List(new DateLiteral(LocalDate.now()))).head
     val endDate = semesterIndividual.props.getOrElse(lwm.hasEndDate, List(new DateLiteral(LocalDate.now()))).head
@@ -94,6 +96,7 @@ object LabWorks {
   }
 
   def delete(resource: Resource): Future[Resource] = {
+    import utils.Global._
     val p = Promise[Resource]()
     val individual = Individual(resource)
     if (individual.props(rdf.typ).contains(lwm.LabWork)) {
@@ -103,19 +106,58 @@ object LabWorks {
   }
 
   def all(): Future[List[Individual]] = {
+    import utils.Global._
     sparqlExecutionContext.executeQuery(SPARQLBuilder.listIndividualsWithClass(lwm.LabWork)).map { stringResult ⇒
       SPARQLTools.statementsFromString(stringResult).map(labwork ⇒ Individual(labwork.s)).toList
     }
   }
 
+  def forStudent(student: Resource)(implicit queryHost: QueryHost) = {
+    s"""
+      |${Vocabulary.defaultPrefixes}
+      |select distinct ?labwork where {
+      | $student lwm:memberOf ?group .
+      | ?group lwm:hasLabWork ?labwork
+      |}
+    """.stripMargin.execSelect().map { solution ⇒
+      Resource(solution.data("?labwork").toString)
+    }
+  }
+
+  def openForDegree(degree: Resource)(implicit queryHost: QueryHost) = {
+    s"""
+       |${Vocabulary.defaultPrefixes}
+       |select * where {
+       |  ?labwork lwm:hasCourse ?course .
+       |  ?course lwm:hasDegree $degree .
+       |  ?labwork lwm:allowsApplications "true"
+       |}
+     """.stripMargin.execSelect().map { solution ⇒
+      Resource(solution.data("labwork").toString)
+    }
+  }
+
+  def pendingApplications(student: Resource)(implicit queryHost: QueryHost) = {
+    s"""
+      |${Vocabulary.defaultPrefixes}
+      |select * where {
+      | $student lwm:hasPendingApplication ?application .
+      | ?application lwm:hasLabWork ?labwork
+      |}
+    """.stripMargin.execSelect().map { solution ⇒
+      Resource(solution.data("labwork").toString)
+    }
+  }
+
   def orderedGroups(labwork: Resource) = {
+    import utils.Global._
     val query =
       s"""
-         |select * where {
-         |$labwork ${Vocabulary.lwm.hasGroup} ?group .
-         |?group ${Vocabulary.lwm.hasGroupId} ?id .
-         |} order by desc(?id)
-       """.stripMargin
+        |select * where {
+        |$labwork ${Vocabulary.lwm.hasGroup} ?group .
+        |?group ${Vocabulary.lwm.hasGroupId} ?id .
+        |} order by desc(?id)
+      """.stripMargin
 
     val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
     var groups = List.empty[(Resource, String)]
@@ -129,6 +171,7 @@ object LabWorks {
   }
 
   def labworksForDate(date: LocalDate) = {
+    import utils.Global._
     val query =
       s"""
         select * where {
