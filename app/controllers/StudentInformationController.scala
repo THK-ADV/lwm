@@ -20,7 +20,11 @@ object StudentInformationController extends Controller with Authentication with 
 
   def showInformation(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action { implicit request ⇒
-      Ok(views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm))
+      val start = System.nanoTime()
+      val html = views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)
+      val duration = (System.nanoTime() - start) / 1000000
+      println(s"Duration: $duration")
+      Ok(html)
     }
   }
 

@@ -24,7 +24,7 @@
 
         <div class="container" id="everything">
             <div class="row">
-            @header_loggedIn_admin(Individual(student).props.getOrElse(lwm.hasGmId, List(StringLiteral(""))).head.value)
+            @header_loggedIn_admin(Students.getId(student))
             </div>
             <div class="row">
                 @navigation_admin()
