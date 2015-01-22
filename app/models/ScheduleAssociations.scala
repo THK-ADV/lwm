@@ -208,45 +208,38 @@ object ScheduleAssociations {
   }
 
   def getAlternateDates(oldSchedule: Resource, group: Resource, groupId: String, orderId: String) = {
-
-    val query =
-      s"""
-         prefix lwm: <http://lwm.gm.fh-koeln.de/>
-        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-        select * where {
-          ?labwork lwm:hasGroup $group .
-          ?labwork lwm:hasGroup ?group .
-          ?group lwm:hasScheduleAssociation ?association .
-          ?group lwm:hasGroupId ?groupId .
-          ?association lwm:hasAssignmentAssociation ?assignmentAssociation .
-          ?association lwm:hasAssignmentDate ?date .
-          ?association lwm:hasAssignmentDateTimetableEntry ?entry .
-          ?entry lwm:hasStartTime ?time .
-          ?assignmentAssociation lwm:hasOrderId "$orderId" .
-          filter not exists {?group lwm:hasGroupId "$groupId"}
-        }order by desc(?date) desc(?time)
-       """.stripMargin
-    val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
-    var alternates = List.empty[(String, String)]
-
-    while (results.hasNext) {
-      val solution = results.nextSolution()
-      val altSchedule = solution.getResource("association").getURI
-      val altGroupId = solution.getLiteral("groupId").getString
-      val altDate = solution.getLiteral("date").getString
-      val altTime = URLDecoder.decode(solution.getLiteral("time").getString, "UTF-8")
+    import utils.Implicits._
+    s"""
+       |${Vocabulary.defaultPrefixes}
+       |
+       | Select * where {
+       |
+       |       ?labwork lwm:hasGroup $group .
+       |       ?labwork lwm:hasGroup ?group .
+       |       ?group lwm:hasScheduleAssociation ?association .
+       |       ?group lwm:hasGroupId ?groupId .
+       |       ?association lwm:hasAssignmentAssociation ?assignmentAssociation .
+       |       ?association lwm:hasAssignmentDate ?date .
+       |       ?association lwm:hasAssignmentDateTimetableEntry ?entry .
+       |       ?entry lwm:hasStartTime ?time .
+       |       ?assignmentAssociation lwm:hasOrderId "$orderId" .
+       |
+       |    filter not exists {?group lwm:hasGroupId "$groupId"}
+       |
+       | } order by desc(?date) desc(?time)
+     """.stripMargin.execSelect().map { qs ⇒
+      val altSchedule = qs.data("association").asResource().getURI
+      val altGroupId = qs.data("groupId").asLiteral().getString
+      val altDate = qs.data("date").asLiteral().getString
+      val altTime = URLDecoder.decode(qs.data("time").asLiteral().getString, "UTF-8")
       val groupMembersSize = {
-        val newGroup = Resource(solution.getResource("group").getURI)
+        val newGroup = Resource(qs.data("group").asResource().getURI)
         val groupCount = Individual(newGroup).props.getOrElse(lwm.hasMember, List(StringLiteral("")))
         val normalizedGroupCount = 0 //getNormalizedCount(newGroup, altDate)
         groupCount.size + normalizedGroupCount
       }
-      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)") :: alternates
+      (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)")
     }
-
-    alternates
   }
 
   def getNormalizedCount(group: Resource, date: String): Int = {

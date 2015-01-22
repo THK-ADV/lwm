@@ -1,14 +1,11 @@
 @(student: Resource, labwork: Resource, form: Form[AlternateAssociationFormModel])(implicit request: RequestHeader)
 @import java.net.URLDecoder
-@import Vocabulary._
-@import utils.Implicits._
+@import utils.semantic.Resource
+@import utils.semantic.Vocabulary._
 @import com.hp.hpl.jena.query.QueryExecutionFactory
+@import utils.Global._
 
 @{
-    var lines = Vector("<table class=\"table\"><tr><th>Termin</th><th>Anwesend</th><th>Bestanden</th><th>Optionen</th></tr>")
-    var modals = List.empty[String]
-    var initScripts = List.empty[String]
-
     val query =
         s"""
          select * where {
@@ -38,33 +35,39 @@
             ?alternateRoom ${lwm.hasRoomId} ?alternateRoomId
           }
          } order by asc(?id)
-       """.stripMargin.execSelect()(utils.Global.query).map{solution =>
+       """.stripMargin
 
-        val date = solution.data("assignmentDate").toString
-        val room = solution.data("roomId").toString
-        val scheduleRes = solution.data("scheduleAssociation").toString
-        val groupRes = solution.data("group").toString
-        val time = URLDecoder.decode(solution.data("startTime").toString, "UTF-8")
-        val groupId = URLDecoder.decode(solution.data("groupId").toString, "UTF-8")
-        val orderId = URLDecoder.decode(solution.data("id").toString, "UTF-8")
-        val supervisor = URLDecoder.decode(solution.data("supervisorName").toString, "UTF-8")
+    val result = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
+    var lines = Vector("<table class=\"table\"><tr><th>Termin</th><th>Anwesend</th><th>Bestanden</th><th>Optionen</th></tr>")
+    var modals = List.empty[String]
+    var initScripts = List.empty[String]
+    while(result.hasNext){
+        val solution = result.next()
+        val date = solution.getLiteral("assignmentDate").getString
+        val room = solution.getLiteral("roomId").getString
+        val scheduleRes = solution.getResource("scheduleAssociation").getURI
+        val groupRes = solution.getResource("group").getURI
+        val time = URLDecoder.decode(solution.getLiteral("startTime").getString, "UTF-8")
+        val groupId = URLDecoder.decode(solution.getLiteral("groupId").getString, "UTF-8")
+        val orderId = URLDecoder.decode(solution.getLiteral("id").getString, "UTF-8")
+        val supervisor = URLDecoder.decode(solution.getLiteral("supervisorName").getString, "UTF-8")
 
 
-        val passed = solution.data.get("passed").map(_.toString).getOrElse("false").toBoolean
-        val attended = solution.data.get("attended").map(_.toString).getOrElse("false").toBoolean
+        val passed = if(solution.getLiteral("passed") == null) false else solution.getLiteral("passed").getBoolean
+        val attended =  if(solution.getLiteral("attended") == null) false else solution.getLiteral("attended").getBoolean
         val script =
-                s"""
+            s"""
              |<script>
              |  initLocalState("$scheduleRes", $attended, $passed);
              |</script>
            """.stripMargin
 
-        val row =  if(solution.data.get("alternateGroupId").isDefined){
-            val alternateUri = URLDecoder.decode(solution.data("alternate").toString, "UTF-8")
-            val id = URLDecoder.decode(solution.data("alternateGroupId").toString, "UTF-8")
-            val aDate = solution.data.get("alternateDate").map(node => URLDecoder.decode(node.toString, "UTF-8")).getOrElse("")
-            val aRoom = solution.data.get("alternateRoomId").map(_.toString).getOrElse("")
-            val aTime = solution.data.get("alternateTime").map(node => URLDecoder.decode(node.toString, "UTF-8")).getOrElse("")
+        val row =  if(solution.getLiteral("alternateGroupId") != null){
+            val alternateUri = URLDecoder.decode(solution.getResource("alternate").getURI, "UTF-8")
+            val id = URLDecoder.decode(solution.getLiteral("alternateGroupId").getString, "UTF-8")
+            val aDate = if(solution.getLiteral("alternateDate") == null) "" else solution.getLiteral("alternateDate").getString
+            val aRoom = if(solution.getLiteral("alternateRoomId") == null) "" else solution.getLiteral("alternateRoomId").getString
+            val aTime = if(solution.getLiteral("alternateTime") == null) "" else URLDecoder.decode(solution.getLiteral("alternateTime").getString, "UTF-8")
 
             s"""<tr>
                |<td><span id="old${alternateUri.hashCode}" class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span id="new${alternateUri.hashCode}"  class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoom</span><a id="rm${alternateUri.hashCode}" href="javascript:removeAlternateDate('${student.value}', '$scheduleRes','$alternateUri', '${alternateUri.hashCode}');" class="glyphicon glyphicon-remove"></a></td>
@@ -83,7 +86,7 @@
 
 
         val modal =
-          s"""
+            s"""
              <div class="modal fade" id="${scheduleRes.hashCode}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -101,20 +104,15 @@
                 </div>
            """.stripMargin
 
-
         initScripts = script :: initScripts
         modals = modal :: modals
 
         lines = lines :+ row
-
     }
-
-
     lines = lines :+ "</table>"
     lines = lines ++ initScripts ++ modals
 
 
-    val text = lines.mkString("\n")
-
-    Html(text)
+    Html(lines.mkString("\n"))
 }
+

@@ -115,7 +115,11 @@ object LabworkApplicationController extends Controller with Authentication with 
                   LabworkApplications.create(labworkApplication).map { l ⇒
                     createTransaction(session.user, l.uri, s"Labwork Application ${l.uri} created by ${session.user}")
                     Redirect(routes.StudentDashboardController.dashboard())
+                  }.recover {
+                    case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard())
                   }
+                }.recover {
+                  case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard())
                 }
 
               } else {
@@ -180,6 +184,8 @@ object LabworkApplicationController extends Controller with Authentication with 
           applicationlist.props.get(lwm.hasLabWork).map { labwork ⇒
             ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), min.get.toInt, min.get.toInt) // TODO -> has to be in application.conf
           }
+        }.recover {
+          case NonFatal(t) ⇒ Redirect(routes.LabworkApplicationController.index())
         }
       }
       Future.successful(Redirect(routes.LabworkApplicationController.index()))

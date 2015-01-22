@@ -31,7 +31,7 @@
                 <div class="col-md-9">
                     <h3>Übersicht für @helpers.students.studentName(student)</h3>
                     @Students.labworksForStudent(student).map{ labwork =>
-                        <h3> <a href="@routes.LabworkManagementController.edit(labwork._1.value)">@labwork._2</a>
+                        <h3> <a href="@routes.LabworkManagementController.edit(labwork._1.value)">@labwork._2._2</a>
                             @helpers.students.groupForStudent(student, labwork._1)
                         </h3>
                         @helpers.students.detailedStudentSchedule(student, labwork._1, form)

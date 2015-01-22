@@ -82,9 +82,9 @@ object Students extends CheckedDelete {
     val h = s"""
       |${Vocabulary.defaultPrefixes}
       |
-      |select * where {
-      | ?student rdf:type lwm:Student .
-      | ?student lwm:hasGmId "$gmId"
+      | Select * where {
+      |     ?student rdf:type lwm:Student .
+      |     ?student lwm:hasGmId "$gmId"
       | }
     """.stripMargin.execSelect().map { solution ⇒
       solution.data("student")
@@ -266,10 +266,11 @@ object Students extends CheckedDelete {
          | Select * {
          |     $student lwm:memberOf ?group .
          |     ?group lwm:hasLabWork ?labwork .
-         |     optional { ?group rdfs:label ?name } .
+         |     optional { ?group rdfs:label ?name .
+         |                ?labwork rdfs:label ?labworkName } .
          |
          | } order by desc(?name)
-       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString) -> qs.data.get("name").map(_.toString).getOrElse("No Group"))
+       """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("labwork").toString) -> (qs.data.get("name").map(_.toString).getOrElse("No Group"), URLDecoder.decode(qs.data.get("labworkName").map(_.toString).getOrElse(""), "UTF-8")))
   }
 
   def getLabworkApprovalProperty(student: Resource, labwork: Resource)(implicit queryHost: QueryHost): Option[Property] = {
