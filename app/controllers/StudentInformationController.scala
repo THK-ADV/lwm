@@ -16,6 +16,7 @@ import scala.util.control.NonFatal
 object StudentInformationController extends Controller with Authentication with TransactionSupport {
 
   import play.api.Play.current
+
   override val system = Akka.system()
 
   def showInformation(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
@@ -71,22 +72,25 @@ object StudentInformationController extends Controller with Authentication with 
       implicit request ⇒
         import utils.Implicits._
 
-        val student = (request.body \ "student").as[String]
-        val oldSchedule = (request.body \ "oldSchedule").as[String]
-        val alternate = (request.body \ "schedule").as[String]
+        val student = (request.body \ "student").asOpt[String]
+        val oldSchedule = (request.body \ "oldSchedule").asOpt[String]
+        val alternate = (request.body \ "schedule").asOpt[String]
 
-        s"""
-        |prefix lwm: <http://lwm.gm.fh-koeln.de/>
-        |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        |
-        |delete data {
-        |  <$student> lwm:hasSchedule <$oldSchedule> .
-        |  <$oldSchedule> lwm:hasAlternateScheduleAssociation <$alternate> .
-        |}
-    """.stripMargin.execUpdate()
-
-        Ok("Schedule removed")
+        if (student.isDefined && oldSchedule.isDefined && alternate.isDefined) {
+          s"""
+              |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+              |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+              |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+              |
+              |delete data {
+              |  <${student.get}> lwm:hasSchedule <${oldSchedule.get}> .
+              |  <${oldSchedule.get}> lwm:hasAlternateScheduleAssociation <${alternate.get}> .
+              |}
+          """.stripMargin.execUpdate()
+          Ok("Schedule removed")
+        } else {
+          Ok("Schedule not removed")
+        }
     }
   }
 }
