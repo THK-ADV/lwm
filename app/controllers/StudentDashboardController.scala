@@ -16,7 +16,7 @@ object StudentDashboardController extends Controller {
 
   def dashboard = hasPermissions(Permissions.DefaultRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         student ← Students.get(session.user)
         degree ← Students.getDegree(student)
       } yield {
@@ -25,6 +25,8 @@ object StudentDashboardController extends Controller {
         println(labworkList)
         val studentLabworkList = Students.labworksForStudent(student).toMap.keys.map(Individual(_)).toList
         Ok(views.html.dashboard_student(Individual(student), (labworkList diff pendingLabworkList) diff studentLabworkList, pendingLabworkList, Students.labworksForStudent(student).map(e ⇒ Individual(e._1) -> Seq(e._2)), LabworkApplications.Forms.labworkApplicationForm.fill(LabworkApplicationFormModel(session.user, "", Nil))))
+      }).recover{
+        case NonFatal(t) => Ok(views.html.login(UserForms.loginForm)).withNewSession
       }
     }
   }

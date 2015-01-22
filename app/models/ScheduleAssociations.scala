@@ -250,44 +250,34 @@ object ScheduleAssociations {
   }
 
   def getNormalizedCount(group: Resource, date: String): Int = {
-    val start = System.nanoTime()
     import utils.Implicits._
     val queryAlternate =
       s"""
-          PREFIX owl: <http://www.w3.org/2002/07/owl#>
-          PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+         |${Vocabulary.defaultPrefixes}
+         |
+         | Select (count(distinct ?s) as ?count) where {
+         |
+         |     ?s lwm:memberOf $group .
+         |     ?group lwm:hasLabWork ?labwork .
+         |     ?s lwm:hasScheduleAssociation ?sched .
+         |     ?sched lwm:hasAlternateScheduleAssociation ?alter .
+         |     ?alter lwm:hasAssignmentDate "$date" .
+         |     ?alter lwm:hasGroup ?g2 .
+         |     ?g2 lwm:hasLabWork ?labwork
+         | }
+       """.stripMargin.execSelect().head.data("count").asLiteral().getInt
 
-        Select ?s where {
-          ?s lwm:memberOf $group .
-          ?group lwm:hasLabWork ?labwork .
-          ?s lwm:hasScheduleAssociation ?sched .
-          ?sched lwm:hasAlternateScheduleAssociation ?alter .
-          ?alter lwm:hasAssignmentDate "$date" .
-          ?alter lwm:hasGroup ?g2 .
-          ?g2 lwm:hasLabWork ?labwork
-        }
-      """.stripMargin.execSelect().size
-
-    val duration = (System.nanoTime() - start) / 1000000
-    println(duration)
     val queryHidden =
       s"""
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-       Select ?s where {
-        ?s lwm:memberOf $group .
-        ?group lwm:hasLabWork ?labwork .
-        ?s lwm:hasHidingState ?state .
-        ?state lwm:hasHidingSubject ?labwork
-    }
-     """.stripMargin.execSelect().size
+          |${Vocabulary.defaultPrefixes}
+          |
+          | Select ?s where {
+          |    ?s lwm:memberOf $group .
+          |    ?group lwm:hasLabWork ?labwork .
+          |    ?s lwm:hasHidingState ?state .
+          |    ?state lwm:hasHidingSubject ?labwork .
+          | }
+      """.stripMargin.execSelect().size
 
     queryAlternate - queryHidden
   }
