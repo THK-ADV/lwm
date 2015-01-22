@@ -6,7 +6,7 @@ import collection.mutable.ListBuffer
 
 object BreadCrumbKeeper {
 
-  case class UrlReference(label: String, uri: String)
+  case class UrlReference(label: String, storingObject: String, checkingObject: String)
 
   final val noStorageRef = "noStorage"
 }
@@ -37,7 +37,7 @@ class BreadCrumbKeeper {
       "", "/")
 
   def add(reference: UrlReference): Unit = {
-    if (blacklist.contains(reference.uri)) {
+    if (blacklist.contains(reference.checkingObject)) {
       breadcrumbs.clear()
       breadcrumbs += reference
     } else if (breadcrumbs.contains(reference)) {
@@ -61,7 +61,7 @@ class BreadCrumbKeeper {
 
     breadcrumbs.foreach {
       ref ⇒
-        builder.append(s"<a href='${ref.uri}'>${ref.label} / </a>")
+        builder.append(s"<a href='${ref.storingObject}'>${ref.label} / </a>")
     }
     Html(builder.toString())
   }
