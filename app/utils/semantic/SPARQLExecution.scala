@@ -24,14 +24,14 @@ class SPARQLExecution(val updateHost: String, queryHost: String)(implicit timeou
   }
 
   def executeQuery(query: String): Future[String] = Future {
-    println(s"Executing Query: \n $query")
+    // println(s"Executing Query: \n $query")
     val start = System.nanoTime()
     val queryEncoded = URLEncoder.encode(query, "UTF-8")
     val response = Http.postData(queryHost, s"query=$queryEncoded")
       .option(HttpOptions.readTimeout(timeout.duration.toMillis.toInt))
       .header("accept", "text/xml")
       .asString
-    println(s"Duration: ${(System.nanoTime() - start) / 1000000}")
+    // println(s"Duration: ${(System.nanoTime() - start) / 1000000}")
     response
   }
 

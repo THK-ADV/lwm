@@ -17,8 +17,8 @@ object Implicits {
     import scala.collection.JavaConverters._
 
     def execSelect()(implicit queryHost: QueryHost): List[QuerySolution] = {
-      println(string)
-      val start = System.nanoTime()
+      // println(string)
+      // val start = System.nanoTime()
       val results = QueryExecutionFactory.sparqlService(queryHost.host, string).execSelect().asScala
       val m = results.map { solution ⇒
         val data = solution.varNames().asScala.map { variable ⇒
@@ -27,7 +27,7 @@ object Implicits {
         }
         QuerySolution(data.toMap)
       }.toList
-      println(s"Select Duration: ${(System.nanoTime() - start) / 1000000}")
+      // println(s"Select Duration: ${(System.nanoTime() - start) / 1000000}")
       m
     }
 
@@ -37,10 +37,10 @@ object Implicits {
     }
 
     def executeAsk()(implicit queryHost: QueryHost) = {
-      println(string)
+      // println(string)
       val start = System.nanoTime()
       val r = QueryExecutionFactory.sparqlService(queryHost.host, string).execAsk()
-      println(s"ASK Duration: ${(System.nanoTime() - start) / 1000000}")
+      // println(s"ASK Duration: ${(System.nanoTime() - start) / 1000000}")
       r
     }
   }
