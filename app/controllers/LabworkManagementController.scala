@@ -100,7 +100,7 @@ object LabworkManagementController extends Controller with Authentication with T
 
       val groupQuery =
         s"""
-          |select (<$labworkid> as ?s) (${lwm.hasGroup} as ?p) ?o w here {
+          |select (<$labworkid> as ?s) (${lwm.hasGroup} as ?p) ?o where {
           | <$labworkid> ${lwm.hasGroup} ?o .
           | ?o ${lwm.hasGroupId} ?id
           |} order by asc(?id)
