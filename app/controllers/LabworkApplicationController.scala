@@ -186,7 +186,7 @@ object LabworkApplicationController extends Controller with Authentication with 
         val applicationsFuture = LabworkApplicationLists.getAllApplications(applicationlist.uri)
         applicationsFuture.map { applications ⇒
           applicationlist.props.get(lwm.hasLabWork).map { labwork ⇒
-            ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), min.get.toInt, min.get.toInt) // TODO -> has to be in application.conf
+            ListGrouping.group(labwork.head.asResource().get, applications.map(_.uri), min.get.toInt, max.get.toInt) // TODO -> has to be in application.conf
           }
         }.recover {
           case NonFatal(t) ⇒ Redirect(routes.LabworkApplicationController.index())
