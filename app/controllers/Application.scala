@@ -114,9 +114,11 @@ object Application extends Controller with Authentication {
   def refreshCrumbs = hasSession { session ⇒
     Action.async(parse.json) { implicit request ⇒
       val label = (request.body \ "label").asOpt[String]
-      val url = (request.body \ "url").asOpt[String]
-      if (url.isDefined && label.isDefined && label.get.trim != BreadCrumbKeeper.noStorageRef) {
-        session.breadcrumbKeeper.add(UrlReference(label.get, url.get))
+      val store = (request.body \ "store").asOpt[String]
+      val check = (request.body \ "check").asOpt[String]
+
+      if (store.isDefined && check.isDefined && label.isDefined && label.get.trim != BreadCrumbKeeper.noStorageRef) {
+        session.breadcrumbKeeper.add(UrlReference(label.get, store.get, check.get))
       }
       Future(Ok(session.breadcrumbKeeper.generate())).recover {
         case NonFatal(e) ⇒

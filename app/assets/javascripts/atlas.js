@@ -165,8 +165,12 @@ function currentUser() {
 }
 
 function breadCrumbs(label) {
-    var path = window.location.pathname;
-    ajaxHO("/breadcrumbs", "POST", "application/json", {label: label, url: path}, function(data){
+    var url = window.location.href;
+    var pathname = window.location.pathname;
+    var additionalParams = url.split(window.location.pathname)[1];
+    var path = pathname + additionalParams;
+    
+    ajaxHO("/breadcrumbs", "POST", "application/json", {label: label, store: path, check: pathname}, function(data){
         $("#breadcrumbs").html(data);
     });
 }

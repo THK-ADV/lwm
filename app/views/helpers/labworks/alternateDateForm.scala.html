@@ -13,12 +13,6 @@
 
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-            <button id="alternateDateSaveButton@{oldSchedule.value.hashCode}" type="button" class="btn btn-primary">Speichern</button>
+            <button onclick="postAlternateDate('@student.value', '@oldSchedule.value', '@oldSchedule.value.hashCode')" type="button" class="btn btn-primary">Speichern</button>
         </div>
     </div>
-
-    <script>
-        $("#alternateDateSaveButton@{oldSchedule.value.hashCode}").click(function(){
-        postAlternateDate('@student.value', '@oldSchedule.value', @oldSchedule.value.hashCode);
-    });
-    </script>

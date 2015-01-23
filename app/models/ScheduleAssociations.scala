@@ -208,84 +208,65 @@ object ScheduleAssociations {
   }
 
   def getAlternateDates(oldSchedule: Resource, group: Resource, groupId: String, orderId: String) = {
+    import utils.Implicits._
+    s"""
+       |${Vocabulary.defaultPrefixes}
+       |
+       | Select * where {
+       |
+       |       ?labwork lwm:hasGroup $group .
+       |       ?labwork lwm:hasGroup ?group .
+       |       ?group lwm:hasScheduleAssociation ?association .
+       |       ?group lwm:hasGroupId ?groupId .
+       |       ?association lwm:hasAssignmentAssociation ?assignmentAssociation .
+       |       ?association lwm:hasAssignmentDate ?date .
+       |       ?association lwm:hasAssignmentDateTimetableEntry ?entry .
+       |       ?entry lwm:hasStartTime ?time .
+       |       ?assignmentAssociation lwm:hasOrderId "$orderId" .
+       |
+       |    filter not exists {?group lwm:hasGroupId "$groupId"}
+       |
+       | } order by desc(?date) desc(?time)
+     """.stripMargin.execSelect().map { qs ⇒
+      val altSchedule = qs.data("association").asResource().getURI
+      val altGroupId = qs.data("groupId").asLiteral().getString
+      val altDate = qs.data("date").asLiteral().getString
+      val altTime = URLDecoder.decode(qs.data("time").asLiteral().getString, "UTF-8")
+      val altGroup = qs.data("group").asResource().getURI
+      val groupMembersSize = getNormalizedCount(Resource(altGroup), altDate)
 
-    val query =
-      s"""
-         prefix lwm: <http://lwm.gm.fh-koeln.de/>
-        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-        select * where {
-          ?labwork lwm:hasGroup $group .
-          ?labwork lwm:hasGroup ?group .
-          ?group lwm:hasScheduleAssociation ?association .
-          ?group lwm:hasGroupId ?groupId .
-          ?association lwm:hasAssignmentAssociation ?assignmentAssociation .
-          ?association lwm:hasAssignmentDate ?date .
-          ?association lwm:hasAssignmentDateTimetableEntry ?entry .
-          ?entry lwm:hasStartTime ?time .
-          ?assignmentAssociation lwm:hasOrderId "$orderId" .
-          filter not exists {?group lwm:hasGroupId "$groupId"}
-        }order by desc(?date) desc(?time)
-       """.stripMargin
-    val results = QueryExecutionFactory.sparqlService(queryHost, query).execSelect()
-    var alternates = List.empty[(String, String)]
-
-    while (results.hasNext) {
-      val solution = results.nextSolution()
-      val altSchedule = solution.getResource("association").getURI
-      val altGroupId = solution.getLiteral("groupId").getString
-      val altDate = solution.getLiteral("date").getString
-      val altTime = URLDecoder.decode(solution.getLiteral("time").getString, "UTF-8")
-      val groupMembersSize = {
-        val newGroup = Resource(solution.getResource("group").getURI)
-        val groupCount = Individual(newGroup).props.getOrElse(lwm.hasMember, List(StringLiteral("")))
-        val normalizedGroupCount = getNormalizedCount(newGroup, altDate)
-        groupCount.size + normalizedGroupCount
-      }
-      alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)") :: alternates
+      (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)")
     }
-
-    alternates
   }
 
   def getNormalizedCount(group: Resource, date: String): Int = {
     import utils.Implicits._
-    val queryAlternate =
-      s"""
-          PREFIX owl: <http://www.w3.org/2002/07/owl#>
-          PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
-          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-        Select ?s where {
-          ?s lwm:memberOf $group .
-          ?group lwm:hasLabWork ?labwork .
-          ?s lwm:hasScheduleAssociation ?sched .
-          ?sched lwm:hasAlternateScheduleAssociation ?alter .
-          ?alter lwm:hasAssignmentDate "$date" .
-          ?alter lwm:hasGroup ?g2 .
-          ?g2 lwm:hasLabWork ?labwork
-        }
+    val groupSize = Individual(group).props.getOrElse(lwm.hasMember, Nil).size
+
+    val alternateSize =
+      s"""
+         |${Vocabulary.defaultPrefixes}
+         |
+         | Select ?association where {
+         |    ?association lwm:hasAlternateScheduleAssociation ?schedule .
+         |    ?schedule lwm:hasAssignmentDate "$date" .
+         |    ?schedule lwm:hasGroup $group .
+         | }
+       """.stripMargin.execSelect().size
+
+    val hiddenSize =
+      s"""
+          |${Vocabulary.defaultPrefixes}
+          |
+          | Select ?s where {
+          |    ?s lwm:memberOf $group .
+          |    $group lwm:hasLabWork ?labwork .
+          |    ?s lwm:hasHidingState ?state .
+          |    ?state lwm:hasHidingSubject ?labwork .
+          | }
       """.stripMargin.execSelect().size
 
-    val queryHidden =
-      s"""
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX lwm: <http://lwm.gm.fh-koeln.de/>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-       Select ?s where {
-        ?s lwm:memberOf $group .
-        ?group lwm:hasLabWork ?labwork .
-        ?s lwm:hasHidingState ?state .
-        ?state lwm:hasHidingSubject ?labwork
-    }
-     """.stripMargin.execSelect().size
-
-    queryAlternate - queryHidden
+    groupSize + alternateSize - hiddenSize
   }
 }
