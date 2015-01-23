@@ -115,7 +115,10 @@ object UserManagement extends Controller with Authentication {
             u.update(nco.phoneNumber, phone, StringLiteral(user.phone))
             u.update(rdfs.label, label, StringLiteral(s"${user.firstname} ${user.lastname}"))
           }
-          Future.successful(Redirect(routes.UserManagement.index()))
+          Future(Redirect(routes.UserManagement.index())).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
         }
       )
     }
