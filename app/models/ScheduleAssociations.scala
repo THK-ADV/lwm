@@ -232,46 +232,41 @@ object ScheduleAssociations {
       val altGroupId = qs.data("groupId").asLiteral().getString
       val altDate = qs.data("date").asLiteral().getString
       val altTime = URLDecoder.decode(qs.data("time").asLiteral().getString, "UTF-8")
-      val groupMembersSize = {
-        val newGroup = Resource(qs.data("group").asResource().getURI)
-        val groupCount = Individual(newGroup).props.getOrElse(lwm.hasMember, List(StringLiteral("")))
-        val normalizedGroupCount = 0 //getNormalizedCount(newGroup, altDate)
-        groupCount.size + normalizedGroupCount
-      }
+      val altGroup = qs.data("group").asResource().getURI
+      val groupMembersSize = getNormalizedCount(Resource(altGroup), altDate)
+
       (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)")
     }
   }
 
   def getNormalizedCount(group: Resource, date: String): Int = {
     import utils.Implicits._
-    val queryAlternate =
+
+    val groupSize = Individual(group).props.getOrElse(lwm.hasMember, Nil).size
+
+    val alternateSize =
       s"""
          |${Vocabulary.defaultPrefixes}
          |
-         | Select (count(distinct ?s) as ?count) where {
-         |
-         |     ?s lwm:memberOf $group .
-         |     ?group lwm:hasLabWork ?labwork .
-         |     ?s lwm:hasScheduleAssociation ?sched .
-         |     ?sched lwm:hasAlternateScheduleAssociation ?alter .
-         |     ?alter lwm:hasAssignmentDate "$date" .
-         |     ?alter lwm:hasGroup ?g2 .
-         |     ?g2 lwm:hasLabWork ?labwork
+         | Select ?association where {
+         |    ?association lwm:hasAlternateScheduleAssociation ?schedule .
+         |    ?schedule lwm:hasAssignmentDate "$date" .
+         |    ?schedule lwm:hasGroup $group .
          | }
-       """.stripMargin.execSelect().head.data("count").asLiteral().getInt
+       """.stripMargin.execSelect().size
 
-    val queryHidden =
+    val hiddenSize =
       s"""
           |${Vocabulary.defaultPrefixes}
           |
           | Select ?s where {
           |    ?s lwm:memberOf $group .
-          |    ?group lwm:hasLabWork ?labwork .
+          |    $group lwm:hasLabWork ?labwork .
           |    ?s lwm:hasHidingState ?state .
           |    ?state lwm:hasHidingSubject ?labwork .
           | }
       """.stripMargin.execSelect().size
 
-    queryAlternate - queryHidden
+    groupSize + alternateSize - hiddenSize
   }
 }
