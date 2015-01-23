@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.AdministrationDashboardController._
 import models._
 import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
@@ -8,6 +9,9 @@ import utils.TransactionSupport
 import utils.semantic.{ Individual, Resource }
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Global._
+
+import scala.util.control.NonFatal
+
 /**
   * Created by root on 9/13/14.
   */
@@ -19,11 +23,14 @@ object SemesterManagementController extends Controller with Authentication with 
     session ⇒
       Action.async {
         implicit request ⇒
-          for {
+          (for {
             semesterResources ← Semesters.all()
             semesters = semesterResources.map(s ⇒ Individual(s))
           } yield {
             Ok(views.html.semesterManagement(semesters, Semesters.options, SemesterForm.semesterForm))
+          }).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
           }
       }
   }
@@ -52,7 +59,10 @@ object SemesterManagementController extends Controller with Authentication with 
               Redirect(routes.SemesterManagementController.index())
             }
           }
-        )
+        ).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 
@@ -64,6 +74,9 @@ object SemesterManagementController extends Controller with Authentication with 
           Semesters.delete(Resource(id)).map { s ⇒
             deleteTransaction(session.user, s, s"New Semester $s created by ${session.user}")
             Redirect(routes.SemesterManagementController.index())
+          }.recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
           }
       }
   }

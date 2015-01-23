@@ -1,6 +1,7 @@
 package controllers
 
 import actors.TransactionsLoggerActor.Transaction
+import controllers.AdministrationDashboardController._
 import models._
 import org.joda.time.{ LocalDateTime, Days, Interval, LocalDate }
 import play.api.Play
@@ -12,6 +13,7 @@ import utils.semantic.Vocabulary.{ lwm, rdfs }
 import utils.semantic.{ Individual, Resource, SPARQLTools }
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object BlacklistManagementController extends Controller with Authentication {
 
@@ -21,12 +23,15 @@ object BlacklistManagementController extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         blacklists ← Blacklists.all()
         semesterResources ← Semesters.all()
         semesters = semesterResources.map(s ⇒ Individual(s))
       } yield {
         Ok(views.html.blacklist_management(blacklists, semesters, Blacklists.Forms.blacklistForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -51,6 +56,9 @@ object BlacklistManagementController extends Controller with Authentication {
 
           Ok(views.html.blacklist_date_management(title, semester, dates, blacklist, Blacklists.Forms.blacklistDateForm, Blacklists.Forms.blacklistDateRangeForm))
         }
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -73,7 +81,10 @@ object BlacklistManagementController extends Controller with Authentication {
             Redirect(routes.BlacklistManagementController.index())
           }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -81,11 +92,14 @@ object BlacklistManagementController extends Controller with Authentication {
     Action.async(parse.json) {
       implicit request ⇒
         val id = (request.body \ "id").as[String]
-        for (dates ← BlacklistDates.getAll(Resource(id))) yield {
+        (for (dates ← BlacklistDates.getAll(Resource(id))) yield {
           dates.foreach(d ⇒ BlacklistDates.delete(d.uri))
           Blacklists.delete(Resource(id))
           system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), DeleteAction(Resource(id), s"Backlist deleted by ${session.user}.")))
           Redirect(routes.BlacklistManagementController.index())
+        }).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
     }
   }
@@ -122,7 +136,10 @@ object BlacklistManagementController extends Controller with Authentication {
             Redirect(routes.BlacklistManagementController.blacklistEdit(blacklist.blacklistResource))
           }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -165,7 +182,10 @@ object BlacklistManagementController extends Controller with Authentication {
             Redirect(routes.BlacklistManagementController.blacklistEdit(blacklist.blacklistResource))
           }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -179,12 +199,15 @@ object BlacklistManagementController extends Controller with Authentication {
         date ← dateId
       } yield BlacklistDates.delete(Resource(date))
 
-      maybeDeleted match {
+      (maybeDeleted match {
         case Some(deleted) ⇒ deleted.map { id ⇒
           system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), DeleteAction(id, s"Backlist Entry deleted by ${session.user}.")))
           Redirect(routes.BlacklistManagementController.blacklistEdit(listId.get))
         }
-        case None ⇒ Future.successful(Redirect(routes.BlacklistManagementController.index()))
+        case None ⇒ Future(Redirect(routes.BlacklistManagementController.index()))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }

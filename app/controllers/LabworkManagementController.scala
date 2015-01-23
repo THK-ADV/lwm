@@ -2,6 +2,7 @@ package controllers
 
 import java.net.URLDecoder
 
+import controllers.AdministrationDashboardController._
 import controllers.AssignmentManagementController._
 import controllers.StudentsManagement._
 import models._
@@ -39,7 +40,7 @@ object LabworkManagementController extends Controller with Authentication with T
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         courseResources ← Courses.all()
         labworks ← LabWorks.all()
         semesterResources ← Semesters.all()
@@ -47,6 +48,9 @@ object LabworkManagementController extends Controller with Authentication with T
         semesters = semesterResources.map(s ⇒ Individual(s))
       } yield {
         Ok(views.html.labwork_management(semesters.toList, labworks.toList, courses.toList, LabWorkForms.labworkForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -96,7 +100,7 @@ object LabworkManagementController extends Controller with Authentication with T
 
       val groupQuery =
         s"""
-          |select (<$labworkid> as ?s) (${lwm.hasGroup} as ?p) ?o where {
+          |select (<$labworkid> as ?s) (${lwm.hasGroup} as ?p) ?o w here {
           | <$labworkid> ${lwm.hasGroup} ?o .
           | ?o ${lwm.hasGroupId} ?id
           |} order by asc(?id)
@@ -145,7 +149,7 @@ object LabworkManagementController extends Controller with Authentication with T
           SPARQLTools.statementsFromString(result).map(_.s)
         }
       }
-      for {
+      (for {
         allApplications ← LabworkApplications.all()
         groups ← groupsFuture
         semesters ← Semesters.all()
@@ -167,6 +171,9 @@ object LabworkManagementController extends Controller with Authentication with T
           semesters.map(s ⇒ Individual(s)), courses.map(c ⇒ Individual(c)),
           AssignmentForms.assignmentAssociationForm,
           LabWorkForms.labworkUpdateForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -190,7 +197,10 @@ object LabworkManagementController extends Controller with Authentication with T
               Redirect(routes.LabworkManagementController.index())
             }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -200,6 +210,9 @@ object LabworkManagementController extends Controller with Authentication with T
       LabWorks.delete(Resource(id)).map { lw ⇒
         deleteTransaction(session.user, lw, s"Labwork $lw deleted by ${session.user}")
         Redirect(routes.LabworkManagementController.index())
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -245,7 +258,10 @@ object LabworkManagementController extends Controller with Authentication with T
             }
 
           }
-          Future.successful(Redirect(routes.LabworkManagementController.index()))
+          Future(Redirect(routes.LabworkManagementController.index())).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 
@@ -280,9 +296,12 @@ object LabworkManagementController extends Controller with Authentication with T
                 i.update(rdfs.label, oC.props.getOrElse(rdfs.label, List(StringLiteral(""))).head, nC.props.getOrElse(rdfs.label, List(StringLiteral(""))).head)
                 modifyTransaction(session.user, i.uri, s"Labworl ${i.uri} edited by ${session.user}")
               }
-              Future.successful(Redirect(routes.LabworkManagementController.edit(id)))
+              Future(Redirect(routes.LabworkManagementController.edit(id)))
             }
-          )
+          ).recover {
+              case NonFatal(e) ⇒
+                InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+            }
       }
   }
 
@@ -422,7 +441,7 @@ object LabworkManagementController extends Controller with Authentication with T
           }
         }
 
-        for {
+        (for {
           groups ← groupsFuture(labwork)
           courseLabel ← courselabelFuture(labwork)
           degreeLabel ← degreelabelFuture(labwork)
@@ -445,6 +464,9 @@ object LabworkManagementController extends Controller with Authentication with T
           writer.write(builder.toString())
           writer.close()
           Redirect(routes.LabworkManagementController.edit(labworkid))
+        }).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
     }
   }
@@ -486,7 +508,7 @@ object LabworkManagementController extends Controller with Authentication with T
         }
 
         val p = new PegDownProcessor()
-        for {
+        (for {
           labLabel ← labFuture
           semLabel ← semesterFuture
           assignment ← assignmentFuture
@@ -500,6 +522,9 @@ object LabworkManagementController extends Controller with Authentication with T
           val label = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
           val topics = a.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).head.value
           Ok(views.html.assignment_ordered_export(labLabel.head.value, semLabel.head.value, orderId, Html(label), Html(description), Html(text), Html(hints), Html(goals), topics))
+        }).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
     }
   }
@@ -523,7 +548,7 @@ object LabworkManagementController extends Controller with Authentication with T
           """.stripMargin.executeAsk()
         }
 
-        if (maybeStudent.isDefined) {
+        (if (maybeStudent.isDefined) {
           val student = Individual(Resource(maybeStudent.get))
           Students.getLabworkApprovalProperty(student.uri, labwork) match {
 
@@ -543,9 +568,12 @@ object LabworkManagementController extends Controller with Authentication with T
             ("approvedState", JsBoolean(askForApproval(student.uri, labwork)))
           ))
 
-          Future.successful(Ok(json))
+          Future(Ok(json))
         } else {
-          Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
+          Future(Redirect(routes.LabworkManagementController.edit(labworkid)))
+        }).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
     }
   }

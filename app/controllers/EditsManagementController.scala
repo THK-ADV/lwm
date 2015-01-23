@@ -3,6 +3,7 @@ package controllers
 import java.util.NoSuchElementException
 import actors.TransactionsLoggerActor.Transaction
 import com.google.common.primitives.Doubles
+import controllers.AdministrationDashboardController._
 import models._
 import org.joda.time.{ LocalDateTime, LocalDate }
 import play.api.{ Logger, Play }
@@ -61,7 +62,10 @@ object EditsManagementController extends Controller with Authentication with Tra
           }
         }
 
-        Future.successful(Redirect(routes.LabworkManagementController.index()))
+        Future(Redirect(routes.LabworkManagementController.index())).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
       }
   }
 

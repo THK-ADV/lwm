@@ -25,7 +25,7 @@ object Global extends GlobalSettings {
   implicit lazy val query = QueryHost(queryHost)
   implicit lazy val update = UpdateHost(updateHost)
 
-  implicit val timeout = Timeout(30.seconds)
+  implicit val timeout = Timeout(1.millisecond)
   implicit val sparqlExecutionContext = SPARQLExecution(queryHost, updateHost)
   val lwmNamespace = Namespace("http://lwm.gm.fh-koeln.de/")
 

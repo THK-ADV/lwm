@@ -2,6 +2,7 @@ package controllers
 
 import actors.{ UserCountSocketActor, SessionHandler }
 import akka.util.Timeout
+import controllers.AdministrationDashboardController._
 import models.{ Users, Students, UserForms }
 import play.api.libs.concurrent.{ Promise ⇒ PlayPromise }
 import play.api.libs.json.JsValue
@@ -10,6 +11,7 @@ import play.libs.Akka
 import play.api.Play.current
 import utils.Global._
 import scala.concurrent.{ Promise, Await, Future }
+import scala.util.control.NonFatal
 
 /**
   * Session Management.
@@ -36,7 +38,7 @@ object SessionManagement extends Controller {
     )
 
     loginData match {
-      case None ⇒ Future.successful(Unauthorized)
+      case None ⇒ Future(Unauthorized)
       case Some(login) ⇒
         val timeoutFuture = PlayPromise.timeout("No response from IDM", 45.second)
         val authFuture = (sessionsHandler ? SessionHandler.AuthenticationRequest(login.user.toLowerCase, login.password)).mapTo[Either[String, SessionHandler.Session]]
@@ -73,6 +75,9 @@ object SessionManagement extends Controller {
                 }
             }
           case t: String ⇒ Ok(views.html.error(t))
+        }.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
     }
 
@@ -105,7 +110,10 @@ object SessionManagement extends Controller {
       }
     }
 
-    p.future
+    p.future.recover {
+      case NonFatal(e) ⇒
+        Left(InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!"))
+    }
   }
 }
 

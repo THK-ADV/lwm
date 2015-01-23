@@ -1,6 +1,7 @@
 package controllers
 
 import actors.TransactionsLoggerActor.Transaction
+import controllers.AdministrationDashboardController._
 import models._
 import org.joda.time.LocalDateTime
 import play.api.Play
@@ -11,6 +12,7 @@ import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.{ Future, ExecutionContext }
+import scala.util.control.NonFatal
 
 object DegreeManagementController extends Controller with Authentication {
 
@@ -20,11 +22,14 @@ object DegreeManagementController extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         degreeResources ← Degrees.all()
         degrees = degreeResources.map(d ⇒ Individual(d))
       } yield {
         Ok(views.html.degreeManagement(degrees.toList, DegreeForms.degreeForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -46,7 +51,10 @@ object DegreeManagementController extends Controller with Authentication {
             Redirect(routes.DegreeManagementController.index())
           }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -58,6 +66,9 @@ object DegreeManagementController extends Controller with Authentication {
         Degrees.all().map { all ⇒
           Ok(views.html.degreeManagement(all.map(e ⇒ Individual(e)), DegreeForms.degreeForm))
         }
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -86,7 +97,10 @@ object DegreeManagementController extends Controller with Authentication {
           }
           Future.successful(Redirect(routes.DegreeManagementController.index()))
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 }

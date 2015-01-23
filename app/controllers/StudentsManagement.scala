@@ -1,7 +1,7 @@
 package controllers
 
-import com.hp.hpl.jena.tdb.assembler.Vocab
-import controllers.SemesterManagementController._
+import controllers.GroupManagementController._
+import controllers.SessionManagement._
 import models._
 import play.api.libs.json.{ JsArray, JsString, Json }
 import play.api.mvc.{ Result, Action, Controller }
@@ -24,7 +24,7 @@ object StudentsManagement extends Controller with Authentication with Transactio
 
   def index(page: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         studentResources ← Students.all()
         degreeResources ← Degrees.all()
         students = studentResources.map(s ⇒ Individual(s))
@@ -34,6 +34,9 @@ object StudentsManagement extends Controller with Authentication with Transactio
         val paged = sorted.slice((page.toInt - 1) * 50, ((page.toInt - 1) * 50) + 50)
         val nrPages = (students.size / 50.0).round + 1
         Ok(views.html.studentManagement(paged, degrees, nrPages.toInt, UserForms.studentForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -69,7 +72,10 @@ object StudentsManagement extends Controller with Authentication with Transactio
             case NonFatal(e) ⇒ promise.success(Redirect(routes.Application.index()).withNewSession)
           }
 
-          promise.future
+          promise.future.recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
         }
       )
     }
@@ -96,7 +102,10 @@ object StudentsManagement extends Controller with Authentication with Transactio
             Redirect(routes.StudentsManagement.index("1"))
           }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -124,6 +133,9 @@ object StudentsManagement extends Controller with Authentication with Transactio
           deleteTransaction(session.user, s, s"Student $s deleted by ${session.user}")
           Redirect(routes.StudentsManagement.index("1"))
         }
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -188,9 +200,12 @@ object StudentsManagement extends Controller with Authentication with Transactio
             s.update(rdfs.label, label, StringLiteral(s"${student.firstname} ${student.lastname}"))
             modifyTransaction(session.user, s.uri, s"Student ${s.uri} modified by ${session.user}")
           }
-          Future.successful(Redirect(routes.StudentsManagement.index("1")))
+          Future(Redirect(routes.StudentsManagement.index("1")))
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -249,7 +264,10 @@ object StudentsManagement extends Controller with Authentication with Transactio
               }
             }
           )
-          Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
+          Future(Redirect(routes.StudentDashboardController.dashboard())).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 }

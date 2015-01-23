@@ -2,6 +2,7 @@ package controllers
 
 import java.net.URLDecoder
 
+import controllers.AdministrationDashboardController._
 import models.{ LiveAssignment, LiveAssignments }
 import org.pegdown.PegDownProcessor
 import play.api.mvc.{ Action, Controller, Result }
@@ -15,6 +16,7 @@ import utils.Global._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise }
 import scala.util.Random
+import scala.util.control.NonFatal
 
 object LiveAssignmentManagementController extends Controller with Authentication with TransactionSupport {
   import play.api.Play.current
@@ -25,6 +27,9 @@ object LiveAssignmentManagementController extends Controller with Authentication
       Action.async { implicit request ⇒
         LiveAssignments.tags().map { las ⇒
           Ok(views.html.liveAssignments.tagIndex(las, LiveAssignments.Forms.addForm))
+        }.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
       }
   }
@@ -34,6 +39,9 @@ object LiveAssignmentManagementController extends Controller with Authentication
       Action.async { implicit request ⇒
         LiveAssignments.all(tag).map { las ⇒
           Ok(views.html.liveAssignments.index(las, LiveAssignments.Forms.addForm))
+        }.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
       }
   }
@@ -54,7 +62,10 @@ object LiveAssignmentManagementController extends Controller with Authentication
           }
         )
 
-        p.future
+        p.future.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
       }
   }
 
@@ -73,13 +84,16 @@ object LiveAssignmentManagementController extends Controller with Authentication
             }
         }
 
-        p.future
+        p.future.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
       }
   }
 
   def show(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) {
     session ⇒
-      Action { implicit request ⇒
+      Action.async { implicit request ⇒
         import utils.Global._
         val a = Individual(Resource(id))
         val p = new PegDownProcessor()
@@ -87,7 +101,10 @@ object LiveAssignmentManagementController extends Controller with Authentication
         val text = a.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.toString
         val title = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.toString
         val example = a.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.toString
-        Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example))))
+        Future(Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example))))).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
       }
   }
 
@@ -103,6 +120,9 @@ object LiveAssignmentManagementController extends Controller with Authentication
           val title = a.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.toString
           val example = a.props.getOrElse(lwm.hasHints, List(StringLiteral(""))).head.toString
           Ok(views.html.liveAssignments.show(Html(p.markdownToHtml(title)), Html(p.markdownToHtml(text)), Html(p.markdownToHtml(example))))
+        }.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
       }
   }
@@ -111,7 +131,7 @@ object LiveAssignmentManagementController extends Controller with Authentication
 
       LiveAssignments.Forms.addForm.bindFromRequest.fold(
         formWithErrors ⇒ {
-          Future.successful(Redirect(routes.LiveAssignmentManagementController.index()))
+          Future(Redirect(routes.LiveAssignmentManagementController.index()))
         },
         liveAssignment ⇒ {
           val ass = Individual(Resource(id))
@@ -131,7 +151,10 @@ object LiveAssignmentManagementController extends Controller with Authentication
             ass.add(lwm.hasTopic, StringLiteral(topic.trim))
           }
           modifyTransaction(session.user, ass.uri, s"Live Assignment ${ass.uri} modified by ${session.user}")
-          Future.successful(Redirect(routes.LiveAssignmentManagementController.index()))
+          Future(Redirect(routes.LiveAssignmentManagementController.index()))
+        }.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
       )
     }

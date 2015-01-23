@@ -1,6 +1,7 @@
 package controllers
 
 import java.net.URLEncoder
+import controllers.AdministrationDashboardController._
 import utils.Global._
 import utils.Implicits._
 import play.api.mvc.{ Action, Controller }
@@ -9,6 +10,7 @@ import utils.semantic.{ Resource, RDFNode, SPARQLTools }
 import utils.semantic.Vocabulary.{ lwm, rdfs, foaf }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object SearchController extends Controller with Authentication {
 
@@ -79,7 +81,7 @@ object SearchController extends Controller with Authentication {
           SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.o))
         }
       }
-      for {
+      (for {
         firstName ← futureFirstName
         lastName ← futureLastName
         registrationId ← futureRegistrationId
@@ -87,6 +89,9 @@ object SearchController extends Controller with Authentication {
       } yield {
         val complete = firstName ++ lastName ++ registrationId ++ gmId
         Ok(views.html.complex_search(complete))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }

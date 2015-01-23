@@ -1,6 +1,7 @@
 package controllers
 
 import akka.util.Timeout
+import controllers.SessionManagement._
 import models.{ UserForms, Users }
 import play.api.mvc.{ Action, Controller, Result }
 import utils.Global._
@@ -21,7 +22,10 @@ object UserManagement extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList.map(r ⇒ Individual(r)), UserForms.userForm))
+      (for (users ← Users.all()) yield Ok(views.html.userManagement(users.toList.map(r ⇒ Individual(r)), UserForms.userForm))).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 
@@ -45,7 +49,10 @@ object UserManagement extends Controller with Authentication {
           }
           promise.future
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -60,7 +67,10 @@ object UserManagement extends Controller with Authentication {
         user ⇒ {
           Users.create(user).map(_ ⇒ Redirect(routes.UserManagement.index()))
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -71,6 +81,9 @@ object UserManagement extends Controller with Authentication {
         Users.all().map { all ⇒
           Redirect(routes.UserManagement.index())
         }
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }

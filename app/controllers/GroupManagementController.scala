@@ -1,8 +1,5 @@
 package controllers
 
-import java.util.Scanner
-
-import controllers.LabworkManagementController._
 import models._
 import play.api.libs.concurrent.Akka
 import play.api.mvc.{ Action, Controller }
@@ -42,6 +39,9 @@ object GroupManagementController extends Controller with Authentication with Tra
           val s = gI.props.getOrElse(lwm.hasMember, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
           val a = lI.props.getOrElse(lwm.hasAssignmentAssociation, List(Resource(""))).map(r ⇒ Individual(Resource(r.value)))
           Ok(views.html.groups_detail_management(lI, gI, s, g.toList, a))
+        }.recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
       }
   }

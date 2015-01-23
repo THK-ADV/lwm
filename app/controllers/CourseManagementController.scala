@@ -1,6 +1,7 @@
 package controllers
 
 import actors.TransactionsLoggerActor.Transaction
+import controllers.AdministrationDashboardController._
 import models._
 import org.joda.time.LocalDateTime
 import play.api.Play
@@ -11,6 +12,7 @@ import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ StringLiteral, Individual, Resource }
 import utils.Global._
 import scala.concurrent.{ Future, ExecutionContext }
+import scala.util.control.NonFatal
 
 /**
   * Created by rgiacinto on 21/08/14.
@@ -22,14 +24,16 @@ object CourseManagementController extends Controller with Authentication {
 
   def index() = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      for {
+      (for {
         courseResources ← Courses.all()
         degreeResources ← Degrees.all()
         courses = courseResources.map(c ⇒ Individual(c))
         degrees = degreeResources.map(d ⇒ Individual(d))
-
       } yield {
         Ok(views.html.courseManagement(degrees.toList, courses.toList, CourseForms.courseForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -53,7 +57,10 @@ object CourseManagementController extends Controller with Authentication {
             Redirect(routes.CourseManagementController.index())
           }
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -63,6 +70,9 @@ object CourseManagementController extends Controller with Authentication {
       Courses.delete(Resource(id)).map { c ⇒
         system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), DeleteAction(c, s"Course deleted by ${session.user}.")))
         Redirect(routes.CourseManagementController.index())
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -93,9 +103,12 @@ object CourseManagementController extends Controller with Authentication {
             i.update(rdfs.label, name, StringLiteral(course.name))
             system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Course modified by ${session.user}.")))
           }
-          Future.successful(Redirect(routes.CourseManagementController.index()))
+          Future(Redirect(routes.CourseManagementController.index()))
         }
-      )
+      ).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 }

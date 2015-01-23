@@ -116,7 +116,6 @@ case class Individual(uri: Resource)(implicit executionContext: SPARQLExecution)
     val response = executionContext.executeQueryBlocking(SPARQLBuilder.listIndividualProperties(uri))
     val xml = loadString(response)
     val t = SPARQLTools.statementsFromXML(xml)
-
     t.toList
   }
 

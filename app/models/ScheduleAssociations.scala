@@ -240,7 +240,7 @@ object ScheduleAssociations {
       val groupMembersSize = {
         val newGroup = Resource(solution.getResource("group").getURI)
         val groupCount = Individual(newGroup).props.getOrElse(lwm.hasMember, List(StringLiteral("")))
-        val normalizedGroupCount = 0 //getNormalizedCount(newGroup, altDate)
+        val normalizedGroupCount = getNormalizedCount(newGroup, altDate)
         groupCount.size + normalizedGroupCount
       }
       alternates = (altSchedule, s"$altDate, $altTime Gruppe $altGroupId ($groupMembersSize)") :: alternates
@@ -250,7 +250,6 @@ object ScheduleAssociations {
   }
 
   def getNormalizedCount(group: Resource, date: String): Int = {
-    val start = System.nanoTime()
     import utils.Implicits._
     val queryAlternate =
       s"""
@@ -271,8 +270,6 @@ object ScheduleAssociations {
         }
       """.stripMargin.execSelect().size
 
-    val duration = (System.nanoTime() - start) / 1000000
-    println(duration)
     val queryHidden =
       s"""
         PREFIX owl: <http://www.w3.org/2002/07/owl#>

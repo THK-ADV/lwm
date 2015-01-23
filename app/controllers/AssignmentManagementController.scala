@@ -1,6 +1,7 @@
 package controllers
 
 import actors.TransactionsLoggerActor.Transaction
+import controllers.AdministrationDashboardController._
 import models._
 import org.joda.time.LocalDateTime
 import org.pegdown.PegDownProcessor
@@ -24,12 +25,15 @@ object AssignmentManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         implicit request ⇒
-          for {
+          (for {
             assignments ← Assignments.all()
             courseResources ← Courses.all()
             courses = courseResources.map(c ⇒ Individual(c))
           } yield {
             Ok(views.html.assignmentManagement(assignments, courses, AssignmentForms.assignmentForm))
+          }).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
           }
       }
   }
@@ -38,7 +42,10 @@ object AssignmentManagementController extends Controller with Authentication {
     session ⇒
       Action.async {
         implicit request ⇒
-          Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses.map(c ⇒ Individual(c)), AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm)))
+          Courses.all().map(courses ⇒ Ok(views.html.assignment_detail(Individual(Resource(assignment)), courses.map(c ⇒ Individual(c)), AssignmentForms.assignmentForm, AssignmentForms.assignmentSolutionForm))).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 
@@ -62,7 +69,10 @@ object AssignmentManagementController extends Controller with Authentication {
                   system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(assignment.uri, s"New assignment created by ${session.user}")))
                   Redirect(routes.AssignmentManagementController.index())
               }
-          )
+          ).recover {
+              case NonFatal(e) ⇒
+                InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+            }
       }
   }
 
@@ -75,6 +85,9 @@ object AssignmentManagementController extends Controller with Authentication {
             assignment ⇒
               system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(assignment, s"Assignment deleted by ${session.user}.")))
               Redirect(routes.AssignmentManagementController.index())
+          }.recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
           }
       }
   }
@@ -122,9 +135,12 @@ object AssignmentManagementController extends Controller with Authentication {
               }
               a.topics.split(",").map(t ⇒ i.add(lwm.hasTopic, StringLiteral(t)))
               a.courses.map(c ⇒ i.add(lwm.hasCourse, Resource(c)))
-              Future.successful(Redirect(routes.AssignmentManagementController.index()))
+              Future(Redirect(routes.AssignmentManagementController.index()))
             }
-          )
+          ).recover {
+              case NonFatal(e) ⇒
+                InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+            }
       }
   }
 
@@ -162,17 +178,18 @@ object AssignmentManagementController extends Controller with Authentication {
                   AssignmentSolutions.create(AssignmentSolution(a.name, a.text, Resource(assignmentid)))
                 }
               }
-              (for {
+              for {
                 s1 ← solution
                 s2 ← s1
               } yield {
                 system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), CreateAction(s2.uri, s"Assignment Solution created by ${session.user}.")))
                 Redirect(routes.AssignmentManagementController.detailed(assignmentid))
-              }).recover {
-                case NonFatal(t) ⇒ Redirect(routes.AssignmentManagementController.index())
               }
             }
-          )
+          ).recover {
+              case NonFatal(e) ⇒
+                InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+            }
       }
   }
 
@@ -196,9 +213,12 @@ object AssignmentManagementController extends Controller with Authentication {
               i.add(lwm.hasPreparationTime, StringLiteral(s"${
                 a.preparationTime
               }"))
-              Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
+              Future(Redirect(routes.LabworkManagementController.edit(labworkid)))
             }
-          )
+          ).recover {
+              case NonFatal(e) ⇒
+                InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+            }
       }
   }
 
@@ -220,7 +240,10 @@ object AssignmentManagementController extends Controller with Authentication {
             }
           }
           system.eventStream.publish(Transaction(session.user, LocalDateTime.now(), ModifyAction(i.uri, s"Assignment removed from $labworkid by ${session.user}.")))
-          Future.successful(Redirect(routes.LabworkManagementController.edit(labworkid)))
+          Future(Redirect(routes.LabworkManagementController.edit(labworkid))).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 
@@ -237,7 +260,10 @@ object AssignmentManagementController extends Controller with Authentication {
           val description = p.markdownToHtml(i.props.getOrElse(lwm.hasDescription, List(StringLiteral(""))).head.value)
           val label = i.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
           val topics = i.props.getOrElse(lwm.hasTopic, List(StringLiteral(""))).head.value
-          Future.successful(Ok(views.html.assignment_export(label, Html.apply(description), Html.apply(text), Html.apply(hints), Html.apply(goals), topics)))
+          Future(Ok(views.html.assignment_export(label, Html.apply(description), Html.apply(text), Html.apply(hints), Html.apply(goals), topics))).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
 
       }
   }
@@ -267,6 +293,9 @@ object AssignmentManagementController extends Controller with Authentication {
             val text = p.markdownToHtml(s.head.props.getOrElse(lwm.hasText, List(StringLiteral(""))).head.value)
             val label = i.props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
             Ok(views.html.assignment_solution_export(label, Html(name), Html(text)))
+          }.recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
           }
 
       }

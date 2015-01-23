@@ -4,6 +4,7 @@ package controllers
 import actors.SessionHandler
 import actors.SessionHandler.{ Invalid, Valid }
 import akka.util.Timeout
+import controllers.AdministrationDashboardController._
 import controllers.UserManagement._
 import models.UserForms
 import play.api._
@@ -17,6 +18,7 @@ import utils.semantic.SPARQLTools
 import utils.semantic.Vocabulary.{ lwm, foaf }
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object Application extends Controller with Authentication {
 
@@ -44,9 +46,12 @@ object Application extends Controller with Authentication {
     val maybeToken = request.session.get("session")
     maybeToken match {
       case None ⇒
-        Future.successful(Ok(views.html.login(UserForms.loginForm)))
+        Future(Ok(views.html.login(UserForms.loginForm))).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
       case Some(id) ⇒
-        for {
+        (for {
           response ← sessionsHandler ? SessionHandler.SessionValidationRequest(id)
         } yield {
           response match {
@@ -55,6 +60,9 @@ object Application extends Controller with Authentication {
             case _ ⇒
               Ok(views.html.login(UserForms.loginForm))
           }
+        }).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
         }
     }
 
@@ -91,11 +99,14 @@ object Application extends Controller with Authentication {
               SPARQLTools.statementsFromString(result).map(_.o)
             }
           }
-          for {
+          (for {
             firstName ← firstNameFuture
             lastName ← lastNameFuture
           } yield {
             Ok(s"${firstName.head} ${lastName.head} ($user)")
+          }).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
           }
       }
   }
@@ -107,7 +118,10 @@ object Application extends Controller with Authentication {
       if (url.isDefined && label.isDefined && label.get.trim != BreadCrumbKeeper.noStorageRef) {
         session.breadcrumbKeeper.add(UrlReference(label.get, url.get))
       }
-      Future.successful(Ok(session.breadcrumbKeeper.generate()))
+      Future(Ok(session.breadcrumbKeeper.generate())).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 }

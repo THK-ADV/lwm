@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.SessionManagement._
 import models._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
@@ -8,6 +9,7 @@ import utils.semantic.Vocabulary.{ rdfs, lwm }
 import utils.semantic.{ Individual, Resource }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object TimetableController extends Controller with Authentication {
 
@@ -16,7 +18,7 @@ object TimetableController extends Controller with Authentication {
   def index(labworkid: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
 
-      for {
+      (for {
         supervisors ← Users.all()
         rooms ← Rooms.all()
       } yield {
@@ -31,6 +33,9 @@ object TimetableController extends Controller with Authentication {
           entries,
           rooms.map(e ⇒ Individual(e)),
           TimeTableForm.timetableForm))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -55,7 +60,10 @@ object TimetableController extends Controller with Authentication {
             scheduleFuture
           }
 
-          Future.successful(Redirect(routes.LabworkManagementController.index()))
+          Future(Redirect(routes.LabworkManagementController.index())).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 
@@ -84,7 +92,10 @@ object TimetableController extends Controller with Authentication {
                 TimetableEntries.create(e).map(_ ⇒ Redirect(routes.TimetableController.index(labworkid)))
               }
             }
-          )
+          ).recover {
+              case NonFatal(e) ⇒
+                InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+            }
       }
   }
 

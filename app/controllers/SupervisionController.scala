@@ -3,6 +3,7 @@ package controllers
 import actors.SessionHandler.Valid
 import actors.{ SessionHandler, SupervisionSocketActor }
 import akka.util.Timeout
+import controllers.SessionManagement._
 import controllers.SupervisionChangeWrites.SupervisionChange
 import models.Students
 import org.joda.time.format.{ DateTimeFormat, DateTimeFormatter }
@@ -17,6 +18,7 @@ import utils.semantic.{ StringLiteral, Individual, Resource }
 import play.api.Play.current
 
 import scala.concurrent.{ Promise, Future }
+import scala.util.control.NonFatal
 
 object SupervisionChangeWrites {
 
@@ -69,7 +71,10 @@ object SupervisionController extends Controller with Authentication with Transac
 
   def supervise(id: String, date: String, time: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      Future.successful(Ok(views.html.supervision(Resource(id), LocalDate.parse(date), LocalTime.parse(time, DateTimeFormat.forPattern("HH:mm")))))
+      Future(Ok(views.html.supervision(Resource(id), LocalDate.parse(date), LocalTime.parse(time, DateTimeFormat.forPattern("HH:mm"))))).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 

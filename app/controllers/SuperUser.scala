@@ -2,6 +2,7 @@ package controllers
 
 import java.net.URLEncoder
 
+import controllers.SessionManagement._
 import play.api.mvc.{ Action, Controller }
 import utils.Security.Authentication
 import utils.semantic._
@@ -18,7 +19,10 @@ object SuperUser extends Controller with Authentication {
 
   def index = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async { implicit request ⇒
-      Future.successful(Ok(views.html.helpers.sudo.mainPage()))
+      Future(Ok(views.html.helpers.sudo.mainPage())).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 
@@ -62,7 +66,7 @@ object SuperUser extends Controller with Authentication {
       val p = (request.body \ "property").asOpt[String]
       val n = (request.body \ "node").asOpt[String]
 
-      if (r.isDefined && p.isDefined && n.isDefined) {
+      (if (r.isDefined && p.isDefined && n.isDefined) {
         val resource = Resource(r.get)
         val property = Property(p.get)
         val rdfnode = {
@@ -76,10 +80,13 @@ object SuperUser extends Controller with Authentication {
               |}
             """.stripMargin
 
-        sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(routes.SuperUser.resourceOverview(r.get))).recover { case NonFatal(t) ⇒ Redirect(routes.SuperUser.index()) }
+        sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(routes.SuperUser.resourceOverview(r.get)))
 
       } else {
-        Future.successful(Ok(views.html.helpers.sudo.mainPage()))
+        Future(Ok(views.html.helpers.sudo.mainPage()))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }
@@ -95,7 +102,7 @@ object SuperUser extends Controller with Authentication {
       val nextNode = (request.body \ "nextNode").asOpt[String]
 
       val url = (request.body \ "url").asOpt[String]
-      if (prevRes.isDefined && prevProp.isDefined && prevNode.isDefined && nextRes.isDefined && nextProp.isDefined && nextNode.isDefined) {
+      (if (prevRes.isDefined && prevProp.isDefined && prevNode.isDefined && nextRes.isDefined && nextProp.isDefined && nextNode.isDefined) {
         val pn = if (prevNode.get.contains("http")) prevNode.get; else s"'${URLEncoder.encode(prevNode.get, "UTF-8")}'"
         val nn = if (nextNode.get.contains("http")) nextNode.get; else s"'${URLEncoder.encode(nextNode.get, "UTF-8")}'"
         val u =
@@ -108,9 +115,12 @@ object SuperUser extends Controller with Authentication {
             }
           """.stripMargin
         sparqlExecutionContext.executeUpdate(u).map(_ ⇒ Redirect(url.get)).recover { case NonFatal(t) ⇒ Redirect(url.get) }
-        Future.successful(Redirect(url.get))
+        Future(Redirect(url.get))
       } else {
-        Future.successful(Redirect(url.get))
+        Future(Redirect(url.get))
+      }).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
       }
     }
   }

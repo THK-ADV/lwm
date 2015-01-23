@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.AdministrationDashboardController._
 import models._
 import play.api.mvc.{ Action, Controller }
 import play.libs.Akka
@@ -25,7 +26,10 @@ object LabworkApplicationController extends Controller with Authentication with 
       val t = LabworkApplicationLists.all().flatMap { lists ⇒
         Future.sequence(getApplicationListInfo(lists))
       }
-      for (info ← t) yield Ok(views.html.labwork_application_management(info))
+      (for (info ← t) yield Ok(views.html.labwork_application_management(info))).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 
@@ -89,7 +93,7 @@ object LabworkApplicationController extends Controller with Authentication with 
       Action.async { implicit request ⇒
         LabworkApplications.Forms.labworkApplicationForm.bindFromRequest.fold(
           formWithErrors ⇒ {
-            Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
+            Future(Redirect(routes.StudentDashboardController.dashboard()))
           },
           s ⇒ {
             Students.get(s.applicant).flatMap { applicantResource ⇒
@@ -119,7 +123,7 @@ object LabworkApplicationController extends Controller with Authentication with 
                 }
 
               } else {
-                Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
+                Future(Redirect(routes.StudentDashboardController.dashboard()))
               }
             }.recover {
               case NonFatal(t) ⇒
@@ -182,7 +186,10 @@ object LabworkApplicationController extends Controller with Authentication with 
           }
         }
       }
-      Future.successful(Redirect(routes.LabworkApplicationController.index()))
+      Future(Redirect(routes.LabworkApplicationController.index())).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 
@@ -195,7 +202,10 @@ object LabworkApplicationController extends Controller with Authentication with 
           if (applicationd.isDefined && listId.isDefined) {
             LabworkApplications.delete(Resource(applicationd.get)).map(_ ⇒ Redirect(routes.LabworkApplicationController.applicationListEdit(listId.get))).recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.index() }
           }
-          Future.successful(Redirect(routes.LabworkApplicationController.index()))
+          Future(Redirect(routes.LabworkApplicationController.index())).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
       }
   }
 
@@ -227,15 +237,16 @@ object LabworkApplicationController extends Controller with Authentication with 
                 LabworkApplications.delete(application.head).map { deleted ⇒
                   deleteTransaction(session.user, deleted, s"Labwork Application removed by ${session.user}")
                   Redirect(routes.StudentDashboardController.dashboard())
-                }.recover {
-                  case NonFatal(t) ⇒ routes.StudentDashboardController.dashboard()
                 }
               }
             }).recover {
               case NonFatal(t) ⇒ Redirect(routes.StudentDashboardController.dashboard())
             }
           }
-          Future.successful(Redirect(routes.StudentDashboardController.dashboard()))
+          Future(Redirect(routes.StudentDashboardController.dashboard())).recover {
+            case NonFatal(e) ⇒
+              InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+          }
 
       }
   }
@@ -296,7 +307,10 @@ object LabworkApplicationController extends Controller with Authentication with 
               case NonFatal(t) ⇒ Redirect(routes.LabworkApplicationController.index())
             }
           })
-        Future.successful(Redirect(routes.LabworkApplicationController.index()))
+        Future(Redirect(routes.LabworkApplicationController.index())).recover {
+          case NonFatal(e) ⇒
+            InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+        }
     }
   }
 
@@ -312,7 +326,10 @@ object LabworkApplicationController extends Controller with Authentication with 
           Redirect(routes.LabworkApplicationController.applicationListEdit(listId))
         }.recover { case NonFatal(t) ⇒ routes.LabworkApplicationController.applicationListEdit(listId) }
       }
-      Future.successful(Redirect(routes.LabworkApplicationController.index()))
+      Future(Redirect(routes.LabworkApplicationController.index())).recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 

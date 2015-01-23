@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.SessionManagement._
 import models.{ ScheduleAssociations, LabWorks }
 import play.api.libs.json.{ JsString, JsObject }
 import play.api.mvc.{ Result, Action, Controller }
@@ -19,12 +20,14 @@ object StudentInformationController extends Controller with Authentication with 
   override val system = Akka.system()
 
   def showInformation(id: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
-    Action { implicit request ⇒
-      val start = System.nanoTime()
-      val html = views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)
-      val duration = (System.nanoTime() - start) / 1000000
-      println(s"Duration: $duration")
-      Ok(html)
+    Action.async { implicit request ⇒
+      Future {
+        val html = views.html.student_information_overview(Resource(id), ScheduleAssociations.Forms.alternateForm)
+        Ok(html)
+      }.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 
@@ -62,7 +65,10 @@ object StudentInformationController extends Controller with Authentication with 
           modifyTransaction(session.user, schedule.uri, s"Alternate Schedule entry added to ${schedule.uri} of Student $student by ${session.user}")
       }
 
-      p.future
+      p.future.recover {
+        case NonFatal(e) ⇒
+          InternalServerError(s"Oops. There seems to be a problem ($e) with the server. We are working on it!")
+      }
     }
   }
 
