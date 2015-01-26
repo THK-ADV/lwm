@@ -180,10 +180,10 @@ function swapGroups(index, student, oldGroup) {
     ajaxHO("/administration/groups/swap", "POST", "application/json", {student: student, old: oldGroup, new: newGroup}, reload);
 }
 
-function removeAlternateDate(student, oldSchedule, schedule, hash) {
-    $("#new" + hash).remove();
-    $("#rm" + hash).remove();
-    $("#old" + hash).removeClass().addClass("text-success");
+function removeAlternateDate(student, oldSchedule, schedule,scheduleHash, alternateHash) {
+    $("#new" + alternateHash).remove();
+    $("#rm" + alternateHash).remove();
+    $("#old" + alternateHash).removeClass().addClass("text-success");
     ajaxHO("/students/overview/"+encodeURIComponent(schedule), "DELETE", "application/json", {student: student, schedule: schedule, oldSchedule: oldSchedule}, function(data){
         alert(JSON.stringify(data));
     });
