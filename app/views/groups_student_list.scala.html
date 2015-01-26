@@ -56,7 +56,7 @@
                         }
                     }
 
-                    <td><h3><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@s.hashCode()"></a></h3></td>
+                    <td><h3><a class="glyphicon glyphicon-random" data-toggle="modal" data-target="#@gm.hashCode()"></a></h3></td>
                     <td><h3><a href="javascript: if(confirmed()) removeStudentFromGroup('@labwork.uri.value', '@s.uri.value', '@group.uri.value')" class="glyphicon glyphicon-remove"></a></h3></td>
                     <td><h3>
                         <a href="@{
@@ -90,7 +90,7 @@
                     </h3></td>
                 </tr>
             }
-                <div class="modal fade" id="@s.hashCode()" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="@gm.hashCode()" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -99,7 +99,7 @@
                                 <h4 class="modal-title" id="myModalLabel">Gruppe ändern</h4>
                             </div>
                             <div class="modal-body">
-                            @change_group_select(s.hashCode(), s, group, groups)
+                            @change_group_select(gm.hashCode(), s, group, groups)
                             </div>
 
                         </div>

@@ -10,9 +10,10 @@ import play.api.data.Forms._
 import utils.Global._
 import utils.semantic.Vocabulary.{ lwm, owl, rdf, rdfs }
 import utils.semantic._
+import utils.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Future, Promise }
+import scala.concurrent.{ Future, Promise, blocking }
 
 case class ScheduleAssociation(group: Resource, assignmentAssoc: Resource, assignmentDate: LocalDate, dueDate: LocalDate, assignmentDateTimetableEntry: Resource, dueDateTimetableEntry: Resource, timetable: Resource)
 

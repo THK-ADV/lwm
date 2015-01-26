@@ -2,16 +2,16 @@ package controllers
 
 import models._
 import play.api.libs.concurrent.Akka
-import play.api.mvc.{ Action, Controller }
+import play.api.mvc.{ Result, Call, Action, Controller }
 import utils.Security.Authentication
 import utils.TransactionSupport
 import utils.semantic._
 import utils.semantic.Vocabulary.{ rdfs, rdf, lwm, owl }
 import utils.Global._
-import scala.concurrent.Future
+import utils.Implicits._
+import scala.concurrent.{ Promise, Future, blocking }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
-
 object GroupManagementController extends Controller with Authentication with TransactionSupport {
   import play.api.Play.current
   val system = Akka.system
@@ -147,92 +147,120 @@ object GroupManagementController extends Controller with Authentication with Tra
   def swapGroups = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
     Action.async(parse.json) {
       implicit request ⇒
-        val student = (request.body \ "student").asOpt[String]
-        val oldGroup = (request.body \ "old").asOpt[String]
-        val newGroup = (request.body \ "new").asOpt[String]
-        if (student.isDefined && oldGroup.isDefined && newGroup.isDefined) {
+        val maybeStudent = (request.body \ "student").asOpt[String]
+        val maybeOldGroup = (request.body \ "old").asOpt[String]
+        val maybeNewGroup = (request.body \ "new").asOpt[String]
+        if (maybeStudent.isDefined && maybeOldGroup.isDefined && maybeNewGroup.isDefined) {
+          val student = Resource(maybeStudent.get)
+          val oldGroup = Resource(maybeOldGroup.get)
+          val newGroup = Resource(maybeNewGroup.get)
 
-          def procure(id: Option[String]): String = {
-            Individual(Resource(id.get)).props.getOrElse(rdfs.label, List(StringLiteral(""))).head.value
-          }
+          val studentSchedule =
+            s"""
+               |${Vocabulary.defaultPrefixes}
+               |
+               | Select ?assignment ?schedule where {
+               |    $student lwm:hasScheduleAssociation ?schedule .
+               |    ?schedule lwm:hasGroup $oldGroup .
+               |    ?schedule lwm:hasAssignmentAssociation ?assignment .
+               |
+               | } order by desc(?assignment)
+             """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("schedule").toString))
 
-          def assData(entryWithSchedule: Resource) = {
-            val q =
-              s"""
-                 Select ?s ?p ?o where {
-                 $entryWithSchedule ${lwm.hasScheduleAssociation} ?schedule .
-                  ?schedule ${lwm.hasAssignmentAssociation} ?s .
-                  ?schedule ?p ?o
-                 filter(?p != ${rdf.typ} && ?p != ${lwm.hasAssignmentAssociation} && ?p != ${owl.NamedIndividual})
-                 } order by asc(?s) asc(?p)
-               """.stripMargin
+          val newGroupSchedule =
+            s"""
+               |${Vocabulary.defaultPrefixes}
+               |
+               | Select ?assignment ?schedule where {
+               |    $newGroup lwm:hasScheduleAssociation ?schedule .
+               |    ?schedule lwm:hasAssignmentAssociation ?assignment .
+               |
+               | } order by desc(?assignment)
+             """.stripMargin.execSelect().map(qs ⇒ Resource(qs.data("schedule").toString))
 
-            sparqlExecutionContext.executeQuery(q).map { result ⇒
-              SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p, e.o))
-            }
-          }
-          def scheduleLink(student: Resource, oldGroup: Resource) = {
-            val q = s"""
-                 Select ?s (${lwm.hasAssignmentAssociation} as ?p) ?o where {
-                 $student ${lwm.hasScheduleAssociation} ?s .
-                  ?s ${lwm.hasGroup} $oldGroup .
-                  ?s ${lwm.hasAssignmentAssociation} ?o
-                  } order by asc(?o)
-               """.stripMargin
-
-            sparqlExecutionContext.executeQuery(q).map { result ⇒
-              SPARQLTools.statementsFromString(result).map(e ⇒ (e.s, e.p, e.o))
-            }
-          }
-          def removeStatements(student: Resource, oldGroup: Resource) = {
-            val u =
-              s"""
-                  Delete {
-                  ?s ?p ?o
-                  } where {
-                  $student ${lwm.hasScheduleAssociation} ?s .
-                  ?s ${lwm.hasGroup} $oldGroup .
-                  ?s ?p ?o
-                  filter(?p != ${lwm.hasAssignmentAssociation} && ?p != ${owl.NamedIndividual} && ?p != ${rdf.typ} && ?p != ${lwm.hasPassed} && ?p != ${lwm.hasAttended})
-                  }
-                """.stripMargin
-            sparqlExecutionContext.executeUpdate(u)
-          }
-
-          def insertStatements(fpiece: Seq[(Resource, Property, RDFNode)], spiece: Seq[(Resource, Property, RDFNode)]) = {
+          def buildDelete() = {
             val builder = StringBuilder.newBuilder
-            builder.append("Insert data { ")
-            fpiece.map {
-              head ⇒
-                spiece.map {
-                  tail ⇒
-                    if (head._3.value == tail._1.value) {
-                      builder.append(s"${head._1} ${tail._2} ${if (tail._3.value.contains("http")) tail._3; else s"'${tail._3}'"} . ")
-                    }
-                }
+            builder.append(Vocabulary.defaultPrefixes)
+            s"""
+               |${Vocabulary.defaultPrefixes}
+               |
+               | Select * where {
+               |    $student lwm:hasScheduleAssociation ?schedule .
+               |    ?schedule lwm:hasGroup $oldGroup .
+               |    ?schedule lwm:hasDueDateTimetableEntry ?dueDateEntry .
+               |    ?schedule lwm:hasDueDate ?dueDate .
+               |    ?schedule lwm:hasAssignmentDateTimetableEntry ?assignmentEntry .
+               |    ?schedule lwm:hasAssignmentDate ?assignmentDate .
+               |    ?schedule lwm:hasAssignmentAssociation ?assignment .
+               | }
+             """.stripMargin.execSelect().map { qs ⇒
+
+              val schedule = Resource(qs.data("schedule").toString)
+              val dueDateEntry = Resource(qs.data("dueDateEntry").toString)
+              val dueDate = s"'${qs.data("dueDate").toString}'"
+              val assignmentEntry = Resource(qs.data("assignmentEntry").toString)
+              val assignmentDate = s"'${qs.data("assignmentDate").toString}'"
+              val assignment = Resource(qs.data("assignment").toString)
+
+              builder.append(
+                s"""
+                     |Delete data {
+                     |  $schedule lwm:hasDueDateTimetableEntry $dueDateEntry .
+                     |  $schedule lwm:hasDueDate $dueDate .
+                     |  $schedule lwm:hasAssignmentDateTimetableEntry $assignmentEntry .
+                     |  $schedule lwm:hasAssignmentDate $assignmentDate .
+                     |  $schedule lwm:hasGroup $oldGroup .
+                     |  $schedule lwm:hasAssignmentAssociation $assignment .
+                     |} ;
+                   """.stripMargin)
             }
-            val u = builder.dropRight(2).append("}").toString()
-
-            sparqlExecutionContext.executeUpdate(u)
+            builder.toString()
           }
 
-          for {
-            studentAssocs ← scheduleLink(Resource(student.get), Resource(oldGroup.get))
-            groupAssocs ← assData(Resource(newGroup.get))
-            removal ← removeStatements(Resource(student.get), Resource(oldGroup.get))
-            add ← insertStatements(studentAssocs, groupAssocs)
-          } yield {
-
-            val studentIndividual = Individual(Resource(student.get))
-            val oldGroupIndividual = Individual(Resource(oldGroup.get))
-            val newGroupIndividual = Individual(Resource(newGroup.get))
-
-            studentIndividual.update(lwm.memberOf, Resource(oldGroup.get), Resource(newGroup.get))
-            oldGroupIndividual.remove(lwm.hasMember, Resource(student.get))
-            newGroupIndividual.add(lwm.hasMember, Resource(student.get))
-            modifyTransaction(session.user, studentIndividual.uri, s"Student ${studentIndividual.props.get(rdfs.label).map(_.headOption.map(_.toString)).getOrElse("")} moved to new Group ${newGroupIndividual.props.get(rdfs.label).map(_.headOption.map(_.toString)).getOrElse("")} by ${session.user}")
-            Redirect(routes.GroupManagementController.index(oldGroupIndividual.props.getOrElse(lwm.hasLabWork, List(Resource(""))).head.value, oldGroupIndividual.uri.value))
+          def buildInsert() = {
+            val builder = StringBuilder.newBuilder
+            builder.append(Vocabulary.defaultPrefixes)
+            for (i ← 0 until studentSchedule.size) {
+              builder.append(
+                s"""
+                   |Insert {
+                   |${studentSchedule(i)} ?p ?o
+                   |}
+                   |Where {
+                   |${newGroupSchedule(i)} ?p ?o
+                   |
+                   |filter(?p != rdf:type)
+                   |filter(?p != lwm:hasPassed && ?p != lwm:hasAttended)
+                   |} ;
+                 """.stripMargin)
+            }
+            builder.toString()
           }
+
+          def buildStudentGroupDeletion() = {
+            s"""
+               |${Vocabulary.defaultPrefixes}
+               |
+               | Delete data {
+               | $student lwm:memberOf $oldGroup .
+               | $oldGroup lwm:hasMember $student .
+               | } ;
+               | Insert data {
+               | $student lwm:memberOf $newGroup .
+               | $newGroup lwm:hasMember $student .
+               | }
+             """.stripMargin
+          }
+
+          val megaUpdate = buildDelete() + buildInsert() + buildStudentGroupDeletion()
+
+          val p = Promise[Result]()
+
+          blocking {
+            megaUpdate.execUpdate()
+            p.success(Redirect(routes.LabworkManagementController.index()))
+          }
+          p.future
         } else {
           Future.successful(Redirect(routes.LabworkManagementController.index()))
         }
