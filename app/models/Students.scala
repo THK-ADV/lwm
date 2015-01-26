@@ -221,13 +221,17 @@ object Students extends CheckedDelete {
   // TODO Replace usage with getHiddenStudents
   def isHidden(labwork: Resource, student: Resource)(implicit queryHost: QueryHost) = {
     s"""
-          |${Vocabulary.defaultPrefixes}
-          |
-          | ASK {
-          |    $student lwm:hasHidingState ?state .
-          |    ?state lwm:hasHidingSubject $labwork .
-          | }
-    """.stripMargin.executeAsk()
+      |prefix lwm: <http://lwm.gm.fh-koeln.de/>
+      |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      |prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      |
+      |select (count(?state) as ?count) where {
+      |    $student lwm:hasHidingState ?state .
+      |    ?state lwm:hasHidingSubject $labwork .
+      |}
+    """.stripMargin.execSelect().map { solution ⇒
+      solution.data("count").asLiteral().getInt > 0
+    }.head
   }
 
   def getHiddenStudents(labwork: Resource)(implicit queryHost: QueryHost) = {

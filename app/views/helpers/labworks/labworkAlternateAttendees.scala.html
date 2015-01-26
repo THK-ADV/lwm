@@ -25,13 +25,13 @@
               ?student lwm:hasGmId ?gmId .
               ?association lwm:hasGroup ?origGroup .
               ?association lwm:hasAssignmentAssociation ?assignment .
-              ?association lwm:hasAssignmentDateTimetableEntry ?entry .
-              ?entry lwm:hasStartTime "${if(startTime.getHourOfDay < 10) URLEncoder.encode(startTime.toString("H:mm"), "UTF-8") else URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}" .
               ?assignment lwm:hasLabWork ?labwork .
               ?origGroup lwm:hasGroupId ?origGroupId .
               ?association lwm:hasAlternateScheduleAssociation ?alternate .
               ?alternate lwm:hasGroup $group .
               ?alternate lwm:hasAssignmentDate "${date.toString("yyyy-MM-dd")}" .
+              ?alternate lwm:hasAssignmentDateTimetableEntry ?entry .
+              ?entry lwm:hasStartTime "${if(startTime.getHourOfDay < 10) URLEncoder.encode(startTime.toString("H:mm"), "UTF-8") else URLEncoder.encode(startTime.toString("HH:mm"), "UTF-8")}" .
               optional {?association lwm:hasPassed ?passed } .
               optional {?association lwm:hasAttended ?attended }
             }
