@@ -4,7 +4,7 @@ object DatabaseRunner extends App {
   new Thread(new Runnable {
     override def run(): Unit = {
       System.setProperty("log4j.configuration", "log4j.properties")
-      new FusekiCmd("--update", "--desc=assemblerA.ttl", "--port=3030", "/lwm").mainRun()
+      new FusekiCmd("--update", "--desc=assemblerA.ttl", "--port=3030", "--jetty-config=jetty.xml", "/lwm").mainRun()
     }
   }).start()
 }
