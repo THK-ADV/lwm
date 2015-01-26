@@ -237,6 +237,25 @@ function superUserUpdate(hash, url) {
     ajaxHO("/superuser", "POST", "application/json", obj, reload);
 }
 
+
+function getPossibleAlternateDates(student, labwork, group, groupId, orderId, hash) {
+    var json = {group: group, gId: groupId, oId: orderId};
+    $("#newSchedule"+hash).html("<option value='none'>Wird geladen.. </option>");
+    ajaxHO("/students/overview/"+encodeURIComponent(student)+"/"+encodeURIComponent(labwork), "POST", "application/json", json, function(data){
+        var options = "";
+        for(var entry in data) {
+            if(!data.hasOwnProperty(entry)) {
+                continue;
+            }
+            options += "<option value='"+entry+"'>"+data[entry]+"</option>";
+        }
+        $("#newSchedule"+hash).html(options);
+        $("#"+hash).modal("toggle");
+        $("#"+hash).modal("show");
+});
+
+}
+
 var timer = 5;
 
 var socket;

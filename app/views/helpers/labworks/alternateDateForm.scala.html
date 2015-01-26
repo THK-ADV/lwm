@@ -6,9 +6,6 @@
 
         <label for="newSchedule@{oldSchedule.value.hashCode}">Neuer Termin:</label>
         <select id="newSchedule@{oldSchedule.value.hashCode}" name="newSchedule" >
-        @ScheduleAssociations.getAlternateDates(oldSchedule, group, groupId, orderId).map{entry =>
-            <option value="@entry._1" >@entry._2</option>
-        }
         </select>
 
         <div class="modal-footer">

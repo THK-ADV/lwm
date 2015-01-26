@@ -208,7 +208,7 @@ object ScheduleAssociations {
     }
   }
 
-  def getAlternateDates(oldSchedule: Resource, group: Resource, groupId: String, orderId: String) = {
+  def getAlternateDates(group: Resource, groupId: String, orderId: String) = {
     import utils.Implicits._
     s"""
        |${Vocabulary.defaultPrefixes}

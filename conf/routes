@@ -123,7 +123,7 @@ POST          /administration/substitutions                           controller
 GET           /administration/supervision-socket                      controllers.SupervisionController.superviseSocket
 POST          /administration/supervision                             controllers.SupervisionController.supervisionPost
 
-GET           /administration/supervision/:id/:date/:time                   controllers.SupervisionController.supervise(id, date, time)
+GET           /administration/supervision/:id/:date/:time             controllers.SupervisionController.supervise(id, date, time)
 
 GET           /students/:id/information                               controllers.StudentDashboardController.informationPage(id)
 POST          /students/:id/information                               controllers.StudentsManagement.changeInformation(id)
@@ -131,6 +131,7 @@ DELETE        /students/labworkApplications                           controller
 
 GET           /students/overview/:id                                  controllers.StudentInformationController.showInformation(id)
 POST          /students/overview/:id                                  controllers.StudentInformationController.postAlternateDate(id)
+POST          /students/overview/:sId/:lId                            controllers.StudentInformationController.possibleAlternateDates(sId, lId)
 DELETE        /students/overview/:id                                  controllers.StudentInformationController.removeAlternateDate(id)
 
 GET           /superuser                                              controllers.SuperUser.index()

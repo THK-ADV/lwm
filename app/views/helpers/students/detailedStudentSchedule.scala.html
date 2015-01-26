@@ -73,14 +73,14 @@
                |<td><span id="old${alternateUri.hashCode}" class="text-danger linethrough">$date, $time Uhr, Raum $room</span> <br /> <span id="new${alternateUri.hashCode}"  class="text-success">$aDate $aTime Uhr, Gruppe $id, Raum $aRoom</span><a id="rm${alternateUri.hashCode}" href="javascript:removeAlternateDate('${student.value}', '$scheduleRes','$alternateUri', '${alternateUri.hashCode}');" class="glyphicon glyphicon-remove"></a></td>
                |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
                |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
-               |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
+               |<td><h1> <a href="javascript: getPossibleAlternateDates('${student.value}','${labwork.value}','$groupRes','$groupId','$orderId', '${scheduleRes.hashCode}')" class="glyphicon glyphicon-pencil"></a></h1></td>
                |</tr>""".stripMargin
         }else{
             s"""<tr>
                |<td id="dates${scheduleRes.hashCode}"><span id="old${scheduleRes.hashCode}" class="text-success">$date, $time Uhr, Raum $room</span><br /></td>
                |<td><h1><a href="javascript:attendanceSwitch('${scheduleRes.toString}', 'attendance-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="attendance-${scheduleRes.toString.hashCode}" class="glyphicon glyphicon-user ${if(attended){"text-success"}else{"text-danger"}}"></span></a></h1></td>
                |<td><h1><a href="javascript:passedSwitch('${scheduleRes.toString}', 'passed-${scheduleRes.toString.hashCode}', '${request.session(play.api.mvc.Security.username)}');"><span id="passed-${scheduleRes.toString.hashCode}"  class="${if(passed){"glyphicon glyphicon-ok text-success"}else{"glyphicon glyphicon-ban-circle text-danger"}}"></h1></td>
-               |<td><h1><a href="#" class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#${scheduleRes.hashCode}"></a></h1></td>
+               |<td><h1> <a href="javascript: getPossibleAlternateDates('${student.value}','${labwork.value}','$groupRes','$groupId','$orderId', '${scheduleRes.hashCode}')" class="glyphicon glyphicon-pencil"></a></h1></td>
                |</tr>""".stripMargin
         }
 
@@ -96,7 +96,7 @@
                                 <h4 class="modal-title" id="myModalLabel">Ersatztermin angeben</h4>
                             </div>
                             <div class="modal-body">
-                            ${helpers.labworks.alternateDateForm(student,Resource(scheduleRes),Resource(groupRes), groupId, orderId, form).toString}
+                            ${helpers.labworks.alternateDateForm(student, Resource(scheduleRes), Resource(groupRes), groupId, orderId, form)}
                             </div>
 
                         </div>

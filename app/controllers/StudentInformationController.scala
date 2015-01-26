@@ -99,4 +99,23 @@ object StudentInformationController extends Controller with Authentication with 
         }
     }
   }
+
+  def possibleAlternateDates(sId: String, lId: String) = hasPermissions(Permissions.AdminRole.permissions.toList: _*) { session ⇒
+
+    Action.async(parse.json) { implicit request ⇒
+      val maybeGroup = (request.body \ "group").asOpt[String]
+      val maybeGroupId = (request.body \ "gId").asOpt[String]
+      val maybeOrderId = (request.body \ "oId").asOpt[String]
+
+      if (maybeGroup.isDefined && maybeGroupId.isDefined && maybeOrderId.isDefined) {
+        val alternateDates = ScheduleAssociations.getAlternateDates(Resource(maybeGroup.get), maybeGroupId.get, maybeOrderId.get)
+        val json = JsObject(alternateDates.map(tuple ⇒ (tuple._1, JsString(tuple._2))).toSeq)
+
+        Future.successful(Ok(json))
+      } else {
+        Future.successful(Ok("Keine Alternativen verfügbar"))
+      }
+
+    }
+  }
 }
