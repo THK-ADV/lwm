@@ -412,10 +412,10 @@ paths:
 definitions:
   Student:
     properties:
-      uri:
+      id:
         type: string
         description: the URI of this user.
-      name:
+      lastname:
         type: string
         description: The name of the student.
       firstname: 
@@ -459,10 +459,10 @@ definitions:
         
   User:
     properties:
-      uri:
+      id:
         type: string
         description: the URI of this user.
-      name:
+      lastname:
         type: string
         description: The name of the user.
       firstname: 
@@ -488,7 +488,9 @@ definitions:
 
   Labwork:
     properties:
-      name: 
+      id:
+        type: string
+      label: 
         type: string
         description: The name of this labwork.
       groups:
@@ -502,9 +504,19 @@ definitions:
 
   Degree:
     properties:
-      name: 
+      id:
+        type: string
+      label: 
         type: string
         description: The name of this degree.
+
+  Course:
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+          description: The name of this course.
 
   Room:
     properties:
@@ -540,17 +552,25 @@ definitions:
 
   Group:
     properties:
+      label:
+        type: string
       id: 
         type: string
-        description: The id of this group.
+        description: The uri of this group.
       members:
         description: The members of this group.
         type: array
         items:
           type: string
+      labwork:
+        type: string
+      groupSchedule:
+        type: string
 
   AssignmentAssociation:
     properties:
+      id:
+        type: string
       visible:
         type: boolean
       index:
@@ -559,6 +579,74 @@ definitions:
         type: string
       dueIndex:
         type: integer
+      labwork:
+        type: string
+        
+  Solution:
+      properties:
+        assignment:
+          type: string
+        id:
+          type: string
+          description: The id of this solution.
+        files:
+          description: the relative urls
+          type: array
+          items:
+            type: string
+            
+  StudentSchedule:
+    properties:
+      id: 
+        type: string
+      associations:
+        type: array
+        items:
+          type: string
+      
+  GroupSchedule:
+    properties:
+      id:
+        type: string
+      associations:
+        type: array
+        items:
+          type: string
+          
+  SupervisionInformation:
+    properties:
+      id: 
+        type: string
+      attended:
+        type: boolean
+      passed:
+        type: boolean
+      comment:
+        type: string
+  
+  GroupScheduleAssociation:
+    properties:
+      id:
+        type: string
+      timetableEntry:
+        type: string
+      date:
+        type: string
+        format: date
+      
+      
+  StudentScheduleAssociation:
+      properties:
+        id:
+          type: string
+        timetableEntry:
+          type: string
+        date:
+          type: string
+          format: date
+        groupScheduleAssociation:
+          type: string
+
 
   Error:
     properties:

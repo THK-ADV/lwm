@@ -191,7 +191,7 @@ object Vocabulary {
     val ns = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
     val prefix = Prefix("rdf")
 
-    val Alt = resource("Alt")
+val Alt = resource("Alt")
     val Bag = resource("Bag")
     val Property = resource("Property")
     val Seq = resource("Seq")
