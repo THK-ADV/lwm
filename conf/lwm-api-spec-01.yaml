@@ -1,0 +1,567 @@
+swagger: '2.0'
+info:
+  title: Labwork API
+  description: LWM ReST API
+  version: "0.1.0"
+# the domain of the service
+host: praktikum.gm.fh-koeln.de
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json; charset=utf-8
+consumes:
+  - application/json; charset=utf-8
+  
+paths:
+  /sessions:
+    get:
+      summary: Active sessions.
+      description: Returns a list of all active sessions.
+      consumes:
+        - application/json; charset=utf-8
+        - text/csv; charset=utf-8
+      responses:
+        200:
+          description: Number of active sessions.
+          schema:
+            type: integer
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      tags: 
+        - Session Handling
+        - Administration
+      
+    post:
+      summary: Server login.
+      description: Send login information to the server.
+      responses:
+        200:
+          description: Login was sucessful.
+          schema:
+            type: string
+            description: The id for this session.
+      tags: 
+        - Session Handling
+        - Administration
+        
+    delete:
+      summary: Server Logout.
+      description: Deletes the session of a user.
+      responses:
+        200:
+          description: Logout sucessful.
+          schema:
+            type: string
+            description: KO or OK
+        400:
+          description: Unknown user.
+          schema:
+            type: string
+            description: The user id that was in the session.
+      tags: 
+        - Session Handling
+        - Administration
+    
+  /search:
+    get:
+      summary: Search the DB.
+      description: |
+        Returns a list with basic information for all entities.
+      tags:
+        - Search
+      parameters:
+        - in: query
+          name: q
+          description: The query
+          required: true
+          type: string
+        - in: query
+          name: type
+          description: The entity type that should satisfy the query. Defaults to Student.
+          required: false
+          type: string
+        - name: fields
+          in: query
+          description: |
+            The field names for this search. Defaults to (label, name, systemId, registrationId)
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+      responses:
+        200:
+          description: An array of URIs that satisfy the query.
+          schema:
+            type: array
+            items:
+              type: string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /students:
+    get:
+      produces:
+        - text/csv
+        - application/json
+      summary: List of all registered students.
+      description: |
+        Returns a list with basic information for all registered students. 
+        This request accepts query parameters for the degree and the course
+        to apply filters to the list of students.
+      tags:
+        - Student
+      parameters:
+        - name: degree
+          in: query
+          description: The degree
+          type: string
+          required: false
+        - name: course
+          in: query
+          description: The course
+          type: string
+          required: false
+      responses:
+        200:
+          description: An array of students.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Student'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Student details.
+      description: Handles a post with student details.
+      tags:
+        - Student Management
+      parameters:
+        - name: student
+          in: body
+          description: The student JSON you want to post
+          schema:
+            $ref: '#/definitions/Student'
+          required: true
+      responses:
+        200:
+          description: The URI of the posted student.
+          schema:
+            type: string
+            
+  /students/{systemId}:
+    get:
+      summary: Details about a student.
+      description: |
+        Returns detailed information about the given student.
+      tags:
+        - Student
+      parameters:
+        - name: systemId
+          in: path
+          type: string
+          description: ID of the student
+          required: true
+      responses:
+        200:
+          description: Details for this student.
+          schema:
+            $ref: '#/definitions/Student'
+        400:
+          description: Student could not be found.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Deletes a student.
+      description: Deletes an existing student. 
+      parameters:
+        - name: systemId
+          in: path
+          type: string
+          description: ID of the student
+          required: true
+      responses:
+        200:
+          description: Student was sucessfully deleted and returns the student that was deleted.
+          schema:
+            $ref: '#/definitions/Student'
+        400:
+          description: Id does not exist. No student was deleted. 
+          schema:
+            type: string
+            description: Wrong id
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      tags: 
+        - Student Management
+            
+  /users:
+    get:
+      summary: List of all registered users.
+      description: |
+        Returns a list with basic information for all registered users.
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of users.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: User details.
+      description: Handles a post with student details and creates a new user if necessary.
+      tags:
+        - User Management
+      parameters:
+        - name: user
+          in: body
+          description: The user JSON you want to post
+          schema:
+            $ref: '#/definitions/User'
+          required: true
+      responses:
+        200:
+          description: The URI of the posted student.
+          schema:
+            type: string
+            
+  /users/{systemId}:
+    get:
+      summary: Details about a user.
+      description: |
+        Returns detailed information about the given user.
+      tags:
+        - User
+      parameters:
+        - name: systemId
+          in: path
+          type: string
+          description: ID of the user
+          required: true
+      responses:
+        200:
+          description: Details for this user.
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: User could not be found.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Deletes a user.
+      description: Deletes an existing user. 
+      parameters:
+        - name: systemId
+          in: path
+          type: string
+          description: ID of the user
+          required: true
+      responses:
+        200:
+          description: User was sucessfully deleted and returns the user that was deleted.
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: Id does not exist. No user was deleted. 
+          schema:
+            type: string
+            description: Wrong id
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      tags: 
+        - User Management
+      
+            
+  /labworks:
+    get:
+      summary: List of all labworks.
+      description: |
+        Returns a list of all labworks.
+      tags:
+        - Labwork
+      parameters:
+        - name: degree
+          in: query
+          description: The degree
+          type: string
+          required: false
+        - name: course
+          in: query
+          description: The course
+          type: string
+          required: false
+        - name: semester
+          in: query
+          description: The semester
+          type: string
+          required: false
+      
+      responses:
+        200:
+          description: An array of labworks.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Labwork'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /labworks/{labworkId}:
+    get:
+      summary: Labwork Details.
+      description: |
+        Returns details
+      tags:
+        - Labwork
+        
+      parameters:
+        - name: labworkId
+          in: path
+          description: The labwork id
+          type: string
+          required: true
+      
+      responses:
+        200:
+          description: The Labwork.
+          schema:
+            $ref: '#/definitions/Labwork'
+            
+        400:
+          description: Id does not exist. No user was deleted. 
+          schema:
+            type: string
+            description: Wrong id
+            
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    
+    
+  /degrees:
+    get:
+      summary: List of all degrees.
+      description: |
+        Returns a list of all degrees.
+      tags:
+        - Degree
+      
+      responses:
+        200:
+          description: An array of degrees.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Degree'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /groups:
+    get:
+      summary: List of all groups.
+      description: |
+        Returns a list of all groups.
+      tags:
+        - Group
+      
+      responses:
+        200:
+          description: An array of groups.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Group'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+            
+definitions:
+  Student:
+    properties:
+      uri:
+        type: string
+        description: the URI of this user.
+      name:
+        type: string
+        description: The name of the student.
+      firstname: 
+        type: string
+        description: The firstname of the student.
+      registrationId:
+        type: string
+        description: The registration id (Matrikelnummer) of the student.
+      systemId:
+        type: string
+        description: The system login id of the student.
+      degrees:
+        type: array
+        items:
+          type: string
+        description: All degrees of this student.
+      courses:
+        type: array
+        items:
+          type: string
+        description: All courses of this student.
+      labworks:
+        type: array
+        items:
+          type: string
+        description: All labworks of this student.
+      emails:
+        type: array
+        items:
+          type: string
+        description: The email addresses of this student.
+      phoneNumbers:
+        type: array
+        items:
+          type: string
+        description: The phone numbers of this student.
+      permissions:
+        type: array
+        items:
+          type: string
+        
+  User:
+    properties:
+      uri:
+        type: string
+        description: the URI of this user.
+      name:
+        type: string
+        description: The name of the user.
+      firstname: 
+        type: string
+        description: The firstname of the user.
+      systemId:
+        type: string
+        description: The system login id of the user.
+      emails:
+        type: array
+        items:
+          type: string
+        description: The email addresses of this user.
+      phoneNumbers:
+        type: array
+        items:
+          type: string
+        description: The phone numbers of this user.
+      permissions:
+        type: array
+        items:
+          type: string
+
+  Labwork:
+    properties:
+      name: 
+        type: string
+        description: The name of this labwork.
+      groups:
+        type: array
+        items:
+          type: string
+      assignmentAssociations:
+        type: array
+        items:
+          type: string
+
+  Degree:
+    properties:
+      name: 
+        type: string
+        description: The name of this degree.
+
+  Room:
+    properties:
+      id:
+        type: string
+      label: 
+        type: string
+
+  Assignment:
+    properties:
+      id: 
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+      text:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      goals:
+        type: string
+      hints:
+        type: string
+      courses:
+        type: array
+        items: 
+          type: string
+      solution:
+        type: string
+
+  Group:
+    properties:
+      id: 
+        type: string
+        description: The id of this group.
+      members:
+        description: The members of this group.
+        type: array
+        items:
+          type: string
+
+  AssignmentAssociation:
+    properties:
+      visible:
+        type: boolean
+      index:
+        type: integer
+      assignment:
+        type: string
+      dueIndex:
+        type: integer
+
+  Error:
+    properties:
+      description:
+        type: string
+        description: The error message.
