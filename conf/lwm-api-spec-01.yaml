@@ -647,6 +647,38 @@ definitions:
         groupScheduleAssociation:
           type: string
 
+  Timetable:
+    properties:
+      entries:
+        type: array
+        items:
+          type: string
+    
+  TimetableEntry:
+    properties:
+      room:
+        type: string
+      supervisor:
+        type: string
+      startTime:
+        type: string
+      endTime: 
+        type: string
+        
+  Semester:
+    properties:
+      name:
+        type: string
+      startDate: 
+        type: string
+      endDate:
+        type: string
+    
+  Tag:
+    properties:
+      name: 
+        type: string
+      
 
   Error:
     properties:
