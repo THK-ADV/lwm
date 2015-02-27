@@ -517,6 +517,9 @@ definitions:
         label:
           type: string
           description: The name of this course.
+        lecturer:
+          type: string
+          description: The lecturer of this course.
 
   Room:
     properties:
